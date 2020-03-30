@@ -8,3 +8,18 @@ timescaledb-single:
   enabled: true
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
+  clusterName: timescaledb
+  nameOverride: timescaledb
+  credentials:
+    postgres: tea
+
+# Values for configuring the deployment of the Timescale Prometheus Connector
+# The charts README is at:
+#   https://github.com/timescale/prometheus-postgresql-adapter-private/tree/series-schema/helm-chart
+timescale-prometheus:
+  enabled: true
+  password:
+    create: true
+    value: tea
+    secretName: connector-passwords
+  host: timescaledb.default.svc.cluster.local
