@@ -20,5 +20,9 @@ dependencies:
   - name: timescale-prometheus
     condition: timescale-prometheus.enabled
     version: 0.1.0
-    # TODO: change to a proper repo before publishing
-    repository: "file:///path/to/timescale-prometheus/helm-chart"
+    # Modify this to your path until it is published
+    repository: "file:///Users/atanasovski/Work/prometheus-postgresql-adapter/helm-chart"
+  - name: prometheus
+    condition: prometheus.enabled
+    version: 11.0.4
+    repository: https://kubernetes-charts.storage.googleapis.com

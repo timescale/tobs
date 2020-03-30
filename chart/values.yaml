@@ -17,4 +17,35 @@ timescale-prometheus:
   # TODO: change to public docker image
   image: delixd/timescale-prometheus
   enabled: true
-  passwordSecret: "already-created-timescaledb-passwords-secret"
+  # connection options
+  connection:
+    # user to connect to TimescaleDB with
+    user: postgres
+    # A secret containing the password for the user used 
+    # to connect to the database needs to be created before 
+    # installing the chart
+    passwordSecret: "ts-obv-timescaledb-passwords"
+    # db host by default configured to "{{ .Release.Name }}.default.svc.cluster.local"
+    # use:
+    # host:
+    #  nameTemplate: "{{ .Release.Name }}.default.svc.cluster.local"
+    # to change host name by setting either a template or a string
+  
+  # configuration options for the service exposed by timescale-prometheus
+  service:
+    # port must be passed as string because the prometheus-config-map 
+    # created in this chart can properly set the url for the remote_write endpoint
+    port: "9201"
+# Values for configuring the deployment of Prometheus
+# The stable/prometheus chart is used and the guide for it
+# can be found at: 
+#   https://hub.helm.sh/charts/stable/prometheus
+prometheus:
+  enabled: true
+  alertmanager:
+    enabled: false
+  server:
+    timescaledbAsRemote: true
+    retention: "1d"
+    configMapOverrideName: "prometheus-config"
+  
