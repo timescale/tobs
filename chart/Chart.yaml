@@ -1,0 +1,19 @@
+apiVersion: v2
+name: timescale-observability
+description: A Helm chart for the Timescale Observability Suite
+
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application.
+appVersion: 0.1.0
+
+dependencies:
+  - name: timescaledb-single
+    version: 0.5.4
+    repository: "https://raw.githubusercontent.com/timescale/timescaledb-kubernetes/master/charts/repo/"
+    
