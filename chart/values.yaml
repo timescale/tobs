@@ -8,3 +8,13 @@ timescaledb-single:
   enabled: true
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
+
+# Values for configuring the deployment of the Timescale Prometheus Connector
+# The charts README is at:
+#   https://github.com/timescale/prometheus-postgresql-adapter-private/tree/series-schema/helm-chart
+#   TODO: Change this link before publishing
+timescale-prometheus:
+  # TODO: change to public docker image
+  image: delixd/timescale-prometheus
+  enabled: true
+  passwordSecret: "already-created-timescaledb-passwords-secret"
