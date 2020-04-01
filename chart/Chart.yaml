@@ -19,7 +19,6 @@ dependencies:
     repository: "https://raw.githubusercontent.com/timescale/timescaledb-kubernetes/master/charts/repo/"
   - name: timescale-prometheus
     condition: timescale-prometheus.enabled
-    version: 0.3.0
-    # Modify this to your path until it is published
+    version: 0.1.0
+    # TODO: change to a proper repo before publishing
     repository: "file:///path/to/timescale-prometheus/helm-chart"
-    
