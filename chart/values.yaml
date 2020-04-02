@@ -15,7 +15,7 @@ timescaledb-single:
 #   TODO: Change this link before publishing
 timescale-prometheus:
   # TODO: change to public docker image
-  image: delixd/timescale-prometheus
+  image: delixd/timescale-prometheus:0402
   enabled: true
   # connection options
   connection:
@@ -46,6 +46,5 @@ prometheus:
     enabled: false
   server:
     timescaledbAsRemote: true
-    retention: "1d"
     configMapOverrideName: "prometheus-config"
   

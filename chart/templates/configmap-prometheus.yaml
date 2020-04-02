@@ -22,7 +22,7 @@ data:
 {{- if $writeTsEndpoint -}}
 {{- $dummyChart := dict "Name" "timescale-prometheus" -}}
 {{- $context := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
-{{- $tsPromUrl := printf "%s.%s:%s/write" (include "connector.fullname" $context) "default.svc.cluster.local" $tsPromValues.service.port }}
+{{- $tsPromUrl := printf " http://%s.%s:%s/write" (include "connector.fullname" $context) "default.svc.cluster.local" $tsPromValues.service.port }}
       - url: {{- $tsPromUrl }}
 {{- end }}
 {{- if $remoteWrite }}
