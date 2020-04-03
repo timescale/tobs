@@ -13,8 +13,8 @@ data:
     global:
 {{ $root.Values.prometheus.server.global | toYaml | trimSuffix "\n" | indent 6 }}
 {{- $tsPromValues := index $root.Values "timescale-prometheus" -}}
-{{- $tsAsRemoteEnabled := $root.Values.prometheus.server.timescaledbAsRemote -}}
-{{- $writeTsEndpoint := and $tsAsRemoteEnabled $tsPromValues.enabled -}}
+{{- $tsAsRemoteEnabled := $tsPromValues.remote.enabled -}}
+{{- $writeTsEndpoint := and $tsPromValues.enabled $tsAsRemoteEnabled  -}}
 {{- $remoteWrite := $root.Values.prometheus.server.remoteWrite -}}
 {{- $shouldHaveRemoteWriteKey := or $remoteWrite $writeTsEndpoint -}}
 {{- if $shouldHaveRemoteWriteKey }}
@@ -24,6 +24,15 @@ data:
 {{- $context := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
 {{- $tsPromUrl := printf " http://%s.%s:%s/write" (include "connector.fullname" $context) "default.svc.cluster.local" $tsPromValues.service.port }}
       - url: {{- $tsPromUrl }}
+        queue_config:
+        {{- with $tsPromValues.remote.queue }}
+          min_shards: {{- print " " .minShards }}
+          capacity:  {{- print " " .capacity }}
+          max_samples_per_send: {{- print " " .maxSamplesPerSend }}
+          batch_send_deadline: {{- print " " .batchSendDeadline }}
+          min_backoff: {{- print " " .minBackoff }}
+          max_backoff: {{- print " " .maxBackoff }}
+        {{- end -}}
 {{- end }}
 {{- if $remoteWrite }}
 {{ $root.Values.prometheus.server.remoteWrite | toYaml | indent 6 }}

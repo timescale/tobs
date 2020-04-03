@@ -36,6 +36,21 @@ timescale-prometheus:
     # port must be passed as string because the prometheus-config-map 
     # created in this chart can properly set the url for the remote_write endpoint
     port: "9201"
+  
+  # configuration options for the prometheus remote_write
+  # these options are not used by the timescale-prometheus chart
+  # but by this one
+  remote:
+    enabled: true
+    # queue config 
+    # see: https://prometheus.io/docs/practices/remote_write/
+    queue:
+      minShards: 3
+      capacity: 2000
+      maxSamplesPerSend: 500
+      batchSendDeadline: "10s"
+      minBackoff: "500ms"
+      maxBackoff: "2s"
 # Values for configuring the deployment of Prometheus
 # The stable/prometheus chart is used and the guide for it
 # can be found at: 
@@ -45,6 +60,5 @@ prometheus:
   alertmanager:
     enabled: false
   server:
-    timescaledbAsRemote: true
     configMapOverrideName: "prometheus-config"
   
