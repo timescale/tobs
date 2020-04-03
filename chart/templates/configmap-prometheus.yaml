@@ -16,36 +16,27 @@ data:
     global:
 {{ $root.Values.prometheus.server.global | toYaml | trimSuffix "\n" | indent 6 }}
 {{- $tsPromValues := index $root.Values "timescale-prometheus" -}}
-{{- $tsAsRemoteEnabled := $tsPromValues.remote.enabled -}}
-{{- $writeTsEndpoint := and $tsPromValues.enabled $tsAsRemoteEnabled  -}}
 {{- $remoteWrite := $root.Values.prometheus.server.remoteWrite -}}
-{{- $shouldHaveRemoteWriteKey := or $remoteWrite $writeTsEndpoint -}}
+{{- $shouldHaveRemoteWriteKey := or $remoteWrite $tsPromValues.enabled -}}
 {{- $dummyChart := dict "Name" "timescale-prometheus" -}}
 {{- $tsPromContext := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
-{{- $tsPromUrl := printf "http://%s.%s:%s" (include "connector.fullname" $tsPromContext) "default.svc.cluster.local" $tsPromValues.service.port -}}
+{{- $tsPromUrl := printf "http://%s.%s:%s" (include "timescale-observability.fullname" $tsPromContext) "default.svc.cluster.local" $tsPromValues.service.port -}}
 {{- if $shouldHaveRemoteWriteKey }}
     remote_write:
-{{- if $writeTsEndpoint -}}
+{{- if $tsPromValues.enabled -}}
 {{- $tsPromWriteUrl := printf " %s/write" $tsPromUrl }}
       - url: {{- $tsPromWriteUrl }}
         queue_config:
-        {{- with $tsPromValues.remote.queue }}
-          min_shards: {{- print " " .minShards }}
-          capacity:  {{- print " " .capacity }}
-          max_samples_per_send: {{- print " " .maxSamplesPerSend }}
-          batch_send_deadline: {{- print " " .batchSendDeadline }}
-          min_backoff: {{- print " " .minBackoff }}
-          max_backoff: {{- print " " .maxBackoff }}
-        {{- end -}}
+{{ toYaml $tsPromValues.remote.queue | indent 10 }}
 {{- end }}
 {{- if $remoteWrite }}
 {{ $root.Values.prometheus.server.remoteWrite | toYaml | indent 6 }}
 {{- end }}
 {{- end }}
-{{- $shouldHaveRemoteReadKey := or $root.Values.prometheus.server.remoteRead $writeTsEndpoint -}}
-{{- if false }}
+{{- $shouldHaveRemoteReadKey := or $root.Values.prometheus.server.remoteRead $tsPromValues.enabled -}}
+{{- if $shouldHaveRemoteReadKey }}
     remote_read:
-{{- if $writeTsEndpoint }}
+{{- if $tsPromValues.enabled }}
 {{- $tsPromReadUrl := printf " %s/read" $tsPromUrl }}
       - url: {{- $tsPromReadUrl }}
 {{- end }}

@@ -21,7 +21,7 @@ dependencies:
     condition: timescale-prometheus.enabled
     version: 0.1.0
     # Modify this to your path until it is published
-    repository: "file:///Users/atanasovski/Work/prometheus-postgresql-adapter/helm-chart"
+    repository: "file:///path/to/timescale-prometheus/helm-chart"
   - name: prometheus
     condition: prometheus.enabled
     version: 11.0.4
