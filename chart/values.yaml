@@ -4,36 +4,20 @@
 # Check out the various configuration options (administration guide) at: 
 #    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
 timescaledb-single:
-  loadBalancer: 
-    enabled: false
   # disable the chart if an existing TimescaleDB instance is used
   enabled: true
+  # create only a ClusterIP service
+  loadBalancer: 
+    enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
-  nodeSelector:
-    type: db
-  timescaledbTune:
-    enabled: false
-  resources:
-    requests:
-      cpu: 1
-      memory: 2Gi
-    limits:
-      cpu: 1.5
-      memory: 3Gi
-  persistentVolumes:
-    data:
-      size: 30G
-    wal:
-      size: 15G
+
 
 # Values for configuring the deployment of the Timescale Prometheus Connector
 # The charts README is at:
 #   https://github.com/timescale/prometheus-postgresql-adapter-private/tree/series-schema/helm-chart
 #   TODO: Change this link before publishing
 timescale-prometheus:
-  nodeSelector:
-    type: conn
   # TODO: change to public docker image
   image: delixd/timescale-prometheus:0402
   enabled: true
@@ -64,8 +48,8 @@ timescale-prometheus:
     requests:
       # By default this should be enough for a cluster 
       # with only a few pods
-      memory: 3Gi
-      cpu: 1
+      memory: 3.5Gi
+      cpu: 6
   # configuration options for the prometheus remote_write
   # these options are not used by the timescale-prometheus chart
   # but by this one
@@ -73,13 +57,15 @@ timescale-prometheus:
     enabled: true
     # queue config 
     # see: https://prometheus.io/docs/practices/remote_write/
+    # the timescale-prometheus connector works best with larger
+    # than the default values for max_samples_per_send and min_shards
     queue:
       minShards: 10
-      capacity: 3000
+      capacity: 10000
       maxSamplesPerSend: 1000
-      batchSendDeadline: "10s"
-      minBackoff: "500ms"
-      maxBackoff: "2s"
+      batchSendDeadline: "1m"
+      minBackoff: "30ms"
+      maxBackoff: "300ms"
 # Values for configuring the deployment of Prometheus
 # The stable/prometheus chart is used and the guide for it
 # can be found at: 
@@ -89,10 +75,6 @@ prometheus:
   alertmanager:
     enabled: false
   pushgateway:
-    nodeSelector: 
-      type: tools
   server:
-    nodeSelector: 
-      type: tools
     configMapOverrideName: "prometheus-config"
   
