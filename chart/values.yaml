@@ -4,16 +4,36 @@
 # Check out the various configuration options (administration guide) at: 
 #    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
 timescaledb-single:
+  loadBalancer: 
+    enabled: false
   # disable the chart if an existing TimescaleDB instance is used
   enabled: true
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
+  nodeSelector:
+    type: db
+  timescaledbTune:
+    enabled: false
+  resources:
+    requests:
+      cpu: 1
+      memory: 2Gi
+    limits:
+      cpu: 1.5
+      memory: 3Gi
+  persistentVolumes:
+    data:
+      size: 30G
+    wal:
+      size: 15G
 
 # Values for configuring the deployment of the Timescale Prometheus Connector
 # The charts README is at:
 #   https://github.com/timescale/prometheus-postgresql-adapter-private/tree/series-schema/helm-chart
 #   TODO: Change this link before publishing
 timescale-prometheus:
+  nodeSelector:
+    type: conn
   # TODO: change to public docker image
   image: delixd/timescale-prometheus:0402
   enabled: true
@@ -36,7 +56,16 @@ timescale-prometheus:
     # port must be passed as string because the prometheus-config-map 
     # created in this chart can properly set the url for the remote_write endpoint
     port: "9201"
-  
+    # we disable the load balancer by default, only a ClusterIP service
+    # will get created
+    loadBalancer:
+      enabled: false    
+  resources:
+    requests:
+      # By default this should be enough for a cluster 
+      # with only a few pods
+      memory: 3Gi
+      cpu: 1
   # configuration options for the prometheus remote_write
   # these options are not used by the timescale-prometheus chart
   # but by this one
@@ -45,9 +74,9 @@ timescale-prometheus:
     # queue config 
     # see: https://prometheus.io/docs/practices/remote_write/
     queue:
-      minShards: 3
-      capacity: 2000
-      maxSamplesPerSend: 500
+      minShards: 10
+      capacity: 3000
+      maxSamplesPerSend: 1000
       batchSendDeadline: "10s"
       minBackoff: "500ms"
       maxBackoff: "2s"
@@ -59,6 +88,11 @@ prometheus:
   enabled: true
   alertmanager:
     enabled: false
+  pushgateway:
+    nodeSelector: 
+      type: tools
   server:
+    nodeSelector: 
+      type: tools
     configMapOverrideName: "prometheus-config"
   
