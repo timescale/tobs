@@ -20,13 +20,14 @@ data:
 {{- $writeTsEndpoint := and $tsPromValues.enabled $tsAsRemoteEnabled  -}}
 {{- $remoteWrite := $root.Values.prometheus.server.remoteWrite -}}
 {{- $shouldHaveRemoteWriteKey := or $remoteWrite $writeTsEndpoint -}}
+{{- $dummyChart := dict "Name" "timescale-prometheus" -}}
+{{- $tsPromContext := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
+{{- $tsPromUrl := printf "http://%s.%s:%s" (include "connector.fullname" $tsPromContext) "default.svc.cluster.local" $tsPromValues.service.port -}}
 {{- if $shouldHaveRemoteWriteKey }}
     remote_write:
 {{- if $writeTsEndpoint -}}
-{{- $dummyChart := dict "Name" "timescale-prometheus" -}}
-{{- $tsPromContext := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
-{{- $tsPromUrl := printf " http://%s.%s:%s/write" (include "connector.fullname" $tsPromContext) "default.svc.cluster.local" $tsPromValues.service.port }}
-      - url: {{- $tsPromUrl }}
+{{- $tsPromWriteUrl := printf " %s/write" $tsPromUrl }}
+      - url: {{- $tsPromWriteUrl }}
         queue_config:
         {{- with $tsPromValues.remote.queue }}
           min_shards: {{- print " " .minShards }}
@@ -41,9 +42,16 @@ data:
 {{ $root.Values.prometheus.server.remoteWrite | toYaml | indent 6 }}
 {{- end }}
 {{- end }}
-{{- if $root.Values.prometheus.server.remoteRead }}
+{{- $shouldHaveRemoteReadKey := or $root.Values.prometheus.server.remoteRead $writeTsEndpoint -}}
+{{- if $shouldHaveRemoteReadKey }}
     remote_read:
+{{- if $writeTsEndpoint }}
+{{- $tsPromReadUrl := printf " %s/read" $tsPromUrl }}
+      - url: {{- $tsPromReadUrl }}
+{{- end }}
+{{- if $root.Values.prometheus.server.remoteRead }}
 {{ $root.Values.prometheus.server.remoteRead | toYaml | indent 4 }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- if eq $key "alerts" }}
