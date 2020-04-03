@@ -1,10 +1,13 @@
 {{- if .Values.prometheus.enabled -}}
 {{- if .Values.prometheus.server.enabled -}}
 {{- if .Values.prometheus.server.configMapOverrideName -}}
+{{- $promContext := dict "Release" .Release "Chart" .Chart "Values" .Values.prometheus -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}
+  labels:
+    {{- include "prometheus.server.labels" $promContext | nindent 4 }}
 data:
 {{- $root := . -}}
 {{- range $key, $value := .Values.prometheus.serverFiles }}
@@ -21,8 +24,8 @@ data:
     remote_write:
 {{- if $writeTsEndpoint -}}
 {{- $dummyChart := dict "Name" "timescale-prometheus" -}}
-{{- $context := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
-{{- $tsPromUrl := printf " http://%s.%s:%s/write" (include "connector.fullname" $context) "default.svc.cluster.local" $tsPromValues.service.port }}
+{{- $tsPromContext := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
+{{- $tsPromUrl := printf " http://%s.%s:%s/write" (include "connector.fullname" $tsPromContext) "default.svc.cluster.local" $tsPromValues.service.port }}
       - url: {{- $tsPromUrl }}
         queue_config:
         {{- with $tsPromValues.remote.queue }}
