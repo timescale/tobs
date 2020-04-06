@@ -15,13 +15,12 @@ appVersion: 0.1.0
 dependencies:
   - name: timescaledb-single
     condition: timescale-single.enabled
-    version: 0.5.4
-    repository: "https://raw.githubusercontent.com/timescale/timescaledb-kubernetes/master/charts/repo/"
+    version: 0.5.5
+    repository: https://charts.timescale.com
   - name: timescale-prometheus
     condition: timescale-prometheus.enabled
     version: 0.1.0
-    # Modify this to your path until it is published
-    repository: "file:///path/to/timescale-prometheus/helm-chart"
+    repository: https://charts.timescale.com
   - name: prometheus
     condition: prometheus.enabled
     version: 11.0.4
