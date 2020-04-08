@@ -20,7 +20,7 @@ data:
 {{- $shouldHaveRemoteWriteKey := or $remoteWrite $tsPromValues.enabled -}}
 {{- $dummyChart := dict "Name" "timescale-prometheus" -}}
 {{- $tsPromContext := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
-{{- $tsPromUrl := printf "http://%s.%s:%s" (include "timescale-observability.fullname" $tsPromContext) "default.svc.cluster.local" $tsPromValues.service.port -}}
+{{- $tsPromUrl := printf "http://%s.%s.svc.cluster.local:%.0f" (include "timescale-observability.fullname" $tsPromContext) $root.Release.Namespace $tsPromValues.service.port -}}
 {{- if $shouldHaveRemoteWriteKey }}
     remote_write:
 {{- if $tsPromValues.enabled -}}

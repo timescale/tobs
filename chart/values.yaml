@@ -41,9 +41,6 @@ timescale-prometheus:
   
   # configuration options for the service exposed by timescale-prometheus
   service:
-    # port must be passed as string because the prometheus-config-map 
-    # created in this chart can properly set the url for the remote_write endpoint
-    port: "9201"
     # we disable the load balancer by default, only a ClusterIP service
     # will get created
     loadBalancer:
@@ -78,3 +75,12 @@ prometheus:
     # a remote endpoint for read/write (if enabled)
     configMapOverrideName: "prometheus-config"
     
+# Values for configuring the deployment of Grafana
+# The stable/grafana chart is used and the guide for it
+# can be found at:
+#   https://hub.helm.sh/charts/stable/grafana
+grafana:
+  enabled: true
+  sidecar:
+    datasources:
+      enabled: true

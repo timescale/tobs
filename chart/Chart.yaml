@@ -9,7 +9,7 @@ appVersion: 0.1.0-alpha.1
 
 dependencies:
   - name: timescaledb-single
-    condition: timescale-single.enabled
+    condition: timescaledb-single.enabled
     version: 0.5.5
     repository: https://charts.timescale.com
   - name: timescale-prometheus
@@ -19,4 +19,8 @@ dependencies:
   - name: prometheus
     condition: prometheus.enabled
     version: 11.0.4
+    repository: https://kubernetes-charts.storage.googleapis.com
+  - name: grafana
+    condition: grafana.enabled
+    version: 5.0.11
     repository: https://kubernetes-charts.storage.googleapis.com
