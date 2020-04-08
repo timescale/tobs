@@ -46,7 +46,7 @@ The chart defines the following parameters in the `values.yaml` file:
 | `prometheus.server.configMapOverrideName`           | The name of the ConfigMap that provides the Prometheus config. Resolves to `{{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}` | `prometheus-config` |
 
 The properties described in the table above are only those that this chart overrides for each of the sub-charts it depends on.
-You can additionally change any of the configurable properties of each sub-chart. 
+You can additionally change any of the configurable properties of each sub-chart.
 
 ## Additional configuration for TimescaleDB
 
@@ -59,8 +59,8 @@ You can set up the credentials, nodeSelector, volume sizes (default volumes crea
 ## Additional configuration for Timescale-Prometheus Connector
 
 The connector is configured to connect to the TimescaleDB instance deployed with this chart.
-But it can be configured to connect to any TimescaleDB host, and expose whichever port you like. 
-For more details about how to configure the Timescale-Prometheus connector please see the 
+But it can be configured to connect to any TimescaleDB host, and expose whichever port you like.
+For more details about how to configure the Timescale-Prometheus connector please see the
 [Helm chart directory][timescale-prometheus-helm] of the [Timescale-Prometheus][timescale-prometheus-repo] repo.
 
 ## Additional configuration for Prometheus
@@ -70,11 +70,23 @@ a ConfigMap override where the Timescale-Prometheus Connector is already configu
 and `remote_read` endpoint. We create a ConfigMap that is still compatible and respects all the configuration
 properties for the prometheus chart, so no functionality is lost.
 
-For all the properties that can be configured and more details on how to set up the Prometheus 
+For all the properties that can be configured and more details on how to set up the Prometheus
 deployment see the [Helm hub entry][prometheus-helm-hub].
 
 For more information about the `remote_write` configuration that can be set with
 `timescale-prometheus.remote.queue` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
+
+
+## Contributing
+
+We welcome contributions to the Timescale-Observability Helm charts, which is
+licensed and released under the open-source Apache License, Version 2.  The
+same [Contributor's
+Agreement](//github.com/timescale/timescaledb/blob/master/CONTRIBUTING.md)
+applies as in TimescaleDB; please sign the [Contributor License
+Agreement](https://cla-assistant.io/timescale/timescale-observability) (CLA) if
+you're a new contributor.
+
 
 [design-doc]: https://www.timescale.com/404/
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
