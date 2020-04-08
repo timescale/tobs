@@ -21,7 +21,7 @@ timescale-prometheus:
   # connection options
   connection:
     # user to connect to TimescaleDB with
-    user: postgres
+    # user: postgres
     # The secret containing the password for the user used 
     # to connect to the database needs to be created before 
     # installing the chart.
@@ -69,6 +69,8 @@ timescale-prometheus:
 prometheus:
   enabled: true
   alertmanager:
+    enabled: false
+  pushgateway:
     enabled: false
   server:
     # we provide a config map which will have the
