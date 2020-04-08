@@ -14,7 +14,7 @@ dependencies:
     repository: https://charts.timescale.com
   - name: timescale-prometheus
     condition: timescale-prometheus.enabled
-    version: 0.1.0
+    version: 0.1.0-alpha.1
     repository: https://charts.timescale.com
   - name: prometheus
     condition: prometheus.enabled

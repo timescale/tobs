@@ -9,6 +9,8 @@ For a detailed description of the architecture, please see [our design doc][desi
 The following command will install Prometheus, TimescaleDB, and Timescale-Prometheus Connector
 into your Kubernetes cluster:
 ```
+helm repo add timescale https://charts.timescale.com/
+helm repo update
 helm install <release_name> timescale/timescale-observability
 ```
 
