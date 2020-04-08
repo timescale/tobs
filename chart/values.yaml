@@ -52,7 +52,7 @@ timescale-prometheus:
     requests:
       # By default this should be enough for a cluster 
       # with only a few pods
-      memory: 3.5Gi
+      memory: 2Gi
       cpu: 1
   # configuration options for the prometheus remote_write
   # these options are not used by the timescale-prometheus chart
@@ -60,13 +60,8 @@ timescale-prometheus:
   remote:
     # queue config 
     # see: https://prometheus.io/docs/practices/remote_write/
-    # the timescale-prometheus connector works best with larger
-    # than the default values for capacity and min_shards
     queue:
-      min_shards: 10
-      capacity: 1000
-      batch_send_deadline: 1m
-      max_backoff: 300ms
+      max_shards: 30
 # Values for configuring the deployment of Prometheus
 # The stable/prometheus chart is used and the guide for it
 # can be found at: 
