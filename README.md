@@ -14,6 +14,32 @@ helm repo update
 helm install <release_name> timescale/timescale-observability
 ```
 
+## Cleanup
+
+To uninstall a release you can run:
+```
+helm uninstall <release_name>
+```
+
+### TimescaleDB PVCs and Backup
+
+Removing the deployment does not remove the Persistent Volume
+Claims (pvc) belonging to the release. For a full cleanup run:
+```
+RELEASE=<release_name>
+kubectl delete $(kubectl get pvc -l release=$RELEASE -o name)
+```
+
+If you had TimescaleDB backups enabled please check the guide for cleaning them at the [TimescaleDB Helm Chart repo][timescaledb-helm-cleanup]
+
+### TimescaleDB config service
+
+Sometimes one of the services created with the deployment is not deleted. The `<release_name>-config` service
+may need to be manually deleted with 
+```
+kubectl delete svc <release_name>-config
+```
+
 # Configuring Helm Chart
 
 To get a fully-documented configuration file for `timescale-observability`, please run:
@@ -88,7 +114,8 @@ Agreement](https://cla-assistant.io/timescale/timescale-observability) (CLA) if
 you're a new contributor.
 
 
-[design-doc]: https://docs.google.com/document/d/1e3mAN3eHUpQ2JHDvnmkmn_9rFyqyYisIgdtgd3D1MHA
+[design-doc]: https://tsdb.co/prom-design-doc
+[timescaledb-helm-cleanup]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#optional-delete-the-s3-backups
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 [timescale-prometheus-repo]: https://github.com/timescale/timescale-prometheus
 [timescale-prometheus-helm]: https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
