@@ -88,7 +88,7 @@ Agreement](https://cla-assistant.io/timescale/timescale-observability) (CLA) if
 you're a new contributor.
 
 
-[design-doc]: https://www.timescale.com/404/
+[design-doc]: https://docs.google.com/document/d/1e3mAN3eHUpQ2JHDvnmkmn_9rFyqyYisIgdtgd3D1MHA
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 [timescale-prometheus-repo]: https://github.com/timescale/timescale-prometheus
 [timescale-prometheus-helm]: https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
