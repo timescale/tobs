@@ -84,3 +84,8 @@ grafana:
   sidecar:
     datasources:
       enabled: true
+    dashboards:
+      enabled: true
+
+dashboards:
+  folder: dashboards

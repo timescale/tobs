@@ -1,0 +1,22 @@
+{{ if  .Values.prometheus.server.enabled -}}
+{{ if .Values.grafana.enabled -}}
+{{ if .Values.grafana.sidecar.dashboards.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards
+  labels:
+   grafana_dashboard: "1"
+   app: {{ template "timescale-observability.fullname" . }}
+   chart: {{ template "timescale-observability.chart" . }}
+   release: {{ .Release.Name }}
+data:
+{{- $root := . -}}
+{{- $dashSelector := print .Values.dashboards.folder "/**.json" -}}
+{{ range $fileName, $ignored := .Files.Glob $dashSelector }}
+  {{ base $fileName -}}: |-
+{{ $root.Files.Get "dashboards/k8s-dashboard.json" | indent 4 }}
+{{- end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
