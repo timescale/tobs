@@ -176,7 +176,7 @@ For more information on running Prometheus, visit: https://prometheus.io/
 
 {{ if .Values.grafana.enabled }}
 ##################################################################################
-############################## Notes about Prometheus ############################
+############################## Notes about Grafana ############################
 ##################################################################################
 {{- $grafanaEnv := (set (set (deepCopy .) "Values" (index .Values "grafana")) "Chart" (dict "Name" "grafana"))  }}
 1. Get your '{{ .Values.grafana.adminUser }}' user password by running:
@@ -195,4 +195,3 @@ For more information on running Prometheus, visit: https://prometheus.io/
 #################################################################################
 {{- end }}
 {{- end -}}
-
