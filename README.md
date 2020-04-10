@@ -6,7 +6,7 @@ For a detailed description of the architecture, please see [our design doc][desi
 
 # Quick start
 
-The following command will install Prometheus, TimescaleDB, and Timescale-Prometheus Connector
+The following command will install Prometheus, TimescaleDB, Timescale-Prometheus Connector, and Grafana
 into your Kubernetes cluster:
 ```
 helm repo add timescale https://charts.timescale.com/
@@ -70,6 +70,8 @@ The chart defines the following parameters in the `values.yaml` file:
 | `prometheus.alertmanager.enabled`                   | If true will create the Prometheus Alert Manager       | `false`    |
 | `prometheus.pushgateway.enabled`                    | If true will create the Prometheus Push Gateway        | `false`    |
 | `prometheus.server.configMapOverrideName`           | The name of the ConfigMap that provides the Prometheus config. Resolves to `{{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}` | `prometheus-config` |
+| `grafana.enabled`                                   | If false, Grafana will not be created                 | `true`      |
+| `grafana.sidecar.datasources.enabled`               | If false, Prometheus and TimescaleDB will not be provisioned as datasources | `true` |
 
 The properties described in the table above are only those that this chart overrides for each of the sub-charts it depends on.
 You can additionally change any of the configurable properties of each sub-chart.
@@ -102,6 +104,26 @@ deployment see the [Helm hub entry][prometheus-helm-hub].
 For more information about the `remote_write` configuration that can be set with
 `timescale-prometheus.remote.queue` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
 
+## Additional configuration for Grafana
+
+The stable/grafana chart is used as a dependency for deploying Grafana. We specify a Secret that 
+sets up the Prometheus Server and TimescaleDB as provisioned data sources (if they are enabled).
+
+To get the initial password for the `admin` user after deployment execute 
+```
+kubectl get secret --namespace <namespace> <release_name>-grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+```
+
+By default Grafana is accessable on port 80 through the `<release_name>-grafana` service. You can use port-forwarding
+to access it in your browser locally with
+
+```
+kubectl port-forward svc/<release_name>-grafana 8080:80
+```
+
+And then navigate to http://localhost:8080.
+
+For all the properties that can be configured and more details on how to set up the Grafana deployment see the [Helm hub entry][grafana-helm-hub]
 
 ## Contributing
 
@@ -121,3 +143,4 @@ you're a new contributor.
 [timescale-prometheus-helm]: https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
 [prometheus-helm-hub]: https://hub.helm.sh/charts/stable/prometheus
 [prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
+[grafana-helm-hub]: https://hub.helm.sh/charts/stable/grafana
