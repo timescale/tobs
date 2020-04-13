@@ -86,6 +86,6 @@ grafana:
       enabled: true
     dashboards:
       enabled: true
-
-dashboards:
-  folder: dashboards
+      files:
+        - dashboards/k8s.json
+  

@@ -72,6 +72,8 @@ The chart defines the following parameters in the `values.yaml` file:
 | `prometheus.server.configMapOverrideName`           | The name of the ConfigMap that provides the Prometheus config. Resolves to `{{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}` | `prometheus-config` |
 | `grafana.enabled`                                   | If false, Grafana will not be created                 | `true`      |
 | `grafana.sidecar.datasources.enabled`               | If false, Prometheus and TimescaleDB will not be provisioned as datasources | `true` |
+| `grafana.sidecar.dashboards.enabled`                | If false, no dashboards will be provisioned by default | `true`     |
+| `grafana.sidecar.dashboards.files`                  | Files with dashboard definitions (in JSON) to be provisioned | `['dashboards/k8s.json']` |
 
 The properties described in the table above are only those that this chart overrides for each of the sub-charts it depends on.
 You can additionally change any of the configurable properties of each sub-chart.

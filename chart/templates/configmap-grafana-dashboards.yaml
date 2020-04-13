@@ -12,10 +12,9 @@ metadata:
    release: {{ .Release.Name }}
 data:
 {{- $root := . -}}
-{{- $dashSelector := print .Values.dashboards.folder "/**.json" -}}
-{{ range $fileName, $ignored := .Files.Glob $dashSelector }}
-  {{ base $fileName -}}: |-
-{{ $root.Files.Get "dashboards/k8s-dashboard.json" | indent 4 }}
+{{ range $dash := .Values.grafana.sidecar.dashboards.files }}
+  {{ base $dash -}}: |-
+{{ $root.Files.Get $dash | indent 4 }}
 {{- end }}
 {{- end -}}
 {{- end -}}
