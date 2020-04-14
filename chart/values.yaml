@@ -6,6 +6,8 @@
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
   enabled: true
+  image:
+    tag: pg12-ts1.7
   # create only a ClusterIP service
   loadBalancer: 
     enabled: false
@@ -33,10 +35,10 @@ timescale-prometheus:
     #  secretTemplate: "already-existing-secret"
     # to change the secret name by setting either a template or a string
     
-    # db host by default configured to "{{ .Release.Name }}.default.svc.cluster.local"
+    # db host by default configured to "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     # use:
     # host:
-    #  nameTemplate: "{{ .Release.Name }}.default.svc.cluster.local"
+    #  nameTemplate: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     # to change host name by setting either a template or a string
   
   # configuration options for the service exposed by timescale-prometheus
@@ -84,6 +86,26 @@ grafana:
   sidecar:
     datasources:
       enabled: true
+      # Provision a prometheus data source
+      prometheus:
+        enabled: true
+        # By default url of data source is set to prometheus instance 
+        # deployed with this chart
+        urlTemplate: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
+      # Provision a TimescaleDB data source
+      timescaledb:
+        enabled: true
+        # Run a Job that updates the search path so that grafana
+        # can autocomplete the metric name tables (which are stored in 
+        # the 'prom' schema)
+        alterSearchPath: true
+        user: postgres
+        # By default the url/host is set to the db instance deployed
+        # with this chart
+        urlTemplate: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
+        # The secret containing the password for the user used 
+        # to connect to the database.
+        passwordSecretTemplate: "{{ .Release.Name }}-timescaledb-passwords"
     dashboards:
       enabled: true
       files:

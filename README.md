@@ -71,7 +71,14 @@ The chart defines the following parameters in the `values.yaml` file:
 | `prometheus.pushgateway.enabled`                    | If true will create the Prometheus Push Gateway        | `false`    |
 | `prometheus.server.configMapOverrideName`           | The name of the ConfigMap that provides the Prometheus config. Resolves to `{{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}` | `prometheus-config` |
 | `grafana.enabled`                                   | If false, Grafana will not be created                 | `true`      |
-| `grafana.sidecar.datasources.enabled`               | If false, Prometheus and TimescaleDB will not be provisioned as datasources | `true` |
+| `grafana.sidecar.datasources.enabled`               | If false, no data sources will be provisioned | `true` |
+| `grafana.sidecar.datasources.prometheus.enabled` | If false, a Prometheus data source will not be provisioned | `true` |
+| `grafana.sidecar.datasources.prometheus.urlTemplate` | Template that will be parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart  | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc.cluster.local` |
+| `grafana.sidecar.datasources.timescaledb.enabled` | If false a TimescaleDB data source will not be provisioned | `true` |
+| `grafana.sidecar.datasources.timescaledb.alterSearchPath` | If false a Job will not run that sets the search path of the TimescaleDB user, used to allow metric name autocomplete | `true` |
+| `grafana.sidecar.datasources.timescaledb.user` | User to connect to TimescaleDB | `postgres`
+| `grafana.sidecar.datasources.timescaledb.urlTemplate` | Template that will be parsed to the host of TimescaleDB, defaults to DB deployed with this chart | `{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local` |
+| `grafana.sidecar.datasources.timescaledb.passwordSecretTemplate` | Used by alterSearchPath job. Secret containing the password for the user to connect to TimescaleDB | `{{ .Release.Name }}-timescaledb-passwords` |
 | `grafana.sidecar.dashboards.enabled`                | If false, no dashboards will be provisioned by default | `true`     |
 | `grafana.sidecar.dashboards.files`                  | Files with dashboard definitions (in JSON) to be provisioned | `['dashboards/k8s.json']` |
 
@@ -126,6 +133,19 @@ kubectl port-forward svc/<release_name>-grafana 8080:80
 And then navigate to http://localhost:8080.
 
 For all the properties that can be configured and more details on how to set up the Grafana deployment see the [Helm hub entry][grafana-helm-hub]
+
+### Provisioned Data Sources 
+
+The data sources for Prometheus and TimescaleDB are provisioned by default. But the TimescaleDB data source is
+set up without the password. Upon connecting to Grafana, you will need to set the password for the selected user.
+
+You can get the password from the TimescaleDB secret already created with 
+```
+kubectl get secret --namespace <namespace> <release_name>-timescaledb-passwords -o jsonpath="{.data.postgres}" | base64 --decode
+```
+
+Remember to substitute the name of the secret (`<release_name-timescaledb-passwords`) and the name of the user (`.data.postgres`)
+if you are not using the defaults.
 
 ## Contributing
 

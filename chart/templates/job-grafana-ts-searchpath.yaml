@@ -1,0 +1,43 @@
+{{- if .Values.grafana.enabled -}}
+{{- $ds := .Values.grafana.sidecar.datasources -}}
+{{- if $ds.enabled -}}
+{{- if $ds.timescaledb.alterSearchPath -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "timescale-observability.fullname" . }}-search-path
+  labels:
+    app: {{ template "timescale-observability.fullname" . }}
+    chart: {{ template "timescale-observability.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-search-path
+          image: postgres:12-alpine
+          env:
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: {{ $ds.timescaledb.user }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl $ds.timescaledb.passwordSecretTemplate . }}
+                  key: {{ $ds.timescaledb.user }}
+            - name: PGHOST
+              value: {{ tpl $ds.timescaledb.urlTemplate . }}
+          command: ['psql', '-c', {{ printf "ALTER ROLE %s SET search_path = prom,_prom_catalog,public;" $ds.timescaledb.user | quote }}]
+      restartPolicy: OnFailure
+      initContainers:
+        - name: init-db
+          image: busybox:1.28
+          env:
+            - name: PGHOST
+              value: {{ tpl $ds.timescaledb.urlTemplate . }}
+          command: ['sh', '-c', "until nslookup ${PGHOST}; do echo waiting for ${PGHOST}; sleep 2; done"]
+{{- end -}}
+{{- end -}}
+{{- end -}}
