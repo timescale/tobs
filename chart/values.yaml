@@ -84,3 +84,8 @@ grafana:
   sidecar:
     datasources:
       enabled: true
+    dashboards:
+      enabled: true
+      files:
+        - dashboards/k8s.json
+  

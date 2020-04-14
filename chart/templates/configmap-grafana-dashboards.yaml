@@ -1,0 +1,21 @@
+{{ if  .Values.prometheus.server.enabled -}}
+{{ if .Values.grafana.enabled -}}
+{{ if .Values.grafana.sidecar.dashboards.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards
+  labels:
+   grafana_dashboard: "1"
+   app: {{ template "timescale-observability.fullname" . }}
+   chart: {{ template "timescale-observability.chart" . }}
+   release: {{ .Release.Name }}
+data:
+{{- $root := . -}}
+{{ range $dash := .Values.grafana.sidecar.dashboards.files }}
+  {{ base $dash -}}: |-
+{{ $root.Files.Get $dash | indent 4 }}
+{{- end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
