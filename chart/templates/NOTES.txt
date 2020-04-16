@@ -188,6 +188,9 @@ For more information on running Prometheus, visit: https://prometheus.io/
 
    {{ template "grafana.fullname" $grafanaEnv }}.{{ template "grafana.namespace" $grafanaEnv }}.svc.cluster.local
 
+{{ if .Values.grafana.sidecar.datasources.timescaledb.enabled -}}
+3. The provisioned TimescaleDB data source requires that you set the connection password before using it!
+{{- end -}}
 {{- if not .Values.grafana.persistence.enabled }}
 
 #################################################################################

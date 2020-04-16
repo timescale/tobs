@@ -33,10 +33,10 @@ timescale-prometheus:
     #  secretTemplate: "already-existing-secret"
     # to change the secret name by setting either a template or a string
     
-    # db host by default configured to "{{ .Release.Name }}.default.svc.cluster.local"
+    # db host by default configured to "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     # use:
     # host:
-    #  nameTemplate: "{{ .Release.Name }}.default.svc.cluster.local"
+    #  nameTemplate: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     # to change host name by setting either a template or a string
   
   # configuration options for the service exposed by timescale-prometheus
@@ -84,6 +84,19 @@ grafana:
   sidecar:
     datasources:
       enabled: true
+      # Provision a prometheus data source
+      prometheus:
+        enabled: true
+        # By default url of data source is set to prometheus instance 
+        # deployed with this chart
+        urlTemplate: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
+      # Provision a TimescaleDB data source
+      timescaledb:
+        enabled: true
+        user: postgres
+        # By default the url/host is set to the db instance deployed
+        # with this chart
+        urlTemplate: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     dashboards:
       enabled: true
       files:
