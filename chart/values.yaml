@@ -100,5 +100,6 @@ grafana:
     dashboards:
       enabled: true
       files:
-        - dashboards/k8s.json
+        - dashboards/k8s-cluster.json
+        - dashboards/k8s-hardware.json
   
