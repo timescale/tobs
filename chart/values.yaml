@@ -85,6 +85,11 @@ prometheus:
 #   https://hub.helm.sh/charts/stable/grafana
 grafana:
   enabled: true
+  grafana.ini:
+    database:
+      url: "postgres://postgres:tea@.default.svc.cluster.local:5432/postgres"
+      ssl_mode: require
+
   sidecar:
     datasources:
       enabled: true
