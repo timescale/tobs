@@ -1,0 +1,51 @@
+{{- if .Values.grafana.enabled -}}
+{{- if .Values.grafana.timescale.db.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-grafana-db
+  labels:
+    app: {{ template "timescale-observability.fullname" . }}
+    chart: {{ template "timescale-observability.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    spec:
+{{- $root := . -}}
+{{- with .Values.grafana.timescale }}
+      containers:
+        - name: {{ $root.Chart.Name }}-grafana-db
+          image: postgres:12-alpine
+          volumeMounts:
+            - name: sql-volume
+              mountPath: /add-users.sql
+              subPath: add-users.sql
+          env:
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: {{ .adminUser }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .adminPassSecret $root }}
+                  key: {{ .adminUser }}
+            - name: PGHOST
+              value: {{ tpl .db.host $root }}
+          command: ['psql', '-f', '/add-users.sql']
+      restartPolicy: OnFailure
+      volumes: 
+        - name: sql-volume
+          configMap:
+            name: {{ $root.Release.Name }}-grafana-db
+      initContainers:
+        - name: init-db
+          image: busybox:1.28
+          env:
+            - name: PGHOST
+              value: {{ tpl .db.host $root }}
+          command: ['sh', '-c', "until nslookup ${PGHOST}; do echo waiting for ${PGHOST}; sleep 2; done"]
+{{- end -}}
+{{- end -}}
+{{- end -}}

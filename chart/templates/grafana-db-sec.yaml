@@ -1,0 +1,23 @@
+{{ if .Values.grafana.enabled -}}
+{{ if .Values.grafana.timescale.db.enabled -}}
+apiVersion: v1
+kind: Secret
+metadata: 
+  name: {{ .Release.Name }}-grafana-db
+  labels:
+    app: {{ template "timescale-observability.fullname" . }}
+    chart: {{ template "timescale-observability.chart" . }}
+    release: {{ .Release.Name }}
+type: Opaque
+data: 
+{{- $root := . -}}
+{{- with .Values.grafana.timescale.db }}
+  GF_DATABASE_TYPE: {{ "postgres" | b64enc }}
+  GF_DATABASE_HOST: {{ tpl .host $root | b64enc }}
+  GF_DATABASE_NAME: {{ .dbName | b64enc }}
+  GF_DATABASE_USER: {{ .user | b64enc }}
+  GF_DATABASE_PASSWORD: {{ .pass | b64enc }}
+  GF_DATABASE_SSL_MODE: {{ .sslMode | b64enc }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

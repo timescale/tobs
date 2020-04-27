@@ -1,9 +1,8 @@
 {{ if .Values.grafana.enabled -}}
-{{- $ds := .Values.grafana.sidecar.datasources -}}
-{{ if $ds.enabled }}
-{{- $tsEnabled := $ds.timescaledb.enabled -}}
-{{- $promEnabled := $ds.prometheus.enabled -}}
-{{- $anyDataSources := and $tsEnabled $promEnabled -}}
+{{ if .Values.grafana.sidecar.datasources.enabled }}
+{{- $tsEnabled := .Values.grafana.timescale.ds.enabled -}}
+{{- $promEnabled := .Values.grafana.prometheus.ds.enabled -}}
+{{- $anyDataSources := or $tsEnabled $promEnabled -}}
 {{ if $anyDataSources -}}
 apiVersion: v1
 kind: Secret
@@ -24,27 +23,30 @@ stringData:
 {{- if $promEnabled }}
       - name: Prometheus
         type: prometheus
-        url: {{ tpl $ds.prometheus.urlTemplate . }}
+        url: {{ tpl .Values.grafana.prometheus.ds.url . }}
         isDefault: true
         editable: true
         access: proxy
 {{- end -}}
 {{ if $tsEnabled -}}
-{{- $isDefault := not $promEnabled }}
+{{- $isDefault := not $promEnabled -}}
+{{- $root := . -}}
+{{ with .Values.grafana.timescale.ds }}
       - name: TimescaleDB
-        url: {{ tpl $ds.timescaledb.urlTemplate . }}
+        url: {{ tpl .host $root }}
         type: postgres
         isDefault: {{ $isDefault }}
         access: proxy
-        user: {{ $ds.timescaledb.user }}
-        database: postgres
+        user: {{ .user }}
+        database: {{ .dbName }}
         editable: true
         secureJsonData:
-          password: {{ index .Values "timescaledb-single" "credentials" $ds.timescaledb.user }}
+          password: {{ .pass }}
         jsonData:
-          sslmode: require
+          sslmode: {{ .sslMode }}
           postgresVersion: 1000
           timescaledb: true
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
