@@ -1,7 +1,7 @@
 {{ if .Values.grafana.enabled -}}
 {{ if .Values.grafana.sidecar.datasources.enabled }}
-{{- $tsEnabled := .Values.grafana.timescale.ds.enabled -}}
-{{- $promEnabled := .Values.grafana.prometheus.ds.enabled -}}
+{{- $tsEnabled := .Values.grafana.timescale.datasource.enabled -}}
+{{- $promEnabled := .Values.grafana.prometheus.datasource.enabled -}}
 {{- $anyDataSources := or $tsEnabled $promEnabled -}}
 {{ if $anyDataSources -}}
 apiVersion: v1
@@ -23,7 +23,7 @@ stringData:
 {{- if $promEnabled }}
       - name: Prometheus
         type: prometheus
-        url: {{ tpl .Values.grafana.prometheus.ds.url . }}
+        url: {{ tpl .Values.grafana.prometheus.datasource.url . }}
         isDefault: true
         editable: true
         access: proxy
@@ -31,7 +31,7 @@ stringData:
 {{ if $tsEnabled -}}
 {{- $isDefault := not $promEnabled -}}
 {{- $root := . -}}
-{{ with .Values.grafana.timescale.ds }}
+{{ with .Values.grafana.timescale.datasource }}
       - name: TimescaleDB
         url: {{ tpl .host $root }}
         type: postgres

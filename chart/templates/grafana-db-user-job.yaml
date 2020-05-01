@@ -1,5 +1,5 @@
 {{- if .Values.grafana.enabled -}}
-{{- if .Values.grafana.timescale.db.enabled -}}
+{{- if .Values.grafana.timescale.database.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -32,7 +32,7 @@ spec:
                   name: {{ tpl .adminPassSecret $root }}
                   key: {{ .adminUser }}
             - name: PGHOST
-              value: {{ tpl .db.host $root }}
+              value: {{ tpl .database.host $root }}
           command: ['psql', '-f', '/add-users.sql']
       restartPolicy: OnFailure
       volumes: 
@@ -44,7 +44,7 @@ spec:
           image: busybox:1.28
           env:
             - name: PGHOST
-              value: {{ tpl .db.host $root }}
+              value: {{ tpl .database.host $root }}
           command: ['sh', '-c', "until nslookup ${PGHOST}; do echo waiting for ${PGHOST}; sleep 2; done"]
 {{- end -}}
 {{- end -}}

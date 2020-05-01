@@ -181,10 +181,11 @@ For more information on running Prometheus, visit: https://prometheus.io/
 ##################################################################################
 {{- $grafanaEnv := (set (set (deepCopy .) "Values" (index .Values "grafana")) "Chart" (dict "Name" "grafana"))  }}
 
-1. The Grafana server can be accessed via port {{ .Values.grafana.service.port }} on the following DNS name from within your cluster:
+1. The Grafana server can be accessed via port {{ .Values.grafana.service.port }} on 
+   the following DNS name from within your cluster:
    {{ template "grafana.fullname" $grafanaEnv }}.{{ template "grafana.namespace" $grafanaEnv }}.svc.cluster.local
 
-{{- if not (or .Values.grafana.persistence.enabled .Values.grafana.timescale.db.enabled) }}
+{{- if not (or .Values.grafana.persistence.enabled .Values.grafana.timescale.database.enabled) }}
 
 2. Get your '{{ .Values.grafana.adminUser }}' user password by running:
    kubectl get secret --namespace {{ template "grafana.namespace" $grafanaEnv }} {{ template "grafana.fullname" $grafanaEnv }} -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
@@ -194,20 +195,25 @@ For more information on running Prometheus, visit: https://prometheus.io/
 ######            the Grafana pod is terminated.                            #####
 #################################################################################
 {{- end }}
-{{- if or .Values.grafana.persistence.enabled .Values.grafana.timescale.db.enabled }}
+{{- if or .Values.grafana.persistence.enabled .Values.grafana.timescale.database.enabled }}
+{{- if .Release.IsInstall }}
 
-2. Persistence is enabled, if this is your first time deploying, the '{{ .Values.grafana.adminUser }}' user
-  password can be retrieved by:
+2. The '{{ .Values.grafana.adminUser }}' user password can be retrieved by:
     kubectl get secret --namespace {{ template "grafana.namespace" $grafanaEnv }} {{ template "grafana.fullname" $grafanaEnv }} -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-  We encourage you to remember it. On upgrades, if you keep the previous PVCs or database instance,
-  the password for '{{ .Values.grafana.adminUser }}' will not be applied from the values file
-  or randomly generated again.
+{{- end -}}
+{{- if .Release.IsUpgrade }}
+
+2. Persistence is enabled, and you did an upgrade. If you don't have the password 
+   for '{{ .Values.grafana.adminUser }}', it can not be retrieved again, you need
+   to reset it (see 3.)
+{{- end -}}
 {{- end }}
 
-3. Reset the admin user password with grafana-cli inside the pod
+3. Yout can reset the admin user password with grafana-cli from inside the pod. 
+   First attach yourself to the grafana container: 
     GRAFANAPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana"
     kubectl exec -it ${GRAFANAPOD} -c grafana -- /bin/sh
-  and then execute in the pod's shell
+  And then execute in the shell:
     grafana-cli admin reset-admin-password <password-you-want-to-set>
 {{- end -}}
 

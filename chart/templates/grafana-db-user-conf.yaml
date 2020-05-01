@@ -1,6 +1,6 @@
 {{ if .Values.grafana.enabled -}}
-{{- $timescaleAsDB := .Values.grafana.timescale.db -}}
-{{- $timescaleAsDS := .Values.grafana.timescale.ds -}}
+{{- $timescaleAsDB := .Values.grafana.timescale.database -}}
+{{- $timescaleAsDS := .Values.grafana.timescale.datasource -}}
 {{ if or $timescaleAsDB.enabled $timescaleAsDS.enabled -}}
 apiVersion: v1
 kind: ConfigMap

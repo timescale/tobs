@@ -1,5 +1,5 @@
 {{ if .Values.grafana.enabled -}}
-{{ if .Values.grafana.timescale.db.enabled -}}
+{{ if .Values.grafana.timescale.database.enabled -}}
 apiVersion: v1
 kind: Secret
 metadata: 
@@ -11,7 +11,7 @@ metadata:
 type: Opaque
 data: 
 {{- $root := . -}}
-{{- with .Values.grafana.timescale.db }}
+{{- with .Values.grafana.timescale.database }}
   GF_DATABASE_TYPE: {{ "postgres" | b64enc }}
   GF_DATABASE_HOST: {{ tpl .host $root | b64enc }}
   GF_DATABASE_NAME: {{ .dbName | b64enc }}

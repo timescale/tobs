@@ -142,38 +142,38 @@ For more information about the `remote_write` configuration that can be set with
 | `grafana.sidecar.datasources.enabled`               | If false, no data sources will be provisioned         | `true`      |
 | `grafana.sidecar.dashboards.enabled`                | If false, no dashboards will be provisioned by default | `true`     |
 | `grafana.sidecar.dashboards.files`                  | Files with dashboard definitions (in JSON) to be provisioned | `['dashboards/k8s-cluster.json','dashboards/k8s-hardware.json']` |
-| `grafana.prometheus.ds.enabled` | If false, a Prometheus data source will not be provisioned | true |
-| `grafana.prometheus.ds.url` | Template parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart  | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc.cluster.local` |
-| `grafana.timescale.db.enabled` | If false, TimescaleDB will not be configured as a database, default sqllite will be used | `true` |
-| `grafana.timescale.db.host` | Hostname (templated) of database, defaults to db deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
-| `grafana.timescale.db.user`                     | User to connect to the db with (will be created ) | `grafanadb` |
-| `grafana.timescale.db.pass`                     | Password for the user | `grafanadb` |
-| `grafana.timescale.db.dbName`                   | Database where to store the data | `postgres` |
-| `grafana.timescale.db.schema`                   | Schema to use (will be created) | `grafanadb` |
-| `grafana.timescale.db.sslMode`                  | SSL mode for connection | `require` |
-| `grafana.timescale.ds.host` | Hostname (templated) of database, defaults to host deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
-| `grafana.timescale.ds.enabled` |  If false a TimescaleDB data source will not be provisioned | `true` |
-| `grafana.timescale.ds.user` | User to connect with | `grafana` |
-| `grafana.timescale.ds.pass` | Pass for user | `grafana` |
-| `grafana.timescale.ds.dbName` | Database storing the metrics (Should be same with `timescale-prometheus.connection.dbName`) | `postgres` |
-| `grafana.timescale.ds.sslMode` | SSL mode for connection | `require` |
+| `grafana.prometheus.datasource.enabled` | If false, a Prometheus data source will not be provisioned | true |
+| `grafana.prometheus.datasource.url` | Template parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart  | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc.cluster.local` |
+| `grafana.timescale.database.enabled` | If false, TimescaleDB will not be configured as a database, default sqllite will be used | `true` |
+| `grafana.timescale.database.host` | Hostname (templated) of database, defaults to db deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
+| `grafana.timescale.database.user`                     | User to connect to the db with (will be created ) | `grafanadb` |
+| `grafana.timescale.database.pass`                     | Password for the user | `grafanadb` |
+| `grafana.timescale.database.dbName`                   | Database where to store the data | `postgres` |
+| `grafana.timescale.database.schema`                   | Schema to use (will be created) | `grafanadb` |
+| `grafana.timescale.database.sslMode`                  | SSL mode for connection | `require` |
+| `grafana.timescale.datasource.host` | Hostname (templated) of database, defaults to host deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
+| `grafana.timescale.datasource.enabled` |  If false a TimescaleDB data source will not be provisioned | `true` |
+| `grafana.timescale.datasource.user` | User to connect with | `grafana` |
+| `grafana.timescale.datasource.pass` | Pass for user | `grafana` |
+| `grafana.timescale.datasource.dbName` | Database storing the metrics (Should be same with `timescale-prometheus.connection.dbName`) | `postgres` |
+| `grafana.timescale.datasource.sslMode` | SSL mode for connection | `require` |
 | `grafana.timescale.adminUser`                | Admin user to create the users and schemas with | `postgres` |
 | `grafana.timescale.adminPassSecret`      | Name (templated) of secret containing password for admin user | `"{{ .Release.Name }}-timescaledb-passwords"` |
 
 ### TimescaleDB user for the Grafana Database
 
 This chart is configured to deploy Grafana so that it uses a TimescaleDB/PostgreSQL instance for it's database.
-This is controlled with the `grafana.timescale.db.enabled` value. If enabled it will run a Job that creates
-a user (as specified with `grafana.timescale.db.user`) and a separate schema (`grafana.timescale.db.schema`).
+This is controlled with the `grafana.timescale.database.enabled` value. If enabled it will run a Job that creates
+a user (as specified with `grafana.timescale.database.user`) and a separate schema (`grafana.timescale.database.schema`).
 This user is created as the owner of the schema, and will not have access to any other schemas/tables in the specified
-database (`grafana.timescale.db.dbName`). In order for the user and schema to be created, the `grafana.timescale.adminUser`
+database (`grafana.timescale.database.dbName`). In order for the user and schema to be created, the `grafana.timescale.adminUser`
 must be set to a db user with the ability to do so (e.g. postgres), and `grafana.timescale.adminPassSecret` must be
 the name of a secret that contains the password for this user.
 
 ### TimescaleDB user for a provisioned Data Source in Grafana
 
-The chart is configured to provision a TimescaleDB data source. This is controlled with the `grafana.timescale.ds.enabled`
-If enabled it will run a Job that creates a user (as specified with `grafana.timescale.ds.user`) and grant read-only
+The chart is configured to provision a TimescaleDB data source. This is controlled with the `grafana.timescale.datasource.enabled`
+If enabled it will run a Job that creates a user (as specified with `grafana.timescale.datasource.user`) and grant read-only
 access to the timescale-prometheus schemas. In order for the user and schema to be created, the `grafana.timescale.adminUser`
 must be set to a db user with the ability to do so (e.g. postgres), and `grafana.timescale.adminPassSecret` must be
 the name of a secret that contains the password for this user.

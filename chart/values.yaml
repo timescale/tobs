@@ -88,13 +88,13 @@ grafana:
         - dashboards/k8s-hardware.json
   envFromSecret: "{{ .Release.Name }}-grafana-db"
   prometheus:
-    ds:
+    datasource:
       enabled: true
       # By default url of data source is set to prometheus instance 
       # deployed with this chart
       url: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
   timescale:
-    db:
+    database:
       enabled: true
       host:  *dbHost
       user: grafanadb
@@ -102,7 +102,7 @@ grafana:
       dbName: *metricDB
       schema: grafanadb
       sslMode: require
-    ds:
+    datasource:
       enabled: true
       user: grafana
       pass: grafana
