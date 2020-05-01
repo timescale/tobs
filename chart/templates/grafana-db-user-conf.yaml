@@ -15,31 +15,31 @@ data:
     \set ON_ERROR_STOP on
     {{ if $timescaleAsDB.enabled -}}
     DO $$
-    BEGIN
-    CREATE ROLE {{ $timescaleAsDB.user }} WITH LOGIN PASSWORD '{{ $timescaleAsDB.pass }}';
-    EXCEPTION WHEN duplicate_object THEN RAISE NOTICE '%, skipping', SQLERRM USING ERRCODE = SQLSTATE;
-    END
+      BEGIN
+        CREATE ROLE {{ $timescaleAsDB.user }} WITH LOGIN PASSWORD '{{ $timescaleAsDB.pass }}';
+      EXCEPTION WHEN duplicate_object THEN 
+        RAISE NOTICE 'role {{ $timescaleAsDB.user }} already exists, skipping create';
+      END
     $$;
     CREATE SCHEMA IF NOT EXISTS {{ $timescaleAsDB.schema }} AUTHORIZATION {{ $timescaleAsDB.user }};
     ALTER ROLE {{ $timescaleAsDB.user }} SET search_path = {{ $timescaleAsDB.schema }};
     {{- end -}}
     {{- if $timescaleAsDS.enabled }}
     DO $$
-    BEGIN
-    CREATE ROLE {{ $timescaleAsDS.user }} WITH LOGIN PASSWORD '{{ $timescaleAsDS.pass }}';
-    EXCEPTION WHEN duplicate_object THEN RAISE NOTICE '%, skipping', SQLERRM USING ERRCODE = SQLSTATE;
-    END
+      BEGIN
+        CREATE ROLE prom_reader;
+      EXCEPTION WHEN duplicate_object THEN
+        RAISE NOTICE 'role prom_reader already exists, skipping create';
+      END
     $$;
-    GRANT USAGE ON SCHEMA prom_metric TO {{ $timescaleAsDS.user }};
-    GRANT SELECT ON ALL TABLES IN SCHEMA prom_metric TO {{ $timescaleAsDS.user }};
-
-    GRANT USAGE ON SCHEMA prom TO {{ $timescaleAsDS.user }};
-    GRANT SELECT ON ALL TABLES IN SCHEMA prom TO {{ $timescaleAsDS.user }};
-
-    GRANT USAGE ON SCHEMA _prom_catalog TO {{ $timescaleAsDS.user }};
-    GRANT SELECT ON ALL TABLES IN SCHEMA _prom_catalog TO {{ $timescaleAsDS.user }};
-    GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA _prom_catalog TO {{ $timescaleAsDS.user }}; 
-    {{- end -}}
-    
+    DO $$
+      BEGIN
+        CREATE ROLE {{ $timescaleAsDS.user }} WITH LOGIN PASSWORD '{{ $timescaleAsDS.pass }}';
+      EXCEPTION WHEN duplicate_object THEN
+        RAISE NOTICE 'role {{ $timescaleAsDS.user }} already exists, skipping create';
+      END
+    $$;
+    GRANT prom_reader TO {{ $timescaleAsDS.user }};
+    {{- end -}}  
 {{- end -}}
 {{- end -}}
