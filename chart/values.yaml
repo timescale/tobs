@@ -8,7 +8,6 @@ timescaledb-single:
   enabled: true
   image:
     tag: pg12-ts1.7
-    pullPolicy: Always
   # create only a ClusterIP service
   loadBalancer: 
     enabled: false
@@ -75,7 +74,7 @@ prometheus:
       port: "9201"
       write:
         enabled: true 
-        # complete url = {protocol}://{host}:{port}/endpoint
+        # complete url = {protocol}://{host}:{port}/{endpoint}
         endpoint: "write"
         # write queue config 
         # see: https://prometheus.io/docs/practices/remote_write/

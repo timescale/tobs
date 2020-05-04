@@ -104,7 +104,6 @@ You can set up the credentials, nodeSelector, volume sizes (default volumes crea
 | `timescale-prometheus.service.loadBalancer.enabled` | Create a LB for the connector instead of a Cluster IP | `false`     |
 | `timescale-prometheus.resources.requests.memory`    | Amount of memory for the Connector pod                | `2Gi`       |
 | `timescale-prometheus.resources.requests.cpu`       | Number of vCPUs for the Connector pod                 | `1`         |
-| `timescale-prometheus.remote.queue.max-shards`      | Max number of shards the prometheus server should create for the Timescale-Prometheus endpoint | `30` |
 
 ### Additional configuration for Timescale-Prometheus Connector
 
@@ -121,6 +120,14 @@ For more details about how to configure the Timescale-Prometheus connector pleas
 | `prometheus.alertmanager.enabled`                   | If true will create the Prometheus Alert Manager       | `false`    |
 | `prometheus.pushgateway.enabled`                    | If true will create the Prometheus Push Gateway        | `false`    |
 | `prometheus.server.configMapOverrideName`           | The name of the ConfigMap that provides the Prometheus config. Resolves to `{{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}` | `prometheus-config` |
+| `prometheus.server.timescaleRemote.host` | Templated hostname of Timescale-Prometheus connector to be used as Long Term Storage | `{{ .Release.Name }}-timescale-prometheus.{{ .Release.Namespace }}.svc.cluster.local` |
+| `prometheus.server.timescaleRemote.protocol` | Protocol to use to send the metrics to Timescale-Prometheus | `http` |
+| `prometheus.server.timescaleRemote.port` | Listening Port of Timescale-Prometheus Connector | `9201` |
+| `prometheus.server.timescaleRemote.write.enabled` | If false, Timescale-Prometheus Connector will not be set up as remote_write| `true` |
+| `prometheus.server.timescaleRemote.write.endpoint` | Write endpoint of Timescale-Prometheus. Used to generate url of remote_write as {protocol}://{host}:{port}/{endpoint} | `write` |
+| `prometheus.server.timescaleRemote.write.queue` | remote_write queue config | `{max_shards: 30}`
+| `prometheus.server.timescaleRemote.read.enabled` | If false Timescale-Prometheus Connector will not be set up as remote_read | `true` |
+| `prometheus.server.timescaleRemote.write.endpoint` | Read endpoint of Timescale-Prometheus. Used to generate url of remote_read as {protocol}://{host}:{port}/{endpoint} | `read` |
 
 ### Additional configuration for Prometheus
 
@@ -128,6 +135,12 @@ The stable/prometheus chart is used as a dependency for deploying Prometheus. We
 a ConfigMap override where the Timescale-Prometheus Connector is already configured as a `remote_write`
 and `remote_read` endpoint. We create a ConfigMap that is still compatible and respects all the configuration
 properties for the prometheus chart, so no functionality is lost.
+
+The Timescale-Prometheus connection is set using the values in `prometheus.server.timescaleRemote`.
+This doesn't change the way the `prometheus.server.remoteWrite` configuration is handled. The configuration
+is separate so we can use templating and set the endpoint properly when deploying Timescale-Prometheus and 
+Prometheus in the same release. If you specify more endpoints in `prometheus.server.remoteWrite` (or `remoteRead`)
+They will be added additionally.
 
 For all the properties that can be configured and more details on how to set up the Prometheus
 deployment see the [Helm hub entry][prometheus-helm-hub].
