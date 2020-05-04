@@ -1,13 +1,12 @@
-{{- if .Values.prometheus.enabled -}}
-{{- if .Values.prometheus.server.enabled -}}
+{{- if and .Values.prometheus.enabled .Values.prometheus.server.enabled -}}
 {{- if .Values.prometheus.server.configMapOverrideName -}}
 {{- $promContext := dict "Release" .Release "Chart" .Chart "Values" .Values.prometheus -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}
   labels:
     {{- include "prometheus.server.labels" $promContext | nindent 4 }}
+  name: {{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}
 data:
 {{- $root := . -}}
 {{- range $key, $value := .Values.prometheus.serverFiles }}
@@ -15,31 +14,30 @@ data:
 {{- if eq $key "prometheus.yml" }}
     global:
 {{ $root.Values.prometheus.server.global | toYaml | trimSuffix "\n" | indent 6 }}
-{{- $tsPromValues := index $root.Values "timescale-prometheus" -}}
-{{- $remoteWrite := $root.Values.prometheus.server.remoteWrite -}}
-{{- $shouldHaveRemoteWriteKey := or $remoteWrite $tsPromValues.enabled -}}
-{{- $tsPromUrl := printf "http://%s-timescale-prometheus-connector.%s.svc.cluster.local:%.0f" $root.Release.Name $root.Release.Namespace $tsPromValues.service.port -}}
-{{- if $shouldHaveRemoteWriteKey }}
+{{- $hasRemoteWrite := or $root.Values.prometheus.server.remoteWrite $root.Values.prometheus.server.timescaleRemote.write.enabled -}}
+{{- if $hasRemoteWrite }}
     remote_write:
-{{- if $tsPromValues.enabled -}}
-{{- $tsPromWriteUrl := printf " %s/write" $tsPromUrl }}
-      - url: {{- $tsPromWriteUrl }}
-        queue_config:
-{{ toYaml $tsPromValues.remote.queue | indent 10 }}
+{{- if $root.Values.prometheus.server.timescaleRemote.write.enabled -}}
+{{ with $root.Values.prometheus.server.timescaleRemote }}
+    - url: {{ printf "%s://%s:%s/%s" .protocol (tpl .host $root) .port .write.endpoint }}
+      queue_config: 
+{{ toYaml .write.queue | indent 8 }}
+{{- end -}}
 {{- end }}
-{{- if $remoteWrite }}
-{{ $root.Values.prometheus.server.remoteWrite | toYaml | indent 6 }}
+{{ if $root.Values.prometheus.server.remoteWrite -}}
+{{ $root.Values.prometheus.server.remoteWrite | toYaml | indent 4 }}
+{{- end -}}
 {{- end }}
-{{- end }}
-{{- $shouldHaveRemoteReadKey := or $root.Values.prometheus.server.remoteRead $tsPromValues.enabled -}}
-{{- if $shouldHaveRemoteReadKey }}
+{{- $hasRemoteRead := or $root.Values.prometheus.server.remoteRead $root.Values.prometheus.server.timescaleRemote.read.enabled -}}
+{{- if $hasRemoteRead }}
     remote_read:
-{{- if $tsPromValues.enabled }}
-{{- $tsPromReadUrl := printf " %s/read" $tsPromUrl }}
-      - url: {{- $tsPromReadUrl }}
+{{- if $root.Values.prometheus.server.timescaleRemote.read.enabled -}}
+{{ with $root.Values.prometheus.server.timescaleRemote }}
+    - url: {{ printf "%s://%s:%s/%s" .protocol (tpl .host $root) .port .read.endpoint }}
+{{- end -}}
 {{- end }}
-{{- if $root.Values.prometheus.server.remoteRead }}
-{{ $root.Values.prometheus.server.remoteRead | toYaml | indent 6 }}
+{{ if $root.Values.prometheus.server.remoteRead -}}
+{{ $root.Values.prometheus.server.remoteRead | toYaml | indent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -94,7 +92,6 @@ data:
         - source_labels: [__meta_kubernetes_pod_container_port_number]
           regex:
           action: drop
-{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
