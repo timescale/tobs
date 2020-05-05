@@ -23,8 +23,8 @@ data:
     $$;
     CREATE SCHEMA IF NOT EXISTS {{ $timescaleAsDB.schema }} AUTHORIZATION {{ $timescaleAsDB.user }};
     ALTER ROLE {{ $timescaleAsDB.user }} SET search_path = {{ $timescaleAsDB.schema }};
-    {{- end -}}
-    {{- if $timescaleAsDS.enabled }}
+    {{- end }}
+    {{ if $timescaleAsDS.enabled -}}
     DO $$
       BEGIN
         CREATE ROLE prom_reader;
@@ -40,6 +40,22 @@ data:
       END
     $$;
     GRANT prom_reader TO {{ $timescaleAsDS.user }};
-    {{- end -}}  
+    {{- end }}  
+  wait-for-ts.sh: |-
+    echo Checking if ${PGHOST} is up
+    NUM_TIMES_FAILED=0;
+    until nslookup ${PGHOST}; 
+    do 
+      echo Num times failed: ${NUM_TIMES_FAILED}
+      NUM_TIMES_FAILED=$(( $NUM_TIMES_FAILED + 1 ));
+      if [ "${NUM_TIMES_FAILED}" -gt "5" ] 
+      then
+        echo Failed 5 times while waiting for ${PGHOST}, exiting
+        exit 1;
+      fi
+      echo Waiting 5 seconds; 
+      sleep 5;
+      echo Checking if ${PGHOST} is up
+    done
 {{- end -}}
 {{- end -}}

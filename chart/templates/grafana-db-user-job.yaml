@@ -42,10 +42,14 @@ spec:
       initContainers:
         - name: init-db
           image: busybox:1.28
+          volumeMounts:
+            - name: sql-volume
+              mountPath: /wait-for-ts.sh
+              subPath: wait-for-ts.sh
           env:
             - name: PGHOST
               value: {{ tpl .database.host $root }}
-          command: ['sh', '-c', "until nslookup ${PGHOST}; do echo waiting for ${PGHOST}; sleep 2; done"]
+          command: ['sh', '/wait-for-ts.sh']
 {{- end -}}
 {{- end -}}
 {{- end -}}
