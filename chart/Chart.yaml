@@ -22,5 +22,5 @@ dependencies:
     repository: https://kubernetes-charts.storage.googleapis.com
   - name: grafana
     condition: grafana.enabled
-    version: 5.0.11
+    version: 5.0.16
     repository: https://kubernetes-charts.storage.googleapis.com

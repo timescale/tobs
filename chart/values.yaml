@@ -23,25 +23,18 @@ timescale-prometheus:
   # connection options
   connection:
     # the db name in which the metrics will be stored
-    dbName: postgres
+    dbName: &metricDB postgres
     # user to connect to TimescaleDB with
-    # user: postgres
-    # The secret containing the password for the user used 
-    # to connect to the database needs to be created before 
-    # installing the chart.
-    # If using the timescaledb helm chart (yes by default)
-    # and the credentials it creates
-    # this is set to "{{ .Release.Name }}-timescaledb-passwords"
-    # use:
-    # password:
-    #  secretTemplate: "already-existing-secret"
-    # to change the secret name by setting either a template or a string
-    
-    # db host by default configured to "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
-    # use:
-    # host:
-    #  nameTemplate: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
-    # to change host name by setting either a template or a string
+    user: postgres
+    password:
+      # Name of a secret object (templated) containing the connection password
+      # Key must be value of timescale-prometheus.connection.user
+      # Created by default if timescaledb-single.enabled=true
+      secretTemplate: &dbPassSecret "{{ .Release.Name }}-timescaledb-passwords"
+    host:
+      # Host name (templated) of the database instance, default
+      # to service created in timescaledb-single
+      nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
 
   # configuration options for the service exposed by timescale-prometheus
   service:
@@ -55,7 +48,7 @@ timescale-prometheus:
       # with only a few pods
       memory: 2Gi
       cpu: 1
-  # configuration options for the prometheus remote_write
+  # configuration options for the prometheus remote_write queue
   # these options are not used by the timescale-prometheus chart
   # but by the prometheus server chart
   remote:
@@ -88,22 +81,36 @@ grafana:
   sidecar:
     datasources:
       enabled: true
-      # Provision a prometheus data source
-      prometheus:
-        enabled: true
-        # By default url of data source is set to prometheus instance 
-        # deployed with this chart
-        urlTemplate: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
-      # Provision a TimescaleDB data source
-      timescaledb:
-        enabled: true
-        user: postgres
-        # By default the url/host is set to the db instance deployed
-        # with this chart
-        urlTemplate: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     dashboards:
       enabled: true
       files:
         - dashboards/k8s-cluster.json
         - dashboards/k8s-hardware.json
-  
+  envFromSecret: "{{ .Release.Name }}-grafana-db"
+  prometheus:
+    datasource:
+      enabled: true
+      # By default url of data source is set to prometheus instance 
+      # deployed with this chart
+      url: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
+  timescale:
+    database:
+      enabled: true
+      host:  *dbHost
+      user: grafanadb
+      pass: grafanadb
+      dbName: *metricDB
+      schema: grafanadb
+      sslMode: require
+    datasource:
+      enabled: true
+      user: grafana
+      pass: grafana
+      dbName: *metricDB
+      sslMode: require
+      # By default the url/host is set to the db instance deployed
+      # with this chart
+      host: *dbHost
+    adminUser: postgres
+    adminPassSecret: *dbPassSecret
+
