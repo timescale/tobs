@@ -84,7 +84,7 @@ Get the Prometheus server URL by running these commands in the same shell:
   echo http://$SERVICE_IP:{{ .Values.prometheus.server.service.servicePort }}
 {{- else if contains "ClusterIP"  .Values.prometheus.server.service.type }}
   export SERVICE_NAME=$(kubectl get services --namespace {{ .Release.Namespace }} -l "app={{ template "prometheus.name" $promEnv }},component={{ .Values.prometheus.server.name }}" -o jsonpath="{.items[0].metadata.name}")
-  kubectl --namespace {{ .Release.Namespace }} port-forward service/$SERVICE_NAME 9090:{{ .Values.prometheus.server.service.servicePort }} 
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/$SERVICE_NAME 9090:{{ .Values.prometheus.server.service.servicePort }}
 {{- end }}
 {{- end }}
 
@@ -181,9 +181,13 @@ For more information on running Prometheus, visit: https://prometheus.io/
 ##################################################################################
 {{- $grafanaEnv := (set (set (deepCopy .) "Values" (index .Values "grafana")) "Chart" (dict "Name" "grafana"))  }}
 
-1. The Grafana server can be accessed via port {{ .Values.grafana.service.port }} on 
+1. The Grafana server can be accessed via port {{ .Values.grafana.service.port }} on
    the following DNS name from within your cluster:
    {{ template "grafana.fullname" $grafanaEnv }}.{{ template "grafana.namespace" $grafanaEnv }}.svc.cluster.local
+
+   You can access grafana locally by executing:
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ template "grafana.fullname" $grafanaEnv }} 8080:{{ .Values.grafana.service.port }}
+   Then you can point your browser to http://127.0.0.1:8080/.
 
 {{- if not (or .Values.grafana.persistence.enabled .Values.grafana.timescale.database.enabled) }}
 
@@ -203,14 +207,14 @@ For more information on running Prometheus, visit: https://prometheus.io/
 {{- end -}}
 {{- if .Release.IsUpgrade }}
 
-2. Persistence is enabled, and you did an upgrade. If you don't have the password 
+2. Persistence is enabled, and you did an upgrade. If you don't have the password
    for '{{ .Values.grafana.adminUser }}', it can not be retrieved again, you need
    to reset it (see 3.)
 {{- end -}}
 {{- end }}
 
-3. Yout can reset the admin user password with grafana-cli from inside the pod. 
-   First attach yourself to the grafana container: 
+3. Yout can reset the admin user password with grafana-cli from inside the pod.
+   First attach yourself to the grafana container:
     GRAFANAPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana"
     kubectl exec -it ${GRAFANAPOD} -c grafana -- /bin/sh
   And then execute in the shell:
