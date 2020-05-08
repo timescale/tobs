@@ -215,7 +215,7 @@ For more information on running Prometheus, visit: https://prometheus.io/
 
 3. Yout can reset the admin user password with grafana-cli from inside the pod.
    First attach yourself to the grafana container:
-    GRAFANAPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana"
+    GRAFANAPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana)"
     kubectl exec -it ${GRAFANAPOD} -c grafana -- /bin/sh
   And then execute in the shell:
     grafana-cli admin reset-admin-password <password-you-want-to-set>
