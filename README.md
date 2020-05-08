@@ -50,10 +50,11 @@ If you had TimescaleDB backups enabled please check the guide for cleaning them 
 
 ### TimescaleDB config service
 
-Sometimes one of the services created with the deployment is not deleted. The `<release_name>-config` service
+Sometimes one of the services created with the deployment is not deleted. The `<release_name>-config` service and `<release_name>` endpoint
 may need to be manually deleted with 
 ```
 kubectl delete svc <release_name>-config
+kubectl delete endpoints <release_name>
 ```
 
 # Configuring Helm Chart
