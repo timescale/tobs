@@ -18,9 +18,9 @@ dependencies:
     repository: https://charts.timescale.com
   - name: prometheus
     condition: prometheus.enabled
-    version: 11.0.4
+    version: 11.0.5
     repository: https://kubernetes-charts.storage.googleapis.com
   - name: grafana
     condition: grafana.enabled
-    version: 5.0.16
+    version: 5.0.24
     repository: https://kubernetes-charts.storage.googleapis.com
