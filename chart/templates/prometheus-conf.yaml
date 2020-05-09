@@ -18,9 +18,7 @@ data:
 {{- $tsPromValues := index $root.Values "timescale-prometheus" -}}
 {{- $remoteWrite := $root.Values.prometheus.server.remoteWrite -}}
 {{- $shouldHaveRemoteWriteKey := or $remoteWrite $tsPromValues.enabled -}}
-{{- $dummyChart := dict "Name" "timescale-prometheus" -}}
-{{- $tsPromContext := dict "Release" $root.Release "Chart" $dummyChart "Values" $tsPromValues -}}
-{{- $tsPromUrl := printf "http://%s.%s.svc.cluster.local:%.0f" (include "timescale-observability.fullname" $tsPromContext) $root.Release.Namespace $tsPromValues.service.port -}}
+{{- $tsPromUrl := printf "http://%s-timescale-prometheus-connector.%s.svc.cluster.local:%.0f" $root.Release.Name $root.Release.Namespace $tsPromValues.service.port -}}
 {{- if $shouldHaveRemoteWriteKey }}
     remote_write:
 {{- if $tsPromValues.enabled -}}
@@ -41,7 +39,7 @@ data:
       - url: {{- $tsPromReadUrl }}
 {{- end }}
 {{- if $root.Values.prometheus.server.remoteRead }}
-{{ $root.Values.prometheus.server.remoteRead | toYaml | indent 4 }}
+{{ $root.Values.prometheus.server.remoteRead | toYaml | indent 6 }}
 {{- end }}
 {{- end }}
 {{- end }}
