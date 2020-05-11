@@ -1,0 +1,6044 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: timescale-observability
+  labels:
+    app.kubernetes.io/name: timescale-observability
+    app.kubernetes.io/instance: timescale-observability
+
+---
+# Source: timescale-observability/charts/grafana/templates/podsecuritypolicy.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName:  'docker/default'
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/defaultProfileName:  'runtime/default'
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    # Default set from Docker, without DAC_OVERRIDE or CHOWN
+    - FOWNER
+    - FSETID
+    - KILL
+    - SETGID
+    - SETUID
+    - SETPCAP
+    - NET_BIND_SERVICE
+    - NET_RAW
+    - SYS_CHROOT
+    - MKNOD
+    - AUDIT_WRITE
+    - SETFCAP
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+  readOnlyRootFilesystem: false
+---
+# Source: timescale-observability/charts/grafana/templates/tests/test-podsecuritypolicy.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: timescale-observability-grafana-test
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  allowPrivilegeEscalation: true
+  privileged: false
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  fsGroup:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - projected
+  - secret
+---
+# Source: timescale-observability/charts/grafana/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+---
+# Source: timescale-observability/charts/grafana/templates/tests/test-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+  name: timescale-observability-grafana-test
+  namespace: timescale-observability
+---
+# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: kube-state-metrics
+    helm.sh/chart: kube-state-metrics-2.7.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: timescale-observability
+  name: timescale-observability-kube-state-metrics
+  namespace: timescale-observability
+imagePullSecrets:
+  []
+---
+# Source: timescale-observability/charts/prometheus/templates/node-exporter-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    component: "node-exporter"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-node-exporter
+  annotations:
+    {}
+---
+# Source: timescale-observability/charts/prometheus/templates/server-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    component: "server"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-server
+  annotations:
+    {}
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/serviceaccount-timescaledb.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: timescale-observability-timescaledb
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+---
+# Source: timescale-observability/charts/grafana/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  admin-user: "YWRtaW4="
+  admin-password: "QmRGWXphTkRMajdCM1lqbzBVZFg1c1JLTERkY1RaS0NsNEhvblU5Sw=="
+  ldap-toml: ""
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/sec-certificate.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  name: timescale-observability-timescaledb-certificate
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURFVENDQWZtZ0F3SUJBZ0lSQUtYcmZkdERKWFFXdW85ZnhxUVkrQmd3RFFZSktvWklodmNOQVFFTEJRQXcKSWpFZ01CNEdBMVVFQXhNWGRHbHRaWE5qWVd4bExXOWljMlZ5ZG1GaWFXeHBkSGt3SGhjTk1qQXdOVEV4TURrMApNRE01V2hjTk1qVXdOVEV4TURrME1ETTVXakFpTVNBd0hnWURWUVFERXhkMGFXMWxjMk5oYkdVdGIySnpaWEoyCllXSnBiR2wwZVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSjdhaSttRnR1L0UKenNHOEM5c2c5TDl3a0lxYkRpSUFGaDAreVFHQ0hHSkorTmtlOWJlSkY3d2lxY1U2RGM1ZXozS2ZpZ083WXlRNQp3TzgyaTdWdkdVQXZQY3E1dkZJYy9QZTJGSHErSkpEa2xkZGdQdGhzY2R6anNWUjZOZDYySGFnYW5BQTNDVDhHCnlGdEZ1MzRoaW5IYTMrZnZGcTNMeGdFbHNyY3BaQTlRVnVCVFJaYTgxQ1QrRmJDL21SYlh1dnhBeXpmY3hWYk8KajV2QVRRS1FnejFNQ3Nmck80YVBlTjA0SDR4QnhyemJHdXZ6TllRTjY0ejVlTTJvWkJLRHp6c0JiSWN6ejlZSwprcEVCQ1I0aThVR1ErTW9FVlJKWHJ1YmhvNFlRS3RhYkY4WFVBMVI1RzhOR1pMSnpuK0dhZW8wN243WWFublRNCjB0NkwrY3J2U1ZNQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWRKUVFXTUJRR0NDc0cKQVFVRkJ3TUJCZ2dyQmdFRkJRY0RBakFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQTBHQ1NxR1NJYjNEUUVCQ3dVQQpBNElCQVFBQlcrdWRpbUlOZFpYcEpKRTh3bU5CMVE5dEVtc25yaHJDYjBEdnBBOE9RYzBFdlo3RCtxTkpaUVY2CkRsWERPdWhXYks2dFJlV2JCdExqODQ2TkdlMVFnV1FKdWtGeVUzSVRmTytia1RveEpWSlhON3MzVmZKS3ltd0MKeFRCMTFrY29FS1BYR202L0hBZnFDcFBoRlRZVVBCUStrdWNUYWt3YjBpY0h0dmU0YmZaT3F4dGZyanRscFF4WgpJSk51YWdXcC9VUytJd01KS0Z0RTNmQjRwRkpTUHgrTVBRaDZJU2Y0UDVrZlk0RzdqdjhHOHBTWU15bFlwdktECkNTa21iUzY3NlFiamRrb3hFVkRnTS9FWFFNQW9XSTlXYWh3Z2ZMSGhCNlJuRkRYZWlidlQrcnJUTnlDekVnUjEKcXlSVzJsdG52cHJzN2FUM2ZndDhCTEFPZlluSgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBbnRxTDZZVzI3OFRPd2J3TDJ5RDB2M0NRaXBzT0lnQVdIVDdKQVlJY1lrbjQyUjcxCnQ0a1h2Q0tweFRvTnpsN1BjcCtLQTd0akpEbkE3emFMdFc4WlFDODl5cm04VWh6ODk3WVVlcjRra09TVjEyQSsKMkd4eDNPT3hWSG8xM3JZZHFCcWNBRGNKUHdiSVcwVzdmaUdLY2RyZjUrOFdyY3ZHQVNXeXR5bGtEMUJXNEZORgpscnpVSlA0VnNMK1pGdGU2L0VETE45ekZWczZQbThCTkFwQ0RQVXdLeCtzN2hvOTQzVGdmakVIR3ZOc2E2L00xCmhBM3JqUGw0emFoa0VvUFBPd0ZzaHpQUDFncVNrUUVKSGlMeFFaRDR5Z1JWRWxldTV1R2poaEFxMXBzWHhkUUQKVkhrYncwWmtzbk9mNFpwNmpUdWZ0aHFlZE16UzNvdjV5dTlKVXdJREFRQUJBb0lCQUFPR09jQnVsUVp3eVYyRwovSVJhRU5RR2ZVNTE3alJXNkNheDgrZXlxVXFNOVpacmwyd0JBS1BONlJKVkhXVk11VEdEMUo0TWxFQ0RmNEpQCkpYNWEvcVpyNWVVUGhkd1VoSkJDVytYMVBmNXc4OW9aYW91R3JHZ0lMVEVBblIxWjBRS2Z4SUpFdGxITnByaFAKcmI4NG8wZXZZWFJWMjV6emZtc2NHUUR6VENNQ3psZkoxUUNra2l2R1FqSkt1eHV2c0tmc2pvTnlrbTdVbXU2TQpYZEtXQlBIVHF1TEl3WDBONlc5bzdDckNuQkw2dm9QWis1REx1Mis2Q1Q3a0ozZ1JiV1BvdGhIU3pVNEZUczgxCnlTcDJkc2JwRkdlSjhVVTZGV2JVVXVEUXpmQU8wNGs4ZlhJN2pZUGJMTzd3bzFiNzRaM1QySDROeFdnYWZab1UKZ1h1Y3V2RUNnWUVBeTZVa21MZFJSZTVMc0krR0lmUVNDeThHMFFGTlB3NnBvTVliMHRTdGJMa2JDUURWSytRbQpDR2dtSEpjQTBOQ2Q3S25rVG01Y0dmZDNLN25XbFR0RnJtbmlydS9vYTNFUGNkRjRacDFhN1VjK0l5ZERCUEFiClRRT1N3bzJXTVZ2S1lJdkUrY0REcmhjRzh2bk83MzVlclZ3M0pyeEphYWJGSlN3SGQ3R2g2RThDZ1lFQXg3RjMKeDQwWXFVUmF1Q0xTWlhTdHJuWUpUbDgzZ3pmRGJ5amVnNFRrT2h2YVFjbERGZ0dYMWFOOUlscUg4Y1VDSEl2cgpGbnhKNWhwYkN4REJpK1dGdE5SRmVwZCtRSzhzUjc1ZlhuOXdIY3Nwd1hTUWs0bUdPQ3p6dW1NNmRVZEUvYVJsCjVOUDVGUW9sUDFpV004eW9nUzZsc1ZXdFlrQjlzZEtLN0d3RUNiMENnWUFjNUZjbTI0dEtVcDZtZEJaaHB0RVEKaVNGOGNhVFY5MnlWaE1YWnlaYTVRQ0hYeXloelM3RWhyRFVNQlZoMlI4TEFHdkpyTmprVzdnY1lTd3RvckxvYwpIcVdza0JqM2RWanRtdnhzQXBNdDZ0ZWtBU1AvQlZtNk9YR083S3VNWVN0N094azlIZDRsU3RzUGllV1VFT2U1CnpNVitWMlJLK3dBcFgrL0hTWXBnL1FLQmdFV1Z4TXhua1dGaWJVNWU2L3ZvbGFFR2hxV2xybDF1TUE3cktlYWcKaHpyc2U3aVMzbXFyc1hJRG4xWTZQOGJ5eEpLWCt4cUJ3dXFJNHBMUGl2SXB6OWE4WlYyYnJxWHhwTGQzVWhwRwp4QlhOdHNZdnpUVnNKYllyaTk2Mk55ZW81eFNQbGVZUUsycTJkMVpFazBxSGxXdzJpZ3hxYzVtYUtYS3VrRFJrClMxL3RBb0dCQUsrSzJ1MEd1alZmU1hPRUp2MlhWc0JJS3ZyM0dieHptZ1h4RjBjV0RqdnNzRzF1U2ZoZXNCYTEKb2JDZXhuUXlEdmhhK2ZQcDVoT2V5K2VEeGpGd29uY080RWIwMlB1SFJuZ1JwUURBcVhNaGdtVE1BRnBDUWZDUQoraFNiWXFsNHNUWUhMbUoxMDZUdlhPMVlaaXZkM1ZSczZyVElVV2pSUk1qNGJUN3Q1emlSCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+...
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/sec-passwords.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: timescale-observability-timescaledb-passwords
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+type: Opaque
+data:
+  "admin": Y29sYQ==
+  "postgres": dGVh
+  "standby": cGluYWNvbGFkYQ==
+...
+---
+# Source: timescale-observability/templates/secret-grafana-datasources.yaml
+apiVersion: v1
+kind: Secret
+metadata: 
+  name: timescale-observability-grafana-datasources
+  labels:
+    grafana_datasource: "1"
+    app: timescale-observability
+    chart: timescale-observability-0.1.0-alpha.2
+    release: timescale-observability
+type: Opaque
+stringData: 
+  datasource.yaml: |-
+    # config file version
+    apiVersion: 1
+    
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://timescale-observability-prometheus-server.timescale-observability.svc.cluster.local
+        isDefault: true
+        editable: true
+        access: proxy
+      - name: TimescaleDB
+        url: timescale-observability.timescale-observability.svc.cluster.local
+        type: postgres
+        isDefault: false
+        access: proxy
+        user: postgres
+        database: postgres
+        editable: true
+        secureJsonData:
+          password: tea
+        jsonData:
+          sslmode: require
+          postgresVersion: 1000
+          timescaledb: true
+---
+# Source: timescale-observability/charts/grafana/templates/configmap-dashboard-provider.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+  name: timescale-observability-grafana-config-dashboards
+  namespace: timescale-observability
+data:
+  provider.yaml: |-
+    apiVersion: 1
+    providers:
+    - name: 'sidecarProvider'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      allowUiUpdates: false
+      options:
+        path: /tmp/dashboards
+---
+# Source: timescale-observability/charts/grafana/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  grafana.ini: |
+    [analytics]
+    check_for_updates = true
+    [grafana_net]
+    url = https://grafana.net
+    [log]
+    mode = console
+    [paths]
+    data = /var/lib/grafana/data
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    provisioning = /etc/grafana/provisioning
+---
+# Source: timescale-observability/charts/grafana/templates/tests/test-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timescale-observability-grafana-test
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  run.sh: |-
+    @test "Test Health" {
+      url="http://timescale-observability-grafana/api/health"
+
+      code=$(wget --server-response --spider --timeout 10 --tries 1 ${url} 2>&1 | awk '/^  HTTP/{print $2}')
+      [ "$code" == "200" ]
+    }
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/configmap-patroni.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timescale-observability-timescaledb-patroni
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+data:
+  patroni.yaml: |
+    bootstrap:
+      dcs:
+        loop_wait: 10
+        maximum_lag_on_failover: 33554432
+        postgresql:
+          parameters:
+            archive_command: /etc/timescaledb/scripts/pgbackrest_archive.sh %p
+            archive_mode: "on"
+            archive_timeout: 1800s
+            autovacuum_analyze_scale_factor: 0.02
+            autovacuum_max_workers: 10
+            autovacuum_vacuum_scale_factor: 0.05
+            hot_standby: "on"
+            log_autovacuum_min_duration: 0
+            log_checkpoints: "on"
+            log_connections: "on"
+            log_disconnections: "on"
+            log_line_prefix: '%t [%p]: [%c-%l] %u@%d,app=%a [%e] '
+            log_lock_waits: "on"
+            log_min_duration_statement: 1s
+            log_statement: ddl
+            max_connections: 100
+            max_prepared_transactions: 150
+            shared_preload_libraries: timescaledb,pg_stat_statements
+            ssl: "on"
+            ssl_cert_file: /etc/certificate/tls.crt
+            ssl_key_file: /etc/certificate/tls.key
+            tcp_keepalives_idle: 900
+            tcp_keepalives_interval: 100
+            temp_file_limit: 1GB
+            timescaledb.passfile: ../.pgpass
+            unix_socket_directories: /var/run/postgresql
+            unix_socket_permissions: "0750"
+            wal_level: hot_standby
+            wal_log_hints: "on"
+          use_pg_rewind: true
+          use_slots: true
+        retry_timeout: 10
+        ttl: 30
+      method: restore_or_initdb
+      post_init: /etc/timescaledb/scripts/post_init.sh
+      restore_or_initdb:
+        command: |
+          /etc/timescaledb/scripts/restore_or_initdb.sh --encoding=UTF8 --locale=C.UTF-8
+        keep_existing_recovery_conf: true
+    kubernetes:
+      ports:
+      - name: postgresql
+        port: 5432
+        targetPort: 5432
+      role_label: role
+      scope_label: cluster-name
+      use_endpoints: true
+    log:
+      level: WARNING
+    postgresql:
+      authentication:
+        replication:
+          username: standby
+        superuser:
+          username: postgres
+      basebackup:
+      - waldir: /var/lib/postgresql/wal/pg_wal
+      callbacks:
+        on_reload: /etc/timescaledb/scripts/patroni_callback.sh
+        on_restart: /etc/timescaledb/scripts/patroni_callback.sh
+        on_role_change: /etc/timescaledb/scripts/patroni_callback.sh
+        on_start: /etc/timescaledb/scripts/patroni_callback.sh
+        on_stop: /etc/timescaledb/scripts/patroni_callback.sh
+      create_replica_methods:
+      - pgbackrest
+      - basebackup
+      listen: 0.0.0.0:5432
+      pg_hba:
+      - hostnossl all,replication all                all                reject
+      - local     all             all                                   peer
+      - hostssl   all             all                127.0.0.1/32       md5
+      - hostssl   all             all                ::1/128            md5
+      - hostssl   replication     standby            all                md5
+      - hostssl   all             all                all                md5
+      pgbackrest:
+        command: /etc/timescaledb/scripts/pgbackrest_restore.sh
+        keep_data: true
+        no_master: 1
+        no_params: true
+      recovery_conf:
+        restore_command: /etc/timescaledb/scripts/pgbackrest_archive_get.sh %f "%p"
+      use_unix_socket: true
+    restapi:
+      listen: 0.0.0.0:8008
+...
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/configmap-scripts.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timescale-observability-timescaledb-scripts
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+data:
+  # If no backup is configured, archive_command would normally fail. A failing archive_command on a cluster
+  # is going to cause WAL to be kept around forever, meaning we'll fill up Volumes we have quite quickly.
+  #
+  # Therefore, if the backup is disabled, we always return exitcode 0 when archiving
+  pgbackrest_archive.sh: |
+    #!/bin/bash
+    PGBACKREST_BACKUP_ENABLED=0
+    [ "${PGBACKREST_BACKUP_ENABLED}" == "0" ] && exit 0
+
+    source "${HOME}/.pgbackrest_environment"
+    exec pgbackrest --stanza=poddb archive-push $1
+  pgbackrest_archive_get.sh: |
+    #!/bin/bash
+    PGBACKREST_BACKUP_ENABLED=0
+    [ "${PGBACKREST_BACKUP_ENABLED}" == "0" ] && exit 1
+
+    source "${HOME}/.pgbackrest_environment"
+    exec pgbackrest --stanza=poddb archive-get ${1} "${2}"
+  pgbackrest_bootstrap.sh: |
+    #!/bin/bash
+    set -e
+
+    function log {
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - bootstrap - $1"
+    }
+
+    while ! pg_isready -q; do
+        log "Waiting for PostgreSQL to become available"
+        sleep 3
+    done
+
+    # If we are the primary, we want to create/validate the backup stanza
+    if [ "$(psql -c "SELECT pg_is_in_recovery()::text" -AtXq)" == "false" ]; then
+        pgbackrest check || {
+            log "Creating pgBackrest stanza"
+            pgbackrest --stanza=poddb stanza-create --log-level-stderr=info || exit 1
+        }
+    fi
+
+    log "Starting pgBackrest api to listen for backup requests"
+    exec python3 /scripts/pgbackrest-rest.py --stanza=poddb --loglevel=debug
+  pgbackrest_restore.sh: |
+    #!/bin/bash
+    PGBACKREST_BACKUP_ENABLED=0
+    [ "${PGBACKREST_BACKUP_ENABLED}" == "0" ] && exit 1
+
+    source "${HOME}/.pod_environment"
+
+    PGDATA="/var/lib/postgresql/data"
+    WALDIR="/var/lib/postgresql/wal/pg_wal"
+
+    # A missing PGDATA points to Patroni removing a botched PGDATA, or manual
+    # intervention. In this scenario, we need to recreate the DATA and WALDIRs
+    # to keep pgBackRest happy
+    [ -d "${PGDATA}" ] || install -o postgres -g postgres -d -m 0700 "${PGDATA}"
+    [ -d "${WALDIR}" ] || install -o postgres -g postgres -d -m 0700 "${WALDIR}"
+
+    pgbackrest --stanza=poddb --force --delta --log-level-console=detail restore
+  restore_or_initdb.sh: |
+    #!/bin/bash
+
+    source "${HOME}/.pod_environment"
+
+    function log {
+      echo "$(date '+%Y-%m-%d %H:%M:%S') - restore_or_initdb - $1"
+    }
+
+    PGDATA="/var/lib/postgresql/data"
+    WALDIR="/var/lib/postgresql/wal/pg_wal"
+
+    # Patroni attaches --scope and --datadir to the arguments, we need to strip them off as
+    # initdb has no business with these parameters
+    initdb_args=""
+    for value in "$@"
+    do
+      [[ $value == --scope* ]] || [[ $value == --datadir* ]] || initdb_args="${initdb_args} $value"
+    done
+
+    log "Invoking initdb"
+    initdb --auth-local=peer --auth-host=md5 --pgdata="${PGDATA}" --waldir="${WALDIR}" ${initdb_args}
+    echo "include_if_exists = '/var/run/postgresql/timescaledb.conf'" >> "${PGDATA}/postgresql.conf"
+
+  post_init.sh: |
+    #!/bin/bash
+    PGBACKREST_BACKUP_ENABLED=0
+
+    source "${HOME}/.pod_environment"
+
+    function log {
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - post_init - $1"
+    }
+
+    log "Creating extension TimescaleDB in template1 and postgres databases"
+    psql -d "$URL" <<__SQL__
+      \connect template1
+      -- As we're still only initializing, we cannot have synchronous_commit enabled just yet.
+      SET synchronous_commit to 'off';
+      CREATE EXTENSION timescaledb;
+
+      \connect postgres
+      SET synchronous_commit to 'off';
+      CREATE EXTENSION timescaledb;
+    __SQL__
+
+    TABLESPACES=""
+    for tablespace in $TABLESPACES
+    do
+      log "Creating tablespace ${tablespace}"
+      tablespacedir="/var/lib/postgresql/tablespaces/${tablespace}/data"
+      psql -d "$URL" --set tablespace="${tablespace}" --set directory="${tablespacedir}" --set ON_ERROR_STOP=1 <<__SQL__
+        SET synchronous_commit to 'off';
+        CREATE TABLESPACE :"tablespace" LOCATION :'directory';
+    __SQL__
+    done
+
+    if [ "${PGBACKREST_BACKUP_ENABLED}" == "1" ]; then
+      log "Waiting for pgBackRest API to become responsive"
+      while sleep 1; do
+          if [ $SECONDS -gt 10 ]; then
+              log "pgBackRest API did not respond within $SECONDS seconds, will not trigger a backup"
+              exit 0
+          fi
+          timeout 1 bash -c "echo > /dev/tcp/localhost/8081" 2>/dev/null && break
+      done
+
+      log "Triggering pgBackRest backup"
+      curl -i -X POST http://localhost:8081/backups
+    fi
+
+    # We always exit 0 this script, otherwise the database initialization fails.
+    exit 0
+  patroni_callback.sh: |
+    #!/bin/bash
+    set -e
+
+    source "${HOME}/.pod_environment"
+
+    for suffix in "$1" all
+    do
+      CALLBACK="/etc/timescaledb/callbacks/${suffix}"
+      if [ -f "${CALLBACK}" ]
+      then
+        "${CALLBACK}" $@
+      fi
+    done
+
+  lifecycle_preStop.psql: |
+    \pset pager off
+    \set ON_ERROR_STOP true
+    \set hostname `hostname`
+    \set dsn_fmt 'user=postgres host=%s application_name=lifecycle:preStop@%s connect_timeout=5 options=''-c log_min_duration_statement=0'''
+
+    SELECT
+        pg_is_in_recovery() AS in_recovery,
+        format(:'dsn_fmt', patroni_scope,                       :'hostname') AS primary_dsn,
+        format(:'dsn_fmt', '/var/run/postgresql', :'hostname') AS local_dsn
+    FROM
+        current_setting('cluster_name') AS cs(patroni_scope)
+    \gset
+
+    \timing on
+    \set ECHO queries
+
+    -- There should be a CHECKPOINT at the primary
+    \if :in_recovery
+        \connect :"primary_dsn"
+        CHECKPOINT;
+    \endif
+
+    -- There should also be a CHECKPOINT locally,
+    -- for the primary, this may mean we do a double checkpoint,
+    -- but the second one would be cheap anyway, so we leave that as is
+    \connect :"local_dsn"
+    SELECT 'Issuing checkpoint';
+    CHECKPOINT;
+
+    \if :in_recovery
+        SELECT 'We are a replica: Successfully invoked checkpoints at the primary and locally.';
+    \else
+        SELECT 'We are a primary: Successfully invoked checkpoints, now issuing a switchover.';
+        \! curl -s http://localhost:8008/switchover -XPOST -d '{"leader": "$(hostname)"}'
+    \endif
+...
+---
+# Source: timescale-observability/templates/configmap-grafana-dashboards.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timescale-observability-grafana-dashboards
+  labels:
+   grafana_dashboard: "1"
+   app: timescale-observability
+   chart: timescale-observability-0.1.0-alpha.2
+   release: timescale-observability
+data:
+  k8s-cluster.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Summary metrics about deployments, nodes, pods, containers, and jobs in a Kubernetes cluster.",
+      "editable": true,
+      "gnetId": 6417,
+      "graphTooltip": 1,
+      "id": 1,
+      "iteration": 1587329642807,
+      "links": [
+        {
+          "asDropdown": true,
+          "icon": "external link",
+          "includeVars": true,
+          "keepTime": false,
+          "tags": [
+            "kubernetes-app"
+          ],
+          "title": "Dashboards",
+          "type": "dashboards"
+        }
+      ],
+      "panels": [
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 14,
+          "panels": [],
+          "title": "Deployments",
+          "type": "row"
+        },
+        {
+          "columns": [],
+          "datasource": "Prometheus",
+          "description": "",
+          "fontSize": "100%",
+          "gridPos": {
+            "h": 8,
+            "w": 18,
+            "x": 0,
+            "y": 1
+          },
+          "id": 53,
+          "pageSize": null,
+          "showHeader": true,
+          "sort": {
+            "col": 1,
+            "desc": false
+          },
+          "styles": [
+            {
+              "alias": "",
+              "align": "center",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "Time",
+              "thresholds": [],
+              "type": "date",
+              "unit": "short"
+            },
+            {
+              "alias": "Deployment",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "deployment",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
+            },
+            {
+              "alias": "Available Replicas",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 0,
+              "mappingType": 1,
+              "pattern": "Value #D",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            },
+            {
+              "alias": "Requested Replicas",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 0,
+              "mappingType": 1,
+              "pattern": "Value #E",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            }
+          ],
+          "targets": [
+            {
+              "expr": "sum(kube_deployment_status_replicas_available{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\", deployment=~\"$Deployment\"}) by (deployment)",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "D"
+            },
+            {
+              "expr": "sum(kube_deployment_spec_replicas{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\", deployment=~\"$Deployment\"}) by (deployment)",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "E"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Replica Status Summary",
+          "transform": "table",
+          "type": "table"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 18,
+            "y": 1
+          },
+          "id": 63,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "#FF9830",
+            "show": true,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(kube_deployment_status_replicas_unavailable{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\", deployment=~\"$Deployment\"})",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "1",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Replicas Unavailable ",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 9
+          },
+          "id": 22,
+          "panels": [],
+          "repeat": null,
+          "title": "Nodes",
+          "type": "row"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 18,
+            "x": 0,
+            "y": 10
+          },
+          "id": 24,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(kube_node_info{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "",
+          "title": "Number Of Nodes",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 6,
+            "x": 18,
+            "y": 10
+          },
+          "id": 26,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "#FF9830",
+            "show": true
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(kube_node_spec_unschedulable{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "1",
+          "title": "Nodes Unavailable",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "id": 28,
+          "panels": [],
+          "title": "Pods",
+          "type": "row"
+        },
+        {
+          "aliasColors": {
+            "Failed": "red",
+            "Succeeded": "blue"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 18,
+            "x": 0,
+            "y": 14
+          },
+          "hiddenSeries": false,
+          "id": 55,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(kube_pod_status_phase{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\", phase=\"Running\"})",
+              "interval": "",
+              "legendFormat": "Running",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(kube_pod_status_phase{namespace=~\"$Namespace\", phase=\"Succeeded\"})",
+              "interval": "",
+              "legendFormat": "Succeeded",
+              "refId": "D"
+            },
+            {
+              "expr": "sum(kube_pod_status_phase{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\", phase=\"Pending\"})",
+              "interval": "",
+              "legendFormat": "Pending",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(kube_pod_status_phase{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\", kubernetes_node=~\"$Node\", phase=\"Failed\"})",
+              "interval": "",
+              "legendFormat": "Failed",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(kube_pod_status_phase{namespace=~\"$Namespace\", phase=\"Unknown\"})",
+              "interval": "",
+              "legendFormat": "Unknown",
+              "refId": "E"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Pod Status",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": null,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 18,
+            "y": 14
+          },
+          "id": 57,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "#FF9830",
+            "show": true,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(kube_pod_status_phase{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\", phase=\"Failed\"})",
+              "interval": "",
+              "legendFormat": "Failed",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "1",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Pods Failed ",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "id": 36,
+          "panels": [],
+          "title": "Containers",
+          "type": "row"
+        },
+        {
+          "aliasColors": {
+            "Terminated": "blue"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 18,
+            "x": 0,
+            "y": 23
+          },
+          "hiddenSeries": false,
+          "id": 59,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(kube_pod_container_status_running{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\"})",
+              "interval": "",
+              "legendFormat": "Running",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(kube_pod_container_status_waiting{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\"})",
+              "interval": "",
+              "legendFormat": "Waiting",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(kube_pod_container_status_terminated{namespace=~\"$Namespace\", kubernetes_node=~\"$Node\"})",
+              "interval": "",
+              "legendFormat": "Terminated",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Container Status",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "Prometheus",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 18,
+            "y": 23
+          },
+          "id": 41,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "pluginVersion": "6.7.1",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "#FF9830",
+            "show": true
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(delta(kube_pod_container_status_restarts_total{namespace=\"kube-system\", kubernetes_node=~\"$Node\"}[30m]))",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "1",
+          "title": "Container Restarts [30m]",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 22,
+      "style": "dark",
+      "tags": [
+        "kubernetes"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": false,
+              "text": "No data sources found",
+              "value": ""
+            },
+            "hide": 2,
+            "includeAll": false,
+            "label": "",
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "regex": "/$ds/",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "allValue": "",
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": "Prometheus",
+            "definition": "kube_namespace_labels",
+            "hide": 0,
+            "includeAll": true,
+            "index": -1,
+            "label": null,
+            "multi": false,
+            "name": "Namespace",
+            "options": [],
+            "query": "kube_namespace_labels",
+            "refresh": 1,
+            "regex": ".*namespace=\"(.*)\".*",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": "Prometheus",
+            "definition": "label_values(kubernetes_io_hostname)",
+            "hide": 0,
+            "includeAll": true,
+            "index": -1,
+            "label": null,
+            "multi": false,
+            "name": "Node",
+            "options": [],
+            "query": "label_values(kubernetes_io_hostname)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": "Prometheus",
+            "definition": "label_values(kube_deployment_labels, deployment)",
+            "hide": 0,
+            "includeAll": true,
+            "index": -1,
+            "label": null,
+            "multi": false,
+            "name": "Deployment",
+            "options": [],
+            "query": "label_values(kube_deployment_labels, deployment)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
+      },
+      "time": {
+        "from": "now-30m",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ],
+        "time_options": [
+          "5m",
+          "15m",
+          "1h",
+          "6h",
+          "12h",
+          "24h",
+          "2d",
+          "7d",
+          "30d"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Kubernetes Cluster Monitoring",
+      "uid": "n9QIeV3Wz",
+      "variables": {
+        "list": []
+      },
+      "version": 1
+    }
+    
+  k8s-hardware.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Monitors Kubernetes cluster using Prometheus. Shows overall cluster CPU / Memory / Filesystem usage as well as individual pod, containers, systemd services statistics. Uses cAdvisor metrics only.",
+      "editable": true,
+      "gnetId": 315,
+      "graphTooltip": 0,
+      "id": 2,
+      "iteration": 1587328427130,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 33,
+          "panels": [],
+          "title": "Network I/O pressure",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "fillGradient": 0,
+          "grid": {},
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "height": "200px",
+          "hiddenSeries": false,
+          "id": 32,
+          "isNew": true,
+          "legend": {
+            "alignAsTable": false,
+            "avg": true,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": 200,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~\"^$Node$\"}[1m]))",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "Received",
+              "metric": "network",
+              "refId": "A",
+              "step": 10
+            },
+            {
+              "expr": "- sum (rate (container_network_transmit_bytes_total{kubernetes_io_hostname=~\"^$Node$\"}[1m]))",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "Sent",
+              "metric": "network",
+              "refId": "B",
+              "step": 10
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Network I/O pressure",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "Bps",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "Bps",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 7
+          },
+          "id": 34,
+          "panels": [],
+          "title": "Total usage",
+          "type": "row"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 0,
+            "y": 8
+          },
+          "id": 4,
+          "links": [],
+          "options": {
+            "fieldOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "defaults": {
+                "mappings": [
+                  {
+                    "id": 0,
+                    "op": "=",
+                    "text": "N/A",
+                    "type": 1,
+                    "value": "null"
+                  }
+                ],
+                "max": 100,
+                "min": 0,
+                "nullValueMode": "connected",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "rgba(50, 172, 45, 0.97)",
+                      "value": null
+                    },
+                    {
+                      "color": "rgba(237, 129, 40, 0.89)",
+                      "value": 65
+                    },
+                    {
+                      "color": "rgba(245, 54, 54, 0.9)",
+                      "value": 90
+                    }
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "horizontal",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "6.7.1",
+          "targets": [
+            {
+              "expr": "sum (container_memory_working_set_bytes{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (machine_memory_bytes{kubernetes_io_hostname=~\"^$Node$\"}) * 100",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "title": "Cluster Memory Usage",
+          "type": "gauge"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 8,
+            "y": 8
+          },
+          "id": 6,
+          "links": [],
+          "options": {
+            "fieldOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "defaults": {
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "semi-dark-green",
+                      "value": null
+                    },
+                    {
+                      "color": "semi-dark-orange",
+                      "value": 65
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 90
+                    }
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "auto",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "6.7.1",
+          "targets": [
+            {
+              "expr": "sum(container_cpu_usage_seconds_total{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})/sum(node_cpu_seconds_total{kubernetes_node=~\"^$Node$\"})*100",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Cluster CPU Usage",
+          "type": "gauge"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 16,
+            "y": 8
+          },
+          "id": 7,
+          "links": [],
+          "options": {
+            "fieldOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "defaults": {
+                "decimals": 2,
+                "mappings": [
+                  {
+                    "id": 0,
+                    "op": "=",
+                    "text": "N/A",
+                    "type": 1,
+                    "value": "null"
+                  }
+                ],
+                "max": 100,
+                "min": 0,
+                "nullValueMode": "connected",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "rgba(50, 172, 45, 0.97)",
+                      "value": null
+                    },
+                    {
+                      "color": "rgba(237, 129, 40, 0.89)",
+                      "value": 65
+                    },
+                    {
+                      "color": "rgba(245, 54, 54, 0.9)",
+                      "value": 90
+                    }
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "horizontal",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "6.7.1",
+          "targets": [
+            {
+              "expr": "sum (container_fs_usage_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (container_fs_limit_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) * 100",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "metric": "",
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "title": "Cluster Filesystem Usage",
+          "type": "gauge"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "format": "bytes",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 0,
+            "y": 13
+          },
+          "height": "1px",
+          "id": 9,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "20%",
+          "prefix": "",
+          "prefixFontSize": "20%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (container_memory_working_set_bytes{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "thresholds": "",
+          "title": "Used",
+          "type": "singlestat",
+          "valueFontSize": "50%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "format": "bytes",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 4,
+            "y": 13
+          },
+          "height": "1px",
+          "id": 10,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (machine_memory_bytes{kubernetes_io_hostname=~\"^$Node$\"})",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "thresholds": "",
+          "title": "Total",
+          "type": "singlestat",
+          "valueFontSize": "50%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 8,
+            "y": 13
+          },
+          "height": "1px",
+          "id": 11,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": " cores",
+          "postfixFontSize": "30%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(kube_pod_container_resource_requests_cpu_cores{kubernetes_io_hostname=~\"^$Node$\"})",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "thresholds": "",
+          "title": "Used",
+          "type": "singlestat",
+          "valueFontSize": "50%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 12,
+            "y": 13
+          },
+          "height": "1px",
+          "id": 12,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": " cores",
+          "postfixFontSize": "30%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (machine_cpu_cores{kubernetes_io_hostname=~\"^$Node$\"})",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "thresholds": "",
+          "title": "Total",
+          "type": "singlestat",
+          "valueFontSize": "50%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "format": "bytes",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 16,
+            "y": 13
+          },
+          "height": "1px",
+          "id": 13,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (container_fs_usage_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "thresholds": "",
+          "title": "Used",
+          "type": "singlestat",
+          "valueFontSize": "50%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "datasource": "Prometheus",
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "format": "bytes",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 20,
+            "y": 13
+          },
+          "height": "1px",
+          "id": 14,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (container_fs_limit_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "thresholds": "",
+          "title": "Total",
+          "type": "singlestat",
+          "valueFontSize": "50%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 0,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 49,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(kube_node_status_allocatable_memory_bytes{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Allocatable",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(kube_node_status_capacity_memory_bytes{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Capacity",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(kube_pod_container_resource_requests_memory_bytes{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Requested",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Cluster Memory Capacity",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decbytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 8,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 47,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(kube_node_status_capacity_cpu_cores{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Capacity",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(kube_node_status_allocatable_cpu_cores{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Allocatable",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(kube_pod_container_resource_requests_cpu_cores{node=~\"$Node\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Requested",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Cluster CPU Capacity",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "none",
+              "label": "cores",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 16,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 51,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum (container_fs_usage_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Used",
+              "refId": "A"
+            },
+            {
+              "expr": "sum (container_fs_limit_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^$Node$\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Capacity",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Cluster Filesystem Capacity",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decbytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 21
+          },
+          "id": 35,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 3,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 17
+              },
+              "height": "",
+              "hiddenSeries": false,
+              "id": 17,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (pod)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{ pod }}",
+                  "metric": "container_cpu",
+                  "refId": "A",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Pods CPU usage (1m avg)",
+              "tooltip": {
+                "msResolution": true,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "none",
+                  "label": "cores",
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "Pods CPU usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "id": 36,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 3,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 18
+              },
+              "height": "",
+              "hiddenSeries": false,
+              "id": 23,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (rate (container_cpu_usage_seconds_total{systemd_service_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (systemd_service_name)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{ systemd_service_name }}",
+                  "metric": "container_cpu",
+                  "refId": "A",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "System services CPU usage (1m avg)",
+              "tooltip": {
+                "msResolution": true,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "none",
+                  "label": "cores",
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "System services CPU usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 23
+          },
+          "id": 37,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 3,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 19
+              },
+              "height": "",
+              "hiddenSeries": false,
+              "id": 24,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "hideEmpty": false,
+                "hideZero": false,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sideWidth": null,
+                "sort": "avg",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",container!=\"POD\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (container, pod)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "pod: {{ pod }} | {{ container }}",
+                  "metric": "container_cpu",
+                  "refId": "A",
+                  "step": 10
+                },
+                {
+                  "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name!~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (kubernetes_io_hostname, name, image)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "docker: {{kubernetes_io_hostname}} | {{name}} | {{image}}",
+                  "metric": "container_cpu",
+                  "refId": "B",
+                  "step": 10
+                },
+                {
+                  "expr": "sum (rate (container_cpu_usage_seconds_total{rkt_container_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (kubernetes_io_hostname)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": " rkt: {{ kubernetes_io_hostname }}",
+                  "metric": "container_cpu",
+                  "refId": "C",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Containers CPU usage (1m avg)",
+              "tooltip": {
+                "msResolution": true,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "none",
+                  "label": "cores",
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "Containers CPU usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 24
+          },
+          "id": 38,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 3,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 14,
+                "w": 24,
+                "x": 0,
+                "y": 34
+              },
+              "hiddenSeries": false,
+              "id": 20,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": false,
+                "show": true,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (rate (container_cpu_usage_seconds_total{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (id)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{ id }}",
+                  "metric": "container_cpu",
+                  "refId": "A",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "All processes CPU usage (1m avg)",
+              "tooltip": {
+                "msResolution": true,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "none",
+                  "label": "cores",
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "repeat": null,
+          "title": "All processes CPU usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 25
+          },
+          "id": 39,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 2,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 49
+              },
+              "hiddenSeries": false,
+              "id": 25,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sideWidth": 200,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (container_memory_working_set_bytes{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}) by (pod)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{ pod }}",
+                  "metric": "container_memory_usage:sort_desc",
+                  "refId": "A",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Pods memory usage",
+              "tooltip": {
+                "msResolution": false,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "bytes",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "Pods memory usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 26
+          },
+          "id": 40,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "datasource": "Prometheus",
+              "decimals": 2,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 35
+              },
+              "id": 26,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sideWidth": 200,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (container_memory_working_set_bytes{systemd_service_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}) by (systemd_service_name)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{ systemd_service_name }}",
+                  "metric": "container_memory_usage:sort_desc",
+                  "refId": "A",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeShift": null,
+              "title": "System services memory usage",
+              "tooltip": {
+                "msResolution": false,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "show": true
+              },
+              "yaxes": [
+                {
+                  "format": "bytes",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ]
+            }
+          ],
+          "title": "System services memory usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 27
+          },
+          "id": 41,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 2,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 58
+              },
+              "hiddenSeries": false,
+              "id": 27,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sideWidth": 200,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (container_memory_working_set_bytes{image!=\"\",name=~\"^k8s_.*\",container!=\"POD\",kubernetes_io_hostname=~\"^$Node$\"}) by (container, pod)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "pod: {{ pod }} | {{ container }}",
+                  "metric": "container_memory_usage:sort_desc",
+                  "refId": "A",
+                  "step": 10
+                },
+                {
+                  "expr": "sum (container_memory_working_set_bytes{image!=\"\",name!~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}) by (kubernetes_io_hostname, name, image)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "docker: {{ kubernetes_io_hostname }} | {{ image }} ({{ name }})",
+                  "metric": "container_memory_usage:sort_desc",
+                  "refId": "B",
+                  "step": 10
+                },
+                {
+                  "expr": "sum (container_memory_working_set_bytes{rkt_container_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}) by (kubernetes_io_hostname, rkt_container_name)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "rkt: {{ kubernetes_io_hostname }} | {{ rkt_container_name }}",
+                  "metric": "container_memory_usage:sort_desc",
+                  "refId": "C",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Containers memory usage",
+              "tooltip": {
+                "msResolution": false,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "bytes",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "Containers memory usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 28
+          },
+          "id": 42,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "datasource": "Prometheus",
+              "decimals": 2,
+              "editable": true,
+              "error": false,
+              "fill": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 14,
+                "w": 24,
+                "x": 0,
+                "y": 37
+              },
+              "id": 28,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": false,
+                "show": true,
+                "sideWidth": 200,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "stack": false,
+              "steppedLine": true,
+              "targets": [
+                {
+                  "expr": "sum (container_memory_working_set_bytes{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) by (id)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{ id }}",
+                  "metric": "container_memory_usage:sort_desc",
+                  "refId": "A",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeShift": null,
+              "title": "All processes memory usage",
+              "tooltip": {
+                "msResolution": false,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "show": true
+              },
+              "yaxes": [
+                {
+                  "format": "bytes",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ]
+            }
+          ],
+          "title": "All processes memory usage",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 29
+          },
+          "id": 43,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 2,
+              "editable": true,
+              "error": false,
+              "fill": 1,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 67
+              },
+              "hiddenSeries": false,
+              "id": 16,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sideWidth": 200,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "sum (rate (container_network_receive_bytes_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (pod)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "-> {{ pod }}",
+                  "metric": "network",
+                  "refId": "A",
+                  "step": 10
+                },
+                {
+                  "expr": "- sum (rate (container_network_transmit_bytes_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (pod)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "<- {{ pod }}",
+                  "metric": "network",
+                  "refId": "B",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Pods network I/O (1m avg)",
+              "tooltip": {
+                "msResolution": false,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "Bps",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "Pods network I/O",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 30
+          },
+          "id": 44,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 2,
+              "editable": true,
+              "error": false,
+              "fill": 1,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 61
+              },
+              "hiddenSeries": false,
+              "id": 30,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": true,
+                "show": true,
+                "sideWidth": 200,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "sum (rate (container_network_receive_bytes_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (container, pod)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "-> pod: {{ pod }} | {{ container }}",
+                  "metric": "network",
+                  "refId": "B",
+                  "step": 10
+                },
+                {
+                  "expr": "- sum (rate (container_network_transmit_bytes_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (container, pod)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "<- pod: {{ pod }} | {{ container }}",
+                  "metric": "network",
+                  "refId": "D",
+                  "step": 10
+                },
+                {
+                  "expr": "sum (rate (container_network_receive_bytes_total{image!=\"\",name!~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (kubernetes_io_hostname, name, image)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "-> docker: {{ kubernetes_io_hostname }} | {{ image }} ({{ name }})",
+                  "metric": "network",
+                  "refId": "A",
+                  "step": 10
+                },
+                {
+                  "expr": "- sum (rate (container_network_transmit_bytes_total{image!=\"\",name!~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (kubernetes_io_hostname, name, image)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "<- docker: {{ kubernetes_io_hostname }} | {{ image }} ({{ name }})",
+                  "metric": "network",
+                  "refId": "C",
+                  "step": 10
+                },
+                {
+                  "expr": "sum (rate (container_network_transmit_bytes_total{rkt_container_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (kubernetes_io_hostname, rkt_container_name)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "-> rkt: {{ kubernetes_io_hostname }} | {{ rkt_container_name }}",
+                  "metric": "network",
+                  "refId": "E",
+                  "step": 10
+                },
+                {
+                  "expr": "- sum (rate (container_network_transmit_bytes_total{rkt_container_name!=\"\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (kubernetes_io_hostname, rkt_container_name)",
+                  "hide": false,
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "<- rkt: {{ kubernetes_io_hostname }} | {{ rkt_container_name }}",
+                  "metric": "network",
+                  "refId": "F",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Containers network I/O (1m avg)",
+              "tooltip": {
+                "msResolution": false,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "Bps",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "Containers network I/O",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "id": 45,
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Prometheus",
+              "decimals": 2,
+              "editable": true,
+              "error": false,
+              "fill": 1,
+              "fillGradient": 0,
+              "grid": {},
+              "gridPos": {
+                "h": 14,
+                "w": 24,
+                "x": 0,
+                "y": 62
+              },
+              "hiddenSeries": false,
+              "id": 29,
+              "isNew": true,
+              "legend": {
+                "alignAsTable": true,
+                "avg": true,
+                "current": true,
+                "max": false,
+                "min": false,
+                "rightSide": false,
+                "show": true,
+                "sideWidth": 200,
+                "sort": "current",
+                "sortDesc": true,
+                "total": false,
+                "values": true
+              },
+              "lines": true,
+              "linewidth": 2,
+              "links": [],
+              "nullPointMode": "connected",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "sum (rate (container_network_receive_bytes_total{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (id)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "-> {{ id }}",
+                  "metric": "network",
+                  "refId": "A",
+                  "step": 10
+                },
+                {
+                  "expr": "- sum (rate (container_network_transmit_bytes_total{id!=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) by (id)",
+                  "interval": "10s",
+                  "intervalFactor": 1,
+                  "legendFormat": "<- {{ id }}",
+                  "metric": "network",
+                  "refId": "B",
+                  "step": 10
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "All processes network I/O (1m avg)",
+              "tooltip": {
+                "msResolution": false,
+                "shared": true,
+                "sort": 2,
+                "value_type": "cumulative"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "Bps",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "All processes network I/O",
+          "type": "row"
+        }
+      ],
+      "refresh": "1m",
+      "schemaVersion": 22,
+      "style": "dark",
+      "tags": [
+        "kubernetes"
+      ],
+      "templating": {
+        "list": [
+          {
+            "allValue": ".*",
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": "Prometheus",
+            "definition": "",
+            "hide": 0,
+            "includeAll": true,
+            "index": -1,
+            "label": null,
+            "multi": false,
+            "name": "Node",
+            "options": [],
+            "query": "label_values(kubernetes_io_hostname)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
+      },
+      "time": {
+        "from": "now-5m",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ],
+        "time_options": [
+          "5m",
+          "15m",
+          "1h",
+          "6h",
+          "12h",
+          "24h",
+          "2d",
+          "7d",
+          "30d"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Kubernetes Hardware Monitoring",
+      "uid": "CojiQBCZkf",
+      "variables": {
+        "list": []
+      },
+      "version": 1
+    }
+---
+# Source: timescale-observability/templates/configmap-prometheus.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timescale-observability-prometheus-config
+  labels:
+    component: "server"
+    app: timescale-observability
+    release: timescale-observability
+    chart: timescale-observability-0.1.0-alpha.2
+    heritage: Helm
+data:
+  alerting_rules.yml: |
+    {}
+  alerts: |
+    {}
+  prometheus.yml: |
+    global:
+      evaluation_interval: 1m
+      scrape_interval: 1m
+      scrape_timeout: 10s
+    remote_write:
+      - url: http://timescale-observability-timescale-prometheus.timescale-observability.svc.cluster.local:9201/write
+        queue_config:
+          max_shards: 30
+    remote_read:
+      - url: http://timescale-observability-timescale-prometheus.timescale-observability.svc.cluster.local:9201/read
+    rule_files:
+    - /etc/config/recording_rules.yml
+    - /etc/config/alerting_rules.yml
+    - /etc/config/rules
+    - /etc/config/alerts
+    scrape_configs:
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      job_name: kubernetes-apiservers
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - action: keep
+        regex: default;kubernetes;https
+        source_labels:
+        - __meta_kubernetes_namespace
+        - __meta_kubernetes_service_name
+        - __meta_kubernetes_endpoint_port_name
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      job_name: kubernetes-nodes
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - replacement: kubernetes.default.svc:443
+        target_label: __address__
+      - regex: (.+)
+        replacement: /api/v1/nodes/$1/proxy/metrics
+        source_labels:
+        - __meta_kubernetes_node_name
+        target_label: __metrics_path__
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+    - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      job_name: kubernetes-nodes-cadvisor
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - replacement: kubernetes.default.svc:443
+        target_label: __address__
+      - regex: (.+)
+        replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+        source_labels:
+        - __meta_kubernetes_node_name
+        target_label: __metrics_path__
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+    - job_name: kubernetes-service-endpoints
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_scrape
+      - action: replace
+        regex: (https?)
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_scheme
+        target_label: __scheme__
+      - action: replace
+        regex: (.+)
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_path
+        target_label: __metrics_path__
+      - action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        source_labels:
+        - __address__
+        - __meta_kubernetes_service_annotation_prometheus_io_port
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_service_name
+        target_label: kubernetes_name
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: kubernetes_node
+    - job_name: kubernetes-service-endpoints-slow
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow
+      - action: replace
+        regex: (https?)
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_scheme
+        target_label: __scheme__
+      - action: replace
+        regex: (.+)
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_path
+        target_label: __metrics_path__
+      - action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        source_labels:
+        - __address__
+        - __meta_kubernetes_service_annotation_prometheus_io_port
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_service_name
+        target_label: kubernetes_name
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: kubernetes_node
+      scrape_interval: 5m
+      scrape_timeout: 30s
+    - honor_labels: true
+      job_name: prometheus-pushgateway
+      kubernetes_sd_configs:
+      - role: service
+      relabel_configs:
+      - action: keep
+        regex: pushgateway
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_probe
+    - job_name: kubernetes-services
+      kubernetes_sd_configs:
+      - role: service
+      metrics_path: /probe
+      params:
+        module:
+        - http_2xx
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_service_annotation_prometheus_io_probe
+      - source_labels:
+        - __address__
+        target_label: __param_target
+      - replacement: blackbox
+        target_label: __address__
+      - source_labels:
+        - __param_target
+        target_label: instance
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - source_labels:
+        - __meta_kubernetes_service_name
+        target_label: kubernetes_name
+    - job_name: kubernetes-pods
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+      - action: replace
+        regex: (.+)
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_path
+        target_label: __metrics_path__
+      - action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        source_labels:
+        - __address__
+        - __meta_kubernetes_pod_annotation_prometheus_io_port
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: kubernetes_pod_name
+    - job_name: kubernetes-pods-slow
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - action: keep
+        regex: true
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow
+      - action: replace
+        regex: (.+)
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_path
+        target_label: __metrics_path__
+      - action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        source_labels:
+        - __address__
+        - __meta_kubernetes_pod_annotation_prometheus_io_port
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: kubernetes_namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: kubernetes_pod_name
+      scrape_interval: 5m
+      scrape_timeout: 30s
+  recording_rules.yml: |
+    {}
+  rules: |
+    {}
+---
+# Source: timescale-observability/charts/prometheus/templates/server-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    component: "server"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "8Gi"
+---
+# Source: timescale-observability/charts/grafana/templates/clusterrole.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+  name: timescale-observability-grafana-clusterrole
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "watch", "list"]
+---
+# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: kube-state-metrics
+    helm.sh/chart: kube-state-metrics-2.7.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: timescale-observability
+  name: timescale-observability-kube-state-metrics
+rules:
+
+- apiGroups: ["certificates.k8s.io"]
+  resources:
+  - certificatesigningrequests
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - configmaps
+  verbs: ["list", "watch"]
+
+- apiGroups: ["batch"]
+  resources:
+  - cronjobs
+  verbs: ["list", "watch"]
+
+- apiGroups: ["extensions", "apps"]
+  resources:
+  - daemonsets
+  verbs: ["list", "watch"]
+
+- apiGroups: ["extensions", "apps"]
+  resources:
+  - deployments
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - endpoints
+  verbs: ["list", "watch"]
+
+- apiGroups: ["autoscaling"]
+  resources:
+  - horizontalpodautoscalers
+  verbs: ["list", "watch"]
+
+- apiGroups: ["extensions", "networking.k8s.io"]
+  resources:
+  - ingresses
+  verbs: ["list", "watch"]
+
+- apiGroups: ["batch"]
+  resources:
+  - jobs
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - limitranges
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - namespaces
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - nodes
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - persistentvolumeclaims
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - persistentvolumes
+  verbs: ["list", "watch"]
+
+- apiGroups: ["policy"]
+  resources:
+    - poddisruptionbudgets
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - pods
+  verbs: ["list", "watch"]
+
+- apiGroups: ["extensions", "apps"]
+  resources:
+  - replicasets
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - replicationcontrollers
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - resourcequotas
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - secrets
+  verbs: ["list", "watch"]
+
+- apiGroups: [""]
+  resources:
+  - services
+  verbs: ["list", "watch"]
+
+- apiGroups: ["apps"]
+  resources:
+  - statefulsets
+  verbs: ["list", "watch"]
+
+- apiGroups: ["storage.k8s.io"]
+  resources:
+    - storageclasses
+  verbs: ["list", "watch"]
+---
+# Source: timescale-observability/charts/prometheus/templates/server-clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    component: "server"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-server
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+      - ingresses
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "extensions"
+    resources:
+      - ingresses/status
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
+---
+# Source: timescale-observability/charts/grafana/templates/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: timescale-observability-grafana-clusterrolebinding
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: timescale-observability-grafana
+    namespace: timescale-observability
+roleRef:
+  kind: ClusterRole
+  name: timescale-observability-grafana-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: kube-state-metrics
+    helm.sh/chart: kube-state-metrics-2.7.2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: timescale-observability
+  name: timescale-observability-kube-state-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: timescale-observability-kube-state-metrics
+subjects:
+- kind: ServiceAccount
+  name: timescale-observability-kube-state-metrics
+  namespace: timescale-observability
+---
+# Source: timescale-observability/charts/prometheus/templates/server-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    component: "server"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-server
+subjects:
+  - kind: ServiceAccount
+    name: timescale-observability-prometheus-server
+    namespace: timescale-observability
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: timescale-observability-prometheus-server
+---
+# Source: timescale-observability/charts/grafana/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:      ['extensions']
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  [timescale-observability-grafana]
+---
+# Source: timescale-observability/charts/grafana/templates/tests/test-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: timescale-observability-grafana-test
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:      ['policy']
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  [timescale-observability-grafana-test]
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/role-timescaledb.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: timescale-observability-timescaledb
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  # delete is required only for 'patronictl remove'
+  - delete
+- apiGroups: [""]
+  resources: ["services"]
+  verbs:
+  - create
+- apiGroups: [""]
+  resources:
+  - endpoints
+  - endpoints/restricted
+  verbs:
+  - create
+  - get
+  - patch
+  - update
+  # the following three privileges are necessary only when using endpoints
+  - list
+  - watch
+  # delete is required only for for 'patronictl remove'
+  - delete
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+# Source: timescale-observability/charts/grafana/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: timescale-observability-grafana
+subjects:
+- kind: ServiceAccount
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+---
+# Source: timescale-observability/charts/grafana/templates/tests/test-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: timescale-observability-grafana-test
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: timescale-observability-grafana-test
+subjects:
+- kind: ServiceAccount
+  name: timescale-observability-grafana-test
+  namespace: timescale-observability
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/rolebinding-timescaledb.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: timescale-observability-timescaledb
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+subjects:
+  - kind: ServiceAccount
+    name: timescale-observability-timescaledb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: timescale-observability-timescaledb
+---
+# Source: timescale-observability/charts/grafana/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: service
+      port: 80
+      protocol: TCP
+      targetPort: 3000
+
+  selector:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+---
+# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescale-observability-kube-state-metrics
+  namespace: timescale-observability
+  labels:
+    app.kubernetes.io/name: kube-state-metrics
+    helm.sh/chart: "kube-state-metrics-2.7.2"
+    app.kubernetes.io/instance: "timescale-observability"
+    app.kubernetes.io/managed-by: "Helm"
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  type: "ClusterIP"
+  ports:
+  - name: "http"
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: kube-state-metrics
+    app.kubernetes.io/instance: timescale-observability
+---
+# Source: timescale-observability/charts/prometheus/templates/node-exporter-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+  labels:
+    component: "node-exporter"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-node-exporter
+spec:
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: 9100
+      protocol: TCP
+      targetPort: 9100
+  selector:
+    component: "node-exporter"
+    app: prometheus
+    release: timescale-observability
+  type: "ClusterIP"
+---
+# Source: timescale-observability/charts/prometheus/templates/server-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: "server"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-server
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    component: "server"
+    app: prometheus
+    release: timescale-observability
+  sessionAffinity: None
+  type: "ClusterIP"
+---
+# Source: timescale-observability/charts/timescale-prometheus/templates/svc-connector.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescale-observability-timescale-prometheus
+  labels:
+    app: timescale-observability-timescale-prometheus
+    chart: timescale-prometheus-0.1.0-alpha.2
+    release: timescale-observability
+    heritage: Helm
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
+spec:
+  selector:
+    app: timescale-observability-timescale-prometheus
+  type: ClusterIP
+  ports:
+  - name: connector-port
+    port: 9201
+    protocol: TCP
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/svc-timescaledb-config.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescale-observability-config
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+spec:
+  selector:
+    app: timescale-observability-timescaledb
+    cluster-name: timescale-observability
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: patroni
+    port: 8008
+    protocol: TCP
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/svc-timescaledb-replica.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescale-observability-replica
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+    role: replica
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
+spec:
+  selector:
+    app: timescale-observability-timescaledb
+    cluster-name: timescale-observability
+    role: replica
+  type: ClusterIP
+  ports:
+  - name: postgresql
+    # This always defaults to 5432, even if `!replicaLoadBalancer.enabled`.
+    port: 5432
+    protocol: TCP
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/svc-timescaledb.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescale-observability
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+    role: master
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
+spec:
+  type: ClusterIP
+  ports:
+  - name: postgresql
+    # This always defaults to 5432, even if `!loadBalancer.enabled`.
+    port: 5432
+    targetPort: postgresql
+    protocol: TCP
+---
+# Source: timescale-observability/charts/prometheus/templates/node-exporter-daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    component: "node-exporter"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-node-exporter
+spec:
+  selector:
+    matchLabels:
+      component: "node-exporter"
+      app: prometheus
+      release: timescale-observability
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        component: "node-exporter"
+        app: prometheus
+        release: timescale-observability
+        chart: prometheus-11.0.4
+        heritage: Helm
+    spec:
+      serviceAccountName: timescale-observability-prometheus-node-exporter
+      containers:
+        - name: prometheus-node-exporter
+          image: "prom/node-exporter:v0.18.1"
+          imagePullPolicy: "IfNotPresent"
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+          ports:
+            - name: metrics
+              containerPort: 9100
+              hostPort: 9100
+          resources:
+            {}
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly:  true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+      hostNetwork: true
+      hostPID: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+---
+# Source: timescale-observability/charts/grafana/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timescale-observability-grafana
+  namespace: timescale-observability
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+      app.kubernetes.io/instance: timescale-observability
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/instance: timescale-observability
+      annotations:
+        checksum/config: 68af9881eababfb092611e406b782454ae462e03ed8944b5c636aca1e35807ce
+        checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+        checksum/sc-dashboard-provider-config: 0f05e6baf05e085e899a288503eca06a40e2f9093d043a29ce5856a7cdbc291d
+        checksum/secret: ca0a4b46f7a6fe52e77fc2f59d27d28b648dc4b526d9bf5c65fbf035ae76c646
+    spec:
+      
+      serviceAccountName: timescale-observability-grafana
+      securityContext:
+        fsGroup: 472
+        runAsUser: 472
+      initContainers:
+        - name: grafana-sc-datasources
+          image: "kiwigrid/k8s-sidecar:0.1.99"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: METHOD
+              value: LIST
+            - name: LABEL
+              value: "grafana_datasource"
+            - name: FOLDER
+              value: "/etc/grafana/provisioning/datasources"
+            - name: RESOURCE
+              value: "both"
+          resources:
+            {}
+          volumeMounts:
+            - name: sc-datasources-volume
+              mountPath: "/etc/grafana/provisioning/datasources"
+      containers:
+        - name: grafana-sc-dashboard
+          image: "kiwigrid/k8s-sidecar:0.1.99"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: METHOD
+              value: 
+            - name: LABEL
+              value: "grafana_dashboard"
+            - name: FOLDER
+              value: "/tmp/dashboards"
+            - name: RESOURCE
+              value: "both"
+          resources:
+            {}
+          volumeMounts:
+            - name: sc-dashboard-volume
+              mountPath: "/tmp/dashboards"
+        - name: grafana
+          image: "grafana/grafana:6.7.1"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/grafana/grafana.ini"
+              subPath: grafana.ini
+            - name: storage
+              mountPath: "/var/lib/grafana"
+            - name: sc-dashboard-volume
+              mountPath: "/tmp/dashboards"
+      
+            - name: sc-dashboard-provider
+              mountPath: "/etc/grafana/provisioning/dashboards/sc-dashboardproviders.yaml"
+              subPath: provider.yaml
+            - name: sc-datasources-volume
+              mountPath: "/etc/grafana/provisioning/datasources"
+          ports:
+            - name: service
+              containerPort: 80
+              protocol: TCP
+            - name: grafana
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: timescale-observability-grafana
+                  key: admin-user
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: timescale-observability-grafana
+                  key: admin-password
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+          resources:
+            {}
+      volumes:
+        - name: config
+          configMap:
+            name: timescale-observability-grafana
+        - name: storage
+          emptyDir: {}
+        - name: sc-dashboard-volume
+          emptyDir: {}
+        - name: sc-dashboard-provider
+          configMap:
+            name: timescale-observability-grafana-config-dashboards
+        - name: sc-datasources-volume
+          emptyDir: {}
+---
+# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timescale-observability-kube-state-metrics
+  namespace: timescale-observability
+  labels:
+    app.kubernetes.io/name: kube-state-metrics
+    helm.sh/chart: "kube-state-metrics-2.7.2"
+    app.kubernetes.io/instance: "timescale-observability"
+    app.kubernetes.io/managed-by: "Helm"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kube-state-metrics
+        app.kubernetes.io/instance: "timescale-observability"
+    spec:
+      hostNetwork: false
+      serviceAccountName: timescale-observability-kube-state-metrics
+      securityContext:
+        fsGroup: 65534
+        runAsUser: 65534
+      containers:
+      - name: kube-state-metrics
+        args:
+
+        - --collectors=certificatesigningrequests
+
+
+        - --collectors=configmaps
+
+
+        - --collectors=cronjobs
+
+
+        - --collectors=daemonsets
+
+
+        - --collectors=deployments
+
+
+        - --collectors=endpoints
+
+
+        - --collectors=horizontalpodautoscalers
+
+
+        - --collectors=ingresses
+
+
+        - --collectors=jobs
+
+
+        - --collectors=limitranges
+
+
+
+        - --collectors=namespaces
+
+
+
+        - --collectors=nodes
+
+
+        - --collectors=persistentvolumeclaims
+
+
+        - --collectors=persistentvolumes
+
+
+        - --collectors=poddisruptionbudgets
+
+
+        - --collectors=pods
+
+
+        - --collectors=replicasets
+
+
+        - --collectors=replicationcontrollers
+
+
+        - --collectors=resourcequotas
+
+
+        - --collectors=secrets
+
+
+        - --collectors=services
+
+
+        - --collectors=statefulsets
+
+
+        - --collectors=storageclasses
+
+
+
+
+
+
+        imagePullPolicy: IfNotPresent
+        image: "quay.io/coreos/kube-state-metrics:v1.9.5"
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+---
+# Source: timescale-observability/charts/prometheus/templates/server-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: "server"
+    app: prometheus
+    release: timescale-observability
+    chart: prometheus-11.0.4
+    heritage: Helm
+  name: timescale-observability-prometheus-server
+spec:
+  selector:
+    matchLabels:
+      component: "server"
+      app: prometheus
+      release: timescale-observability
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: "server"
+        app: prometheus
+        release: timescale-observability
+        chart: prometheus-11.0.4
+        heritage: Helm
+    spec:
+      serviceAccountName: timescale-observability-prometheus-server
+      containers:
+        - name: prometheus-server-configmap-reload
+          image: "jimmidyson/configmap-reload:v0.3.0"
+          imagePullPolicy: "IfNotPresent"
+          args:
+            - --volume-dir=/etc/config
+            - --webhook-url=http://127.0.0.1:9090/-/reload
+          resources:
+            {}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+              readOnly: true
+
+        - name: prometheus-server
+          image: "prom/prometheus:v2.16.0"
+          imagePullPolicy: "IfNotPresent"
+          args:
+            - --storage.tsdb.retention.time=15d
+            - --config.file=/etc/config/prometheus.yml
+            - --storage.tsdb.path=/data
+            - --web.console.libraries=/etc/prometheus/console_libraries
+            - --web.console.templates=/etc/prometheus/consoles
+            - --web.enable-lifecycle
+          ports:
+            - containerPort: 9090
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+          resources:
+            {}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+            - name: storage-volume
+              mountPath: /data
+              subPath: ""
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+      terminationGracePeriodSeconds: 300
+      volumes:
+        - name: config-volume
+          configMap:
+            name: timescale-observability-prometheus-config
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: timescale-observability-prometheus-server
+---
+# Source: timescale-observability/charts/timescale-prometheus/templates/deployment-connector.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timescale-observability-timescale-prometheus
+  labels:
+    app: timescale-observability-timescale-prometheus
+    chart: timescale-prometheus-0.1.0-alpha.2
+    release: timescale-observability
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: timescale-observability-timescale-prometheus
+  template:
+    metadata:
+      labels:
+        app: timescale-observability-timescale-prometheus
+      
+      annotations: 
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9201"
+        prometheus.io/scrape: "true"
+      
+    spec:
+      containers:
+        - image: timescale/timescale-prometheus:0.1.0-alpha.2
+          imagePullPolicy: IfNotPresent
+          name: timescale-prometheus-connector
+          resources:
+            requests:
+              cpu: 1
+              memory: 2Gi
+          ports:
+            - containerPort: 9201
+              name: connector-port
+          env:
+            - name: TS_PROM_DB_PORT
+              value: "5432"
+            - name: TS_PROM_DB_USER
+              value: postgres
+            - name: TS_PROM_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: timescale-observability-timescaledb-passwords
+                  key: postgres
+            - name: TS_PROM_DB_HOST
+              value: timescale-observability.timescale-observability.svc.cluster.local
+            - name: TS_PROM_DB_NAME
+              value: postgres
+            - name: TS_PROM_DB_SSL_MODE
+              value: require
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/statefulset-timescaledb.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: timescale-observability-timescaledb
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+spec:
+  serviceName: timescale-observability-timescaledb
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: timescale-observability-timescaledb
+      release: timescale-observability
+  template:
+    metadata:
+      name: timescale-observability-timescaledb
+      labels:
+        app: timescale-observability-timescaledb
+        release: timescale-observability
+        cluster-name: timescale-observability
+    spec:
+      serviceAccountName: timescale-observability-timescaledb
+      securityContext:
+        # The postgres user inside the TimescaleDB image has uid=1000.
+        # This configuration ensures the permissions of the mounts are suitable
+        fsGroup: 1000
+      initContainers:
+      # Issuing the final checkpoints on a busy database may take considerable time.
+      # Unfinished checkpoints will require more time during startup, so the tradeoff
+      # here is time spent in shutdown/time spent in startup.
+      # We choose shutdown here, especially as during the largest part of the shutdown
+      # we can still serve clients.
+      terminationGracePeriodSeconds: 600
+      containers:
+      - name: timescaledb
+        image: "timescaledev/timescaledb-ha:pg12-ts1.7"
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - psql
+              - -X
+              - --file
+              - "/etc/timescaledb/scripts/lifecycle_preStop.psql"
+        # When reusing an already existing volume it sometimes happens that the permissions
+        # of the PGDATA and/or wal directory are incorrect. To guard against this, we always correctly
+        # set the permissons of these directories before we hand over to Patroni.
+        # We also create all the tablespaces that are defined, to ensure a smooth restore/recovery on a
+        # pristine set of Volumes.
+        # As PostgreSQL requires to have full control over the permissions of the tablespace directories,
+        # we create a subdirectory "data" in every tablespace mountpoint. The full path of every tablespace
+        # therefore always ends on "/data".
+        # By creating a .pgpass file in the $HOME directory, we expose the superuser password
+        # to processes that may not have it in their environment (like the preStop lifecycle hook).
+        # To ensure Patroni will not mingle with this file, we give Patroni its own pgpass file.
+        # As these files are in the $HOME directory, they are only available to *this* container,
+        # and they are ephemeral.
+        command:
+          - /bin/bash
+          - "-c"
+          - |
+            
+            install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/data" "/var/lib/postgresql/wal/pg_wal" || exit 1
+            TABLESPACES=""
+            for tablespace in ; do
+              install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/tablespaces/${tablespace}/data"
+            done
+
+            # Environment variables can be read by regular users of PostgreSQL. Especially in a Kubernetes
+            # context it is likely that some secrets are part of those variables.
+            # To ensure we expose as little as possible to the underlying PostgreSQL instance, we have a list
+            # of allowed environment variable patterns to retain.
+            #
+            # We need the KUBERNETES_ environment variables for the native Kubernetes support of Patroni to work.
+            #
+            # NB: Patroni will remove all PATRONI_.* environment variables before starting PostgreSQL
+
+            # We store the current environment, as initscripts, callbacks, archive_commands etc. may require
+            # to have the environment available to them
+            set -o posix
+            export -p > "${HOME}/.pod_environment"
+            export -p | grep PGBACKREST > "${HOME}/.pgbackrest_environment"
+
+            for UNKNOWNVAR in $(env | awk -F '=' '!/^(PATRONI_.*|HOME|PGDATA|PGHOST|LC_.*|LANG|PATH|KUBERNETES_SERVICE_.*)=/ {print $1}')
+            do
+                unset "${UNKNOWNVAR}"
+            done
+
+            echo "*:*:*:postgres:${PATRONI_SUPERUSER_PASSWORD}" >> ${HOME}/.pgpass
+            chmod 0600 ${HOME}/.pgpass
+
+            export PATRONI_POSTGRESQL_PGPASS="${HOME}/.pgpass.patroni"
+
+            exec patroni /etc/timescaledb/patroni.yaml
+        env:
+        # We use mixed case environment variables for Patroni User management,
+        # as the variable themselves are documented to be PATRONI_<username>_OPTIONS.
+        # Where possible, we want to have lowercase usernames in PostgreSQL as more complex postgres usernames
+        # requiring quoting to be done in certain contexts, which many tools do not do correctly, or even at all.
+        # https://patroni.readthedocs.io/en/latest/ENVIRONMENT.html#bootstrap-configuration
+        - name: PATRONI_admin_OPTIONS
+          value: createrole,createdb
+        - name: PATRONI_admin_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: timescale-observability-timescaledb-passwords
+              key: "admin"
+        - name: PATRONI_postgres_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: timescale-observability-timescaledb-passwords
+              key: "postgres"
+        - name: PATRONI_standby_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: timescale-observability-timescaledb-passwords
+              key: "standby"
+        - name: PATRONI_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: timescale-observability-timescaledb-passwords
+              key: standby
+        - name: PATRONI_SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: timescale-observability-timescaledb-passwords
+              key: postgres
+        - name: PATRONI_REPLICATION_USERNAME
+          value: standby
+        # To specify the PostgreSQL and Rest API connect addresses we need
+        # the PATRONI_KUBERNETES_POD_IP to be available as a bash variable, so we can compose an
+        # IP:PORT address later on
+        - name: PATRONI_KUBERNETES_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: PATRONI_POSTGRESQL_CONNECT_ADDRESS
+          value: "$(PATRONI_KUBERNETES_POD_IP):5432"
+        - name: PATRONI_RESTAPI_CONNECT_ADDRESS
+          value: "$(PATRONI_KUBERNETES_POD_IP):8008"
+        - name: PATRONI_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: PATRONI_POSTGRESQL_DATA_DIR
+          value: "/var/lib/postgresql/data"
+        - name: PATRONI_KUBERNETES_NAMESPACE
+          value: timescale-observability
+        - name: PATRONI_KUBERNETES_LABELS
+          value: "{app: timescale-observability-timescaledb, cluster-name: timescale-observability, release: timescale-observability}"
+        - name: PATRONI_SCOPE
+          value: timescale-observability
+        - name: PGBACKREST_CONFIG
+          value: /etc/pgbackrest/pgbackrest.conf
+        # PGDATA and PGHOST are not required to let Patroni/PostgreSQL run correctly,
+        # but for interactive sessions, callbacks and PostgreSQL tools they should be correct.
+        - name: PGDATA
+          value: "$(PATRONI_POSTGRESQL_DATA_DIR)"
+        - name: PGHOST
+          value: "/var/run/postgresql"
+          # pgBackRest is also called using the archive_command if the backup is enabled.
+          # this script will also need access to the environment variables specified for
+          # the backup. This can be removed once we do not directly invoke pgBackRest
+          # from inside the TimescaleDB container anymore
+        ports:
+        - containerPort: 8008
+        - containerPort: 5432
+        readinessProbe:
+          exec:
+            command:
+              - pg_isready
+              - -h
+              - /var/run/postgresql
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        volumeMounts:
+        - name: storage-volume
+          mountPath: "/var/lib/postgresql"
+          subPath: ""
+        - name: wal-volume
+          mountPath: "/var/lib/postgresql/wal"
+          subPath: ""
+        - mountPath: /etc/timescaledb/patroni.yaml
+          subPath: patroni.yaml
+          name: patroni-config
+          readOnly: true
+        - mountPath: /etc/timescaledb/scripts
+          name: timescaledb-scripts
+          readOnly: true
+        - mountPath: /etc/certificate
+          name: certificate
+          readOnly: true
+        - name: socket-directory
+          mountPath: /var/run/postgresql
+        
+        resources:
+          {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                  app: timescale-observability-timescaledb
+                  release: "timescale-observability"
+                  cluster-name: timescale-observability
+          - weight: 50
+            podAffinityTerm:
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+              labelSelector:
+                matchLabels:
+                  app: timescale-observability-timescaledb
+                  release: "timescale-observability"
+                  cluster-name: timescale-observability
+        
+      volumes:
+      - name: socket-directory
+        emptyDir: {}
+      - name: patroni-config
+        configMap:
+          name: timescale-observability-timescaledb-patroni
+      - name: timescaledb-scripts
+        configMap:
+          name: timescale-observability-timescaledb-scripts
+          defaultMode: 488 # 0750 permissions
+      
+      - name: certificate
+        secret:
+          secretName: timescale-observability-timescaledb-certificate
+          defaultMode: 416 # 0640 permissions
+  volumeClaimTemplates:
+    - metadata:
+        name: storage-volume
+        annotations:
+        labels:
+          app: timescale-observability-timescaledb
+          release: timescale-observability
+          heritage: Helm
+          cluster-name: timescale-observability
+          purpose: data-directory
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: "2Gi"
+    - metadata:
+        name: wal-volume
+        annotations:
+        labels:
+          app: timescale-observability-timescaledb
+          release: timescale-observability
+          heritage: Helm
+          cluster-name: timescale-observability
+          purpose: wal-directory
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: "1Gi"
+---
+# Source: timescale-observability/charts/timescale-prometheus/templates/cronjob-dropchunk.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: timescale-observability-timescale-prometheus-drop-chunk
+  labels:
+    app: timescale-observability-timescale-prometheus
+    chart: timescale-prometheus-0.1.0-alpha.2
+    release: timescale-observability
+    heritage: Helm
+spec:
+  schedule: 0,30 * * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: timescale-prometheus-drop-chunk
+            image: postgres:12-alpine
+            args:
+            - psql
+            - -c
+            - CALL prom.drop_chunks();
+            env:
+              - name: PGPORT
+                value: "5432"
+              - name: PGUSER
+                value: postgres
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: timescale-observability-timescaledb-passwords
+                    key: postgres
+              - name: PGHOST
+                value: timescale-observability.timescale-observability.svc.cluster.local
+              - name:  PGDATABASE
+                value: postgres
+          restartPolicy: OnFailure
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/pgbackrest.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/sec-passwords.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/sec-pgbackrest.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/svc-prometheus.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+#
+# This service is only created if Prometheus is enabled.
+---
+# Source: timescale-observability/charts/grafana/templates/tests/test.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: timescale-observability-grafana-test
+  labels:
+    helm.sh/chart: grafana-5.0.11
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/version: "6.7.1"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test-success
+  namespace: timescale-observability
+spec:
+  serviceAccountName: timescale-observability-grafana-test
+  containers:
+    - name: timescale-observability-test
+      image: "bats/bats:v1.1.0"
+      imagePullPolicy: "IfNotPresent"
+      command: ["/opt/bats/bin/bats", "-t", "/tests/run.sh"]
+      volumeMounts:
+        - mountPath: /tests
+          name: tests
+          readOnly: true
+  volumes:
+  - name: tests
+    configMap:
+      name: timescale-observability-grafana-test
+  restartPolicy: Never
+---
+# Source: timescale-observability/charts/timescaledb-single/templates/job-update-patroni.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "timescale-observability-patroni-90"
+  labels:
+    app: timescale-observability-timescaledb
+    chart: timescaledb-single-0.5.5
+    release: timescale-observability
+    heritage: Helm
+    cluster-name: timescale-observability
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  activeDeadlineSeconds: 60
+  template:
+    metadata:
+      labels:
+        app: timescale-observability-timescaledb
+        chart: timescaledb-single-0.5.5
+        release: timescale-observability
+        heritage: Helm
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: timescale-observability-timescaledb-patch-patroni-config
+        image: curlimages/curl
+        command: ["/usr/bin/curl"]
+        args:
+        - --connect-timeout
+        - '10'
+        - --include
+        - --silent
+        - --show-error
+        - --fail
+        - --request
+        - PATCH
+        - --data
+        - "{\"loop_wait\":10,\"maximum_lag_on_failover\":33554432,\"postgresql\":{\"parameters\":{\"archive_command\":\"/etc/timescaledb/scripts/pgbackrest_archive.sh %p\",\"archive_mode\":\"on\",\"archive_timeout\":\"1800s\",\"autovacuum_analyze_scale_factor\":0.02,\"autovacuum_max_workers\":10,\"autovacuum_vacuum_scale_factor\":0.05,\"hot_standby\":\"on\",\"log_autovacuum_min_duration\":0,\"log_checkpoints\":\"on\",\"log_connections\":\"on\",\"log_disconnections\":\"on\",\"log_line_prefix\":\"%t [%p]: [%c-%l] %u@%d,app=%a [%e] \",\"log_lock_waits\":\"on\",\"log_min_duration_statement\":\"1s\",\"log_statement\":\"ddl\",\"max_connections\":100,\"max_prepared_transactions\":150,\"shared_preload_libraries\":\"timescaledb,pg_stat_statements\",\"ssl\":\"on\",\"ssl_cert_file\":\"/etc/certificate/tls.crt\",\"ssl_key_file\":\"/etc/certificate/tls.key\",\"tcp_keepalives_idle\":900,\"tcp_keepalives_interval\":100,\"temp_file_limit\":\"1GB\",\"timescaledb.passfile\":\"../.pgpass\",\"unix_socket_directories\":\"/var/run/postgresql\",\"unix_socket_permissions\":\"0750\",\"wal_level\":\"hot_standby\",\"wal_log_hints\":\"on\"},\"use_pg_rewind\":true,\"use_slots\":true},\"retry_timeout\":10,\"ttl\":30}"
+        - "http://timescale-observability-config:8008/config"
