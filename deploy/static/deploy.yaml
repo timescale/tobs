@@ -15,7 +15,7 @@ metadata:
   name: ts-observability-grafana
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -69,7 +69,7 @@ metadata:
   name: ts-observability-grafana-test
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -100,7 +100,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -113,7 +113,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -143,7 +143,7 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-node-exporter
   annotations:
@@ -157,7 +157,7 @@ metadata:
     component: "server"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-server
   annotations:
@@ -183,7 +183,7 @@ metadata:
   name: ts-observability-grafana
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -191,7 +191,7 @@ metadata:
 type: Opaque
 data:
   admin-user: "YWRtaW4="
-  admin-password: "NWFlc0VMVUhTYkE0dDlTOTdXOU44M01kNUc1SUU2bXJqeE5QSFFZVw=="
+  admin-password: "MXJYNU9TOWhMWnF2b2hyOUVUVjI3WjFSVEowU09Jd2s5UTBSa3RKNg=="
   ldap-toml: ""
 ---
 # Source: timescale-observability/charts/timescaledb-single/templates/sec-certificate.yaml
@@ -209,8 +209,8 @@ metadata:
     heritage: Helm
     cluster-name: ts-observability
 data:
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBekNDQWV1Z0F3SUJBZ0lSQUo4RnlRS0g0NlNIUkwyaDZSSVl0cWN3RFFZSktvWklodmNOQVFFTEJRQXcKR3pFWk1CY0dBMVVFQXhNUWRITXRiMkp6WlhKMllXSnBiR2wwZVRBZUZ3MHlNREEyTURNeE5UUTBORGRhRncweQpOVEEyTURNeE5UUTBORGRhTUJzeEdUQVhCZ05WQkFNVEVIUnpMVzlpYzJWeWRtRmlhV3hwZEhrd2dnRWlNQTBHCkNTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDNUk4aUg5Q2hXTUQ0TThXMFdpVlNJdWxWcXBGSFAKTDdnWmwyTDdod0g1NWNSSENiTjY2MGVGbHBPQnhlYmQxbWVLcGJFMzZyeVp6UGJkZ1hLbzlSb1ZBb1pFL2VJNAp6S1UyUnRqYjA4RFBHSXJlZ0FrZlJtdDV4ajZycTRhM01RUFBtUkd2ZjZSdTYyZzN4anpMQmRSVDNwcUxoQVZtCmVEZFJickxJOFVvWUNJNnFsT2ZPYmNOQ3NXVTBRYWhKKzVlUG5PQmV3SWI4TVZBblZtUHRYU0MwV1pLNVUzYVoKSjFYdWpENFE2ZEo1VERNN1lrdkU2VDNOdURhK05nVE91OFVDa3hlaEVQU2UrZjVPOXZ6bi8vK09MeFpWMklZRwo0RG01V1Q3Y2JmaFExNVE0RzEyaWdDYmlScVU1Q3Q2TEhYcGJRTnVlckdUb1NGdVIrVy84ak9nWkFnTUJBQUdqClFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUgKQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQWt1aEJnbjV2MlZsTgpvSitGdXpDNWs4R1NmSFdMNCtFS3hyR1V1WEdFT2NWbGY3aUlvNnJWRVVaTHArSWhNTVFCZ2RqMDY4UmJ6NitXClVTdEMzNVBMb2ovejZKSnBaMzd3aVVPTVZIMHcyVXlWcXdzd2trQi9OM2dvbWMxV3VJSWRCM2hsWVcyaXBhU0YKSFZyUlVSckRHR2lTdG01T1AyNVZQZVZmaUpodnBpdHlIeVhBRXg2TnBVZnIyb1c3bkM3V0JIdjJ3S1ZHK3E4NApTY3VHcnlVaHBjaWJZUE5mS2kyMWQwWmdUdlNVTFRlY3hCSXVicFpMSFBSK050VVQ0N05IYk1FQ0tNWlgvT2dRCkRqK0NqV0ljY0RhZ21oSXdwME9ucUZtVVBScjZLMkg3V0lySnByck12Y0dWZ2lrMlpQVHpsU1Vhc3RpQWd2b0EKRDg3ZXRFcHZaQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBdVNQSWgvUW9WakErRFBGdEZvbFVpTHBWYXFSUnp5KzRHWmRpKzRjQitlWEVSd216CmV1dEhoWmFUZ2NYbTNkWm5pcVd4TitxOG1jejIzWUZ5cVBVYUZRS0dSUDNpT015bE5rYlkyOVBBenhpSzNvQUoKSDBacmVjWStxNnVHdHpFRHo1a1JyMytrYnV0b044WTh5d1hVVTk2YWk0UUZabmczVVc2eXlQRktHQWlPcXBUbgp6bTNEUXJGbE5FR29TZnVYajV6Z1hzQ0cvREZRSjFaajdWMGd0Rm1TdVZOMm1TZFY3b3crRU9uU2VVd3pPMkpMCnhPazl6YmcydmpZRXpydkZBcE1Yb1JEMG52bitUdmI4NS8vL2ppOFdWZGlHQnVBNXVWayszRzM0VU5lVU9CdGQKb29BbTRrYWxPUXJlaXgxNlcwRGJucXhrNkVoYmtmbHYvSXpvR1FJREFRQUJBb0lCQUJpRDJudldJcmsyN2lCOApuM3RLZC8wYTMxQ2RyWStIdkJMM2JzM3JsS0ZvZ1ZMK3Y5dFk2RUdTTExvVVlIdWpkbFp2bGtYWE9WNE1PK3djCnhmZ0ZiSXkzcHR2ZjJtSzNCbkZuZERPM21HSlQxNStheUpweGtxMnZTSUVtMTFIT2xiaVpoalA4N09NYkhOTzEKMWpyejdLZW1aRVJ4R04zMnNTeUJRZjlGcEJBR2FBcXd5WTlLTGtJL0JFa2pnNkV1Z1MzWDdaTFd4QWJUYVNJdwplRHhPQ2hCZU9hNi90dEZwY2FnUHZtS3NDRytnWmJqN2dJelJVWTY4d3VoRFFQM1pIV2E4TjJGdHVybFlUYmMyCkJNUGRBUTFiT3VBWkxCeVZZcDd6TUVaZTQ1T0V5aXdMVVpTZG41Y1lpeEFXcFl2b25sK0xOcGw0Qnd3Z25FaE8KQWk2YkFRRUNnWUVBODA0Q2poOXJLMTZ6MS93cmZ5OFVzNzF1VEkrcXIxVEtKemRPZ2RIUVg1SkQrUkh5T1N5Kwo1SmhyNHlLWGJPUk1CQ3VQQ2xEZnVCM0VMRk4rMFc1Ry9PS2dqZW5Jb2ZJWHpzSDdiZHAxNXhScU00VWRXdDBzCmNNY1N1YytRVVczOGg1VDlJS0YwZXZGSzFvSytJY2JHV3QwbFBYWnVyOURwRUs1VitZeGRHNmtDZ1lFQXdzelMKNDRFNzVUb0lrYU8xUXFHblJ3eGh6bTZjVmhvN3JhUFFsb0dOWkgzU0MwSTJpWERpWFIwMWxQbDE0Y2xlTUk0YgppMC9CbHlaTUkwallVbEd6L2gwdmlsRUF6NHZRTi9Gb2VSdkQ0MnlhazRvYlpCclpaQ28yZnFIZGF0OFJvaDQwCjU4QllxUWQxWnJ4aW94WHVvRWpJeHlSVUhMQzVCT056OUJieHJ2RUNnWUFBcjlLd0JnU3ViYWtDVGhMdFcvdXAKK2pucWUybFc3MTFXdVFBK3U1SGtBeXl2OGs0RnZVdVlwNWwrWGFXaHlBOHkzOUNhamRuajBpbXdtbGU4VFp4agpzRndWcW5oSGhNQnVjL3U2dHFnb2k5VTA2Z1pJTUdHa3U5c2dyU1pTSklaVzk2T3pTT0ZrUzNRVG9QRGFkWTR2CnlYb0diMlFtbU9kZmhhNTJjdC84YVFLQmdDanRNWTE4MUdHbm5LOUVqc3VOL1FBUFdPa3ZFZ2VCQVhMTXpRRWgKL052VkYzRW9HeDhyS1ZQWTFDNFZieS9keDcwNXpnMnAxd2x6a1dHRVozWjhGZTNZb2VsVWRYQWxkcnlhS3BIdgpSR3Vlb0tkSXg5SnpWYU1XdjFaQm1heGZhMnY5SHE1bUdmcUJSNmdyQWlvemJHd2VmcGhnU0kreWpWeTZrTjBDCmlRcHhBb0dBTi82Tk9NWW5NaW9NM2F5ZHdnNnlEc3pwQUdQK1hEMUVkYStBbzlnTmJLTndzRzY1ZndVdlBzR08KbE1tL1dzQXR5eE56UGdqRlovMXAwcW13Nmh0aHNtWGE1RlpoL1QrVy8yM2FFWUYwTlJMNnI3NCtCcHI1MmFSQwo0N2hGVUZRejBNNG1nbEFYM2NjTnpKYkQ5bGxpRlBJOTRGSlNBQkRjKzJJSnIwa0ZidzA9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBekNDQWV1Z0F3SUJBZ0lSQU90ZUxYd3M3MFMxZ1hOSlhBQjF1TmN3RFFZSktvWklodmNOQVFFTEJRQXcKR3pFWk1CY0dBMVVFQXhNUWRITXRiMkp6WlhKMllXSnBiR2wwZVRBZUZ3MHlNREEyTURNeE5UVXpOVEJhRncweQpOVEEyTURNeE5UVXpOVEJhTUJzeEdUQVhCZ05WQkFNVEVIUnpMVzlpYzJWeWRtRmlhV3hwZEhrd2dnRWlNQTBHCkNTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDek5FSk9mbmU3YXNDc0J3TFNBR09MMEw3dW9ZYzQKdEd0SFlwNGc0bkFuT3AxRFFaN3JaUWg2OGZiQVdPV2lQcmFxUmhoUlk1eUhuaVpwTkkrT3llNmoremwwUU00WAo0OTRoeG5GOGcyWUZtTjlVZCtGZ0hFZi82Mk1oSHkzb0RyT2dtQjFhNHdWWk1vMGltMkNxUnIyenhPeGZxcmpyCmkzaUYxMXpwRGFjK1Fmajh1VzhNWUhFUmM0SVNhNUg4SE13QTcyamJ1cElJaFdPTWgvREM4SitSZFEyN3BxOFEKd2R1cmgxRzRsb0JJRzd0L3M2ZDVIRnNEaFp5OVVYV2xia2tpMEhRV01aZWJxSUNEek9NY3VMUWlBenJaeWJkWgpudnQyeXdKZElqNDZ6eEs2clpxVi9XRmRieTgxWmhJNndMaW9tQlFWc3gzQnF1ZGFjTXdxUkRBSEFnTUJBQUdqClFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUgKQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQUxpdVFwZld4TmFYVwpLY21IUWZFSVJidnVxRkJ4Z3ZKUkorS0RHQWRwakpaQlhqeUZ0a3RxTHhoZ1Z2eEl2Y1JoR1l3Rm85SHQxYkZxCnFRMzZxMDUxOHpRWFJrdmdtY3RSejdNRjJGdHRqOG5sSHlkSE1zS0RPWm9TeFdiS2VBT0RXSFhNMEhpYXRabEYKMjFodkdWTXlUV3c4Y0ZRUHJMT2E1bGdHT2todmJwN3E2ZGtYSVFqYkc0NHpzdDcwTGdEbVdNSFlVd1dTTWdaRwp4dzgxYklRaDZaUityOENueVcyZ1RvTjN6WDJmNzNSYTh4Q3FhT3ozQkVPaXY1Wmxmb3l2RlNVQlNjcFNkMm1CCmhBaXEreVlBalhuRzZIbWFuc09hK05Dem5WdThzMzgyMy9NRkxzNGlMdGo2azczQkNPbEdUUWlDVzdNZVQzTzEKMzRVMWFYZThVdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBc3pSQ1RuNTN1MnJBckFjQzBnQmppOUMrN3FHSE9MUnJSMktlSU9Kd0p6cWRRMEdlCjYyVUlldkgyd0ZqbG9qNjJxa1lZVVdPY2g1NG1hVFNQanNudW8vczVkRURPRitQZUljWnhmSU5tQlpqZlZIZmgKWUJ4SC8rdGpJUjh0NkE2em9KZ2RXdU1GV1RLTklwdGdxa2E5czhUc1g2cTQ2NHQ0aGRkYzZRMm5Qa0g0L0xsdgpER0J4RVhPQ0VtdVIvQnpNQU85bzI3cVNDSVZqaklmd3d2Q2ZrWFVOdTZhdkVNSGJxNGRSdUphQVNCdTdmN09uCmVSeGJBNFdjdlZGMXBXNUpJdEIwRmpHWG02aUFnOHpqSExpMElnTTYyY20zV1o3N2Rzc0NYU0krT3M4U3VxMmEKbGYxaFhXOHZOV1lTT3NDNHFKZ1VGYk1kd2FyblduRE1La1F3QndJREFRQUJBb0lCQUVEbDdoVnJLNFZPRmRTMgovVWg4SjVEYzJpaWxpc2o0WGRtT1YySGxYMlIxajdwcHExbm9UdmZuWk1zbjVwR3BVSkc5ck5UYzFEVXhDd3dTCm91SzlNcFZrUjl4WUU4c0hGTXo2aHVMbTJ5MnZ2VUZqNE5UanFSZC9jWGp2UjdyQWlFRGlsYzd5WkY5M05UR1IKUDZLcTE4eWd4bEduREMwUloyWmhKaDZvZVNiTU5rYVdSY1NWeHNuY3RpWm5XMEhBcTBURUhuL2JiaGFadzBEVApMZVFiR0xqUFpNcVUvbTRnRGg0WFAxZmRZMlJYUHNLclN2VzYyeVFPTDhZUHhHdlNndW9DVkJSakk0em9vNDBvClJLejJpeTE5cVBYTG0wZEs3VHcwOHFxTklrQ0RWWGRHUlJSU3dSU2xodkJmbHFOSlppdWJWUHZNa2swaUxzdnQKUEcwMTR6RUNnWUVBNElLT0FTeWNyamhsbFZ1NFJEZk41U0wyNlYvYm5QY0VTckFsdXVlNklJN1J4UWhlaUtRKwpaNWlEK1dKLzRyWk1aWTZrdmpRcWtqRklNSlY5NUFIRlRXSy9wMkhjZ3lqMWxqa2hoU3N6cFYyZ0c3VCtncnRsClNWVmxHVk8yZXhpRXBOYTVVc0VBQVBLemRVMTBmZkdHeW0xd0xGdEdiV3A5UnM3S2EyRUIvcFVDZ1lFQXpGYnEKRlIycE1NNXlOdm03TS9SSlBTUXNpZUhOS1I5UDcyUnZyM2ZBMms1S2hJcmhCZUZ1U2NwdHZ4TGg0UUlGMWx6OApDaEhuOWFrV1JUYjBJMWdKNW43czBOdzA1UHo1NGk3QnNqdzJRSWpMaklXVlNOSmRISytmaFZXZDdsanFwZDFGCkJicEk3Z0RUNUV3RE1Xa0FpRDlUSVVWeExNQjlWb2VCOWNLeWVTc0NnWUVBazZsS2ZMczYwZHVGOUpZK3U1OTQKYkJ4ekNVdGl4Zm94ZUc0aVlxdkdYMk9QMUdlTXhaSkErU0gycXk5OXJUNzVRRkp4U0NoSFY1L1NPeUlYaXI4ZgpaYVp0SjBuV0h1M3htTHc2cjd1YVhFa1g1U0ZGdy9ZOHg5N0NmOFh2WDBiZzl3bkRHZ3FXVmdsS3Z2d1Nna000CnhDcjJmRFlNUENxdCtzUkhuaGhQbDRFQ2dZRUFoeDJGaFZicWxEbytiYm11SG9tT2tCNUdVUm44OWc4ZFpSZE4KZm9JNkJHQTJoL1BwSFdGVjh2Y21vR3pVN1ZyUUQxSEcyc1hDVXI5dTJXK2YrV3J5aVBZdWsyQzRuUjNtQWJpWApIY3NRdUpWN3VyeHQzUXcwdzQ0aGRpSUozeHZ1ZEtTZVNrNUdnUklOQ20xMHd3eENiTlVxbTlwMkhuaGRxSVRMCjIzelZWS2NDZ1lFQXNhTUpraHdoRkNQUFdyVCtBbTNLbHRLWHNieUJWWFRXT1BtRzBNN1hVdVhyK1JOMGJUVmsKbExVM0diTGpJaDMxYWJ5ZkRNZ3doOFJOZUx0MUhoUGJTZEI3Q0JFV1c3ZDh4Q1h4V2VyWW1BTUVuem1kU1dGZApBYkpqYW94US9rSDFabFA5Vkp2N2QxMkVmaEROREM0c1Bkc2IveVRxU3ZkTnJDVnFXSGVmTmtNPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
 ...
 ---
 # Source: timescale-observability/charts/timescaledb-single/templates/sec-passwords.yaml
@@ -291,7 +291,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -318,7 +318,7 @@ metadata:
   name: ts-observability-grafana
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -344,7 +344,7 @@ metadata:
   name: ts-observability-grafana-test
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -4642,7 +4642,7 @@ metadata:
     component: "server"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-server
 spec:
@@ -4657,7 +4657,7 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -4803,7 +4803,7 @@ metadata:
     component: "server"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-server
 rules:
@@ -4842,7 +4842,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: ts-observability-grafana-clusterrolebinding
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -4883,7 +4883,7 @@ metadata:
     component: "server"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-server
 subjects:
@@ -4902,7 +4902,7 @@ metadata:
   name: ts-observability-grafana
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -4920,7 +4920,7 @@ metadata:
   name: ts-observability-grafana-test
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -4989,7 +4989,7 @@ metadata:
   name: ts-observability-grafana
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -5010,7 +5010,7 @@ metadata:
   name: ts-observability-grafana-test
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -5051,7 +5051,7 @@ metadata:
   name: ts-observability-grafana
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -5102,7 +5102,7 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-node-exporter
 spec:
@@ -5126,7 +5126,7 @@ metadata:
     component: "server"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-server
 spec:
@@ -5149,7 +5149,7 @@ metadata:
   name: ts-observability-timescale-prometheus-connector
   labels:
     app: ts-observability-timescale-prometheus
-    chart: timescale-prometheus-0.1.0-alpha.3
+    chart: timescale-prometheus-0.1.0-alpha.3.1
     release: ts-observability
     heritage: Helm
   annotations:
@@ -5251,7 +5251,7 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-node-exporter
 spec:
@@ -5268,7 +5268,7 @@ spec:
         component: "node-exporter"
         app: prometheus
         release: ts-observability
-        chart: prometheus-11.0.4
+        chart: prometheus-11.1.5
         heritage: Helm
     spec:
       serviceAccountName: ts-observability-prometheus-node-exporter
@@ -5309,7 +5309,7 @@ metadata:
   name: ts-observability-grafana
   namespace: ts-observability
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -5328,15 +5328,16 @@ spec:
         app.kubernetes.io/name: grafana
         app.kubernetes.io/instance: ts-observability
       annotations:
-        checksum/config: 3a807eef2b183107523a74d487546dafe56707ed9453be1f09587fbadac0c331
+        checksum/config: eb6d27d942131bb459497000fab8403a79383789bddaa9b540871cc2132a832c
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/sc-dashboard-provider-config: 62efb32051300e7560493e4a94db249fafd48582e98200dfe2df73410540d69a
-        checksum/secret: 000a37c8f0ced80927f40778d6288dd66347ca51c9c2422530d6af7ed46d7bec
+        checksum/sc-dashboard-provider-config: 55569e387d481a4035ce77496fb57bd0d3c74c3fdd23e144988e0949d4007165
+        checksum/secret: dde032a0de8e3384d810378de88a0318e6d314d97357fd63c3fb8f9e14795e88
     spec:
       
       serviceAccountName: ts-observability-grafana
       securityContext:
         fsGroup: 472
+        runAsGroup: 472
         runAsUser: 472
       initContainers:
         - name: grafana-sc-datasources
@@ -5570,7 +5571,7 @@ metadata:
     component: "server"
     app: prometheus
     release: ts-observability
-    chart: prometheus-11.0.4
+    chart: prometheus-11.1.5
     heritage: Helm
   name: ts-observability-prometheus-server
 spec:
@@ -5586,7 +5587,7 @@ spec:
         component: "server"
         app: prometheus
         release: ts-observability
-        chart: prometheus-11.0.4
+        chart: prometheus-11.1.5
         heritage: Helm
     spec:
       serviceAccountName: ts-observability-prometheus-server
@@ -5661,7 +5662,7 @@ metadata:
   name: ts-observability-timescale-prometheus
   labels:
     app: ts-observability-timescale-prometheus
-    chart: timescale-prometheus-0.1.0-alpha.3
+    chart: timescale-prometheus-0.1.0-alpha.3.1
     release: ts-observability
     heritage: Helm
 spec:
@@ -6043,7 +6044,7 @@ metadata:
   name: ts-observability-timescale-prometheus-drop-chunk
   labels:
     app: ts-observability-timescale-prometheus
-    chart: timescale-prometheus-0.1.0-alpha.3
+    chart: timescale-prometheus-0.1.0-alpha.3.1
     release: ts-observability
     heritage: Helm
 spec:
@@ -6058,7 +6059,7 @@ spec:
             args:
             - psql
             - -c
-            - CALL prom.drop_chunks();
+            - CALL prom_api.drop_chunks();
             env:
               - name: PGPORT
                 value: "5432"
@@ -6099,7 +6100,7 @@ kind: Pod
 metadata:
   name: ts-observability-grafana-test
   labels:
-    helm.sh/chart: grafana-5.0.16
+    helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: ts-observability
     app.kubernetes.io/version: "6.7.3"
@@ -6131,7 +6132,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "ts-observability-patroni-1s"
+  name: "ts-observability-patroni-8t"
   labels:
     app: ts-observability-timescaledb
     chart: timescaledb-single-0.5.5
