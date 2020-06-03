@@ -32,6 +32,7 @@ metadata:
     app.kubernetes.io/name: $RELEASE_NAME
     app.kubernetes.io/instance: timescale-observability
 "
+helm dependency update ${DIR}/chart
 
 OUTPUT_FILE="${DIR}/deploy/static/deploy.yaml"
 cat << EOF | helm template $RELEASE_NAME ${DIR}/chart --namespace $NAMESPACE --values $FILE_ARG > ${OUTPUT_FILE}

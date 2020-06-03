@@ -48,14 +48,6 @@ timescale-prometheus:
       # with only a few pods
       memory: 2Gi
       cpu: 1
-  # configuration options for the prometheus remote_write queue
-  # these options are not used by the timescale-prometheus chart
-  # but by the prometheus server chart
-  remote:
-    # queue config 
-    # see: https://prometheus.io/docs/practices/remote_write/
-    queue:
-      max_shards: 30
 # Values for configuring the deployment of Prometheus
 # The stable/prometheus chart is used and the guide for it
 # can be found at: 
@@ -70,7 +62,28 @@ prometheus:
     # we provide a config map which will have the
     # timescale-prometheus connector already configured as
     # a remote endpoint for read/write (if enabled)
+    # this overrides the config map the prometheus chart 
+    # creates
     configMapOverrideName: "prometheus-config"
+    # values to be used in the override config map
+    # for a Timescale-Prometheus remote_write and remote_read config
+    timescaleRemote:
+      # templated
+      host: "{{ .Release.Name }}-timescale-prometheus-connector.{{ .Release.Namespace }}.svc.cluster.local"
+      protocol: http
+      port: "9201"
+      write:
+        enabled: true 
+        # complete url = {protocol}://{host}:{port}/{endpoint}
+        endpoint: "write"
+        # write queue config 
+        # see: https://prometheus.io/docs/practices/remote_write/
+        queue:
+          max_shards: 30
+      read:
+        enabled: true
+        # complete url = {protocol}://{host}:{port}/endpoint
+        endpoint: "read"
     
 # Values for configuring the deployment of Grafana
 # The stable/grafana chart is used and the guide for it
