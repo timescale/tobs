@@ -1,7 +1,7 @@
 # Values for configuring the deployment of TimescaleDB
-# The charts README is at: 
+# The charts README is at:
 #    https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
-# Check out the various configuration options (administration guide) at: 
+# Check out the various configuration options (administration guide) at:
 #    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
@@ -9,17 +9,17 @@ timescaledb-single:
   image:
     tag: pg12-ts1.7
   # create only a ClusterIP service
-  loadBalancer: 
+  loadBalancer:
     enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
-  
+
 # Values for configuring the deployment of the Timescale Prometheus Connector
 # The charts README is at:
 #   https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
 timescale-prometheus:
   enabled: true
-  image: timescale/timescale-prometheus:0.1.0-alpha.3.1
+  image: timescale/timescale-prometheus:0.1.0-alpha.4
   # connection options
   connection:
     # the db name in which the metrics will be stored
@@ -41,16 +41,16 @@ timescale-prometheus:
     # we disable the load balancer by default, only a ClusterIP service
     # will get created
     loadBalancer:
-      enabled: false    
+      enabled: false
   resources:
     requests:
-      # By default this should be enough for a cluster 
+      # By default this should be enough for a cluster
       # with only a few pods
       memory: 2Gi
       cpu: 1
 # Values for configuring the deployment of Prometheus
 # The stable/prometheus chart is used and the guide for it
-# can be found at: 
+# can be found at:
 #   https://hub.helm.sh/charts/stable/prometheus
 prometheus:
   enabled: true
@@ -62,7 +62,7 @@ prometheus:
     # we provide a config map which will have the
     # timescale-prometheus connector already configured as
     # a remote endpoint for read/write (if enabled)
-    # this overrides the config map the prometheus chart 
+    # this overrides the config map the prometheus chart
     # creates
     configMapOverrideName: "prometheus-config"
     # values to be used in the override config map
@@ -73,10 +73,10 @@ prometheus:
       protocol: http
       port: "9201"
       write:
-        enabled: true 
+        enabled: true
         # complete url = {protocol}://{host}:{port}/{endpoint}
         endpoint: "write"
-        # write queue config 
+        # write queue config
         # see: https://prometheus.io/docs/practices/remote_write/
         queue:
           max_shards: 30
@@ -84,7 +84,7 @@ prometheus:
         enabled: true
         # complete url = {protocol}://{host}:{port}/endpoint
         endpoint: "read"
-    
+
 # Values for configuring the deployment of Grafana
 # The stable/grafana chart is used and the guide for it
 # can be found at:
@@ -103,7 +103,7 @@ grafana:
   prometheus:
     datasource:
       enabled: true
-      # By default url of data source is set to prometheus instance 
+      # By default url of data source is set to prometheus instance
       # deployed with this chart
       url: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
   timescale:
