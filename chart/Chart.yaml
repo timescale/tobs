@@ -4,8 +4,8 @@ description: A Helm chart for the Timescale Observability Suite
 
 type: application
 
-version: 0.1.0-alpha.3.1
-appVersion: 0.1.0-alpha.3.1
+version: 0.1.0-alpha.4
+appVersion: 0.1.0-alpha.4
 
 dependencies:
   - name: timescaledb-single
