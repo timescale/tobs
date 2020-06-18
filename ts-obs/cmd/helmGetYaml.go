@@ -11,7 +11,7 @@ import (
 // helmGetYamlCmd represents the helm get-yaml command
 var helmGetYamlCmd = &cobra.Command{
 	Use:   "get-yaml",
-	Short: "Writes the current configuration YAML to console",
+	Short: "Prints the default timescale-obserability values to console",
 	RunE:  helmGetYaml,
 }
 
