@@ -21,17 +21,31 @@ var retentionSetCmd = &cobra.Command{
 
 func init() {
 	retentionCmd.AddCommand(retentionSetCmd)
+	retentionSetCmd.Flags().StringP("user", "U", "postgres", "database user name")
+	retentionSetCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
 }
 
 func retentionSet(cmd *cobra.Command, args []string) error {
 	var err error
 
-	if os.Getenv("PGPASSWORD_POSTGRES") == "" {
-		return errors.New("Password for postgres user must be set in environment variable PGPASSWORD_POSTGRES")
+	if os.Getenv("PGPASSWORD") == "" {
+		return errors.New("Password for postgres user must be set in environment variable PGPASSWORD")
 	}
 
 	metric := args[0]
 	retention_period := args[1]
+
+	var user string
+	user, err = cmd.Flags().GetString("user")
+	if err != nil {
+		return err
+	}
+
+	var dbname string
+	dbname, err = cmd.Flags().GetString("dbname")
+	if err != nil {
+		return err
+	}
 
 	var name string
 	name, err = cmd.Flags().GetString("name")
@@ -56,14 +70,14 @@ func retentionSet(cmd *cobra.Command, args []string) error {
 	}
 
 	var pool *pgxpool.Pool
-	pool, err = pgxpool.Connect(context.Background(), "postgres://postgres:"+os.Getenv("PGPASSWORD_POSTGRES")+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/postgres")
+	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+os.Getenv("PGPASSWORD")+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
 	if err != nil {
 		return err
 	}
 	defer pool.Close()
 
 	fmt.Printf("Setting retention period for %v to %v days\n", metric, retention_period)
-	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_metric_retention_period('"+metric+"', INTERVAL '1 day' * "+retention_period+")")
+	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_metric_retention_period($1, INTERVAL '1 day' * $2)", metric, retention_period)
 	if err != nil {
 		return err
 	}

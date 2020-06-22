@@ -62,7 +62,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 
 	update.Stdout = w
 	update.Stderr = w
-    fmt.Println("Fetching updates from repository")
+	fmt.Println("Fetching updates from repository")
 	err = update.Run()
 	if err != nil {
 		return err

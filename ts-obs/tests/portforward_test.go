@@ -53,7 +53,7 @@ func testpf(t testing.TB, timescale, grafana, prometheus string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(6 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	if timescale == "" {
 		timescale = "5432"
@@ -83,7 +83,7 @@ func testpf(t testing.TB, timescale, grafana, prometheus string) {
 
 func TestPortForward(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping port-forwarding tests")
+		//t.Skip("Skipping port-forwarding tests")
 	}
 
 	testpf(t, "", "", "")

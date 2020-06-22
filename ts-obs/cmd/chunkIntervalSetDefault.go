@@ -22,13 +22,15 @@ var chunkIntervalSetDefaultCmd = &cobra.Command{
 
 func init() {
 	chunkIntervalCmd.AddCommand(chunkIntervalSetDefaultCmd)
+	chunkIntervalSetDefaultCmd.Flags().StringP("user", "U", "postgres", "database user name")
+	chunkIntervalSetDefaultCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
 }
 
 func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 	var err error
 
-	if os.Getenv("PGPASSWORD_POSTGRES") == "" {
-		return errors.New("Password for postgres user must be set in environment variable PGPASSWORD_POSTGRES")
+	if os.Getenv("PGPASSWORD") == "" {
+		return errors.New("Password for user must be set in environment variable PGPASSWORD")
 	}
 
 	var chunk_interval time.Duration
@@ -39,6 +41,18 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 
 	if chunk_interval.Minutes() < 1.0 {
 		return errors.New("Chunk interval must be at least 1 minute")
+	}
+
+	var user string
+	user, err = cmd.Flags().GetString("user")
+	if err != nil {
+		return err
+	}
+
+	var dbname string
+	dbname, err = cmd.Flags().GetString("dbname")
+	if err != nil {
+		return err
 	}
 
 	var name string
@@ -64,14 +78,14 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	var pool *pgxpool.Pool
-	pool, err = pgxpool.Connect(context.Background(), "postgres://postgres:"+os.Getenv("PGPASSWORD_POSTGRES")+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/postgres")
+	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+os.Getenv("PGPASSWORD")+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
 	if err != nil {
 		return err
 	}
 	defer pool.Close()
 
 	fmt.Printf("Setting default chunk interval to %v\n", chunk_interval)
-	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_default_chunk_interval(INTERVAL '1 second' * "+strconv.FormatFloat(chunk_interval.Seconds(), 'f', -1, 64)+")")
+	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_default_chunk_interval(INTERVAL '1 second' * $1)", strconv.FormatFloat(chunk_interval.Seconds(), 'f', -1, 64))
 	if err != nil {
 		return err
 	}

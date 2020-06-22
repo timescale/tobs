@@ -21,7 +21,7 @@ var timescaledbConnectCmd = &cobra.Command{
 
 func init() {
 	timescaledbCmd.AddCommand(timescaledbConnectCmd)
-	timescaledbConnectCmd.Flags().StringP("user", "u", "postgres", "user to login with")
+	timescaledbConnectCmd.Flags().StringP("user", "U", "postgres", "database user name")
 	timescaledbConnectCmd.Flags().StringP("password", "p", "", "environment variable where password is stored")
 	timescaledbConnectCmd.Flags().BoolP("master", "m", false, "directly execute session on master node")
 }

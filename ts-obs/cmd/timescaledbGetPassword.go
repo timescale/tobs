@@ -16,7 +16,7 @@ var timescaledbGetPasswordCmd = &cobra.Command{
 
 func init() {
 	timescaledbCmd.AddCommand(timescaledbGetPasswordCmd)
-	timescaledbGetPasswordCmd.Flags().StringP("user", "u", "postgres", "user whose password to get")
+	timescaledbGetPasswordCmd.Flags().StringP("user", "U", "postgres", "user whose password to get")
 }
 
 func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
