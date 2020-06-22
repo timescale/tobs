@@ -52,7 +52,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 
 	addchart.Stdout = w
 	addchart.Stderr = w
-	fmt.Println("Adding Timescale Helm chart")
+	fmt.Println("Adding Timescale Helm Repository")
 	err = addchart.Run()
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 
 	update.Stdout = w
 	update.Stderr = w
-	fmt.Println("Updating local chart info")
+    fmt.Println("Fetching updates from repository")
 	err = update.Run()
 	if err != nil {
 		return err
