@@ -39,7 +39,7 @@ func grafanaGetPassword(cmd *cobra.Command, args []string) error {
 	}
 
 	pass := secret.Data["admin-password"]
-	fmt.Printf("Password: %v\n", string(pass))
+	fmt.Println(string(pass))
 
 	return nil
 }

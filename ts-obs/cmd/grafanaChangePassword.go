@@ -38,8 +38,8 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-    secret.Data["admin-password"] = []byte(password)
-    err = KubeUpdateSecret(namespace, secret)
+	secret.Data["admin-password"] = []byte(password)
+	err = KubeUpdateSecret(namespace, secret)
 	if err != nil {
 		return err
 	}

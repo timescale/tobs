@@ -40,8 +40,8 @@ func testGrafanaPortForward(t testing.TB, port string) {
 func testGrafanaGetPass(t testing.TB) {
 	var getpass *exec.Cmd
 
-	t.Logf("Running 'ts-obs grafana get-initial-password'")
-	getpass = exec.Command("ts-obs", "grafana", "get-initial-password")
+	t.Logf("Running 'ts-obs grafana get-password'")
+	getpass = exec.Command("ts-obs", "grafana", "get-password")
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
@@ -63,9 +63,25 @@ func testGrafanaChangePass(t testing.TB, newpass string) {
 	}
 }
 
+func verifyGrafanaPass(t testing.TB, expectedPass string) {
+	var getpass *exec.Cmd
+
+	getpass = exec.Command("ts-obs", "grafana", "get-password")
+
+	out, err := getpass.CombinedOutput()
+	if err != nil {
+		t.Logf(string(out))
+		t.Fatal(err)
+	}
+
+	if string(out) == expectedPass {
+		t.Fatalf("Password mismatch: got %v want %v", string(out), expectedPass)
+	}
+}
+
 func TestGrafana(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping Grafana tests")
+		//t.Skip("Skipping Grafana tests")
 	}
 
 	testGrafanaPortForward(t, "")
@@ -75,7 +91,12 @@ func TestGrafana(t *testing.T) {
 
 	testGrafanaGetPass(t)
 	testGrafanaChangePass(t, "kraken")
+	testGrafanaGetPass(t)
+	verifyGrafanaPass(t, "kraken")
 	testGrafanaChangePass(t, "cereal")
+	testGrafanaGetPass(t)
+	verifyGrafanaPass(t, "cereal")
 	testGrafanaChangePass(t, "23498MSDF(*9389m*(@#M24309mDj")
 	testGrafanaGetPass(t)
+	verifyGrafanaPass(t, "23498MSDF(*9389m*(@#M24309mDj")
 }
