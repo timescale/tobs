@@ -4,7 +4,7 @@ This is a CLI tool for installing and managing the Timescale Observability Helm 
 
 ## Quick Start
 
-__Dependencies__: [Helm](https://helm.sh/docs/intro/install/)
+__Dependencies__: [Go](https://golang.org/doc/install), [Helm](https://helm.sh/docs/intro/install/)
 
 To install the CLI, run `go install` from inside the `ts-obs` folder. 
 Then, copy the `ts-obs` binary from `$GOPATH/bin` to your `/bin` folder. 

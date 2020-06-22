@@ -1,7 +1,6 @@
 package cmd
 
 import (
-    "errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -11,6 +10,7 @@ import (
 var grafanaGetInitialPasswordCmd = &cobra.Command{
 	Use:   "get-initial-password",
 	Short: "Gets the initial admin password for Grafana",
+	Args:  cobra.ExactArgs(0),
 	RunE:  grafanaGetInitialPassword,
 }
 
@@ -19,19 +19,27 @@ func init() {
 }
 
 func grafanaGetInitialPassword(cmd *cobra.Command, args []string) error {
-    var err error
+	var err error
 
-    if len(args) != 0 {
-        return errors.New("\"ts-obs grafana get-password\" requires 0 arguments")
-    }
+	var name string
+	name, err = cmd.Flags().GetString("name")
+	if err != nil {
+		return err
+	}
 
-    secret, err := kubeGetSecret("ts-obs-grafana")
-    if err != nil {
-        return err
-    }
+	var namespace string
+	namespace, err = cmd.Flags().GetString("namespace")
+	if err != nil {
+		return err
+	}
 
-    pass := secret.Data["admin-password"]
-    fmt.Printf("Password: %v\n", string(pass))
+	secret, err := KubeGetSecret(namespace, name+"-grafana")
+	if err != nil {
+		return err
+	}
 
-    return nil
+	pass := secret.Data["admin-password"]
+	fmt.Printf("Password: %v\n", string(pass))
+
+	return nil
 }

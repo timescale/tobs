@@ -12,7 +12,7 @@ timescaledb-single:
   loadBalancer:
     enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
-  replicaCount: 3
+  replicaCount: 1
 
 # Values for configuring the deployment of the Timescale Prometheus Connector
 # The charts README is at:
@@ -41,12 +41,12 @@ timescale-prometheus:
     # we disable the load balancer by default, only a ClusterIP service
     # will get created
     loadBalancer:
-      enabled: true
+      enabled: false
   resources:
     requests:
       # By default this should be enough for a cluster
       # with only a few pods
-      memory: 2Gi
+      memory: 4Gi
       cpu: 1
 # Values for configuring the deployment of Prometheus
 # The stable/prometheus chart is used and the guide for it

@@ -8,15 +8,15 @@ import (
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Alias for helm install",
-	RunE: install,
+	Args:  cobra.ExactArgs(0),
+	RunE:  install,
 }
 
 func init() {
 	rootCmd.AddCommand(installCmd)
-    installCmd.Flags().StringP("name", "n", "ts-obs", "Release name")
-    installCmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
+	installCmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
 }
 
 func install(cmd *cobra.Command, args []string) error {
-    return helmInstall(cmd, args)
+	return helmInstall(cmd, args)
 }

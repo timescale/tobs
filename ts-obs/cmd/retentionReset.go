@@ -1,20 +1,22 @@
 package cmd
 
 import (
-    "context"
-    "errors"
+	"context"
+	"errors"
 	"fmt"
-    "os"
+	"os"
+	"strconv"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/spf13/cobra"
-    "github.com/jackc/pgx/v4/pgxpool"
 )
 
 // retentionResetCmd represents the retention reset command
 var retentionResetCmd = &cobra.Command{
 	Use:   "reset <metric>",
 	Short: "Resets data retention period to default for a specific metric",
-    RunE:  retentionReset,
+	Args:  cobra.ExactArgs(1),
+	RunE:  retentionReset,
 }
 
 func init() {
@@ -22,36 +24,49 @@ func init() {
 }
 
 func retentionReset(cmd *cobra.Command, args []string) error {
-    var err error
+	var err error
 
-    if len(args) != 1 {
-        return errors.New("\"ts-obs metrics reset-metric-retention\" requires 1 argument")
-    }
+	if os.Getenv("PGPASSWORD_POSTGRES") == "" {
+		return errors.New("Password for postgres user must be set in environment variable PGPASSWORD_POSTGRES")
+	}
 
-    if os.Getenv("PGPASSWORD_POSTGRES")  == "" {
-        return errors.New("Password for postgres user must be set in environment variable PGPASSWORD_POSTGRES")
-    }
+	metric := args[0]
 
-    metric := args[0]
+	var name string
+	name, err = cmd.Flags().GetString("name")
+	if err != nil {
+		return err
+	}
 
-    err = kubePortForwardPod("ts-obs-timescaledb-0", 5432, 5432)
-    if err != nil {
-        return err
-    }
+	var namespace string
+	namespace, err = cmd.Flags().GetString("namespace")
+	if err != nil {
+		return err
+	}
 
-    var pool *pgxpool.Pool
-    pool, err = pgxpool.Connect(context.Background(), "postgres://postgres:" + os.Getenv("PGPASSWORD_POSTGRES") + "@localhost:5432/postgres")
-    if err != nil {
-        return err
-    }
-    defer pool.Close()
+	podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
+	if err != nil {
+		return err
+	}
 
-    fmt.Printf("Resetting retention period for %v back to default\n", metric)
-    _, err = pool.Exec(context.Background(), "SELECT reset_metric_retention_period('" + metric + "')")
-    if err != nil {
-        return err
-    }
+	err = KubePortForwardPod(namespace, podName, LISTEN_PORT_TSDB, FORWARD_PORT_TSDB)
+	if err != nil {
+		return err
+	}
 
-    return nil
+	var pool *pgxpool.Pool
+	pool, err = pgxpool.Connect(context.Background(), "postgres://postgres:"+os.Getenv("PGPASSWORD_POSTGRES")+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/postgres")
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+
+	fmt.Printf("Resetting retention period for %v back to default\n", metric)
+	_, err = pool.Exec(context.Background(), "SELECT prom_api.reset_metric_retention_period('"+metric+"')")
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }

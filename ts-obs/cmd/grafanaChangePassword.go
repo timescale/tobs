@@ -1,8 +1,6 @@
 package cmd
 
 import (
-    "errors"
-
 	"github.com/spf13/cobra"
 )
 
@@ -10,6 +8,7 @@ import (
 var grafanaChangePasswordCmd = &cobra.Command{
 	Use:   "change-password <password>",
 	Short: "Changes the admin password for Grafana",
+	Args:  cobra.ExactArgs(1),
 	RunE:  grafanaChangePassword,
 }
 
@@ -18,20 +17,28 @@ func init() {
 }
 
 func grafanaChangePassword(cmd *cobra.Command, args []string) error {
-    var err error
-    
-    if len(args) != 1 {
-        return errors.New("\"ts-obs grafana change-password\" requires 1 argument")
-    }
+	var err error
 
-    password := args[0]
+	password := args[0]
 
-    grafanaPod, err := kubeGetPodName(map[string]string{"app.kubernetes.io/name" : "grafana"})
-    if err != nil {
-        return err
-    }
+	var name string
+	name, err = cmd.Flags().GetString("name")
+	if err != nil {
+		return err
+	}
 
-    err = kubeExecCmd(grafanaPod, "grafana", "grafana-cli admin reset-admin-password " + password, nil, false)
+	var namespace string
+	namespace, err = cmd.Flags().GetString("namespace")
+	if err != nil {
+		return err
+	}
 
-    return nil
+	grafanaPod, err := KubeGetPodName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
+	if err != nil {
+		return err
+	}
+
+	err = KubeExecCmd(namespace, grafanaPod, "grafana", "grafana-cli admin reset-admin-password "+password, nil, false)
+
+	return nil
 }
