@@ -6,19 +6,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// grafanaGetInitialPasswordCmd represents the grafana get-initial-password command
-var grafanaGetInitialPasswordCmd = &cobra.Command{
-	Use:   "get-initial-password",
-	Short: "Gets the initial admin password for Grafana",
+// grafanaGetPasswordCmd represents the grafana get-password command
+var grafanaGetPasswordCmd = &cobra.Command{
+	Use:   "get-password",
+	Short: "Gets the admin password for Grafana",
 	Args:  cobra.ExactArgs(0),
-	RunE:  grafanaGetInitialPassword,
+	RunE:  grafanaGetPassword,
 }
 
 func init() {
-	grafanaCmd.AddCommand(grafanaGetInitialPasswordCmd)
+	grafanaCmd.AddCommand(grafanaGetPasswordCmd)
 }
 
-func grafanaGetInitialPassword(cmd *cobra.Command, args []string) error {
+func grafanaGetPassword(cmd *cobra.Command, args []string) error {
 	var err error
 
 	var name string

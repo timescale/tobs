@@ -11,8 +11,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/apimachinery/pkg/labels" 
+    "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	rest "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -310,6 +310,20 @@ func KubeDeletePVC(namespace string, PVCName string) error {
 
 	fmt.Println("Deleting PVC...")
 	err = client.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), PVCName, metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func KubeUpdateSecret(namespace string, secret *corev1.Secret) error {
+    var err error
+
+    client, _ := KubeInit()
+
+    fmt.Println("Updating secret...")
+    _, err = client.CoreV1().Secrets(namespace).Update(context.Background(), secret, metav1.UpdateOptions{})
 	if err != nil {
 		return err
 	}

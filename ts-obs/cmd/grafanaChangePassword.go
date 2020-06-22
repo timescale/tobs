@@ -33,6 +33,17 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	secret, err := KubeGetSecret(namespace, name+"-grafana")
+	if err != nil {
+		return err
+	}
+
+    secret.Data["admin-password"] = []byte(password)
+    err = KubeUpdateSecret(namespace, secret)
+	if err != nil {
+		return err
+	}
+
 	grafanaPod, err := KubeGetPodName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return err
