@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,29 +25,29 @@ func prometheusPortForward(cmd *cobra.Command, args []string) error {
 	var port int
 	port, err = cmd.Flags().GetInt("port")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
 	var name string
 	name, err = cmd.Flags().GetString("name")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
 	var namespace string
 	namespace, err = cmd.Flags().GetString("namespace")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
 	serviceName, err := KubeGetServiceName(namespace, map[string]string{"release": name, "app": "prometheus", "component": "server"})
 	if err != nil {
-		return err
+		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
 	err = KubePortForwardService(namespace, serviceName, port, FORWARD_PORT_PROM)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
 	select {}

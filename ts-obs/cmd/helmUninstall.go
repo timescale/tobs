@@ -30,19 +30,19 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	var name string
 	name, err = cmd.Flags().GetString("name")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 	}
 
 	var pvc bool
 	pvc, err = cmd.Flags().GetBool("pvc")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 	}
 
 	var namespace string
 	namespace, err = cmd.Flags().GetString("namespace")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 	}
 
 	var stdbuf bytes.Buffer
@@ -55,14 +55,14 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Uninstalling Timescale Observability")
 	err = uninstall.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 	}
 
 	fmt.Println("Waiting for pods to terminate...")
 	for i := 0; i < 1000; i++ {
 		pods, err := KubeGetAllPods(namespace)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 		}
 		if len(pods) == 0 {
 			break
@@ -88,14 +88,14 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Getting Persistent Volume Claims")
 	pvcnames, err := KubeGetPVCNames(namespace, map[string]string{"release": name})
 	if err != nil {
-		return err
+		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 	}
 
 	fmt.Println("Removing Persistent Volume Claims")
 	for _, s := range pvcnames {
 		err = KubeDeletePVC(namespace, s)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 		}
 	}
 

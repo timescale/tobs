@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -32,67 +33,67 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 	var user string
 	user, err = cmd.Flags().GetString("user")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
 	var password string
 	password, err = cmd.Flags().GetString("password")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
 	var master bool
 	master, err = cmd.Flags().GetBool("master")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
 	var name string
 	name, err = cmd.Flags().GetString("name")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
 	var namespace string
 	namespace, err = cmd.Flags().GetString("namespace")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
 	if (password != "") == master {
-		return errors.New("must connect through one of user/password or master")
+		return fmt.Errorf("could not connect to TimescaleDB: %w", errors.New("must connect through one of user/password or master"))
 	}
 
 	if master {
 		masterpod, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
 		if err != nil {
-			return err
+			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
 		err = KubeExecCmd(namespace, masterpod, "", "psql -U postgres", os.Stdin, true)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 	} else {
 		pod := getPodObject(name, user, password)
 
 		err = KubeCreatePod(pod)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
 		err = KubeWaitOnPod(namespace, "psql")
 		if err != nil {
-			return err
+			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 		err = KubeExecCmd(namespace, "psql", "", "psql -U "+user+" -h "+name+".default.svc.cluster.local postgres", os.Stdin, true)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
 		err = KubeDeletePod(namespace, "psql")
 		if err != nil {
-			return err
+			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 		time.Sleep(3 * time.Second)
 	}

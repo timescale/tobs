@@ -83,7 +83,7 @@ func testpf(t testing.TB, timescale, grafana, prometheus string) {
 
 func TestPortForward(t *testing.T) {
 	if testing.Short() {
-		//t.Skip("Skipping port-forwarding tests")
+		t.Skip("Skipping port-forwarding tests")
 	}
 
 	testpf(t, "", "", "")

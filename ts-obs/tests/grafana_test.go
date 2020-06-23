@@ -53,8 +53,8 @@ func testGrafanaGetPass(t testing.TB) {
 func testGrafanaChangePass(t testing.TB, newpass string) {
 	var changepass *exec.Cmd
 
-	t.Logf("Running 'ts-obs grafana change-password %v'\n", newpass)
-	changepass = exec.Command("ts-obs", "grafana", "change-password", newpass)
+	t.Logf("Running 'ts-obs grafana change-password \"%v\"'\n", newpass)
+	changepass = exec.Command("ts-obs", "grafana", "change-password", "\""+newpass+"\"")
 
 	out, err := changepass.CombinedOutput()
 	if err != nil {
@@ -81,7 +81,7 @@ func verifyGrafanaPass(t testing.TB, expectedPass string) {
 
 func TestGrafana(t *testing.T) {
 	if testing.Short() {
-		//t.Skip("Skipping Grafana tests")
+		t.Skip("Skipping Grafana tests")
 	}
 
 	testGrafanaPortForward(t, "")

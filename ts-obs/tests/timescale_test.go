@@ -16,8 +16,8 @@ func testTimescaleGetPassword(t testing.TB, user string) {
 		t.Logf("Running 'ts-obs timescaledb get-password'")
 		getpass = exec.Command("ts-obs", "timescaledb", "get-password")
 	} else {
-		t.Logf("Running 'ts-obs timescaledb get-password -u %v'\n", user)
-		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-u", user)
+		t.Logf("Running 'ts-obs timescaledb get-password -U %v'\n", user)
+		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-U", user)
 	}
 
 	out, err := getpass.CombinedOutput()
@@ -68,8 +68,8 @@ func testTimescaleConnect(t testing.TB, master bool, user, password string) {
 			t.Logf("Running 'ts-obs timescaledb connect -p %v'\n", password)
 			connect = exec.Command("ts-obs", "timescaledb", "connect", "-p", password)
 		} else {
-			t.Logf("Running 'ts-obs timescaledb connect -u %v -p %v'\n", user, password)
-			connect = exec.Command("ts-obs", "timescaledb", "connect", "-u", user, "-p", password)
+			t.Logf("Running 'ts-obs timescaledb connect -U %v -p %v'\n", user, password)
+			connect = exec.Command("ts-obs", "timescaledb", "connect", "-U", user, "-p", password)
 		}
 	}
 

@@ -24,18 +24,18 @@ func grafanaGetPassword(cmd *cobra.Command, args []string) error {
 	var name string
 	name, err = cmd.Flags().GetString("name")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get Grafana password: %w", err)
 	}
 
 	var namespace string
 	namespace, err = cmd.Flags().GetString("namespace")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get Grafana password: %w", err)
 	}
 
 	secret, err := KubeGetSecret(namespace, name+"-grafana")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get Grafana password: %w", err)
 	}
 
 	pass := secret.Data["admin-password"]

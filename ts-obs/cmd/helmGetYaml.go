@@ -27,7 +27,7 @@ func helmGetYaml(cmd *cobra.Command, args []string) error {
 	var out []byte
 	out, err = getyaml.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get Helm values: %w", err)
 	}
 
 	fmt.Print(string(out))

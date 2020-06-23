@@ -31,19 +31,19 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	var name string
 	name, err = cmd.Flags().GetString("name")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
 	var file string
 	file, err = cmd.Flags().GetString("filename")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
 	var namespace string
 	namespace, err = cmd.Flags().GetString("namespace")
 	if err != nil {
-		return err
+		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
 	w := io.Writer(os.Stdout)
@@ -55,7 +55,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Adding Timescale Helm Repository")
 	err = addchart.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
 	update := exec.Command("helm", "repo", "update")
@@ -65,7 +65,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Fetching updates from repository")
 	err = update.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
 	var install *exec.Cmd
@@ -88,7 +88,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Installing Timescale Observability")
 	err = install.Run()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
 	time.Sleep(10 * time.Second)
