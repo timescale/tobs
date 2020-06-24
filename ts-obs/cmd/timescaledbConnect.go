@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -15,7 +14,7 @@ import (
 // timescaledbConnectCmd represents the timescaledb connect command
 var timescaledbConnectCmd = &cobra.Command{
 	Use:   "connect",
-	Short: "Connects to the TimescaleDB/PostgreSQL database",
+	Short: "Connects to the TimescaleDB database",
 	Args:  cobra.ExactArgs(0),
 	RunE:  timescaledbConnect,
 }
@@ -23,7 +22,6 @@ var timescaledbConnectCmd = &cobra.Command{
 func init() {
 	timescaledbCmd.AddCommand(timescaledbConnectCmd)
 	timescaledbConnectCmd.Flags().StringP("user", "U", "postgres", "database user name")
-	timescaledbConnectCmd.Flags().StringP("password", "p", "PGPASSWORD", "environment variable where password is stored")
 	timescaledbConnectCmd.Flags().BoolP("master", "m", false, "directly execute session on master node")
 }
 
@@ -32,12 +30,6 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 
 	var user string
 	user, err = cmd.Flags().GetString("user")
-	if err != nil {
-		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
-	}
-
-	var password string
-	password, err = cmd.Flags().GetString("password")
 	if err != nil {
 		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
@@ -60,9 +52,12 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
-	if (password != "") == master {
-		return fmt.Errorf("could not connect to TimescaleDB: %w", errors.New("must connect through one of user/password or master"))
+	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	if err != nil {
+		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
+
+	pass := string(secret.Data[user])
 
 	if master {
 		masterpod, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
@@ -75,7 +70,7 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 	} else {
-		pod := getPodObject(name, user, password)
+		pod := getPodObject(name, namespace, user, pass)
 
 		err = KubeCreatePod(pod)
 		if err != nil {
@@ -84,10 +79,12 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 
 		err = KubeWaitOnPod(namespace, "psql")
 		if err != nil {
+			KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 		err = KubeExecCmd(namespace, "psql", "", "psql -U "+user+" -h "+name+".default.svc.cluster.local postgres", os.Stdin, true)
 		if err != nil {
+			KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
@@ -101,7 +98,7 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getPodObject(name, user, password string) *corev1.Pod {
+func getPodObject(name, namespace, user, pass string) *corev1.Pod {
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "psql",
@@ -119,7 +116,7 @@ func getPodObject(name, user, password string) *corev1.Pod {
 					Env: []corev1.EnvVar{
 						{
 							Name:  "PGPASSWORD",
-							Value: os.Getenv(password),
+							Value: pass,
 						},
 					},
 					Stdin: true,
@@ -131,7 +128,7 @@ func getPodObject(name, user, password string) *corev1.Pod {
 						"-U",
 						user,
 						"-h",
-						name + ".default.svc.cluster.local",
+						name + "." + namespace + ".svc.cluster.local",
 						"postgres",
 					},
 				},

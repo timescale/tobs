@@ -21,11 +21,13 @@ import (
 	"k8s.io/client-go/transport/spdy"
 )
 
+var HOME = os.Getenv("HOME")
+
 func KubeInit() (kubernetes.Interface, *rest.Config) {
 	var err error
 
 	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: os.ExpandEnv("$HOME/.kube/config")},
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: HOME + "/.kube/config"},
 		&clientcmd.ConfigOverrides{}).ClientConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -111,12 +113,17 @@ func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, er
 	return names, nil
 }
 
-func KubeGetAllPods(namespace string) ([]corev1.Pod, error) {
+func KubeGetAllPods(name, namespace string) ([]corev1.Pod, error) {
 	var err error
 
 	client, _ := KubeInit()
 
-	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{})
+	labelSelector := metav1.LabelSelector{MatchLabels: map[string]string{"release": name}}
+	listOptions := metav1.ListOptions{
+		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
+	}
+
+	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return nil, err
 	}

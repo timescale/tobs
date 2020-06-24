@@ -11,6 +11,7 @@ import (
 )
 
 const DEVEL = true
+const REPO_LOCATION = "https://charts.timescale.com"
 
 // helmInstallCmd represents the helm install command
 var helmInstallCmd = &cobra.Command{
@@ -48,7 +49,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 
 	w := io.Writer(os.Stdout)
 
-	addchart := exec.Command("helm", "repo", "add", "timescale", "https://charts.timescale.com")
+	addchart := exec.Command("helm", "repo", "add", "timescale", REPO_LOCATION)
 
 	addchart.Stdout = w
 	addchart.Stderr = w
@@ -94,7 +95,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	time.Sleep(10 * time.Second)
 
 	fmt.Println("Waiting for pods to initialize...")
-	pods, err := KubeGetAllPods(namespace)
+	pods, err := KubeGetAllPods(name, namespace)
 	if err != nil {
 		return err
 	}

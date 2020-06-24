@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -31,10 +29,6 @@ func retentionSet(cmd *cobra.Command, args []string) error {
 	metric := args[0]
 	retention_period := args[1]
 
-	if os.Getenv("PGPASSWORD") == "" {
-		return fmt.Errorf("could not set retention period for %v: %w", metric, errors.New("password for postgres user must be set in environment variable PGPASSWORD"))
-	}
-
 	var user string
 	user, err = cmd.Flags().GetString("user")
 	if err != nil {
@@ -59,6 +53,13 @@ func retentionSet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not set retention period for %v: %w", metric, err)
 	}
 
+	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	if err != nil {
+		return fmt.Errorf("could not get TimescaleDB password: %w", err)
+	}
+
+	pass := string(secret.Data[user])
+
 	podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
 	if err != nil {
 		return fmt.Errorf("could not set retention period for %v: %w", metric, err)
@@ -70,7 +71,7 @@ func retentionSet(cmd *cobra.Command, args []string) error {
 	}
 
 	var pool *pgxpool.Pool
-	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+os.Getenv("PGPASSWORD")+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
+	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
 	if err != nil {
 		return fmt.Errorf("could not set retention period for %v: %w", metric, err)
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
@@ -28,10 +27,6 @@ func init() {
 
 func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 	var err error
-
-	if os.Getenv("PGPASSWORD") == "" {
-		return fmt.Errorf("could not set default chunk interval: %w", errors.New("password for user must be set in environment variable PGPASSWORD"))
-	}
 
 	var chunk_interval time.Duration
 	chunk_interval, err = time.ParseDuration(args[0])
@@ -67,6 +62,13 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not set default chunk interval: %w", err)
 	}
 
+	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	if err != nil {
+		return fmt.Errorf("could not get TimescaleDB password: %w", err)
+	}
+
+	pass := string(secret.Data[user])
+
 	podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
 	if err != nil {
 		return fmt.Errorf("could not set default chunk interval: %w", err)
@@ -78,7 +80,7 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	var pool *pgxpool.Pool
-	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+os.Getenv("PGPASSWORD")+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
+	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
 	if err != nil {
 		return fmt.Errorf("could not set default chunk interval: %w", err)
 	}

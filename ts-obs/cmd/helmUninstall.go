@@ -60,12 +60,14 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Waiting for pods to terminate...")
 	for i := 0; i < 1000; i++ {
-		pods, err := KubeGetAllPods(namespace)
+		pods, err := KubeGetAllPods(name, namespace)
 		if err != nil {
 			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 		}
 		if len(pods) == 0 {
 			break
+		} else if i == 999 {
+			fmt.Println("WARNING: pods did not terminate in 100 seconds")
 		}
 		time.Sleep(100 * time.Millisecond)
 	}

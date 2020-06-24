@@ -90,7 +90,7 @@ func testHelmUninstall(t testing.TB, name string) {
 		t.Fatal(err)
 	}
 
-	pods, err := cmd.KubeGetAllPods("default")
+	pods, err := cmd.KubeGetAllPods("ts-obs", "default")
 	if len(pods) != 0 {
 		t.Fatal("Pod remaining after uninstall")
 	}
@@ -150,7 +150,7 @@ func TestInstallation(t *testing.T) {
 	time.Sleep(10 * time.Second)
 
 	t.Logf("Waiting for pods to initialize...")
-	pods, err := cmd.KubeGetAllPods("default")
+	pods, err := cmd.KubeGetAllPods("ts-obs", "default")
 	if err != nil {
 		t.Logf("Error getting all pods")
 		t.Fatal(err)

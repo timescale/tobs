@@ -22,7 +22,12 @@ func init() {
 func helmGetYaml(cmd *cobra.Command, args []string) error {
 	var err error
 
-	getyaml := exec.Command("helm", "show", "values", "timescale/timescale-observability", "--devel")
+	var getyaml *exec.Cmd
+	if DEVEL {
+		getyaml = exec.Command("helm", "show", "values", "timescale/timescale-observability", "--devel")
+	} else {
+		getyaml = exec.Command("helm", "show", "values", "timescale/timescale-observability")
+	}
 
 	var out []byte
 	out, err = getyaml.CombinedOutput()

@@ -9,7 +9,7 @@ import (
 // timescaledbGetPasswordCmd represents the timescaledb get-password command
 var timescaledbGetPasswordCmd = &cobra.Command{
 	Use:   "get-password",
-	Short: "Gets the TimescaleDB/PostgreSQL password for a specific user",
+	Short: "Gets the TimescaleDB password for a specific user",
 	Args:  cobra.ExactArgs(0),
 	RunE:  timescaledbGetPassword,
 }
@@ -46,7 +46,7 @@ func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
 	}
 
 	pass := secret.Data[user]
-	fmt.Printf(string(pass))
+	fmt.Println(string(pass))
 
 	return nil
 }
