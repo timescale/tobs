@@ -100,7 +100,7 @@ func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, er
 
 	pvcs, err := client.CoreV1().PersistentVolumeClaims(namespace).List(context.Background(), listOptions)
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
 
 	var names []string
