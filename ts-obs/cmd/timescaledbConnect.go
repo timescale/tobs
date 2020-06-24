@@ -77,12 +77,14 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
+        time.Sleep(time.Second)
+
 		err = KubeWaitOnPod(namespace, "psql")
 		if err != nil {
 			KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
-		err = KubeExecCmd(namespace, "psql", "", "psql -U "+user+" -h "+name+".default.svc.cluster.local postgres", os.Stdin, true)
+		err = KubeExecCmd(namespace, "psql", "", "psql -U "+user+" -h "+name+"."+namespace+".svc.cluster.local postgres", os.Stdin, true)
 		if err != nil {
 			KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
@@ -102,7 +104,7 @@ func getPodObject(name, namespace, user, pass string) *corev1.Pod {
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "psql",
-			Namespace: "default",
+			Namespace: namespace,
 			Labels: map[string]string{
 				"app": "psql",
 			},

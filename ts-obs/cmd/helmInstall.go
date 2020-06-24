@@ -29,14 +29,14 @@ func init() {
 func helmInstall(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
+	var file string
+	file, err = cmd.Flags().GetString("filename")
 	if err != nil {
 		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
-	var file string
-	file, err = cmd.Flags().GetString("filename")
+	var name string
+	name, err = cmd.Flags().GetString("name")
 	if err != nil {
 		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
@@ -71,16 +71,32 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 
 	var install *exec.Cmd
 	if DEVEL {
-		if file == "" {
-			install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--devel")
+		if namespace == "default" {
+			if file == "" {
+				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--devel")
+			} else {
+				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability", "--devel")
+			}
 		} else {
-			install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability", "--devel")
+			if file == "" {
+				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--create-namespace", "-n", namespace, "--devel")
+			} else {
+				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace, "--devel")
+			}
 		}
 	} else {
-		if file == "" {
-			install = exec.Command("helm", "install", name, "timescale/timescale-observability")
+		if namespace == "default" {
+			if file == "" {
+				install = exec.Command("helm", "install", name, "timescale/timescale-observability")
+			} else {
+				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability")
+			}
 		} else {
-			install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability")
+			if file == "" {
+				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--create-namespace", "-n", namespace)
+			} else {
+				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace)
+			}
 		}
 	}
 

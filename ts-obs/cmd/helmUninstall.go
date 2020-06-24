@@ -48,7 +48,12 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	var stdbuf bytes.Buffer
 	mw := io.MultiWriter(os.Stdout, &stdbuf)
 
-	uninstall := exec.Command("helm", "uninstall", name)
+    var uninstall *exec.Cmd
+    if namespace == "default" {
+	    uninstall = exec.Command("helm", "uninstall", name)
+    } else {
+	    uninstall = exec.Command("helm", "uninstall", name, "-n", namespace)
+    }
 
 	uninstall.Stdout = mw
 	uninstall.Stderr = mw
