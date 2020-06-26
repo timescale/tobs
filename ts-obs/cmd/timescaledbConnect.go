@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -57,7 +58,12 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
-	pass := string(secret.Data[user])
+	var pass string
+	if bytepass, exists := secret.Data[user]; exists {
+		pass = string(bytepass)
+	} else {
+		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
+	}
 
 	if master {
 		masterpod, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
@@ -77,7 +83,7 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
-        time.Sleep(time.Second)
+		time.Sleep(time.Second)
 
 		err = KubeWaitOnPod(namespace, "psql")
 		if err != nil {

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -45,8 +46,13 @@ func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
-	pass := secret.Data[user]
-	fmt.Println(string(pass))
+	var pass string
+	if bytepass, exists := secret.Data[user]; exists {
+		pass = string(bytepass)
+	} else {
+		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
+	}
+	fmt.Println(pass)
 
 	return nil
 }

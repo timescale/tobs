@@ -75,13 +75,13 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--devel")
 			} else {
-				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability", "--devel")
+				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability", "--devel")
 			}
 		} else {
 			if file == "" {
 				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--create-namespace", "-n", namespace, "--devel")
 			} else {
-				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace, "--devel")
+				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace, "--devel")
 			}
 		}
 	} else {
@@ -89,13 +89,13 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				install = exec.Command("helm", "install", name, "timescale/timescale-observability")
 			} else {
-				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability")
+				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability")
 			}
 		} else {
 			if file == "" {
 				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--create-namespace", "-n", namespace)
 			} else {
-				install = exec.Command("helm", "upgrade", "--install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace)
+				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace)
 			}
 		}
 	}
@@ -111,7 +111,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	time.Sleep(10 * time.Second)
 
 	fmt.Println("Waiting for pods to initialize...")
-	pods, err := KubeGetAllPods(name, namespace)
+	pods, err := KubeGetAllPods(namespace, name)
 	if err != nil {
 		return err
 	}
@@ -123,5 +123,6 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	fmt.Println("Timescale Observability has been installed successfully")
 	return nil
 }

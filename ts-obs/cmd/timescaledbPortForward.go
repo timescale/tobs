@@ -45,7 +45,7 @@ func timescaledbPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}
 
-	err = KubePortForwardPod(namespace, podName, port, FORWARD_PORT_TSDB)
+	_, err = KubePortForwardPod(namespace, podName, port, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}

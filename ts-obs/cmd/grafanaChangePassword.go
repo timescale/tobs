@@ -40,6 +40,8 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
+	oldpassword := secret.Data["admin-password"]
+
 	secret.Data["admin-password"] = []byte(password)
 	err = KubeUpdateSecret(namespace, secret)
 	if err != nil {
@@ -53,6 +55,8 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 
 	err = KubeExecCmd(namespace, grafanaPod, "grafana", "grafana-cli admin reset-admin-password "+password, nil, false)
 	if err != nil {
+		secret.Data["admin-password"] = oldpassword
+		KubeUpdateSecret(namespace, secret)
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 

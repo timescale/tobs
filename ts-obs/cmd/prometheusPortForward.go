@@ -45,7 +45,7 @@ func prometheusPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
-	err = KubePortForwardService(namespace, serviceName, port, FORWARD_PORT_PROM)
+	_, err = KubePortForwardService(namespace, serviceName, port, FORWARD_PORT_PROM)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}

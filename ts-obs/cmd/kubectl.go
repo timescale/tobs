@@ -23,6 +23,26 @@ import (
 
 var HOME = os.Getenv("HOME")
 
+/*
+func getNamespace(cmd *cobra.Command) (string, error) {
+    namespace, err := cmd.Flags().GetString("namespace")
+	if err != nil {
+        return "", err
+	}
+
+    return namespace, nil
+}
+
+func getReleaseName(cmd *cobra.Command) (string, error) {
+    name, err := cmd.Flags().GetString("name")
+	if err != nil {
+		return "", err
+	}
+
+    return name, nil
+}
+*/
+
 func KubeInit() (kubernetes.Interface, *rest.Config) {
 	var err error
 
@@ -77,19 +97,6 @@ func KubeGetServiceName(namespace string, labelmap map[string]string) (string, e
 	return services.Items[0].Name, nil
 }
 
-func KubeGetSecret(namespace string, secretName string) (*corev1.Secret, error) {
-	var err error
-
-	client, _ := KubeInit()
-
-	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return secret, nil
-}
-
 func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, error) {
 	var err error
 
@@ -113,12 +120,12 @@ func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, er
 	return names, nil
 }
 
-func KubeGetAllPods(name, namespace string) ([]corev1.Pod, error) {
+func KubeGetPods(namespace string, labelmap map[string]string) ([]corev1.Pod, error) {
 	var err error
 
 	client, _ := KubeInit()
 
-	labelSelector := metav1.LabelSelector{MatchLabels: map[string]string{"release": name}}
+	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
 	}
@@ -131,13 +138,57 @@ func KubeGetAllPods(name, namespace string) ([]corev1.Pod, error) {
 	return pods.Items, nil
 }
 
+func KubeGetSecret(namespace string, secretName string) (*corev1.Secret, error) {
+	var err error
+
+	client, _ := KubeInit()
+
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return secret, nil
+}
+
+func KubeGetAllPods(namespace string, name string) ([]corev1.Pod, error) {
+	var err error
+	var allpods []corev1.Pod
+
+	pods, err := KubeGetPods(namespace, map[string]string{"release": name})
+	if err != nil {
+		return nil, err
+	}
+	allpods = append(allpods, pods...)
+
+	pods, err = KubeGetPods(namespace, map[string]string{"app.kubernetes.io/instance": name})
+	if err != nil {
+		return nil, err
+	}
+	allpods = append(allpods, pods...)
+
+	pods, err = KubeGetPods(namespace, map[string]string{"app": name + "-timescale-prometheus"})
+	if err != nil {
+		return nil, err
+	}
+	allpods = append(allpods, pods...)
+
+	pods, err = KubeGetPods(namespace, map[string]string{"job-name": name + "-grafana-db"})
+	if err != nil {
+		return nil, err
+	}
+	allpods = append(allpods, pods...)
+
+	return allpods, nil
+}
+
 // ExecCmd exec command on specific pod and wait the command's output.
 func KubeExecCmd(namespace string, podName string, container string, command string, stdin io.Reader, tty bool) error {
 	var err error
 
 	client, config := KubeInit()
 
-	cmd := []string{
+	shcmd := []string{
 		"/bin/sh",
 		"-c",
 		command,
@@ -146,7 +197,7 @@ func KubeExecCmd(namespace string, podName string, container string, command str
 		Name(podName).SubResource("exec")
 	option := &corev1.PodExecOptions{
 		Container: container,
-		Command:   cmd,
+		Command:   shcmd,
 		Stdin:     true,
 		Stdout:    true,
 		Stderr:    true,
@@ -177,11 +228,12 @@ func KubeExecCmd(namespace string, podName string, container string, command str
 	return nil
 }
 
-func KubePortForwardPod(namespace string, podName string, local int, remote int) error {
+func KubePortForwardPod(namespace string, podName string, local int, remote int) (*portforward.PortForwarder, error) {
 	var err error
 
 	client, config := KubeInit()
 
+	fmt.Printf("Listening to pod %v from port %d\n", podName, local)
 	url := client.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Namespace(namespace).
@@ -190,7 +242,7 @@ func KubePortForwardPod(namespace string, podName string, local int, remote int)
 
 	transport, upgrader, err := spdy.RoundTripperFor(config)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", url)
@@ -199,7 +251,7 @@ func KubePortForwardPod(namespace string, podName string, local int, remote int)
 
 	pf, err := portforward.New(dialer, ports, make(chan struct{}, 1), make(chan struct{}, 1), os.Stdout, os.Stderr)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	errChan := make(chan error)
@@ -209,13 +261,13 @@ func KubePortForwardPod(namespace string, podName string, local int, remote int)
 
 	select {
 	case err = <-errChan:
-		return err
+		return nil, err
 	case <-pf.Ready:
-		return nil
+		return pf, nil
 	}
 }
 
-func KubePortForwardService(namespace string, serviceName string, local int, remote int) error {
+func KubePortForwardService(namespace string, serviceName string, local int, remote int) (*portforward.PortForwarder, error) {
 	var err error
 
 	client, _ := KubeInit()
@@ -228,13 +280,13 @@ func KubePortForwardService(namespace string, serviceName string, local int, rem
 
 	podName := pods.Items[0].Name
 
-	err = KubePortForwardPod(namespace, podName, local, remote)
+	pf, err := KubePortForwardPod(namespace, podName, local, remote)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	time.Sleep(1 * time.Second)
-	return nil
+	return pf, nil
 }
 
 func KubeCreatePod(pod *corev1.Pod) error {
@@ -256,7 +308,7 @@ func KubeDeletePod(namespace string, podName string) error {
 
 	client, _ := KubeInit()
 
-	fmt.Println("Deleting pod...")
+	fmt.Printf("Deleting pod %v...\n", podName)
 	err = client.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
@@ -268,13 +320,17 @@ func KubeDeletePod(namespace string, podName string) error {
 func KubeWaitOnPod(namespace string, podName string) error {
 	client, _ := KubeInit()
 
-	for {
+	fmt.Printf("Waiting on pod %v...\n", podName)
+	for i := 0; i < 6000; i++ {
 		pod, err := client.CoreV1().Pods(namespace).Get(context.Background(), podName, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
-		if pod.Status.Phase != corev1.PodPending && pod.Status.Phase != corev1.PodFailed {
+		if pod.Status.Phase != corev1.PodPending && pod.Status.Phase != corev1.PodFailed && pod.Status.Phase != corev1.PodUnknown {
+			fmt.Printf("Pod %v has started\n", podName)
 			break
+		} else if i == 5999 {
+			fmt.Println("WARNING: pod did not come up in 10 minutes")
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
@@ -287,7 +343,7 @@ func KubeDeleteService(namespace string, serviceName string) error {
 
 	client, _ := KubeInit()
 
-	fmt.Println("Deleting service...")
+	fmt.Printf("Deleting service %v...\n", serviceName)
 	err = client.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
@@ -301,7 +357,7 @@ func KubeDeleteEndpoint(namespace string, endpointName string) error {
 
 	client, _ := KubeInit()
 
-	fmt.Println("Deleting endpoint...")
+	fmt.Printf("Deleting endpoint %v...\n", endpointName)
 	err = client.CoreV1().Endpoints(namespace).Delete(context.Background(), endpointName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
@@ -315,7 +371,7 @@ func KubeDeletePVC(namespace string, PVCName string) error {
 
 	client, _ := KubeInit()
 
-	fmt.Println("Deleting PVC...")
+	fmt.Printf("Deleting PVC %v...\n", PVCName)
 	err = client.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), PVCName, metav1.DeleteOptions{})
 	if err != nil {
 		return err

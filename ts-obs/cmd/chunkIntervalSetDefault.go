@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/spf13/cobra"
 )
 
@@ -62,32 +60,14 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not set default chunk interval: %w", err)
 	}
 
-	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
-	if err != nil {
-		return fmt.Errorf("could not get TimescaleDB password: %w", err)
-	}
-
-	pass := string(secret.Data[user])
-
-	podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
-	if err != nil {
-		return fmt.Errorf("could not set default chunk interval: %w", err)
-	}
-
-	err = KubePortForwardPod(namespace, podName, LISTEN_PORT_TSDB, FORWARD_PORT_TSDB)
-	if err != nil {
-		return fmt.Errorf("could not set default chunk interval: %w", err)
-	}
-
-	var pool *pgxpool.Pool
-	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
+	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not set default chunk interval: %w", err)
 	}
 	defer pool.Close()
 
 	fmt.Printf("Setting default chunk interval to %v\n", chunk_interval)
-	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_default_chunk_interval(INTERVAL '1 second' * $1)", strconv.FormatFloat(chunk_interval.Seconds(), 'f', -1, 64))
+	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_default_chunk_interval($1::INTERVAL)", chunk_interval)
 	if err != nil {
 		return fmt.Errorf("could not set default chunk interval: %w", err)
 	}

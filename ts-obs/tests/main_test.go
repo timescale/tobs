@@ -6,7 +6,11 @@ import (
 	"os/exec"
 	"os/signal"
 	"testing"
+	"time"
 )
+
+const RELEASE_NAME = "gg"
+const NAMESPACE = "ns"
 
 func startKube() {
 	var err error
@@ -26,7 +30,7 @@ func installObs() {
 
 	log.Println("Installing Timescale Observability")
 
-	obsinstall := exec.Command("ts-obs", "install")
+	obsinstall := exec.Command("ts-obs", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	err = obsinstall.Run()
 	if err != nil {
 		log.Println("Error installing Timescale Observability:", err)
@@ -77,7 +81,7 @@ func TestMain(m *testing.M) {
 	startKube()
 	installObs()
 
-	os.Setenv("PGPASSWORD_POSTGRES", "tea")
+	time.Sleep(30 * time.Second)
 
 	code := m.Run()
 

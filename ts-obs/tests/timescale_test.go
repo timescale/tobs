@@ -2,7 +2,6 @@ package tests
 
 import (
 	"net"
-	"os"
 	"os/exec"
 	"syscall"
 	"testing"
@@ -14,10 +13,10 @@ func testTimescaleGetPassword(t testing.TB, user string) {
 
 	if user == "" {
 		t.Logf("Running 'ts-obs timescaledb get-password'")
-		getpass = exec.Command("ts-obs", "timescaledb", "get-password")
+		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else {
 		t.Logf("Running 'ts-obs timescaledb get-password -U %v'\n", user)
-		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-U", user)
+		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	}
 
 	out, err := getpass.CombinedOutput()
@@ -32,10 +31,10 @@ func testTimescalePortForward(t testing.TB, port string) {
 
 	if port == "" {
 		t.Logf("Running 'ts-obs timescaledb port-forward'")
-		portforward = exec.Command("ts-obs", "timescaledb", "port-forward")
+		portforward = exec.Command("ts-obs", "timescaledb", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else {
 		t.Logf("Running 'ts-obs timescaledb port-forward -p %v'\n", port)
-		portforward = exec.Command("ts-obs", "timescaledb", "port-forward", "-p", port)
+		portforward = exec.Command("ts-obs", "timescaledb", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	}
 
 	err := portforward.Start()
@@ -57,19 +56,19 @@ func testTimescalePortForward(t testing.TB, port string) {
 
 }
 
-func testTimescaleConnect(t testing.TB, master bool, user, password string) {
+func testTimescaleConnect(t testing.TB, master bool, user string) {
 	var connect *exec.Cmd
 
 	if master {
 		t.Logf("Running 'ts-obs timescaledb connect -m'")
-		connect = exec.Command("ts-obs", "timescaledb", "connect", "-m")
+		connect = exec.Command("ts-obs", "timescaledb", "connect", "-m", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else {
 		if user == "" {
-			t.Logf("Running 'ts-obs timescaledb connect -p %v'\n", password)
-			connect = exec.Command("ts-obs", "timescaledb", "connect", "-p", password)
+			t.Logf("Running 'ts-obs timescaledb connect'\n")
+			connect = exec.Command("ts-obs", "timescaledb", "connect", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 		} else {
-			t.Logf("Running 'ts-obs timescaledb connect -U %v -p %v'\n", user, password)
-			connect = exec.Command("ts-obs", "timescaledb", "connect", "-U", user, "-p", password)
+			t.Logf("Running 'ts-obs timescaledb connect -U %v'\n", user)
+			connect = exec.Command("ts-obs", "timescaledb", "connect", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 		}
 	}
 
@@ -91,8 +90,6 @@ func TestTimescale(t *testing.T) {
 
 	testTimescaleGetPassword(t, "")
 	testTimescaleGetPassword(t, "admin")
-	testTimescaleGetPassword(t, "23948")
-	testTimescaleGetPassword(t, "user93")
 
 	testTimescalePortForward(t, "")
 	testTimescalePortForward(t, "5432")
@@ -100,14 +97,10 @@ func TestTimescale(t *testing.T) {
 	testTimescalePortForward(t, "1030")
 	testTimescalePortForward(t, "2389")
 
-	os.Setenv("TESTP", "tea")
-	os.Setenv("TESTQ", "cola")
-	os.Setenv("TESTR", "mug")
-
-	testTimescaleConnect(t, true, "", "")
-	testTimescaleConnect(t, false, "", "TESTP")
-	testTimescaleConnect(t, false, "postgres", "TESTP")
-	testTimescaleConnect(t, false, "postgres", "TESTR")
-	testTimescaleConnect(t, false, "admin", "TESTP")
-	testTimescaleConnect(t, false, "admin", "TESTQ")
+	testTimescaleConnect(t, true, "")
+	testTimescaleConnect(t, false, "")
+	testTimescaleConnect(t, false, "postgres")
+	testTimescaleConnect(t, false, "postgres")
+	testTimescaleConnect(t, false, "admin")
+	testTimescaleConnect(t, false, "admin")
 }

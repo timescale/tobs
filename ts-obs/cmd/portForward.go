@@ -67,7 +67,7 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	err = KubePortForwardPod(namespace, podName, timescaledb, FORWARD_PORT_TSDB)
+	_, err = KubePortForwardPod(namespace, podName, timescaledb, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
@@ -78,7 +78,7 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	err = KubePortForwardService(namespace, serviceName, grafana, FORWARD_PORT_GRAFANA)
+	_, err = KubePortForwardService(namespace, serviceName, grafana, FORWARD_PORT_GRAFANA)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
@@ -89,7 +89,7 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	err = KubePortForwardService(namespace, serviceName, prometheus, FORWARD_PORT_PROM)
+	_, err = KubePortForwardService(namespace, serviceName, prometheus, FORWARD_PORT_PROM)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}

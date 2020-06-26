@@ -45,7 +45,7 @@ func grafanaPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}
 
-	err = KubePortForwardService(namespace, serviceName, port, FORWARD_PORT_GRAFANA)
+	_, err = KubePortForwardService(namespace, serviceName, port, FORWARD_PORT_GRAFANA)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}

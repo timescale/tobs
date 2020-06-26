@@ -21,7 +21,6 @@ var helmUninstallCmd = &cobra.Command{
 
 func init() {
 	helmCmd.AddCommand(helmUninstallCmd)
-	helmUninstallCmd.Flags().BoolP("pvc", "", false, "Remove Persistent Volume Claims")
 }
 
 func helmUninstall(cmd *cobra.Command, args []string) error {
@@ -29,12 +28,6 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 	var name string
 	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
-	}
-
-	var pvc bool
-	pvc, err = cmd.Flags().GetBool("pvc")
 	if err != nil {
 		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 	}
@@ -48,12 +41,12 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	var stdbuf bytes.Buffer
 	mw := io.MultiWriter(os.Stdout, &stdbuf)
 
-    var uninstall *exec.Cmd
-    if namespace == "default" {
-	    uninstall = exec.Command("helm", "uninstall", name)
-    } else {
-	    uninstall = exec.Command("helm", "uninstall", name, "-n", namespace)
-    }
+	var uninstall *exec.Cmd
+	if namespace == "default" {
+		uninstall = exec.Command("helm", "uninstall", name)
+	} else {
+		uninstall = exec.Command("helm", "uninstall", name, "-n", namespace)
+	}
 
 	uninstall.Stdout = mw
 	uninstall.Stderr = mw
@@ -65,7 +58,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Waiting for pods to terminate...")
 	for i := 0; i < 1000; i++ {
-		pods, err := KubeGetAllPods(name, namespace)
+		pods, err := KubeGetAllPods(namespace, name)
 		if err != nil {
 			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
 		}
@@ -88,23 +81,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		fmt.Println(err, ", skipping")
 	}
 
-	if !pvc {
-		return nil
-	}
-
-	fmt.Println("Getting Persistent Volume Claims")
-	pvcnames, err := KubeGetPVCNames(namespace, map[string]string{"release": name})
-	if err != nil {
-		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
-	}
-
-	fmt.Println("Removing Persistent Volume Claims")
-	for _, s := range pvcnames {
-		err = KubeDeletePVC(namespace, s)
-		if err != nil {
-			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
-		}
-	}
+	fmt.Println("Data was not deleted. To delete data as well, run 'ts-obs helm delete-data'")
 
 	return nil
 }

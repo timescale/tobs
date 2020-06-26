@@ -3,9 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"strconv"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/spf13/cobra"
 )
 
@@ -52,25 +50,7 @@ func chunkIntervalReset(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)
 	}
 
-	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
-	if err != nil {
-		return fmt.Errorf("could not get TimescaleDB password: %w", err)
-	}
-
-	pass := string(secret.Data[user])
-
-	podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
-	if err != nil {
-		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)
-	}
-
-	err = KubePortForwardPod(namespace, podName, LISTEN_PORT_TSDB, FORWARD_PORT_TSDB)
-	if err != nil {
-		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)
-	}
-
-	var pool *pgxpool.Pool
-	pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@localhost:"+strconv.Itoa(LISTEN_PORT_TSDB)+"/"+dbname)
+	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)
 	}

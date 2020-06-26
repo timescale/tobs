@@ -13,10 +13,10 @@ func testPrometheusPortForward(t testing.TB, port string) {
 
 	if port == "" {
 		t.Logf("Running 'ts-obs prometheus port-forward'")
-		portforward = exec.Command("ts-obs", "prometheus", "port-forward")
+		portforward = exec.Command("ts-obs", "prometheus", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else {
 		t.Logf("Running 'ts-obs prometheus port-forward -p %v'\n", port)
-		portforward = exec.Command("ts-obs", "prometheus", "port-forward", "-p", port)
+		portforward = exec.Command("ts-obs", "prometheus", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	}
 
 	err := portforward.Start()

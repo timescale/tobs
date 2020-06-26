@@ -15,36 +15,36 @@ func testpf(t testing.TB, timescale, grafana, prometheus string) {
 		if grafana == "" {
 			if prometheus == "" {
 				t.Logf("Running 'ts-obs port-forward'\n")
-				portforward = exec.Command("ts-obs", "port-forward")
+				portforward = exec.Command("ts-obs", "port-forward", "-n", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			} else {
 				t.Logf("Running 'ts-obs port-forward -p %v'\n", prometheus)
-				portforward = exec.Command("ts-obs", "port-forward", "-p", prometheus)
+				portforward = exec.Command("ts-obs", "port-forward", "-p", prometheus, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			}
 		} else {
 			if prometheus == "" {
 				t.Logf("Running 'ts-obs port-forward -g %v'\n", grafana)
-				portforward = exec.Command("ts-obs", "port-forward", "-g", grafana)
+				portforward = exec.Command("ts-obs", "port-forward", "-g", grafana, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			} else {
 				t.Logf("Running 'ts-obs port-forward -g %v -p %v'\n", grafana, prometheus)
-				portforward = exec.Command("ts-obs", "port-forward", "-g", grafana, "-p", prometheus)
+				portforward = exec.Command("ts-obs", "port-forward", "-g", grafana, "-p", prometheus, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			}
 		}
 	} else {
 		if grafana == "" {
 			if prometheus == "" {
 				t.Logf("Running 'ts-obs port-forward -t %v'\n", timescale)
-				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale)
+				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			} else {
 				t.Logf("Running 'ts-obs port-forward -t %v -p %v'\n", timescale, prometheus)
-				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale, "-p", prometheus)
+				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale, "-p", prometheus, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			}
 		} else {
 			if prometheus == "" {
 				t.Logf("Running 'ts-obs port-forward -t %v -g %v'\n", timescale, grafana)
-				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale, "-g", grafana)
+				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale, "-g", grafana, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			} else {
 				t.Logf("Running 'ts-obs port-forward -t %v -g %v -p %v'\n", timescale, grafana, prometheus)
-				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale, "-g", grafana, "-p", prometheus)
+				portforward = exec.Command("ts-obs", "port-forward", "-t", timescale, "-g", grafana, "-p", prometheus, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			}
 		}
 	}
