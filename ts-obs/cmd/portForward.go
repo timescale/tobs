@@ -6,13 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const FORWARD_PORT_TSDB = 5432
-const FORWARD_PORT_GRAFANA = 3000
-const FORWARD_PORT_PROM = 9090
-const LISTEN_PORT_TSDB = 5432
-const LISTEN_PORT_GRAFANA = 8080
-const LISTEN_PORT_PROM = 9090
-
 // portForwardCmd represents the port-forward command
 var portForwardCmd = &cobra.Command{
 	Use:   "port-forward",

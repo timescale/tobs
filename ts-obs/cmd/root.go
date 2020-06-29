@@ -22,21 +22,21 @@ compressed long-term store for time series metrics from Prometheus. This
 application is a CLI tool that allows users to quickly access the different
 components of Observability.`,
 	SilenceUsage: true,
-    PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-        var err error 
-        
-	    name, err = cmd.Flags().GetString("name")
-	    if err != nil {
-		    return fmt.Errorf("could not change Grafana password: %w", err)
-	    }
-    
-	    namespace, err = cmd.Flags().GetString("namespace")
-	    if err != nil {
-		    return fmt.Errorf("could not change Grafana password: %w", err)
-	    }
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		var err error
 
-        return nil
-    },
+		name, err = cmd.Flags().GetString("name")
+		if err != nil {
+			return fmt.Errorf("could not change Grafana password: %w", err)
+		}
+
+		namespace, err = cmd.Flags().GetString("namespace")
+		if err != nil {
+			return fmt.Errorf("could not change Grafana password: %w", err)
+		}
+
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

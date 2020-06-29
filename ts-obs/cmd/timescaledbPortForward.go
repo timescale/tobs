@@ -6,6 +6,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const LISTEN_PORT_TSDB = 5432
+const FORWARD_PORT_TSDB = 5432
+
 // timescaledbPortForwardCmd represents the timescaledb port-forward command
 var timescaledbPortForwardCmd = &cobra.Command{
 	Use:   "port-forward",

@@ -6,6 +6,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const LISTEN_PORT_GRAFANA = 8080
+const FORWARD_PORT_GRAFANA = 3000
+
 // grafanaPortForwardCmd represents the grafana port-forward command
 var grafanaPortForwardCmd = &cobra.Command{
 	Use:   "port-forward",

@@ -89,7 +89,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("Installing Timescale Observability")
-    out, err := install.CombinedOutput()
+	out, err := install.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
@@ -110,6 +110,6 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("Timescale Observability has been installed successfully")
-    fmt.Println(string(out))
+	fmt.Println(string(out))
 	return nil
 }

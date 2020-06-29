@@ -6,6 +6,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const LISTEN_PORT_PROM = 9090
+const FORWARD_PORT_PROM = 9090
+
 // prometheusPortForwardCmd represents the prometheus port-forward command
 var prometheusPortForwardCmd = &cobra.Command{
 	Use:   "port-forward",

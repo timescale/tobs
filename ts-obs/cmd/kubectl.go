@@ -23,26 +23,6 @@ import (
 
 var HOME = os.Getenv("HOME")
 
-/*
-func getNamespace(cmd *cobra.Command) (string, error) {
-    namespace, err := cmd.Flags().GetString("namespace")
-	if err != nil {
-        return "", err
-	}
-
-    return namespace, nil
-}
-
-func getReleaseName(cmd *cobra.Command) (string, error) {
-    name, err := cmd.Flags().GetString("name")
-	if err != nil {
-		return "", err
-	}
-
-    return name, nil
-}
-*/
-
 func KubeInit() (kubernetes.Interface, *rest.Config) {
 	var err error
 
