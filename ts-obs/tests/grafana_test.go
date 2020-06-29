@@ -18,7 +18,6 @@ func testGrafanaPortForward(t testing.TB, port string) {
 		t.Logf("Running 'ts-obs grafana port-forward -p %v'\n", port)
 		portforward = exec.Command("ts-obs", "grafana", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	}
-
 	err := portforward.Start()
 	if err != nil {
 		t.Fatal(err)

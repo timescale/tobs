@@ -23,18 +23,6 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 
 	password := args[0]
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not change Grafana password: %w", err)
-	}
-
-	var namespace string
-	namespace, err = cmd.Flags().GetString("namespace")
-	if err != nil {
-		return fmt.Errorf("could not change Grafana password: %w", err)
-	}
-
 	secret, err := KubeGetSecret(namespace, name+"-grafana")
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)

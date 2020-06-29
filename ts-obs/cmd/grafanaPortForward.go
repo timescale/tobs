@@ -28,18 +28,6 @@ func grafanaPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not port-forward Grafana: %w", err)
-	}
-
-	var namespace string
-	namespace, err = cmd.Flags().GetString("namespace")
-	if err != nil {
-		return fmt.Errorf("could not port-forward Grafana: %w", err)
-	}
-
 	serviceName, err := KubeGetServiceName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)

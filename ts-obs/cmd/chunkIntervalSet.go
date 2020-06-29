@@ -45,18 +45,6 @@ func chunkIntervalSet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not set chunk interval for %v: %w", metric, err)
 	}
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not set chunk interval for %v: %w", metric, err)
-	}
-
-	var namespace string
-	namespace, err = cmd.Flags().GetString("namespace")
-	if err != nil {
-		return fmt.Errorf("could not set chunk interval for %v: %w", metric, err)
-	}
-
 	if chunk_interval.Minutes() < 1.0 {
 		return fmt.Errorf("could not set chunk interval for %v: %w", metric, errors.New("Chunk interval must be at least 1 minute"))
 	}

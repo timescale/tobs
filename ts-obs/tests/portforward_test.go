@@ -15,7 +15,7 @@ func testpf(t testing.TB, timescale, grafana, prometheus string) {
 		if grafana == "" {
 			if prometheus == "" {
 				t.Logf("Running 'ts-obs port-forward'\n")
-				portforward = exec.Command("ts-obs", "port-forward", "-n", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+				portforward = exec.Command("ts-obs", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 			} else {
 				t.Logf("Running 'ts-obs port-forward -p %v'\n", prometheus)
 				portforward = exec.Command("ts-obs", "port-forward", "-p", prometheus, "-n", RELEASE_NAME, "--namespace", NAMESPACE)

@@ -38,18 +38,6 @@ func chunkIntervalReset(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)
 	}
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)
-	}
-
-	var namespace string
-	namespace, err = cmd.Flags().GetString("namespace")
-	if err != nil {
-		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)
-	}
-
 	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not reset chunk interval for %v: %w", metric, err)

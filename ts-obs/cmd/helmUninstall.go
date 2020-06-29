@@ -26,18 +26,6 @@ func init() {
 func helmUninstall(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
-	}
-
-	var namespace string
-	namespace, err = cmd.Flags().GetString("namespace")
-	if err != nil {
-		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
-	}
-
 	var stdbuf bytes.Buffer
 	mw := io.MultiWriter(os.Stdout, &stdbuf)
 

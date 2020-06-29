@@ -28,18 +28,6 @@ func timescaledbPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
-	}
-
-	var namespace string
-	namespace, err = cmd.Flags().GetString("namespace")
-	if err != nil {
-		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
-	}
-
 	podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)

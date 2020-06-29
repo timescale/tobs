@@ -29,18 +29,6 @@ func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
-	var name string
-	name, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return fmt.Errorf("could not get TimescaleDB password: %w", err)
-	}
-
-	var namespace string
-	namespace, err = cmd.Flags().GetString("namespace")
-	if err != nil {
-		return fmt.Errorf("could not get TimescaleDB password: %w", err)
-	}
-
 	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
