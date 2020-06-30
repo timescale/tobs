@@ -190,7 +190,7 @@ func verifyChunkInterval(t testing.TB, tableName string, expectedDuration time.D
 
 func TestMetrics(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping metrics tests")
+		//t.Skip("Skipping metrics tests")
 	}
 
 	secret, err := cmd.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-timescaledb-passwords")

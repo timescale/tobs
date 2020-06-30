@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"os"
 	"strconv"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -10,6 +11,10 @@ import (
 
 func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxpool.Pool, error) {
 	var err error
+
+	stdout := os.Stdout
+	os.Stdout = nil
+	defer func() { os.Stdout = stdout }()
 
 	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
 	if err != nil {
