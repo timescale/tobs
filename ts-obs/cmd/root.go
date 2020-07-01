@@ -27,12 +27,12 @@ components of Observability.`,
 
 		name, err = cmd.Flags().GetString("name")
 		if err != nil {
-			return fmt.Errorf("could not change Grafana password: %w", err)
+			return fmt.Errorf("could not read global flag: %w", err)
 		}
 
 		namespace, err = cmd.Flags().GetString("namespace")
 		if err != nil {
-			return fmt.Errorf("could not change Grafana password: %w", err)
+			return fmt.Errorf("could not read global flag: %w", err)
 		}
 
 		return nil

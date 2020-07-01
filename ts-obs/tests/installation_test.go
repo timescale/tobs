@@ -125,7 +125,7 @@ func testHelmGetYaml(t testing.TB) {
 	var getyaml *exec.Cmd
 
 	t.Logf("Running 'ts-obs helm get-yaml'")
-	getyaml = exec.Command("ts-obs", "helm", "get-yaml", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	getyaml = exec.Command("ts-obs", "helm", "get-yaml")
 
 	out, err := getyaml.CombinedOutput()
 	if err != nil {

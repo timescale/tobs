@@ -57,37 +57,18 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
-	var install *exec.Cmd
+	cmds := []string{"install", name, "timescale/timescale-observability"}
+	if namespace != "default" {
+		cmds = append(cmds, "--create-namespace", "--namespace", namespace)
+	}
+	if file != "" {
+		cmds = append(cmds, "--values", file)
+	}
 	if DEVEL {
-		if namespace == "default" {
-			if file == "" {
-				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--devel")
-			} else {
-				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability", "--devel")
-			}
-		} else {
-			if file == "" {
-				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--create-namespace", "-n", namespace, "--devel")
-			} else {
-				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace, "--devel")
-			}
-		}
-	} else {
-		if namespace == "default" {
-			if file == "" {
-				install = exec.Command("helm", "install", name, "timescale/timescale-observability")
-			} else {
-				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability")
-			}
-		} else {
-			if file == "" {
-				install = exec.Command("helm", "install", name, "timescale/timescale-observability", "--create-namespace", "-n", namespace)
-			} else {
-				install = exec.Command("helm", "install", name, "--values", file, "timescale/timescale-observability", "--create-namespace", "-n", namespace)
-			}
-		}
+		cmds = append(cmds, "--devel")
 	}
 
+	install := exec.Command("helm", cmds...)
 	fmt.Println("Installing Timescale Observability")
 	out, err := install.CombinedOutput()
 	if err != nil {

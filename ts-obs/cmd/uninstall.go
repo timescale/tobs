@@ -15,6 +15,7 @@ var uninstallCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(uninstallCmd)
 	uninstallCmd.Flags().BoolP("pvc", "", false, "Remove Persistent Volume Claims")
+	uninstallCmd.Flags().BoolP("delete-data", "", false, "Delete persistent volume claims")
 }
 
 func uninstall(cmd *cobra.Command, args []string) error {
