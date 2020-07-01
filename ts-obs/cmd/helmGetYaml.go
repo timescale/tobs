@@ -10,7 +10,7 @@ import (
 // helmGetYamlCmd represents the helm get-yaml command
 var helmGetYamlCmd = &cobra.Command{
 	Use:   "get-yaml",
-	Short: "Prints the default timescale-obserability values to console",
+	Short: "Prints the default Timescale Observability values to console",
 	Args:  cobra.ExactArgs(0),
 	RunE:  helmGetYaml,
 }

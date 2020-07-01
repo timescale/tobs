@@ -12,7 +12,7 @@ import (
 // chunkIntervalSetDefaultCmd represents the chunk-interval set-default command
 var chunkIntervalSetDefaultCmd = &cobra.Command{
 	Use:   "set-default <duration>",
-	Short: "Sets default chunk interval in minutes",
+	Short: "Sets default chunk interval",
 	Args:  cobra.ExactArgs(1),
 	RunE:  chunkIntervalSetDefault,
 }

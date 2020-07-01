@@ -36,6 +36,7 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
+	fmt.Println("Changing password...")
 	grafanaPod, err := KubeGetPodName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)

@@ -12,7 +12,7 @@ import (
 // chunkIntervalSetCmd represents the chunk-interval set command
 var chunkIntervalSetCmd = &cobra.Command{
 	Use:   "set <metric> <duration>",
-	Short: "Sets chunk interval in minutes for a specific metric",
+	Short: "Sets chunk interval for a specific metric",
 	Args:  cobra.ExactArgs(2),
 	RunE:  chunkIntervalSet,
 }

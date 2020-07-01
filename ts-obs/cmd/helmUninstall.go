@@ -33,7 +33,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	if namespace == "default" {
 		uninstall = exec.Command("helm", "uninstall", name)
 	} else {
-		uninstall = exec.Command("helm", "uninstall", name, "-n", namespace)
+		uninstall = exec.Command("helm", "uninstall", name, "--namespace", namespace)
 	}
 
 	uninstall.Stdout = mw
@@ -69,7 +69,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		fmt.Println(err, ", skipping")
 	}
 
-	fmt.Println("Data was not deleted. To delete data as well, run 'ts-obs helm delete-data'")
+	fmt.Println("Data still remains. To delete data as well, run 'ts-obs helm delete-data'")
 
 	return nil
 }

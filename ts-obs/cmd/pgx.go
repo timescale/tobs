@@ -12,6 +12,7 @@ import (
 func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxpool.Pool, error) {
 	var err error
 
+	// Suppress output
 	stdout := os.Stdout
 	os.Stdout = nil
 	defer func() { os.Stdout = stdout }()
