@@ -77,7 +77,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	}
 
 	if deleteData {
-		fmt.Println("Getting Persistent Volume Claims")
+		fmt.Println("Checking Persistent Volume Claims")
 		pvcnames, err := KubeGetPVCNames(namespace, map[string]string{"release": name})
 		if err != nil {
 			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
