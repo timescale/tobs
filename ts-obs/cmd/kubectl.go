@@ -306,8 +306,8 @@ func KubeWaitOnPod(namespace string, podName string) error {
 		if err != nil {
 			return err
 		}
-		if pod.Status.Phase != corev1.PodPending && pod.Status.Phase != corev1.PodFailed &&
-			pod.Status.Phase != corev1.PodUnknown {
+                podStatus := pod.Status.Phase
+		if podStatus != corev1.PodPending && podStatus != corev1.PodFailed && podStatus != corev1.PodUnknown {
 			fmt.Printf("Pod %v has started\n", podName)
 			break
 		} else if i == 5999 {
