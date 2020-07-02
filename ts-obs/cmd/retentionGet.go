@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -46,14 +45,13 @@ func retentionGet(cmd *cobra.Command, args []string) error {
 	defer pool.Close()
 
 	fmt.Printf("Getting retention period for %v\n", metric)
-	var secs int
-	err = pool.QueryRow(context.Background(), "SELECT EXTRACT(epoch FROM _prom_catalog.get_metric_retention_period($1))", metric).Scan(&secs)
+	var days int
+	err = pool.QueryRow(context.Background(), "SELECT EXTRACT(day FROM _prom_catalog.get_metric_retention_period($1))", metric).Scan(&days)
 	if err != nil {
 		return fmt.Errorf("could not get retention period for %v: %w", metric, err)
 	}
 
-	retention := time.Duration(secs) * time.Second
-	fmt.Println(retention)
+	fmt.Println(days, "days")
 
 	return nil
 }
