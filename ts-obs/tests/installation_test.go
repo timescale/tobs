@@ -55,16 +55,26 @@ func testHelmInstall(t testing.TB, name string, filename string) {
 	}
 }
 
-func testUninstall(t testing.TB, name string) {
+func testUninstall(t testing.TB, name string, deleteData bool) {
 	var uninstall *exec.Cmd
 
-	if name == "" {
-		t.Logf("Running 'ts-obs uninstall'")
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs uninstall -n %v'\n", name)
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
-	}
+    if deleteData {
+        if name == "" {
+		    t.Logf("Running 'ts-obs uninstall --delete-data'")
+		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	    } else {
+		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'\n", name)
+		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
+	    }
+    } else {
+        if name == "" {
+		    t.Logf("Running 'ts-obs uninstall'")
+		    uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	    } else {
+		    t.Logf("Running 'ts-obs uninstall -n %v'\n", name)
+		    uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
+	    }
+    }
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -73,16 +83,26 @@ func testUninstall(t testing.TB, name string) {
 	}
 }
 
-func testHelmUninstall(t testing.TB, name string) {
+func testHelmUninstall(t testing.TB, name string, deleteData bool) {
 	var uninstall *exec.Cmd
 
-	if name == "" {
-		t.Logf("Running 'ts-obs helm uninstall'")
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs helm uninstall -n %v'\n", name)
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
-	}
+    if deleteData {
+        if name == "" {
+		    t.Logf("Running 'ts-obs uninstall --delete-data'")
+		    uninstall = exec.Command("ts-obs", "helm", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	    } else {
+		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'\n", name)
+		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
+	    }
+    } else {
+        if name == "" {
+		    t.Logf("Running 'ts-obs uninstall'")
+		    uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	    } else {
+		    t.Logf("Running 'ts-obs uninstall -n %v'\n", name)
+		    uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
+	    }
+    }
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -136,40 +156,40 @@ func testHelmGetYaml(t testing.TB) {
 
 func TestInstallation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping installation tests")
+		//t.Skip("Skipping installation tests")
 	}
 
 	testHelmGetYaml(t)
 
-	testUninstall(t, "")
+	testUninstall(t, "", false)
 	testInstall(t, "", "")
-	testHelmUninstall(t, "")
+	testHelmUninstall(t, "", true)
 	testHelmInstall(t, "", "")
-	testUninstall(t, "")
+	testUninstall(t, "", false)
 	testHelmDeleteData(t)
 	testHelmInstall(t, "", "")
-	testHelmUninstall(t, "")
+	testHelmUninstall(t, "", false)
 	testInstall(t, "", "")
-	testUninstall(t, "")
+	testUninstall(t, "", false)
 	testHelmDeleteData(t)
 
 	testInstall(t, "sd-fo9ods-oe93", "")
-	testHelmUninstall(t, "sd-fo9ods-oe93")
+	testHelmUninstall(t, "sd-fo9ods-oe93", false)
 	testHelmInstall(t, "x98-2cn4-ru2-9cn48u", "")
-	testUninstall(t, "x98-2cn4-ru2-9cn48u")
+	testUninstall(t, "x98-2cn4-ru2-9cn48u", false)
 	testHelmInstall(t, "as-dn-in234i-n", "")
-	testHelmUninstall(t, "as-dn-in234i-n")
+	testHelmUninstall(t, "as-dn-in234i-n", false)
 	testInstall(t, "we-3oiwo3o-s-d", "")
-	testUninstall(t, "we-3oiwo3o-s-d")
+	testUninstall(t, "we-3oiwo3o-s-d", false)
 
 	testInstall(t, "f1", "./testdata/f1.yml")
-	testHelmUninstall(t, "f1")
+	testHelmUninstall(t, "f1", false)
 	testHelmInstall(t, "f2", "./testdata/f2.yml")
-	testUninstall(t, "f2")
+	testUninstall(t, "f2", false)
 	testHelmInstall(t, "f3", "./testdata/f3.yml")
-	testHelmUninstall(t, "f3")
+	testHelmUninstall(t, "f3", false)
 	testInstall(t, "f4", "./testdata/f4.yml")
-	testUninstall(t, "f4")
+	testUninstall(t, "f4", false)
 
 	testInstall(t, "", "")
 

@@ -55,7 +55,7 @@ func testRetentionReset(t testing.TB, metric string) {
 	}
 }
 
-func testRetentionGet(t testing.TB, metric string, expectedDuration time.Duration) {
+func testRetentionGet(t testing.TB, metric string, expectedDays int64) {
 	var get *exec.Cmd
 
 	t.Logf("Running 'ts-obs metrics retention get %v'\n", metric)
@@ -68,12 +68,12 @@ func testRetentionGet(t testing.TB, metric string, expectedDuration time.Duratio
 	}
 
 	tokens := strings.Fields(string(out))
-	duration, err := time.ParseDuration(tokens[len(tokens)-1])
+	days, err := strconv.ParseInt(tokens[len(tokens)-2], 10, 64)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if duration != expectedDuration {
-		t.Fatalf("Unexpected retention period for table %v: got %v want %v", metric, duration, expectedDuration)
+	if days != expectedDays {
+		t.Fatalf("Unexpected retention period for table %v: got %v want %v", metric, days, expectedDays)
 	}
 }
 
@@ -241,7 +241,7 @@ func TestMetrics(t *testing.T) {
 	testRetentionSetDefault(t, 11)
 	verifyRetentionPeriod(t, "go_info", 11*24*time.Hour)
 
-	testRetentionGet(t, "node_load5", 11*24*time.Hour)
+	testRetentionGet(t, "node_load5", 11)
 
 	testChunkIntervalSet(t, "container_last_seen", "23m45s")
 	verifyChunkInterval(t, "container_last_seen", (23*60+45)*time.Second)
