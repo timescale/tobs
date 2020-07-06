@@ -14,13 +14,13 @@ func testInstall(t testing.TB, name string, filename string) {
 		t.Logf("Running 'ts-obs install'")
 		install = exec.Command("ts-obs", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else if name == "" {
-		t.Logf("Running 'ts-obs install -f %v'\n", filename)
+		t.Logf("Running 'ts-obs install -f %v'", filename)
 		install = exec.Command("ts-obs", "install", "-f", filename, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else if filename == "" {
-		t.Logf("Running 'ts-obs install -n %v'\n", name)
+		t.Logf("Running 'ts-obs install -n %v'", name)
 		install = exec.Command("ts-obs", "install", "-n", name)
 	} else {
-		t.Logf("Running 'ts-obs install -n %v -f %v'\n", name, filename)
+		t.Logf("Running 'ts-obs install -n %v -f %v'", name, filename)
 		install = exec.Command("ts-obs", "install", "-n", name, "-f", filename)
 	}
 
@@ -38,13 +38,13 @@ func testHelmInstall(t testing.TB, name string, filename string) {
 		t.Logf("Running 'ts-obs helm install'")
 		install = exec.Command("ts-obs", "helm", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else if name == "" {
-		t.Logf("Running 'ts-obs helm install -f %v'\n", filename)
+		t.Logf("Running 'ts-obs helm install -f %v'", filename)
 		install = exec.Command("ts-obs", "helm", "install", "-f", filename, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else if filename == "" {
-		t.Logf("Running 'ts-obs helm install -n %v'\n", name)
+		t.Logf("Running 'ts-obs helm install -n %v'", name)
 		install = exec.Command("ts-obs", "helm", "install", "-n", name)
 	} else {
-		t.Logf("Running 'ts-obs helm install -n %v -f %v'\n", name, filename)
+		t.Logf("Running 'ts-obs helm install -n %v -f %v'", name, filename)
 		install = exec.Command("ts-obs", "helm", "install", "-n", name, "-f", filename)
 	}
 
@@ -63,7 +63,7 @@ func testUninstall(t testing.TB, name string, deleteData bool) {
 		    t.Logf("Running 'ts-obs uninstall --delete-data'")
 		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'\n", name)
+		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'", name)
 		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
 	    }
     } else {
@@ -71,7 +71,7 @@ func testUninstall(t testing.TB, name string, deleteData bool) {
 		    t.Logf("Running 'ts-obs uninstall'")
 		    uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v'\n", name)
+		    t.Logf("Running 'ts-obs uninstall -n %v'", name)
 		    uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
 	    }
     }
@@ -91,7 +91,7 @@ func testHelmUninstall(t testing.TB, name string, deleteData bool) {
 		    t.Logf("Running 'ts-obs uninstall --delete-data'")
 		    uninstall = exec.Command("ts-obs", "helm", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'\n", name)
+		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'", name)
 		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
 	    }
     } else {
@@ -99,7 +99,7 @@ func testHelmUninstall(t testing.TB, name string, deleteData bool) {
 		    t.Logf("Running 'ts-obs uninstall'")
 		    uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v'\n", name)
+		    t.Logf("Running 'ts-obs uninstall -n %v'", name)
 		    uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
 	    }
     }
@@ -156,7 +156,7 @@ func testHelmGetYaml(t testing.TB) {
 
 func TestInstallation(t *testing.T) {
 	if testing.Short() {
-		//t.Skip("Skipping installation tests")
+		t.Skip("Skipping installation tests")
 	}
 
 	testHelmGetYaml(t)

@@ -19,7 +19,7 @@ var PASS string
 func testRetentionSetDefault(t testing.TB, period int) {
 	var set *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics retention set-default %d'\n", period)
+	t.Logf("Running 'ts-obs metrics retention set-default %d'", period)
 	set = exec.Command("ts-obs", "metrics", "retention", "set-default", strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := set.CombinedOutput()
@@ -32,7 +32,7 @@ func testRetentionSetDefault(t testing.TB, period int) {
 func testRetentionSet(t testing.TB, metric string, period int) {
 	var set *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics retention set %v %d'\n", metric, period)
+	t.Logf("Running 'ts-obs metrics retention set %v %d'", metric, period)
 	set = exec.Command("ts-obs", "metrics", "retention", "set", metric, strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := set.CombinedOutput()
@@ -45,7 +45,7 @@ func testRetentionSet(t testing.TB, metric string, period int) {
 func testRetentionReset(t testing.TB, metric string) {
 	var reset *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics retention reset %v'\n", metric)
+	t.Logf("Running 'ts-obs metrics retention reset %v'", metric)
 	reset = exec.Command("ts-obs", "metrics", "retention", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := reset.CombinedOutput()
@@ -58,7 +58,7 @@ func testRetentionReset(t testing.TB, metric string) {
 func testRetentionGet(t testing.TB, metric string, expectedDays int64) {
 	var get *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics retention get %v'\n", metric)
+	t.Logf("Running 'ts-obs metrics retention get %v'", metric)
 	get = exec.Command("ts-obs", "metrics", "retention", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := get.CombinedOutput()
@@ -80,7 +80,7 @@ func testRetentionGet(t testing.TB, metric string, expectedDays int64) {
 func testChunkIntervalSetDefault(t testing.TB, interval string) {
 	var set *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics chunk-interval set-default %v'\n", interval)
+	t.Logf("Running 'ts-obs metrics chunk-interval set-default %v'", interval)
 	set = exec.Command("ts-obs", "metrics", "chunk-interval", "set-default", interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := set.CombinedOutput()
@@ -93,7 +93,7 @@ func testChunkIntervalSetDefault(t testing.TB, interval string) {
 func testChunkIntervalSet(t testing.TB, metric, interval string) {
 	var set *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics chunk-interval set %v %v'\n", metric, interval)
+	t.Logf("Running 'ts-obs metrics chunk-interval set %v %v'", metric, interval)
 	set = exec.Command("ts-obs", "metrics", "chunk-interval", "set", metric, interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := set.CombinedOutput()
@@ -106,7 +106,7 @@ func testChunkIntervalSet(t testing.TB, metric, interval string) {
 func testChunkIntervalReset(t testing.TB, metric string) {
 	var reset *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics chunk-interval reset %v'\n", metric)
+	t.Logf("Running 'ts-obs metrics chunk-interval reset %v'", metric)
 	reset = exec.Command("ts-obs", "metrics", "chunk-interval", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := reset.CombinedOutput()
@@ -119,7 +119,7 @@ func testChunkIntervalReset(t testing.TB, metric string) {
 func testChunkIntervalGet(t testing.TB, metric string, expectedDuration time.Duration) {
 	var get *exec.Cmd
 
-	t.Logf("Running 'ts-obs metrics chunk-interval get %v'\n", metric)
+	t.Logf("Running 'ts-obs metrics chunk-interval get %v'", metric)
 	get = exec.Command("ts-obs", "metrics", "chunk-interval", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := get.CombinedOutput()

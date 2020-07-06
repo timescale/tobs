@@ -15,7 +15,7 @@ func testGrafanaPortForward(t testing.TB, port string) {
 		t.Logf("Running 'ts-obs grafana port-forward'")
 		portforward = exec.Command("ts-obs", "grafana", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else {
-		t.Logf("Running 'ts-obs grafana port-forward -p %v'\n", port)
+		t.Logf("Running 'ts-obs grafana port-forward -p %v'", port)
 		portforward = exec.Command("ts-obs", "grafana", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	}
 	err := portforward.Start()
@@ -52,7 +52,7 @@ func testGrafanaGetPass(t testing.TB) {
 func testGrafanaChangePass(t testing.TB, newpass string) {
 	var changepass *exec.Cmd
 
-	t.Logf("Running 'ts-obs grafana change-password \"%v\"'\n", newpass)
+	t.Logf("Running 'ts-obs grafana change-password \"%v\"'", newpass)
 	changepass = exec.Command("ts-obs", "grafana", "change-password", "\""+newpass+"\"", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := changepass.CombinedOutput()
