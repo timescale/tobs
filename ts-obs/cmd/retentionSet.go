@@ -17,8 +17,6 @@ var retentionSetCmd = &cobra.Command{
 
 func init() {
 	retentionCmd.AddCommand(retentionSetCmd)
-	retentionSetCmd.Flags().StringP("user", "U", "postgres", "database user name")
-	retentionSetCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
 }
 
 func retentionSet(cmd *cobra.Command, args []string) error {
@@ -26,18 +24,6 @@ func retentionSet(cmd *cobra.Command, args []string) error {
 
 	metric := args[0]
 	retention_period := args[1]
-
-	var user string
-	user, err = cmd.Flags().GetString("user")
-	if err != nil {
-		return fmt.Errorf("could not set retention period for %v: %w", metric, err)
-	}
-
-	var dbname string
-	dbname, err = cmd.Flags().GetString("dbname")
-	if err != nil {
-		return fmt.Errorf("could not set retention period for %v: %w", metric, err)
-	}
 
 	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {

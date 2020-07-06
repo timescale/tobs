@@ -57,7 +57,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install Timescale Observability: %w", err)
 	}
 
-	cmds := []string{"install", name, "timescale/timescale-observability"}
+	cmds := []string{"install", name, "timescale/timescale-observability", "--set", "cli=true"}
 	if namespace != "default" {
 		cmds = append(cmds, "--create-namespace", "--namespace", namespace)
 	}
