@@ -7,19 +7,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// helmGetYamlCmd represents the helm get-yaml command
-var helmGetYamlCmd = &cobra.Command{
-	Use:   "get-yaml",
+// helmShowValuesCmd represents the helm show-values command
+var helmShowValuesCmd = &cobra.Command{
+	Use:   "show-values",
 	Short: "Prints the default Timescale Observability values to console",
 	Args:  cobra.ExactArgs(0),
-	RunE:  helmGetYaml,
+	RunE:  helmShowValues,
 }
 
 func init() {
-	helmCmd.AddCommand(helmGetYamlCmd)
+	helmCmd.AddCommand(helmShowValuesCmd)
 }
 
-func helmGetYaml(cmd *cobra.Command, args []string) error {
+func helmShowValues(cmd *cobra.Command, args []string) error {
 	var err error
 
 	var getyaml *exec.Cmd
