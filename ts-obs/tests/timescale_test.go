@@ -3,21 +3,20 @@ package tests
 import (
 	"net"
 	"os/exec"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
 )
 
 func testTimescaleGetPassword(t testing.TB, user string) {
-	var getpass *exec.Cmd
-
-	if user == "" {
-		t.Logf("Running 'ts-obs timescaledb get-password'")
-		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs timescaledb get-password -U %v'", user)
-		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	cmds := []string{"timescaledb", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
 	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	getpass := exec.Command("ts-obs", cmds...)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
@@ -26,28 +25,27 @@ func testTimescaleGetPassword(t testing.TB, user string) {
 	}
 }
 
-func testTimescaleChangePassword(t testing.TB, user string, newpass string) {
-    var changepass *exec.Cmd
-
- 	if user == "" {
-		t.Logf("Running 'ts-obs timescaledb change-password %v'", newpass)
-		changepass = exec.Command("ts-obs", "timescaledb", "change-password", newpass, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs timescaledb change-password -U %v'", user)
-		changepass = exec.Command("ts-obs", "timescaledb", "change-password", newpass, "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+func testTimescaleChangePassword(t testing.TB, user, dbname, newpass string) {
+	cmds := []string{"timescaledb", "change-password", newpass, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
 	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	changepass := exec.Command("ts-obs", cmds...)
 
 	out, err := changepass.CombinedOutput()
 	if err != nil {
 		t.Logf(string(out))
 		t.Fatal(err)
-    }
+	}
 }
 
 func verifyTimescalePassword(t testing.TB, user string, expectedPass string) {
-    var getpass *exec.Cmd
-
-	getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	getpass := exec.Command("ts-obs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
@@ -61,15 +59,13 @@ func verifyTimescalePassword(t testing.TB, user string, expectedPass string) {
 }
 
 func testTimescalePortForward(t testing.TB, port string) {
-	var portforward *exec.Cmd
-
-	if port == "" {
-		t.Logf("Running 'ts-obs timescaledb port-forward'")
-		portforward = exec.Command("ts-obs", "timescaledb", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs timescaledb port-forward -p %v'", port)
-		portforward = exec.Command("ts-obs", "timescaledb", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	cmds := []string{"timescaledb", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if port != "" {
+		cmds = append(cmds, "-p", port)
 	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	portforward := exec.Command("ts-obs", cmds...)
 
 	err := portforward.Start()
 	if err != nil {
@@ -87,7 +83,6 @@ func testTimescalePortForward(t testing.TB, port string) {
 	}
 
 	portforward.Process.Signal(syscall.SIGINT)
-
 }
 
 func testTimescaleConnect(t testing.TB, master bool, user string) {
@@ -119,15 +114,15 @@ func testTimescaleConnect(t testing.TB, master bool, user string) {
 
 func TestTimescale(t *testing.T) {
 	if testing.Short() {
-		//t.Skip("Skipping TimescaleDB tests")
+		t.Skip("Skipping TimescaleDB tests")
 	}
 
 	testTimescaleGetPassword(t, "")
-	testTimescaleChangePassword(t, "", "battery")
-    verifyTimescalePassword(t, "postgres", "battery")
+	testTimescaleChangePassword(t, "", "postgres", "battery")
+	verifyTimescalePassword(t, "postgres", "battery")
 	testTimescaleGetPassword(t, "admin")
-	testTimescaleChangePassword(t, "admin", "chips")
-    verifyTimescalePassword(t, "admin", "chips")
+	testTimescaleChangePassword(t, "admin", "", "chips")
+	verifyTimescalePassword(t, "admin", "chips")
 
 	testTimescalePortForward(t, "")
 	testTimescalePortForward(t, "5432")

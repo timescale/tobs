@@ -3,21 +3,20 @@ package tests
 import (
 	"net"
 	"os/exec"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
 )
 
 func testPrometheusPortForward(t testing.TB, port string) {
-	var portforward *exec.Cmd
-
-	if port == "" {
-		t.Logf("Running 'ts-obs prometheus port-forward'")
-		portforward = exec.Command("ts-obs", "prometheus", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs prometheus port-forward -p %v'", port)
-		portforward = exec.Command("ts-obs", "prometheus", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	cmds := []string{"prometheus", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if port != "" {
+		cmds = append(cmds, "-p", port)
 	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	portforward := exec.Command("ts-obs", cmds...)
 
 	err := portforward.Start()
 	if err != nil {

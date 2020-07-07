@@ -16,11 +16,17 @@ import (
 
 var PASS string
 
-func testRetentionSetDefault(t testing.TB, period int) {
-	var set *exec.Cmd
+func testRetentionSetDefault(t testing.TB, period int, user, dbname string) {
+	cmds := []string{"metrics", "retention", "set-default", strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics retention set-default %d'", period)
-	set = exec.Command("ts-obs", "metrics", "retention", "set-default", strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	set := exec.Command("ts-obs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -29,11 +35,17 @@ func testRetentionSetDefault(t testing.TB, period int) {
 	}
 }
 
-func testRetentionSet(t testing.TB, metric string, period int) {
-	var set *exec.Cmd
+func testRetentionSet(t testing.TB, metric string, period int, user, dbname string) {
+	cmds := []string{"metrics", "retention", "set", metric, strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics retention set %v %d'", metric, period)
-	set = exec.Command("ts-obs", "metrics", "retention", "set", metric, strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	set := exec.Command("ts-obs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -42,11 +54,17 @@ func testRetentionSet(t testing.TB, metric string, period int) {
 	}
 }
 
-func testRetentionReset(t testing.TB, metric string) {
-	var reset *exec.Cmd
+func testRetentionReset(t testing.TB, metric, user, dbname string) {
+	cmds := []string{"metrics", "retention", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics retention reset %v'", metric)
-	reset = exec.Command("ts-obs", "metrics", "retention", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	reset := exec.Command("ts-obs", cmds...)
 
 	out, err := reset.CombinedOutput()
 	if err != nil {
@@ -55,11 +73,17 @@ func testRetentionReset(t testing.TB, metric string) {
 	}
 }
 
-func testRetentionGet(t testing.TB, metric string, expectedDays int64) {
-	var get *exec.Cmd
+func testRetentionGet(t testing.TB, metric string, expectedDays int64, user, dbname string) {
+	cmds := []string{"metrics", "retention", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics retention get %v'", metric)
-	get = exec.Command("ts-obs", "metrics", "retention", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	get := exec.Command("ts-obs", cmds...)
 
 	out, err := get.CombinedOutput()
 	if err != nil {
@@ -77,11 +101,17 @@ func testRetentionGet(t testing.TB, metric string, expectedDays int64) {
 	}
 }
 
-func testChunkIntervalSetDefault(t testing.TB, interval string) {
-	var set *exec.Cmd
+func testChunkIntervalSetDefault(t testing.TB, interval, user, dbname string) {
+	cmds := []string{"metrics", "chunk-interval", "set-default", interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics chunk-interval set-default %v'", interval)
-	set = exec.Command("ts-obs", "metrics", "chunk-interval", "set-default", interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	set := exec.Command("ts-obs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -90,11 +120,17 @@ func testChunkIntervalSetDefault(t testing.TB, interval string) {
 	}
 }
 
-func testChunkIntervalSet(t testing.TB, metric, interval string) {
-	var set *exec.Cmd
+func testChunkIntervalSet(t testing.TB, metric, interval, user, dbname string) {
+	cmds := []string{"metrics", "chunk-interval", "set", metric, interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics chunk-interval set %v %v'", metric, interval)
-	set = exec.Command("ts-obs", "metrics", "chunk-interval", "set", metric, interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	set := exec.Command("ts-obs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -103,11 +139,17 @@ func testChunkIntervalSet(t testing.TB, metric, interval string) {
 	}
 }
 
-func testChunkIntervalReset(t testing.TB, metric string) {
-	var reset *exec.Cmd
+func testChunkIntervalReset(t testing.TB, metric, user, dbname string) {
+	cmds := []string{"metrics", "chunk-interval", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics chunk-interval reset %v'", metric)
-	reset = exec.Command("ts-obs", "metrics", "chunk-interval", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	reset := exec.Command("ts-obs", cmds...)
 
 	out, err := reset.CombinedOutput()
 	if err != nil {
@@ -116,11 +158,17 @@ func testChunkIntervalReset(t testing.TB, metric string) {
 	}
 }
 
-func testChunkIntervalGet(t testing.TB, metric string, expectedDuration time.Duration) {
-	var get *exec.Cmd
+func testChunkIntervalGet(t testing.TB, metric string, expectedDuration time.Duration, user, dbname string) {
+	cmds := []string{"metrics", "chunk-interval", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
+	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
 
-	t.Logf("Running 'ts-obs metrics chunk-interval get %v'", metric)
-	get = exec.Command("ts-obs", "metrics", "chunk-interval", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	get := exec.Command("ts-obs", cmds...)
 
 	out, err := get.CombinedOutput()
 	if err != nil {
@@ -190,7 +238,7 @@ func verifyChunkInterval(t testing.TB, tableName string, expectedDuration time.D
 
 func TestMetrics(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping metrics tests")
+		//t.Skip("Skipping metrics tests")
 	}
 
 	secret, err := cmd.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-timescaledb-passwords")
@@ -217,53 +265,53 @@ func TestMetrics(t *testing.T) {
 	}
 	os.Stdout = stdout
 
-	testRetentionSetDefault(t, 10)
+	testRetentionSetDefault(t, 10, "", "")
 	verifyRetentionPeriod(t, "container_last_seen", 10*24*time.Hour)
 
-	testRetentionReset(t, "up")
+	testRetentionReset(t, "up", "", "")
 	verifyRetentionPeriod(t, "up", 10*24*time.Hour)
 
-	testRetentionSet(t, "node_load15", 9)
+	testRetentionSet(t, "node_load15", 9, "", "postgres")
 	verifyRetentionPeriod(t, "node_load15", 9*24*time.Hour)
 
-	testRetentionSet(t, "up", 2)
+	testRetentionSet(t, "up", 2, "postgres", "")
 	verifyRetentionPeriod(t, "up", 2*24*time.Hour)
 
-	testRetentionSet(t, "kube_pod_status_phase", 32)
+	testRetentionSet(t, "kube_pod_status_phase", 32, "", "postgres")
 	verifyRetentionPeriod(t, "kube_pod_status_phase", 32*24*time.Hour)
 
-	testRetentionReset(t, "up")
+	testRetentionReset(t, "up", "", "")
 	verifyRetentionPeriod(t, "up", 10*24*time.Hour)
 
-	testRetentionReset(t, "node_load5")
+	testRetentionReset(t, "node_load5", "", "")
 	verifyRetentionPeriod(t, "node_load15", 10*24*time.Hour)
 
-	testRetentionSetDefault(t, 11)
+	testRetentionSetDefault(t, 11, "", "postgres")
 	verifyRetentionPeriod(t, "go_info", 11*24*time.Hour)
 
-	testRetentionGet(t, "node_load5", 11)
+	testRetentionGet(t, "node_load5", 11, "", "")
 
-	testChunkIntervalSet(t, "container_last_seen", "23m45s")
+	testChunkIntervalSet(t, "container_last_seen", "23m45s", "", "")
 	verifyChunkInterval(t, "container_last_seen", (23*60+45)*time.Second)
 
-	testChunkIntervalSetDefault(t, "62m3s")
+	testChunkIntervalSetDefault(t, "62m3s", "", "")
 	verifyChunkInterval(t, "node_load15", (62*60+3)*time.Second)
 
-	testChunkIntervalSet(t, "go_info", "3403s")
+	testChunkIntervalSet(t, "go_info", "3403s", "postgres", "postgres")
 	verifyChunkInterval(t, "go_info", 3403*time.Second)
 
-	testChunkIntervalGet(t, "node_load15", (62*60+3)*time.Second)
+	testChunkIntervalGet(t, "node_load15", (62*60+3)*time.Second, "", "")
 
-	testChunkIntervalReset(t, "go_info")
+	testChunkIntervalReset(t, "go_info", "", "postgres")
 	verifyChunkInterval(t, "go_info", (62*60+3)*time.Second)
 
-	testChunkIntervalSet(t, "kube_job_info", "8h24m")
+	testChunkIntervalSet(t, "kube_job_info", "8h24m", "", "")
 	verifyChunkInterval(t, "kube_job_info", (8*60+24)*time.Minute)
 
-	testChunkIntervalSetDefault(t, "23h")
+	testChunkIntervalSetDefault(t, "23h", "", "postgres")
 	verifyChunkInterval(t, "kube_pod_status_phase", (23)*time.Hour)
 
-	testChunkIntervalReset(t, "go_threads")
+	testChunkIntervalReset(t, "go_threads", "", "")
 	verifyChunkInterval(t, "go_threads", (23)*time.Hour)
 
 }

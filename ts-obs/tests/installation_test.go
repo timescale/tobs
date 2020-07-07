@@ -58,23 +58,23 @@ func testHelmInstall(t testing.TB, name string, filename string) {
 func testUninstall(t testing.TB, name string, deleteData bool) {
 	var uninstall *exec.Cmd
 
-    if deleteData {
-        if name == "" {
-		    t.Logf("Running 'ts-obs uninstall --delete-data'")
-		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'", name)
-		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
-	    }
-    } else {
-        if name == "" {
-		    t.Logf("Running 'ts-obs uninstall'")
-		    uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v'", name)
-		    uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
-	    }
-    }
+	if deleteData {
+		if name == "" {
+			t.Logf("Running 'ts-obs uninstall --delete-data'")
+			uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+		} else {
+			t.Logf("Running 'ts-obs uninstall -n %v --delete-data'", name)
+			uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
+		}
+	} else {
+		if name == "" {
+			t.Logf("Running 'ts-obs uninstall'")
+			uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+		} else {
+			t.Logf("Running 'ts-obs uninstall -n %v'", name)
+			uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
+		}
+	}
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -86,23 +86,23 @@ func testUninstall(t testing.TB, name string, deleteData bool) {
 func testHelmUninstall(t testing.TB, name string, deleteData bool) {
 	var uninstall *exec.Cmd
 
-    if deleteData {
-        if name == "" {
-		    t.Logf("Running 'ts-obs uninstall --delete-data'")
-		    uninstall = exec.Command("ts-obs", "helm", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v --delete-data'", name)
-		    uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
-	    }
-    } else {
-        if name == "" {
-		    t.Logf("Running 'ts-obs uninstall'")
-		    uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	    } else {
-		    t.Logf("Running 'ts-obs uninstall -n %v'", name)
-		    uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
-	    }
-    }
+	if deleteData {
+		if name == "" {
+			t.Logf("Running 'ts-obs uninstall --delete-data'")
+			uninstall = exec.Command("ts-obs", "helm", "uninstall", "--delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+		} else {
+			t.Logf("Running 'ts-obs uninstall -n %v --delete-data'", name)
+			uninstall = exec.Command("ts-obs", "uninstall", "--delete-data", "-n", name)
+		}
+	} else {
+		if name == "" {
+			t.Logf("Running 'ts-obs uninstall'")
+			uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+		} else {
+			t.Logf("Running 'ts-obs uninstall -n %v'", name)
+			uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
+		}
+	}
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -209,4 +209,6 @@ func TestInstallation(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+
+	time.Sleep(30 * time.Second)
 }
