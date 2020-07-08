@@ -153,13 +153,13 @@ func testHelmDeleteData(t testing.TB, name, namespace string) {
 	}
 }
 
-func testHelmGetYaml(t testing.TB) {
-	var getyaml *exec.Cmd
+func testHelmShowValues(t testing.TB) {
+	var showvalues *exec.Cmd
 
-	t.Logf("Running 'ts-obs helm get-yaml'")
-	getyaml = exec.Command("ts-obs", "helm", "get-yaml")
+	t.Logf("Running 'ts-obs helm show-values'")
+	showvalues = exec.Command("ts-obs", "helm", "show-values")
 
-	out, err := getyaml.CombinedOutput()
+	out, err := showvalues.CombinedOutput()
 	if err != nil {
 		t.Logf(string(out))
 		t.Fatal(err)
@@ -171,7 +171,7 @@ func TestInstallation(t *testing.T) {
 		t.Skip("Skipping installation tests")
 	}
 
-	testHelmGetYaml(t)
+	testHelmShowValues(t)
 
 	testUninstall(t, "", "", false)
 	testInstall(t, "", "", "")

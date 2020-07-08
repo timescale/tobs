@@ -22,15 +22,15 @@ func init() {
 func helmShowValues(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var getyaml *exec.Cmd
+	var showvalues *exec.Cmd
 	if DEVEL {
-		getyaml = exec.Command("helm", "show", "values", "timescale/timescale-observability", "--devel")
+		showvalues = exec.Command("helm", "show", "values", "timescale/timescale-observability", "--devel")
 	} else {
-		getyaml = exec.Command("helm", "show", "values", "timescale/timescale-observability")
+		showvalues = exec.Command("helm", "show", "values", "timescale/timescale-observability")
 	}
 
 	var out []byte
-	out, err = getyaml.CombinedOutput()
+	out, err = showvalues.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("could not get Helm values: %w", err)
 	}
