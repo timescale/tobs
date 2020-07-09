@@ -61,3 +61,13 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+CLI release name and namespace 
+*/}}
+{{- define "timescale-observability.cliOptions" -}}
+{{- if ne .Release.Name "ts-obs" }} -n {{ .Release.Name }}
+{{- end -}}
+{{- if ne .Release.Namespace "default" }} --namespace {{ .Release.Namespace }} 
+{{- end -}}
+{{- end -}}
