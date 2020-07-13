@@ -3,21 +3,20 @@ package tests
 import (
 	"net"
 	"os/exec"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
 )
 
 func testTimescaleGetPassword(t testing.TB, user string) {
-	var getpass *exec.Cmd
-
-	if user == "" {
-		t.Logf("Running 'ts-obs timescaledb get-password'")
-		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs timescaledb get-password -U %v'\n", user)
-		getpass = exec.Command("ts-obs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	cmds := []string{"timescaledb", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
 	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	getpass := exec.Command("ts-obs", cmds...)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
@@ -26,16 +25,47 @@ func testTimescaleGetPassword(t testing.TB, user string) {
 	}
 }
 
-func testTimescalePortForward(t testing.TB, port string) {
-	var portforward *exec.Cmd
-
-	if port == "" {
-		t.Logf("Running 'ts-obs timescaledb port-forward'")
-		portforward = exec.Command("ts-obs", "timescaledb", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs timescaledb port-forward -p %v'\n", port)
-		portforward = exec.Command("ts-obs", "timescaledb", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+func testTimescaleChangePassword(t testing.TB, user, dbname, newpass string) {
+	cmds := []string{"timescaledb", "change-password", newpass, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if user != "" {
+		cmds = append(cmds, "-U", user)
 	}
+	if dbname != "" {
+		cmds = append(cmds, "-d", dbname)
+	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	changepass := exec.Command("ts-obs", cmds...)
+
+	out, err := changepass.CombinedOutput()
+	if err != nil {
+		t.Logf(string(out))
+		t.Fatal(err)
+	}
+}
+
+func verifyTimescalePassword(t testing.TB, user string, expectedPass string) {
+	getpass := exec.Command("ts-obs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+
+	out, err := getpass.CombinedOutput()
+	if err != nil {
+		t.Logf(string(out))
+		t.Fatal(err)
+	}
+
+	if string(out) == expectedPass {
+		t.Fatalf("Password mismatch: got %v want %v", string(out), expectedPass)
+	}
+}
+
+func testTimescalePortForward(t testing.TB, port string) {
+	cmds := []string{"timescaledb", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if port != "" {
+		cmds = append(cmds, "-p", port)
+	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	portforward := exec.Command("ts-obs", cmds...)
 
 	err := portforward.Start()
 	if err != nil {
@@ -53,7 +83,6 @@ func testTimescalePortForward(t testing.TB, port string) {
 	}
 
 	portforward.Process.Signal(syscall.SIGINT)
-
 }
 
 func testTimescaleConnect(t testing.TB, master bool, user string) {
@@ -64,10 +93,10 @@ func testTimescaleConnect(t testing.TB, master bool, user string) {
 		connect = exec.Command("ts-obs", "timescaledb", "connect", "-m", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else {
 		if user == "" {
-			t.Logf("Running 'ts-obs timescaledb connect'\n")
+			t.Logf("Running 'ts-obs timescaledb connect'")
 			connect = exec.Command("ts-obs", "timescaledb", "connect", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 		} else {
-			t.Logf("Running 'ts-obs timescaledb connect -U %v'\n", user)
+			t.Logf("Running 'ts-obs timescaledb connect -U %v'", user)
 			connect = exec.Command("ts-obs", "timescaledb", "connect", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 		}
 	}
@@ -89,7 +118,11 @@ func TestTimescale(t *testing.T) {
 	}
 
 	testTimescaleGetPassword(t, "")
+	testTimescaleChangePassword(t, "", "postgres", "battery")
+	verifyTimescalePassword(t, "postgres", "battery")
 	testTimescaleGetPassword(t, "admin")
+	testTimescaleChangePassword(t, "admin", "", "chips")
+	verifyTimescalePassword(t, "admin", "chips")
 
 	testTimescalePortForward(t, "")
 	testTimescalePortForward(t, "5432")

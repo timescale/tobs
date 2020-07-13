@@ -2,27 +2,31 @@ package tests
 
 import (
 	"os/exec"
+	"strings"
 	"testing"
 	"time"
 
 	"ts-obs/cmd"
 )
 
-func testInstall(t testing.TB, name string, filename string) {
-	var install *exec.Cmd
-	if name == "" && filename == "" {
-		t.Logf("Running 'ts-obs install'")
-		install = exec.Command("ts-obs", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else if name == "" {
-		t.Logf("Running 'ts-obs install -f %v'\n", filename)
-		install = exec.Command("ts-obs", "install", "-f", filename, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else if filename == "" {
-		t.Logf("Running 'ts-obs install -n %v'\n", name)
-		install = exec.Command("ts-obs", "install", "-n", name)
+func testInstall(t testing.TB, name, namespace, filename string) {
+	cmds := []string{"install"}
+	if name != "" {
+		cmds = append(cmds, "-n", name)
 	} else {
-		t.Logf("Running 'ts-obs install -n %v -f %v'\n", name, filename)
-		install = exec.Command("ts-obs", "install", "-n", name, "-f", filename)
+		cmds = append(cmds, "-n", RELEASE_NAME)
 	}
+	if namespace != "" {
+		cmds = append(cmds, "--namespace", namespace)
+	} else {
+		cmds = append(cmds, "--namespace", NAMESPACE)
+	}
+	if filename != "" {
+		cmds = append(cmds, "-f", filename)
+	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	install := exec.Command("ts-obs", cmds...)
 
 	out, err := install.CombinedOutput()
 	if err != nil {
@@ -31,22 +35,24 @@ func testInstall(t testing.TB, name string, filename string) {
 	}
 }
 
-func testHelmInstall(t testing.TB, name string, filename string) {
-	var install *exec.Cmd
-
-	if name == "" && filename == "" {
-		t.Logf("Running 'ts-obs helm install'")
-		install = exec.Command("ts-obs", "helm", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else if name == "" {
-		t.Logf("Running 'ts-obs helm install -f %v'\n", filename)
-		install = exec.Command("ts-obs", "helm", "install", "-f", filename, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else if filename == "" {
-		t.Logf("Running 'ts-obs helm install -n %v'\n", name)
-		install = exec.Command("ts-obs", "helm", "install", "-n", name)
+func testHelmInstall(t testing.TB, name, namespace, filename string) {
+	cmds := []string{"helm", "install"}
+	if name != "" {
+		cmds = append(cmds, "-n", name)
 	} else {
-		t.Logf("Running 'ts-obs helm install -n %v -f %v'\n", name, filename)
-		install = exec.Command("ts-obs", "helm", "install", "-n", name, "-f", filename)
+		cmds = append(cmds, "-n", RELEASE_NAME)
 	}
+	if namespace != "" {
+		cmds = append(cmds, "--namespace", namespace)
+	} else {
+		cmds = append(cmds, "--namespace", NAMESPACE)
+	}
+	if filename != "" {
+		cmds = append(cmds, "-f", filename)
+	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	install := exec.Command("ts-obs", cmds...)
 
 	out, err := install.CombinedOutput()
 	if err != nil {
@@ -55,16 +61,24 @@ func testHelmInstall(t testing.TB, name string, filename string) {
 	}
 }
 
-func testUninstall(t testing.TB, name string) {
-	var uninstall *exec.Cmd
-
-	if name == "" {
-		t.Logf("Running 'ts-obs uninstall'")
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+func testUninstall(t testing.TB, name, namespace string, deleteData bool) {
+	cmds := []string{"uninstall"}
+	if name != "" {
+		cmds = append(cmds, "-n", name)
 	} else {
-		t.Logf("Running 'ts-obs uninstall -n %v'\n", name)
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
+		cmds = append(cmds, "-n", RELEASE_NAME)
 	}
+	if namespace != "" {
+		cmds = append(cmds, "--namespace", namespace)
+	} else {
+		cmds = append(cmds, "--namespace", NAMESPACE)
+	}
+	if deleteData {
+		cmds = append(cmds, "--delete-data")
+	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	uninstall := exec.Command("ts-obs", cmds...)
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -73,16 +87,24 @@ func testUninstall(t testing.TB, name string) {
 	}
 }
 
-func testHelmUninstall(t testing.TB, name string) {
-	var uninstall *exec.Cmd
-
-	if name == "" {
-		t.Logf("Running 'ts-obs helm uninstall'")
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+func testHelmUninstall(t testing.TB, name, namespace string, deleteData bool) {
+	cmds := []string{"helm", "uninstall"}
+	if name != "" {
+		cmds = append(cmds, "-n", name)
 	} else {
-		t.Logf("Running 'ts-obs helm uninstall -n %v'\n", name)
-		uninstall = exec.Command("ts-obs", "uninstall", "-n", name)
+		cmds = append(cmds, "-n", RELEASE_NAME)
 	}
+	if namespace != "" {
+		cmds = append(cmds, "--namespace", namespace)
+	} else {
+		cmds = append(cmds, "--namespace", NAMESPACE)
+	}
+	if deleteData {
+		cmds = append(cmds, "--delete-data")
+	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	uninstall := exec.Command("ts-obs", cmds...)
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -100,11 +122,21 @@ func testHelmUninstall(t testing.TB, name string) {
 
 }
 
-func testHelmDeleteData(t testing.TB) {
-	var deletedata *exec.Cmd
+func testHelmDeleteData(t testing.TB, name, namespace string) {
+	cmds := []string{"helm", "delete-data"}
+	if name != "" {
+		cmds = append(cmds, "-n", name)
+	} else {
+		cmds = append(cmds, "-n", RELEASE_NAME)
+	}
+	if namespace != "" {
+		cmds = append(cmds, "--namespace", namespace)
+	} else {
+		cmds = append(cmds, "--namespace", NAMESPACE)
+	}
 
-	t.Logf("Running 'ts-obs helm delete-data'")
-	deletedata = exec.Command("ts-obs", "helm", "delete-data", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	deletedata := exec.Command("ts-obs", cmds...)
 
 	out, err := deletedata.CombinedOutput()
 	if err != nil {
@@ -121,13 +153,13 @@ func testHelmDeleteData(t testing.TB) {
 	}
 }
 
-func testHelmGetYaml(t testing.TB) {
-	var getyaml *exec.Cmd
+func testHelmShowValues(t testing.TB) {
+	var showvalues *exec.Cmd
 
-	t.Logf("Running 'ts-obs helm get-yaml'")
-	getyaml = exec.Command("ts-obs", "helm", "get-yaml")
+	t.Logf("Running 'ts-obs helm show-values'")
+	showvalues = exec.Command("ts-obs", "helm", "show-values")
 
-	out, err := getyaml.CombinedOutput()
+	out, err := showvalues.CombinedOutput()
 	if err != nil {
 		t.Logf(string(out))
 		t.Fatal(err)
@@ -139,54 +171,56 @@ func TestInstallation(t *testing.T) {
 		t.Skip("Skipping installation tests")
 	}
 
-	testHelmGetYaml(t)
+	testHelmShowValues(t)
 
-	testUninstall(t, "")
-	testInstall(t, "", "")
-	testHelmUninstall(t, "")
-	testHelmInstall(t, "", "")
-	testUninstall(t, "")
-	testHelmDeleteData(t)
-	testHelmInstall(t, "", "")
-	testHelmUninstall(t, "")
-	testInstall(t, "", "")
-	testUninstall(t, "")
-	testHelmDeleteData(t)
+	testUninstall(t, "", "", false)
+	testInstall(t, "", "", "")
+	testHelmUninstall(t, "", "", true)
+	testHelmInstall(t, "", "", "")
+	testUninstall(t, "", "", false)
+	testHelmDeleteData(t, "", "")
+	testHelmInstall(t, "", "", "")
+	testHelmUninstall(t, "", "", false)
+	testInstall(t, "", "", "")
+	testUninstall(t, "", "", false)
+	testHelmDeleteData(t, "", "")
 
-	testInstall(t, "sd-fo9ods-oe93", "")
-	testHelmUninstall(t, "sd-fo9ods-oe93")
-	testHelmInstall(t, "x98-2cn4-ru2-9cn48u", "")
-	testUninstall(t, "x98-2cn4-ru2-9cn48u")
-	testHelmInstall(t, "as-dn-in234i-n", "")
-	testHelmUninstall(t, "as-dn-in234i-n")
-	testInstall(t, "we-3oiwo3o-s-d", "")
-	testUninstall(t, "we-3oiwo3o-s-d")
+	testInstall(t, "sd-fo9ods-oe93", "", "")
+	testHelmUninstall(t, "sd-fo9ods-oe93", "", false)
+	testHelmInstall(t, "x98-2cn4-ru2-9cn48u", "nondef", "")
+	testUninstall(t, "x98-2cn4-ru2-9cn48u", "nondef", false)
+	testHelmInstall(t, "as-dn-in234i-n", "", "")
+	testHelmUninstall(t, "as-dn-in234i-n", "", false)
+	testInstall(t, "we-3oiwo3o-s-d", "", "")
+	testUninstall(t, "we-3oiwo3o-s-d", "", false)
 
-	testInstall(t, "f1", "./testdata/f1.yml")
-	testHelmUninstall(t, "f1")
-	testHelmInstall(t, "f2", "./testdata/f2.yml")
-	testUninstall(t, "f2")
-	testHelmInstall(t, "f3", "./testdata/f3.yml")
-	testHelmUninstall(t, "f3")
-	testInstall(t, "f4", "./testdata/f4.yml")
-	testUninstall(t, "f4")
+	testInstall(t, "f1", "", "./testdata/f1.yml")
+	testHelmUninstall(t, "f1", "", false)
+	testHelmInstall(t, "f2", "", "./testdata/f2.yml")
+	testUninstall(t, "f2", "", false)
+	testHelmInstall(t, "f3", "nas", "./testdata/f3.yml")
+	testHelmUninstall(t, "f3", "nas", false)
+	testInstall(t, "f4", "", "./testdata/f4.yml")
+	testUninstall(t, "f4", "", false)
 
-	testInstall(t, "", "")
+	testInstall(t, "", "", "")
 
 	time.Sleep(10 * time.Second)
 
 	t.Logf("Waiting for pods to initialize...")
-	pods, err := cmd.KubeGetAllPods("ts-obs", "default")
+	pods, err := cmd.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
 	if err != nil {
 		t.Logf("Error getting all pods")
 		t.Fatal(err)
 	}
 
 	for _, pod := range pods {
-		err = cmd.KubeWaitOnPod("default", pod.Name)
+		err = cmd.KubeWaitOnPod(NAMESPACE, pod.Name)
 		if err != nil {
 			t.Logf("Error while waiting on pod")
 			t.Fatal(err)
 		}
 	}
+
+	time.Sleep(30 * time.Second)
 }

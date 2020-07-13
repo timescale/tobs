@@ -3,21 +3,21 @@ package tests
 import (
 	"net"
 	"os/exec"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
 )
 
 func testGrafanaPortForward(t testing.TB, port string) {
-	var portforward *exec.Cmd
-
-	if port == "" {
-		t.Logf("Running 'ts-obs grafana port-forward'")
-		portforward = exec.Command("ts-obs", "grafana", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
-	} else {
-		t.Logf("Running 'ts-obs grafana port-forward -p %v'\n", port)
-		portforward = exec.Command("ts-obs", "grafana", "port-forward", "-p", port, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	cmds := []string{"grafana", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	if port != "" {
+		cmds = append(cmds, "-p", port)
 	}
+
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	portforward := exec.Command("ts-obs", cmds...)
+
 	err := portforward.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -37,10 +37,10 @@ func testGrafanaPortForward(t testing.TB, port string) {
 }
 
 func testGrafanaGetPass(t testing.TB) {
-	var getpass *exec.Cmd
+	cmds := []string{"grafana", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
 
-	t.Logf("Running 'ts-obs grafana get-password'")
-	getpass = exec.Command("ts-obs", "grafana", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	getpass := exec.Command("ts-obs", cmds...)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
@@ -50,10 +50,10 @@ func testGrafanaGetPass(t testing.TB) {
 }
 
 func testGrafanaChangePass(t testing.TB, newpass string) {
-	var changepass *exec.Cmd
+	cmds := []string{"grafana", "change-password", "\"" + newpass + "\"", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
 
-	t.Logf("Running 'ts-obs grafana change-password \"%v\"'\n", newpass)
-	changepass = exec.Command("ts-obs", "grafana", "change-password", "\""+newpass+"\"", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
+	changepass := exec.Command("ts-obs", cmds...)
 
 	out, err := changepass.CombinedOutput()
 	if err != nil {
@@ -63,9 +63,7 @@ func testGrafanaChangePass(t testing.TB, newpass string) {
 }
 
 func verifyGrafanaPass(t testing.TB, expectedPass string) {
-	var getpass *exec.Cmd
-
-	getpass = exec.Command("ts-obs", "grafana", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	getpass := exec.Command("ts-obs", "grafana", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {

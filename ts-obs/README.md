@@ -5,6 +5,7 @@ This is a CLI tool for installing and managing the Timescale Observability Helm 
 ## Quick Start
 
 __Dependencies__: [Go](https://golang.org/doc/install), [Helm](https://helm.sh/docs/intro/install/)
+
 To install the CLI, run `go install` from inside the `ts-obs` folder. 
 Then, copy the `ts-obs` binary from `$GOPATH/bin` to your `/bin` folder. 
 
@@ -26,16 +27,17 @@ The following are the commands possible with the CLI.
 |---------------------------|---------------------------------------------------------------------------|------------------------------------------------------|
 | `ts-obs helm install`     | Installs the Timescale Observability Helm chart.                          | `--filename`, `-f` : file to load configuration from |
 | `ts-obs helm uninstall`   | Uninstalls the Timescale Observability Helm chart.                        | None                                                 |
-| `ts-obs helm get-yaml`    | Writes the YAML configuration of the Timescale Observability Helm chart.  | None                                                 |
+| `ts-obs helm show-values` | Prints the YAML configuration of the Timescale Observability Helm chart.  | None                                                 |
 | `ts-obs helm delete-data` | Deletes persistent volume claims associated with Timescale Observability. | None                                                 |
 
 ### TimescaleDB Commands
 
 | Command                           | Description                                                | Flags                                       |
 |-----------------------------------|------------------------------------------------------------|---------------------------------------------|
-| `ts-obs timescaledb connect`      | Connects to the Timescale database running in the cluster. | `--user`, `-U` : user to login with <br> `--master`, `-m` : directly execute session on master node |
-| `ts-obs timescaledb port-forward` | Port-forwards TimescaleDB to localhost.                    | `--port`, `-p` : port to listen from        |
-| `ts-obs timescaledb get-password` | Gets the password for a user in the Timescale database.    | `--user`, `-U` : user whose password to get |
+| `ts-obs timescaledb connect`         | Connects to the Timescale database running in the cluster. | `--user`, `-U` : user to login with <br> `--master`, `-m` : directly execute session on master node |
+| `ts-obs timescaledb port-forward`    | Port-forwards TimescaleDB to localhost.                    | `--port`, `-p` : port to listen from        |
+| `ts-obs timescaledb get-password`    | Gets the password for a user in the Timescale database.    | `--user`, `-U` : user whose password to get |
+| `ts-obs timescaledb change-password` | Changes the password for a user in the Timescale database. | `--user`, `-U` : user whose password to get |
 
 ### Grafana Commands
 
@@ -65,6 +67,8 @@ The following are the commands possible with the CLI.
 | `ts-obs metrics chunk-interval reset`       | Resets chunk interval of a specific metric to the default value.                     | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
 
 ## Global Flags
+
+The following are global flags that can be used with any of the above commands: 
 
 | Flag           | Description          |
 |----------------|----------------------|

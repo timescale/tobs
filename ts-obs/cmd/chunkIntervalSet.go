@@ -19,8 +19,6 @@ var chunkIntervalSetCmd = &cobra.Command{
 
 func init() {
 	chunkIntervalCmd.AddCommand(chunkIntervalSetCmd)
-	chunkIntervalSetCmd.Flags().StringP("user", "U", "postgres", "database user name")
-	chunkIntervalSetCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
 }
 
 func chunkIntervalSet(cmd *cobra.Command, args []string) error {
@@ -29,18 +27,6 @@ func chunkIntervalSet(cmd *cobra.Command, args []string) error {
 	metric := args[0]
 	var chunk_interval time.Duration
 	chunk_interval, err = time.ParseDuration(args[1])
-	if err != nil {
-		return fmt.Errorf("could not set chunk interval for %v: %w", metric, err)
-	}
-
-	var user string
-	user, err = cmd.Flags().GetString("user")
-	if err != nil {
-		return fmt.Errorf("could not set chunk interval for %v: %w", metric, err)
-	}
-
-	var dbname string
-	dbname, err = cmd.Flags().GetString("dbname")
 	if err != nil {
 		return fmt.Errorf("could not set chunk interval for %v: %w", metric, err)
 	}

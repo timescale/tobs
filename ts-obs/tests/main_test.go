@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-const RELEASE_NAME = "gg"
-const NAMESPACE = "ns"
+var RELEASE_NAME = "gg"
+var NAMESPACE = "ns"
 
 func startKube() {
 	var err error

@@ -19,8 +19,6 @@ var chunkIntervalSetDefaultCmd = &cobra.Command{
 
 func init() {
 	chunkIntervalCmd.AddCommand(chunkIntervalSetDefaultCmd)
-	chunkIntervalSetDefaultCmd.Flags().StringP("user", "U", "postgres", "database user name")
-	chunkIntervalSetDefaultCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
 }
 
 func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
@@ -34,18 +32,6 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 
 	if chunk_interval.Minutes() < 1.0 {
 		return fmt.Errorf("could not set default chunk interval: %w", errors.New("Chunk interval must be at least 1 minute"))
-	}
-
-	var user string
-	user, err = cmd.Flags().GetString("user")
-	if err != nil {
-		return fmt.Errorf("could not set default chunk interval: %w", err)
-	}
-
-	var dbname string
-	dbname, err = cmd.Flags().GetString("dbname")
-	if err != nil {
-		return fmt.Errorf("could not set default chunk interval: %w", err)
 	}
 
 	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
