@@ -13,6 +13,7 @@ spec:
   template:
     spec:
 {{- $root := . -}}
+{{- $vals := .Values -}}
 {{- with .Values.grafana.timescale }}
       containers:
         - name: {{ $root.Chart.Name }}-grafana-db
@@ -23,7 +24,7 @@ spec:
               subPath: add-users.sql
           env:
             - name: PGPORT
-              value: "5432"
+              value: {{ index $vals "timescale-prometheus" "connection" "port" | quote }}
             - name: PGUSER
               value: {{ .adminUser }}
             - name: PGPASSWORD
@@ -33,7 +34,7 @@ spec:
                   key: {{ .adminUser }}
             - name: PGHOST
               value: {{ tpl .database.host $root }}
-          command: ['psql', '-f', '/add-users.sql']
+          command: ['psql', '-d', {{ .database.dbName }}, '-f', '/add-users.sql']
       restartPolicy: OnFailure
       volumes: 
         - name: sql-volume

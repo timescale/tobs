@@ -11,9 +11,12 @@ metadata:
 type: Opaque
 data: 
 {{- $root := . -}}
+{{- $host := tpl .Values.grafana.timescale.database.host $root -}}
+{{- $port := index .Values "timescale-prometheus" "connection" "port" | int -}}
+{{- $fullhost := printf "%s:%d" $host $port -}}
 {{- with .Values.grafana.timescale.database }}
   GF_DATABASE_TYPE: {{ "postgres" | b64enc }}
-  GF_DATABASE_HOST: {{ tpl .host $root | b64enc }}
+  GF_DATABASE_HOST: {{ $fullhost | b64enc }}
   GF_DATABASE_NAME: {{ .dbName | b64enc }}
   GF_DATABASE_USER: {{ .user | b64enc }}
   GF_DATABASE_PASSWORD: {{ .pass | b64enc }}
