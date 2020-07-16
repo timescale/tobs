@@ -31,9 +31,11 @@ stringData:
 {{ if $tsEnabled -}}
 {{- $isDefault := not $promEnabled -}}
 {{- $root := . -}}
+{{- $host := tpl .Values.grafana.timescale.database.host $root -}}
+{{- $port := index .Values "timescale-prometheus" "connection" "port" | int -}}
 {{ with .Values.grafana.timescale.datasource }}
       - name: TimescaleDB
-        url: {{ tpl .host $root }}
+        url: {{ printf "%s:%d" $host $port }}
         type: postgres
         isDefault: {{ $isDefault }}
         access: proxy
