@@ -10,9 +10,8 @@ metadata:
     release: {{ .Release.Name }}
 type: Opaque
 data: 
-{{- $root := . -}}
-{{- $host := tpl .Values.grafana.timescale.database.host $root -}}
-{{- $port := index .Values "timescale-prometheus" "connection" "port" | int -}}
+{{- $host := tpl .Values.grafana.timescale.database.host $ -}}
+{{- $port := .Values.grafana.timescale.database.port | int -}}
 {{- $fullhost := printf "%s:%d" $host $port -}}
 {{- with .Values.grafana.timescale.database }}
   GF_DATABASE_TYPE: {{ "postgres" | b64enc }}

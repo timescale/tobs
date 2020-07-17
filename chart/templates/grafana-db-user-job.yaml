@@ -12,11 +12,10 @@ metadata:
 spec:
   template:
     spec:
-{{- $root := . -}}
 {{- $vals := .Values -}}
 {{- with .Values.grafana.timescale }}
       containers:
-        - name: {{ $root.Chart.Name }}-grafana-db
+        - name: {{ $.Chart.Name }}-grafana-db
           image: postgres:12-alpine
           volumeMounts:
             - name: sql-volume
@@ -24,22 +23,22 @@ spec:
               subPath: add-users.sql
           env:
             - name: PGPORT
-              value: {{ index $vals "timescale-prometheus" "connection" "port" | quote }}
+              value: {{ .database.port | quote }}
             - name: PGUSER
               value: {{ .adminUser }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ tpl .adminPassSecret $root }}
+                  name: {{ tpl .adminPassSecret $ }}
                   key: {{ .adminUser }}
             - name: PGHOST
-              value: {{ tpl .database.host $root }}
+              value: {{ tpl .database.host $ }}
           command: ['psql', '-d', {{ .database.dbName }}, '-f', '/add-users.sql']
       restartPolicy: OnFailure
       volumes: 
         - name: sql-volume
           configMap:
-            name: {{ $root.Release.Name }}-grafana-db
+            name: {{ $.Release.Name }}-grafana-db
       initContainers:
         - name: init-db
           image: busybox:1.28
@@ -49,7 +48,7 @@ spec:
               subPath: wait-for-ts.sh
           env:
             - name: PGHOST
-              value: {{ tpl .database.host $root }}
+              value: {{ tpl .database.host $ }}
           command: ['sh', '/wait-for-ts.sh']
 {{- end -}}
 {{- end -}}
