@@ -5,7 +5,6 @@ import (
 	"errors"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -49,13 +48,13 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		return nil, errors.New("user not found")
 	}
 
-	if strings.HasSuffix(host, ".svc.cluster.local") {
-		podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
-		if err != nil {
-			return nil, err
-		}
+    tsdbPods, err := KubeGetPods(namespace, map[string]string{"release": name, "role": "master"})
+	if err != nil {
+		return nil, err
+	}
 
-		pf, err := KubePortForwardPod(namespace, podName, 0, remote)
+	if len(tsdbPods) != 0 {
+		pf, err := KubePortForwardPod(namespace, tsdbPods[0].Name, 0, remote)
 		if err != nil {
 			return nil, err
 		}
