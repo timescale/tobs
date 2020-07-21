@@ -36,6 +36,7 @@ timescale-prometheus:
       # Host name (templated) of the database instance, default
       # to service created in timescaledb-single
       nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
+    port: 5432
 
   # configuration options for the service exposed by timescale-prometheus
   service:
@@ -111,6 +112,7 @@ grafana:
     database:
       enabled: true
       host:  *dbHost
+      port: 5432
       user: grafanadb
       pass: grafanadb
       dbName: *metricDB
@@ -125,6 +127,7 @@ grafana:
       # By default the url/host is set to the db instance deployed
       # with this chart
       host: *dbHost
+      port: 5432
     adminUser: postgres
     adminPassSecret: *dbPassSecret
 

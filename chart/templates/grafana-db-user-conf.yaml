@@ -21,6 +21,7 @@ data:
         RAISE NOTICE 'role {{ $timescaleAsDB.user }} already exists, skipping create';
       END
     $$;
+    GRANT {{ $timescaleAsDB.user }} TO {{ .Values.grafana.timescale.adminUser }};
     CREATE SCHEMA IF NOT EXISTS {{ $timescaleAsDB.schema }} AUTHORIZATION {{ $timescaleAsDB.user }};
     ALTER ROLE {{ $timescaleAsDB.user }} SET search_path = {{ $timescaleAsDB.schema }};
     {{- end }}

@@ -11,10 +11,9 @@ metadata:
    chart: {{ template "timescale-observability.chart" . }}
    release: {{ .Release.Name }}
 data:
-{{- $root := . -}}
 {{ range $dash := .Values.grafana.sidecar.dashboards.files }}
   {{ base $dash -}}: |-
-{{ $root.Files.Get $dash | indent 4 }}
+{{ $.Files.Get $dash | indent 4 }}
 {{- end }}
 {{- end -}}
 {{- end -}}
