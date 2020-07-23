@@ -1,6 +1,6 @@
 # tobs - The OBServability Stack for Kubernetes CLI
 
-This is a CLI tool for installing and managing the The OBServability stack. 
+This is a CLI tool for installing and managing the The OBServability stack for Kubernetes. 
 
 ## Quick Start
 
