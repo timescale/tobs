@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "ts-obs/cmd"
+import "tobs/cmd"
 
 func main() {
 	cmd.Execute()

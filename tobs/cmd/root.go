@@ -15,12 +15,12 @@ var name string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "ts-obs",
-	Short: "A CLI tool for Timescale Observablity",
-	Long: `Timescale Observability is a tool that uses TimescaleDB as a 
+	Use:   "tobs",
+	Short: "A CLI tool for The Observablity Stack",
+	Long: `The Observability Stack is a tool that uses TimescaleDB as a 
 compressed long-term store for time series metrics from Prometheus. This
 application is a CLI tool that allows users to quickly access the different
-components of Observability.`,
+components of OBServability.`,
 	SilenceUsage: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		var err error
@@ -49,8 +49,8 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ts-obs.yaml)")
-	rootCmd.PersistentFlags().StringP("name", "n", "ts-obs", "Helm release name")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tobs.yaml)")
+	rootCmd.PersistentFlags().StringP("name", "n", "tobs", "Helm release name")
 	rootCmd.PersistentFlags().StringP("namespace", "", "default", "Kubernetes namespace")
 }
 
@@ -67,9 +67,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".ts-obs" (without extension).
+		// Search config in home directory with name ".tobs" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".ts-obs")
+		viper.SetConfigName(".tobs")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

@@ -24,14 +24,14 @@ func helmDeleteData(cmd *cobra.Command, args []string) error {
 	fmt.Println("Getting Persistent Volume Claims")
 	pvcnames, err := KubeGetPVCNames(namespace, map[string]string{"release": name})
 	if err != nil {
-		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
+		return fmt.Errorf("could not delete PVCs: %w", err)
 	}
 
 	fmt.Println("Removing Persistent Volume Claims")
 	for _, s := range pvcnames {
 		err = KubeDeletePVC(namespace, s)
 		if err != nil {
-			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
+		    return fmt.Errorf("could not delete PVCs: %w", err)
 		}
 	}
 

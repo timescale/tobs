@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"ts-obs/cmd"
+	"tobs/cmd"
 )
 
 func changeRelease(t testing.TB) {
