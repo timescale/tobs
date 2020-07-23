@@ -1,6 +1,6 @@
-# tobs - The OBServability Stack for Kubernetes CLI
+# tobs - The Observability Stack for Kubernetes CLI
 
-This is a CLI tool for installing and managing the The OBServability stack for Kubernetes. 
+This is a CLI tool for installing and managing the The Observability stack for Kubernetes. 
 
 ## Quick Start
 
@@ -25,10 +25,10 @@ The following are the commands possible with the CLI.
 
 | Command                 | Description                                                                  | Flags                                                |
 |-------------------------|------------------------------------------------------------------------------|------------------------------------------------------|
-| `tobs helm install`     | Installs Helm chart for The OBServability Stack.                             | `--filename`, `-f` : file to load configuration from |
-| `tobs helm uninstall`   | Uninstalls Helm chart for The OBServability Stack.                           | None                                                 |
-| `tobs helm show-values` | Prints the YAML configuration of the Helm chart for The OBServability Stack. | None                                                 |
-| `tobs helm delete-data` | Deletes persistent volume claims associated with The OBServability Stack.    | None                                                 |
+| `tobs helm install`     | Installs Helm chart for The Observability Stack.                             | `--filename`, `-f` : file to load configuration from |
+| `tobs helm uninstall`   | Uninstalls Helm chart for The Observability Stack.                           | None                                                 |
+| `tobs helm show-values` | Prints the YAML configuration of the Helm chart for The Observability Stack. | None                                                 |
+| `tobs helm delete-data` | Deletes persistent volume claims associated with The Observability Stack.    | None                                                 |
 
 ### TimescaleDB Commands
 

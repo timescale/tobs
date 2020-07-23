@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Long: `The Observability Stack is a tool that uses TimescaleDB as a 
 compressed long-term store for time series metrics from Prometheus. This
 application is a CLI tool that allows users to quickly access the different
-components of OBServability.`,
+components of Observability.`,
 	SilenceUsage: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		var err error
