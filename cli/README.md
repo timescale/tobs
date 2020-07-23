@@ -1,6 +1,6 @@
 # tobs - The Observability Stack for Kubernetes CLI
 
-This is a CLI tool for installing and managing the The Observability stack for Kubernetes. 
+This is a CLI tool for installing and managing the The Observability Stack for Kubernetes. 
 
 ## Quick Start
 
