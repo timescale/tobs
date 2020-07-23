@@ -10,7 +10,7 @@ import (
 // helmShowValuesCmd represents the helm show-values command
 var helmShowValuesCmd = &cobra.Command{
 	Use:   "show-values",
-	Short: "Prints the default Timescale Observability values to console",
+	Short: "Prints the default Observability Stack values to console",
 	Args:  cobra.ExactArgs(0),
 	RunE:  helmShowValues,
 }

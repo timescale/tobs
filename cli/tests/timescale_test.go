@@ -15,8 +15,8 @@ func testTimescaleGetPassword(t testing.TB, user string) {
 		cmds = append(cmds, "-U", user)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	getpass := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	getpass := exec.Command("tobs", cmds...)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
@@ -34,8 +34,8 @@ func testTimescaleChangePassword(t testing.TB, user, dbname, newpass string) {
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	changepass := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	changepass := exec.Command("tobs", cmds...)
 
 	out, err := changepass.CombinedOutput()
 	if err != nil {
@@ -45,7 +45,7 @@ func testTimescaleChangePassword(t testing.TB, user, dbname, newpass string) {
 }
 
 func verifyTimescalePassword(t testing.TB, user string, expectedPass string) {
-	getpass := exec.Command("ts-obs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	getpass := exec.Command("tobs", "timescaledb", "get-password", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
@@ -64,8 +64,8 @@ func testTimescalePortForward(t testing.TB, port string) {
 		cmds = append(cmds, "-p", port)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	portforward := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	portforward := exec.Command("tobs", cmds...)
 
 	err := portforward.Start()
 	if err != nil {
@@ -89,15 +89,15 @@ func testTimescaleConnect(t testing.TB, master bool, user string) {
 	var connect *exec.Cmd
 
 	if master {
-		t.Logf("Running 'ts-obs timescaledb connect -m'")
-		connect = exec.Command("ts-obs", "timescaledb", "connect", "-m", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+		t.Logf("Running 'tobs timescaledb connect -m'")
+		connect = exec.Command("tobs", "timescaledb", "connect", "-m", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	} else {
 		if user == "" {
-			t.Logf("Running 'ts-obs timescaledb connect'")
-			connect = exec.Command("ts-obs", "timescaledb", "connect", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+			t.Logf("Running 'tobs timescaledb connect'")
+			connect = exec.Command("tobs", "timescaledb", "connect", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 		} else {
-			t.Logf("Running 'ts-obs timescaledb connect -U %v'", user)
-			connect = exec.Command("ts-obs", "timescaledb", "connect", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+			t.Logf("Running 'tobs timescaledb connect -U %v'", user)
+			connect = exec.Command("tobs", "timescaledb", "connect", "-U", user, "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 		}
 	}
 

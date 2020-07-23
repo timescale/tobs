@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-	"ts-obs/cmd"
+	"cli/cmd"
 )
 
 var PASS string
@@ -25,8 +25,8 @@ func testRetentionSetDefault(t testing.TB, period int, user, dbname string) {
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	set := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	set := exec.Command("tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -44,8 +44,8 @@ func testRetentionSet(t testing.TB, metric string, period int, user, dbname stri
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	set := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	set := exec.Command("tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -63,8 +63,8 @@ func testRetentionReset(t testing.TB, metric, user, dbname string) {
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	reset := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	reset := exec.Command("tobs", cmds...)
 
 	out, err := reset.CombinedOutput()
 	if err != nil {
@@ -82,8 +82,8 @@ func testRetentionGet(t testing.TB, metric string, expectedDays int64, user, dbn
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	get := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	get := exec.Command("tobs", cmds...)
 
 	out, err := get.CombinedOutput()
 	if err != nil {
@@ -110,8 +110,8 @@ func testChunkIntervalSetDefault(t testing.TB, interval, user, dbname string) {
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	set := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	set := exec.Command("tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -129,8 +129,8 @@ func testChunkIntervalSet(t testing.TB, metric, interval, user, dbname string) {
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	set := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	set := exec.Command("tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -148,8 +148,8 @@ func testChunkIntervalReset(t testing.TB, metric, user, dbname string) {
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	reset := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	reset := exec.Command("tobs", cmds...)
 
 	out, err := reset.CombinedOutput()
 	if err != nil {
@@ -167,8 +167,8 @@ func testChunkIntervalGet(t testing.TB, metric string, expectedDuration time.Dur
 		cmds = append(cmds, "-d", dbname)
 	}
 
-	t.Logf("Running '%v'", "ts-obs "+strings.Join(cmds, " "))
-	get := exec.Command("ts-obs", cmds...)
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	get := exec.Command("tobs", cmds...)
 
 	out, err := get.CombinedOutput()
 	if err != nil {

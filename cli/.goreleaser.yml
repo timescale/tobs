@@ -1,5 +1,6 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
+project_name: tobs
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -8,7 +9,8 @@ builds:
 - env:
   - CGO_ENABLED=0
 archives:
-- replacements:
+- name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  replacements:
     darwin: Darwin
     linux: Linux
     windows: Windows

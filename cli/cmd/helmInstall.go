@@ -16,7 +16,7 @@ const REPO_LOCATION = "https://charts.timescale.com"
 // helmInstallCmd represents the helm install command
 var helmInstallCmd = &cobra.Command{
 	Use:   "install",
-	Short: "Installs Timescale Observability",
+	Short: "Installs The Observability Stack",
 	Args:  cobra.ExactArgs(0),
 	RunE:  helmInstall,
 }
@@ -32,7 +32,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	var file string
 	file, err = cmd.Flags().GetString("filename")
 	if err != nil {
-		return fmt.Errorf("could not install Timescale Observability: %w", err)
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
 	w := io.Writer(os.Stdout)
@@ -44,7 +44,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Adding Timescale Helm Repository")
 	err = addchart.Run()
 	if err != nil {
-		return fmt.Errorf("could not install Timescale Observability: %w", err)
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
 	update := exec.Command("helm", "repo", "update")
@@ -54,7 +54,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Fetching updates from repository")
 	err = update.Run()
 	if err != nil {
-		return fmt.Errorf("could not install Timescale Observability: %w", err)
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
 	cmds := []string{"install", name, "timescale/timescale-observability", "--set", "cli=true"}
@@ -69,10 +69,10 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	}
 
 	install := exec.Command("helm", cmds...)
-	fmt.Println("Installing Timescale Observability")
+	fmt.Println("Installing The Observability Stack")
 	out, err := install.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("could not install Timescale Observability: %w", err)
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
 	time.Sleep(10 * time.Second)
@@ -90,7 +90,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("Timescale Observability has been installed successfully")
+	fmt.Println("The Observability Stack has been installed successfully")
 	fmt.Println(string(out))
 	return nil
 }

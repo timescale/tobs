@@ -28,12 +28,12 @@ func startKube() {
 func installObs() {
 	var err error
 
-	log.Println("Installing Timescale Observability")
+	log.Println("Installing The Observability Stack")
 
-	obsinstall := exec.Command("ts-obs", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	obsinstall := exec.Command("tobs", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
 	err = obsinstall.Run()
 	if err != nil {
-		log.Println("Error installing Timescale Observability:", err)
+		log.Println("Error installing The Observability Stack:", err)
 		os.Exit(1)
 	}
 }

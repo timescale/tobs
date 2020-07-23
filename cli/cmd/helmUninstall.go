@@ -14,7 +14,7 @@ import (
 // helmUninstallCmd represents the helm uninstall command
 var helmUninstallCmd = &cobra.Command{
 	Use:   "uninstall",
-	Short: "Uninstalls Timescale Observability",
+	Short: "Uninstalls The Observability Stack",
 	Args:  cobra.ExactArgs(0),
 	RunE:  helmUninstall,
 }
@@ -30,7 +30,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	var deleteData bool
 	deleteData, err = cmd.Flags().GetBool("delete-data")
 	if err != nil {
-		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
+		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
 
 	var stdbuf bytes.Buffer
@@ -45,17 +45,17 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 	uninstall.Stdout = mw
 	uninstall.Stderr = mw
-	fmt.Println("Uninstalling Timescale Observability")
+	fmt.Println("Uninstalling The Observability Stack")
 	err = uninstall.Run()
 	if err != nil {
-		return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
+		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
 
 	fmt.Println("Waiting for pods to terminate...")
 	for i := 0; i < 1000; i++ {
 		pods, err := KubeGetAllPods(namespace, name)
 		if err != nil {
-			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
+		    return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
 		if len(pods) == 0 {
 			break
@@ -80,18 +80,18 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		fmt.Println("Checking Persistent Volume Claims")
 		pvcnames, err := KubeGetPVCNames(namespace, map[string]string{"release": name})
 		if err != nil {
-			return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
+		    return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
 
 		fmt.Println("Removing Persistent Volume Claims")
 		for _, s := range pvcnames {
 			err = KubeDeletePVC(namespace, s)
 			if err != nil {
-				return fmt.Errorf("could not uninstall Timescale Observability: %w", err)
+		        return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 			}
 		}
 	} else {
-		fmt.Println("Data still remains. To delete data as well, run 'ts-obs helm delete-data'")
+		fmt.Println("Data still remains. To delete data as well, run 'tobs helm delete-data'")
 	}
 
 	return nil

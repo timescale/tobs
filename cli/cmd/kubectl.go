@@ -56,10 +56,6 @@ func KubeGetPodName(namespace string, labelmap map[string]string) (string, error
 		return "", err
 	}
 
-    if len(pods.Items) == 0 {
-        return "", nil
-    }
-
 	return pods.Items[0].Name, nil
 }
 
@@ -77,10 +73,6 @@ func KubeGetServiceName(namespace string, labelmap map[string]string) (string, e
 	if err != nil {
 		return "", err
 	}
-
-    if len(services.Items) == 0 {
-        return "", nil
-    }
 
 	return services.Items[0].Name, nil
 }
