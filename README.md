@@ -30,6 +30,8 @@ helm repo update
 helm install --devel <release_name> timescale/timescale-observability
 ```
 
+Note: The `--devel` option is needed until the chart is in beta -- helm won't find the chart withot this option.  See the helm docs for more.
+
 ## Cleanup
 
 To uninstall a release you can run:
@@ -62,7 +64,7 @@ kubectl delete endpoints <release_name>
 To get a fully-documented configuration file for `timescale-observability`, please run:
 
 ```
-helm show values timescale/timescale-observability > my_values.yml
+helm show values --devel timescale/timescale-observability > my_values.yml
 ```
 
 You can then edit `my_values.yml` and deploy the release with the following command:
