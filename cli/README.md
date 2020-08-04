@@ -6,8 +6,8 @@ This is a CLI tool for installing and managing the The Observability Stack for K
 
 __Dependencies__: [Go](https://golang.org/doc/install), [Helm](https://helm.sh/docs/intro/install/)
 
-To install the CLI, run `go install` from inside the `tobs` folder. 
-Then, copy the `tobs` binary from `$GOPATH/bin` to your `/bin` folder. 
+To build from source, run `go build -o tobs` from inside the `cli` folder. 
+Then, move the `tobs` binary from the current directory to your `/bin` folder. 
 
 ## Commands
 
