@@ -14,6 +14,15 @@ timescaledb-single:
     enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
+  persistentVolumes:
+    data:
+      size: 50Gi
+  patroni:
+    bootstrap:
+      dcs:
+        postgresql:
+          parameters:
+            max_wal_size: 5120
 
 # Values for configuring the deployment of the Timescale Prometheus Connector
 # The charts README is at:
