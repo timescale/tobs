@@ -20,7 +20,7 @@ timescaledb-single:
 #   https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
 timescale-prometheus:
   enabled: true
-  image: timescale/timescale-prometheus:0.1.0-beta.1
+  image: timescale/timescale-prometheus:0.1.0-beta.2
   # connection options
   connection:
     # the db name in which the metrics will be stored
