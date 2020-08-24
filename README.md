@@ -1,4 +1,4 @@
-# Timescale Observability
+# tobs - The Observability Stack for Kubernetes
 
 A Helm chart for deploying Prometheus configured to use TimescaleDB as compressed long-term store for time-series metrics through the Timescale-Prometheus Connector.
 
@@ -27,7 +27,7 @@ into your Kubernetes cluster:
 ```
 helm repo add timescale https://charts.timescale.com/
 helm repo update
-helm install --devel <release_name> timescale/timescale-observability
+helm install --devel <release_name> timescale/tobs
 ```
 
 Note: The `--devel` option is needed until the chart is in beta -- helm won't find the chart withot this option.  See the helm docs for more.
@@ -53,7 +53,7 @@ If you had TimescaleDB backups enabled please check the guide for cleaning them 
 ### TimescaleDB config service
 
 Sometimes one of the services created with the deployment is not deleted. The `<release_name>-config` service and `<release_name>` endpoint
-may need to be manually deleted with 
+may need to be manually deleted with
 ```
 kubectl delete svc <release_name>-config
 kubectl delete endpoints <release_name>
@@ -61,16 +61,16 @@ kubectl delete endpoints <release_name>
 
 # Configuring Helm Chart
 
-To get a fully-documented configuration file for `timescale-observability`, please run:
+To get a fully-documented configuration file for `tobs`, please run:
 
 ```
-helm show values --devel timescale/timescale-observability > my_values.yml
+helm show values --devel timescale/tobs > my_values.yml
 ```
 
 You can then edit `my_values.yml` and deploy the release with the following command:
 
 ```
-helm upgrade --install <release_name> --values my_values.yml timescale/timescale-observability
+helm upgrade --install <release_name> --values my_values.yml timescale/tobs
 ```
 
 The properties described in the tables below are only those that this chart overrides for each of the sub-charts it depends on.
@@ -88,7 +88,7 @@ The chart has the following properties in the `values.yaml` file:
 
 ### Additional configuration for TimescaleDB
 
-By default, the `timescale-observability` Helm chart sets up a single-instance of TimescaleDB; if you are
+By default, the `tobs` Helm chart sets up a single-instance of TimescaleDB; if you are
 interested in a replicated setup for high-availability with automated backups, please see
 [this github repo][timescaledb-helm-repo] for additional instructions.
 
@@ -140,7 +140,7 @@ properties for the prometheus chart, so no functionality is lost.
 
 The Timescale-Prometheus connection is set using the values in `prometheus.server.timescaleRemote`.
 This doesn't change the way the `prometheus.server.remoteWrite` configuration is handled. The configuration
-is separate so we can use templating and set the endpoint properly when deploying Timescale-Prometheus and 
+is separate so we can use templating and set the endpoint properly when deploying Timescale-Prometheus and
 Prometheus in the same release. If you specify more endpoints in `prometheus.server.remoteWrite` (or `remoteRead`)
 They will be added additionally.
 
@@ -196,10 +196,10 @@ the name of a secret that contains the password for this user.
 
 ### Additional configuration for Grafana
 
-The stable/grafana chart is used as a dependency for deploying Grafana. We specify a Secret that 
+The stable/grafana chart is used as a dependency for deploying Grafana. We specify a Secret that
 sets up the Prometheus Server and TimescaleDB as provisioned data sources (if they are enabled).
 
-To get the initial password for the `admin` user after deployment execute 
+To get the initial password for the `admin` user after deployment execute
 ```
 kubectl get secret --namespace <namespace> <release_name>-grafana -o jsonpath="{.data.admin-password}" | base64 --decode
 ```
@@ -217,12 +217,12 @@ For all the properties that can be configured and more details on how to set up 
 
 # Contributing
 
-We welcome contributions to the Timescale-Observability Helm charts, which is
+We welcome contributions to tobs, which is
 licensed and released under the open-source Apache License, Version 2.  The
 same [Contributor's
 Agreement](//github.com/timescale/timescaledb/blob/master/CONTRIBUTING.md)
 applies as in TimescaleDB; please sign the [Contributor License
-Agreement](https://cla-assistant.io/timescale/timescale-observability) (CLA) if
+Agreement](https://cla-assistant.io/timescale/tobs) (CLA) if
 you're a new contributor.
 
 

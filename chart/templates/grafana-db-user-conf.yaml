@@ -7,8 +7,8 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-grafana-db
   labels:
-   app: {{ template "timescale-observability.fullname" . }}
-   chart: {{ template "timescale-observability.chart" . }}
+   app: {{ template "tobs.fullname" . }}
+   chart: {{ template "tobs.chart" . }}
    release: {{ .Release.Name }}
 data:
   add-users.sql: |-
@@ -17,7 +17,7 @@ data:
     DO $$
       BEGIN
         CREATE ROLE {{ $timescaleAsDB.user }} WITH LOGIN PASSWORD '{{ $timescaleAsDB.pass }}';
-      EXCEPTION WHEN duplicate_object THEN 
+      EXCEPTION WHEN duplicate_object THEN
         RAISE NOTICE 'role {{ $timescaleAsDB.user }} already exists, skipping create';
       END
     $$;
@@ -41,20 +41,20 @@ data:
       END
     $$;
     GRANT prom_reader TO {{ $timescaleAsDS.user }};
-    {{- end }}  
+    {{- end }}
   wait-for-ts.sh: |-
     echo Checking if ${PGHOST} is up
     NUM_TIMES_FAILED=0;
-    until nslookup ${PGHOST}; 
-    do 
+    until nslookup ${PGHOST};
+    do
       echo Num times failed: ${NUM_TIMES_FAILED}
       NUM_TIMES_FAILED=$(( $NUM_TIMES_FAILED + 1 ));
-      if [ "${NUM_TIMES_FAILED}" -gt "5" ] 
+      if [ "${NUM_TIMES_FAILED}" -gt "5" ]
       then
         echo Failed 5 times while waiting for ${PGHOST}, exiting
         exit 1;
       fi
-      echo Waiting 5 seconds; 
+      echo Waiting 5 seconds;
       sleep 5;
       echo Checking if ${PGHOST} is up
     done

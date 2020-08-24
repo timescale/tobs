@@ -71,7 +71,7 @@ checksumbin=$(command -v shasum) || {
 tmpdir=$(mktemp -d /tmp/tobs.XXXXXX)
 srcfile="tobs_${TOBS_VERSION}_${OS}_${arch}.tar.gz"
 dstfile="${INSTALLROOT}/bin/tobs-${TOBS_VERSION}"
-url="https://github.com/timescale/timescale-observability/releases/download/${TOBS_VERSION}"
+url="https://github.com/timescale/tobs/releases/download/${TOBS_VERSION}"
 
 (
   cd "$tmpdir"

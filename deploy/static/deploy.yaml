@@ -2,22 +2,22 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ts-observability
+  name: tobs
   labels:
-    app.kubernetes.io/name: ts-observability
-    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/name: tobs
+    app.kubernetes.io/instance: tobs
 
 ---
-# Source: timescale-observability/charts/grafana/templates/podsecuritypolicy.yaml
+# Source: tobs/charts/grafana/templates/podsecuritypolicy.yaml
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
   annotations:
@@ -62,16 +62,16 @@ spec:
     rule: 'RunAsAny'
   readOnlyRootFilesystem: false
 ---
-# Source: timescale-observability/charts/grafana/templates/tests/test-podsecuritypolicy.yaml
+# Source: tobs/charts/grafana/templates/tests/test-podsecuritypolicy.yaml
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: ts-observability-grafana-test
-  namespace: ts-observability
+  name: tobs-grafana-test
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -95,33 +95,33 @@ spec:
   - projected
   - secret
 ---
-# Source: timescale-observability/charts/grafana/templates/serviceaccount.yaml
+# Source: tobs/charts/grafana/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
 ---
-# Source: timescale-observability/charts/grafana/templates/tests/test-serviceaccount.yaml
+# Source: tobs/charts/grafana/templates/tests/test-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
-  name: ts-observability-grafana-test
-  namespace: ts-observability
+  name: tobs-grafana-test
+  namespace: tobs
 ---
-# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/serviceaccount.yaml
+# Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -129,63 +129,63 @@ metadata:
     app.kubernetes.io/name: kube-state-metrics
     helm.sh/chart: kube-state-metrics-2.7.2
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: ts-observability
-  name: ts-observability-kube-state-metrics
-  namespace: ts-observability
+    app.kubernetes.io/instance: tobs
+  name: tobs-kube-state-metrics
+  namespace: tobs
 imagePullSecrets:
   []
 ---
-# Source: timescale-observability/charts/prometheus/templates/node-exporter-serviceaccount.yaml
+# Source: tobs/charts/prometheus/templates/node-exporter-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
     component: "node-exporter"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-node-exporter
+  name: tobs-prometheus-node-exporter
   annotations:
     {}
 ---
-# Source: timescale-observability/charts/prometheus/templates/server-serviceaccount.yaml
+# Source: tobs/charts/prometheus/templates/server-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
     component: "server"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-server
+  name: tobs-prometheus-server
   annotations:
     {}
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/serviceaccount-timescaledb.yaml
+# Source: tobs/charts/timescaledb-single/templates/serviceaccount-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: ts-observability-timescaledb
+  name: tobs-timescaledb
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
 ---
-# Source: timescale-observability/charts/grafana/templates/secret.yaml
+# Source: tobs/charts/grafana/templates/secret.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 type: Opaque
@@ -194,34 +194,34 @@ data:
   admin-password: "MXJYNU9TOWhMWnF2b2hyOUVUVjI3WjFSVEowU09Jd2s5UTBSa3RKNg=="
   ldap-toml: ""
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/sec-certificate.yaml
+# Source: tobs/charts/timescaledb-single/templates/sec-certificate.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
 apiVersion: v1
 kind: Secret
 type: kubernetes.io/tls
 metadata:
-  name: ts-observability-timescaledb-certificate
+  name: tobs-timescaledb-certificate
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
 data:
   tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBekNDQWV1Z0F3SUJBZ0lSQU90ZUxYd3M3MFMxZ1hOSlhBQjF1TmN3RFFZSktvWklodmNOQVFFTEJRQXcKR3pFWk1CY0dBMVVFQXhNUWRITXRiMkp6WlhKMllXSnBiR2wwZVRBZUZ3MHlNREEyTURNeE5UVXpOVEJhRncweQpOVEEyTURNeE5UVXpOVEJhTUJzeEdUQVhCZ05WQkFNVEVIUnpMVzlpYzJWeWRtRmlhV3hwZEhrd2dnRWlNQTBHCkNTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDek5FSk9mbmU3YXNDc0J3TFNBR09MMEw3dW9ZYzQKdEd0SFlwNGc0bkFuT3AxRFFaN3JaUWg2OGZiQVdPV2lQcmFxUmhoUlk1eUhuaVpwTkkrT3llNmoremwwUU00WAo0OTRoeG5GOGcyWUZtTjlVZCtGZ0hFZi82Mk1oSHkzb0RyT2dtQjFhNHdWWk1vMGltMkNxUnIyenhPeGZxcmpyCmkzaUYxMXpwRGFjK1Fmajh1VzhNWUhFUmM0SVNhNUg4SE13QTcyamJ1cElJaFdPTWgvREM4SitSZFEyN3BxOFEKd2R1cmgxRzRsb0JJRzd0L3M2ZDVIRnNEaFp5OVVYV2xia2tpMEhRV01aZWJxSUNEek9NY3VMUWlBenJaeWJkWgpudnQyeXdKZElqNDZ6eEs2clpxVi9XRmRieTgxWmhJNndMaW9tQlFWc3gzQnF1ZGFjTXdxUkRBSEFnTUJBQUdqClFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUgKQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQUxpdVFwZld4TmFYVwpLY21IUWZFSVJidnVxRkJ4Z3ZKUkorS0RHQWRwakpaQlhqeUZ0a3RxTHhoZ1Z2eEl2Y1JoR1l3Rm85SHQxYkZxCnFRMzZxMDUxOHpRWFJrdmdtY3RSejdNRjJGdHRqOG5sSHlkSE1zS0RPWm9TeFdiS2VBT0RXSFhNMEhpYXRabEYKMjFodkdWTXlUV3c4Y0ZRUHJMT2E1bGdHT2todmJwN3E2ZGtYSVFqYkc0NHpzdDcwTGdEbVdNSFlVd1dTTWdaRwp4dzgxYklRaDZaUityOENueVcyZ1RvTjN6WDJmNzNSYTh4Q3FhT3ozQkVPaXY1Wmxmb3l2RlNVQlNjcFNkMm1CCmhBaXEreVlBalhuRzZIbWFuc09hK05Dem5WdThzMzgyMy9NRkxzNGlMdGo2azczQkNPbEdUUWlDVzdNZVQzTzEKMzRVMWFYZThVdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
   tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBc3pSQ1RuNTN1MnJBckFjQzBnQmppOUMrN3FHSE9MUnJSMktlSU9Kd0p6cWRRMEdlCjYyVUlldkgyd0ZqbG9qNjJxa1lZVVdPY2g1NG1hVFNQanNudW8vczVkRURPRitQZUljWnhmSU5tQlpqZlZIZmgKWUJ4SC8rdGpJUjh0NkE2em9KZ2RXdU1GV1RLTklwdGdxa2E5czhUc1g2cTQ2NHQ0aGRkYzZRMm5Qa0g0L0xsdgpER0J4RVhPQ0VtdVIvQnpNQU85bzI3cVNDSVZqaklmd3d2Q2ZrWFVOdTZhdkVNSGJxNGRSdUphQVNCdTdmN09uCmVSeGJBNFdjdlZGMXBXNUpJdEIwRmpHWG02aUFnOHpqSExpMElnTTYyY20zV1o3N2Rzc0NYU0krT3M4U3VxMmEKbGYxaFhXOHZOV1lTT3NDNHFKZ1VGYk1kd2FyblduRE1La1F3QndJREFRQUJBb0lCQUVEbDdoVnJLNFZPRmRTMgovVWg4SjVEYzJpaWxpc2o0WGRtT1YySGxYMlIxajdwcHExbm9UdmZuWk1zbjVwR3BVSkc5ck5UYzFEVXhDd3dTCm91SzlNcFZrUjl4WUU4c0hGTXo2aHVMbTJ5MnZ2VUZqNE5UanFSZC9jWGp2UjdyQWlFRGlsYzd5WkY5M05UR1IKUDZLcTE4eWd4bEduREMwUloyWmhKaDZvZVNiTU5rYVdSY1NWeHNuY3RpWm5XMEhBcTBURUhuL2JiaGFadzBEVApMZVFiR0xqUFpNcVUvbTRnRGg0WFAxZmRZMlJYUHNLclN2VzYyeVFPTDhZUHhHdlNndW9DVkJSakk0em9vNDBvClJLejJpeTE5cVBYTG0wZEs3VHcwOHFxTklrQ0RWWGRHUlJSU3dSU2xodkJmbHFOSlppdWJWUHZNa2swaUxzdnQKUEcwMTR6RUNnWUVBNElLT0FTeWNyamhsbFZ1NFJEZk41U0wyNlYvYm5QY0VTckFsdXVlNklJN1J4UWhlaUtRKwpaNWlEK1dKLzRyWk1aWTZrdmpRcWtqRklNSlY5NUFIRlRXSy9wMkhjZ3lqMWxqa2hoU3N6cFYyZ0c3VCtncnRsClNWVmxHVk8yZXhpRXBOYTVVc0VBQVBLemRVMTBmZkdHeW0xd0xGdEdiV3A5UnM3S2EyRUIvcFVDZ1lFQXpGYnEKRlIycE1NNXlOdm03TS9SSlBTUXNpZUhOS1I5UDcyUnZyM2ZBMms1S2hJcmhCZUZ1U2NwdHZ4TGg0UUlGMWx6OApDaEhuOWFrV1JUYjBJMWdKNW43czBOdzA1UHo1NGk3QnNqdzJRSWpMaklXVlNOSmRISytmaFZXZDdsanFwZDFGCkJicEk3Z0RUNUV3RE1Xa0FpRDlUSVVWeExNQjlWb2VCOWNLeWVTc0NnWUVBazZsS2ZMczYwZHVGOUpZK3U1OTQKYkJ4ekNVdGl4Zm94ZUc0aVlxdkdYMk9QMUdlTXhaSkErU0gycXk5OXJUNzVRRkp4U0NoSFY1L1NPeUlYaXI4ZgpaYVp0SjBuV0h1M3htTHc2cjd1YVhFa1g1U0ZGdy9ZOHg5N0NmOFh2WDBiZzl3bkRHZ3FXVmdsS3Z2d1Nna000CnhDcjJmRFlNUENxdCtzUkhuaGhQbDRFQ2dZRUFoeDJGaFZicWxEbytiYm11SG9tT2tCNUdVUm44OWc4ZFpSZE4KZm9JNkJHQTJoL1BwSFdGVjh2Y21vR3pVN1ZyUUQxSEcyc1hDVXI5dTJXK2YrV3J5aVBZdWsyQzRuUjNtQWJpWApIY3NRdUpWN3VyeHQzUXcwdzQ0aGRpSUozeHZ1ZEtTZVNrNUdnUklOQ20xMHd3eENiTlVxbTlwMkhuaGRxSVRMCjIzelZWS2NDZ1lFQXNhTUpraHdoRkNQUFdyVCtBbTNLbHRLWHNieUJWWFRXT1BtRzBNN1hVdVhyK1JOMGJUVmsKbExVM0diTGpJaDMxYWJ5ZkRNZ3doOFJOZUx0MUhoUGJTZEI3Q0JFV1c3ZDh4Q1h4V2VyWW1BTUVuem1kU1dGZApBYkpqYW94US9rSDFabFA5Vkp2N2QxMkVmaEROREM0c1Bkc2IveVRxU3ZkTnJDVnFXSGVmTmtNPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
 ...
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/sec-passwords.yaml
+# Source: tobs/charts/timescaledb-single/templates/sec-passwords.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ts-observability-timescaledb-passwords
+  name: tobs-timescaledb-passwords
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
 type: Opaque
 data:
@@ -230,31 +230,31 @@ data:
   "standby": cGluYWNvbGFkYQ==
 ...
 ---
-# Source: timescale-observability/templates/grafana-datasources-sec.yaml
+# Source: tobs/templates/grafana-datasources-sec.yaml
 apiVersion: v1
 kind: Secret
-metadata: 
-  name: ts-observability-grafana-datasources
+metadata:
+  name: tobs-grafana-datasources
   labels:
     grafana_datasource: "1"
-    app: ts-observability-timescale-observability
-    chart: timescale-observability-0.1.0-alpha.3.1
-    release: ts-observability
+    app: tobs-tobs
+    chart: tobs-0.1.0-alpha.3.1
+    release: tobs
 type: Opaque
-stringData: 
+stringData:
   datasource.yaml: |-
     # config file version
     apiVersion: 1
-    
+
     datasources:
       - name: Prometheus
         type: prometheus
-        url: http://ts-observability-prometheus-server.ts-observability.svc.cluster.local
+        url: http://tobs-prometheus-server.tobs.svc.cluster.local
         isDefault: true
         editable: true
         access: proxy
       - name: TimescaleDB
-        url: ts-observability.ts-observability.svc.cluster.local
+        url: tobs.tobs.svc.cluster.local
         type: postgres
         isDefault: false
         access: proxy
@@ -268,15 +268,15 @@ stringData:
           postgresVersion: 1000
           timescaledb: true
 ---
-# Source: timescale-observability/templates/grafana-db-sec.yaml
+# Source: tobs/templates/grafana-db-sec.yaml
 apiVersion: v1
 kind: Secret
-metadata: 
-  name: ts-observability-grafana-db
+metadata:
+  name: tobs-grafana-db
   labels:
-    app: ts-observability-timescale-observability
-    chart: timescale-observability-0.1.0-alpha.3.1
-    release: ts-observability
+    app: tobs-tobs
+    chart: tobs-0.1.0-alpha.3.1
+    release: tobs
 type: Opaque
 data:
   GF_DATABASE_TYPE: cG9zdGdyZXM=
@@ -286,18 +286,18 @@ data:
   GF_DATABASE_PASSWORD: Z3JhZmFuYWRi
   GF_DATABASE_SSL_MODE: cmVxdWlyZQ==
 ---
-# Source: timescale-observability/charts/grafana/templates/configmap-dashboard-provider.yaml
+# Source: tobs/charts/grafana/templates/configmap-dashboard-provider.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
-  name: ts-observability-grafana-config-dashboards
-  namespace: ts-observability
+  name: tobs-grafana-config-dashboards
+  namespace: tobs
 data:
   provider.yaml: |-
     apiVersion: 1
@@ -311,16 +311,16 @@ data:
       options:
         path: /tmp/dashboards
 ---
-# Source: timescale-observability/charts/grafana/templates/configmap.yaml
+# Source: tobs/charts/grafana/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 data:
@@ -337,40 +337,40 @@ data:
     plugins = /var/lib/grafana/plugins
     provisioning = /etc/grafana/provisioning
 ---
-# Source: timescale-observability/charts/grafana/templates/tests/test-configmap.yaml
+# Source: tobs/charts/grafana/templates/tests/test-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ts-observability-grafana-test
-  namespace: ts-observability
+  name: tobs-grafana-test
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 data:
   run.sh: |-
     @test "Test Health" {
-      url="http://ts-observability-grafana/api/health"
+      url="http://tobs-grafana/api/health"
 
       code=$(wget --server-response --spider --timeout 10 --tries 1 ${url} 2>&1 | awk '/^  HTTP/{print $2}')
       [ "$code" == "200" ]
     }
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/configmap-patroni.yaml
+# Source: tobs/charts/timescaledb-single/templates/configmap-patroni.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ts-observability-timescaledb-patroni
+  name: tobs-timescaledb-patroni
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
 data:
   patroni.yaml: |
     bootstrap:
@@ -465,19 +465,19 @@ data:
       listen: 0.0.0.0:8008
 ...
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/configmap-scripts.yaml
+# Source: tobs/charts/timescaledb-single/templates/configmap-scripts.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ts-observability-timescaledb-scripts
+  name: tobs-timescaledb-scripts
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
 data:
   # If no backup is configured, archive_command would normally fail. A failing archive_command on a cluster
   # is going to cause WAL to be kept around forever, meaning we'll fill up Volumes we have quite quickly.
@@ -663,16 +663,16 @@ data:
     \endif
 ...
 ---
-# Source: timescale-observability/templates/grafana-dashboards-conf.yaml
+# Source: tobs/templates/grafana-dashboards-conf.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ts-observability-grafana-dashboards
+  name: tobs-grafana-dashboards
   labels:
    grafana_dashboard: "1"
-   app: ts-observability-timescale-observability
-   chart: timescale-observability-0.1.0-alpha.3.1
-   release: ts-observability
+   app: tobs-tobs
+   chart: tobs-0.1.0-alpha.3.1
+   release: tobs
 data:
   k8s-cluster.json: |-
     {
@@ -1659,7 +1659,7 @@ data:
       },
       "version": 1
     }
-    
+
   k8s-hardware.json: |-
     {
       "annotations": {
@@ -4307,22 +4307,22 @@ data:
       "version": 1
     }
 ---
-# Source: timescale-observability/templates/grafana-db-user-conf.yaml
+# Source: tobs/templates/grafana-db-user-conf.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ts-observability-grafana-db
+  name: tobs-grafana-db
   labels:
-   app: ts-observability-timescale-observability
-   chart: timescale-observability-0.1.0-alpha.3.1
-   release: ts-observability
+   app: tobs-tobs
+   chart: tobs-0.1.0-alpha.3.1
+   release: tobs
 data:
   add-users.sql: |-
     \set ON_ERROR_STOP on
     DO $$
       BEGIN
         CREATE ROLE grafanadb WITH LOGIN PASSWORD 'grafanadb';
-      EXCEPTION WHEN duplicate_object THEN 
+      EXCEPTION WHEN duplicate_object THEN
         RAISE NOTICE 'role grafanadb already exists, skipping create';
       END
     $$;
@@ -4342,35 +4342,35 @@ data:
         RAISE NOTICE 'role grafana already exists, skipping create';
       END
     $$;
-    GRANT prom_reader TO grafana;  
+    GRANT prom_reader TO grafana;
   wait-for-ts.sh: |-
     echo Checking if ${PGHOST} is up
     NUM_TIMES_FAILED=0;
-    until nslookup ${PGHOST}; 
-    do 
+    until nslookup ${PGHOST};
+    do
       echo Num times failed: ${NUM_TIMES_FAILED}
       NUM_TIMES_FAILED=$(( $NUM_TIMES_FAILED + 1 ));
-      if [ "${NUM_TIMES_FAILED}" -gt "5" ] 
+      if [ "${NUM_TIMES_FAILED}" -gt "5" ]
       then
         echo Failed 5 times while waiting for ${PGHOST}, exiting
         exit 1;
       fi
-      echo Waiting 5 seconds; 
+      echo Waiting 5 seconds;
       sleep 5;
       echo Checking if ${PGHOST} is up
     done
 ---
-# Source: timescale-observability/templates/prometheus-conf.yaml
+# Source: tobs/templates/prometheus-conf.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
     component: "server"
-    app: timescale-observability
-    release: ts-observability
-    chart: timescale-observability-0.1.0-alpha.3.1
+    app: tobs
+    release: tobs
+    chart: tobs-0.1.0-alpha.3.1
     heritage: Helm
-  name: ts-observability-prometheus-config
+  name: tobs-prometheus-config
 data:
   alerting_rules.yml: |
     {}
@@ -4382,12 +4382,12 @@ data:
       scrape_interval: 1m
       scrape_timeout: 10s
     remote_write:
-    - url: http://ts-observability-timescale-prometheus-connector.ts-observability.svc.cluster.local:9201/write
-      queue_config: 
+    - url: http://tobs-timescale-prometheus-connector.tobs.svc.cluster.local:9201/write
+      queue_config:
         max_shards: 30
 
     remote_read:
-    - url: http://ts-observability-timescale-prometheus-connector.ts-observability.svc.cluster.local:9201/read
+    - url: http://tobs-timescale-prometheus-connector.tobs.svc.cluster.local:9201/read
 
     rule_files:
     - /etc/config/recording_rules.yml
@@ -4634,17 +4634,17 @@ data:
   rules: |
     {}
 ---
-# Source: timescale-observability/charts/prometheus/templates/server-pvc.yaml
+# Source: tobs/charts/prometheus/templates/server-pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
     component: "server"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-server
+  name: tobs-prometheus-server
 spec:
   accessModes:
     - ReadWriteOnce
@@ -4652,23 +4652,23 @@ spec:
     requests:
       storage: "8Gi"
 ---
-# Source: timescale-observability/charts/grafana/templates/clusterrole.yaml
+# Source: tobs/charts/grafana/templates/clusterrole.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
-  name: ts-observability-grafana-clusterrole
+  name: tobs-grafana-clusterrole
 rules:
 - apiGroups: [""] # "" indicates the core API group
   resources: ["configmaps", "secrets"]
   verbs: ["get", "watch", "list"]
 ---
-# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/clusterrole.yaml
+# Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
@@ -4676,8 +4676,8 @@ metadata:
     app.kubernetes.io/name: kube-state-metrics
     helm.sh/chart: kube-state-metrics-2.7.2
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: ts-observability
-  name: ts-observability-kube-state-metrics
+    app.kubernetes.io/instance: tobs
+  name: tobs-kube-state-metrics
 rules:
 
 - apiGroups: ["certificates.k8s.io"]
@@ -4795,17 +4795,17 @@ rules:
     - storageclasses
   verbs: ["list", "watch"]
 ---
-# Source: timescale-observability/charts/prometheus/templates/server-clusterrole.yaml
+# Source: tobs/charts/prometheus/templates/server-clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   labels:
     component: "server"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-server
+  name: tobs-prometheus-server
 rules:
   - apiGroups:
       - ""
@@ -4836,27 +4836,27 @@ rules:
     verbs:
       - get
 ---
-# Source: timescale-observability/charts/grafana/templates/clusterrolebinding.yaml
+# Source: tobs/charts/grafana/templates/clusterrolebinding.yaml
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: ts-observability-grafana-clusterrolebinding
+  name: tobs-grafana-clusterrolebinding
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 subjects:
   - kind: ServiceAccount
-    name: ts-observability-grafana
-    namespace: ts-observability
+    name: tobs-grafana
+    namespace: tobs
 roleRef:
   kind: ClusterRole
-  name: ts-observability-grafana-clusterrole
+  name: tobs-grafana-clusterrole
   apiGroup: rbac.authorization.k8s.io
 ---
-# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/clusterrolebinding.yaml
+# Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
@@ -4864,84 +4864,84 @@ metadata:
     app.kubernetes.io/name: kube-state-metrics
     helm.sh/chart: kube-state-metrics-2.7.2
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: ts-observability
-  name: ts-observability-kube-state-metrics
+    app.kubernetes.io/instance: tobs
+  name: tobs-kube-state-metrics
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: ts-observability-kube-state-metrics
+  name: tobs-kube-state-metrics
 subjects:
 - kind: ServiceAccount
-  name: ts-observability-kube-state-metrics
-  namespace: ts-observability
+  name: tobs-kube-state-metrics
+  namespace: tobs
 ---
-# Source: timescale-observability/charts/prometheus/templates/server-clusterrolebinding.yaml
+# Source: tobs/charts/prometheus/templates/server-clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   labels:
     component: "server"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-server
+  name: tobs-prometheus-server
 subjects:
   - kind: ServiceAccount
-    name: ts-observability-prometheus-server
-    namespace: ts-observability
+    name: tobs-prometheus-server
+    namespace: tobs
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: ts-observability-prometheus-server
+  name: tobs-prometheus-server
 ---
-# Source: timescale-observability/charts/grafana/templates/role.yaml
+# Source: tobs/charts/grafana/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:      ['extensions']
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
-  resourceNames:  [ts-observability-grafana]
+  resourceNames:  [tobs-grafana]
 ---
-# Source: timescale-observability/charts/grafana/templates/tests/test-role.yaml
+# Source: tobs/charts/grafana/templates/tests/test-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: ts-observability-grafana-test
-  namespace: ts-observability
+  name: tobs-grafana-test
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:      ['policy']
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
-  resourceNames:  [ts-observability-grafana-test]
+  resourceNames:  [tobs-grafana-test]
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/role-timescaledb.yaml
+# Source: tobs/charts/timescaledb-single/templates/role-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: ts-observability-timescaledb
+  name: tobs-timescaledb
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
 rules:
 - apiGroups: [""]
@@ -4982,78 +4982,78 @@ rules:
   - update
   - watch
 ---
-# Source: timescale-observability/charts/grafana/templates/rolebinding.yaml
+# Source: tobs/charts/grafana/templates/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: ts-observability-grafana
+  name: tobs-grafana
 subjects:
 - kind: ServiceAccount
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
 ---
-# Source: timescale-observability/charts/grafana/templates/tests/test-rolebinding.yaml
+# Source: tobs/charts/grafana/templates/tests/test-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: ts-observability-grafana-test
-  namespace: ts-observability
+  name: tobs-grafana-test
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: ts-observability-grafana-test
+  name: tobs-grafana-test
 subjects:
 - kind: ServiceAccount
-  name: ts-observability-grafana-test
-  namespace: ts-observability
+  name: tobs-grafana-test
+  namespace: tobs
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/rolebinding-timescaledb.yaml
+# Source: tobs/charts/timescaledb-single/templates/rolebinding-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: ts-observability-timescaledb
+  name: tobs-timescaledb
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
 subjects:
   - kind: ServiceAccount
-    name: ts-observability-timescaledb
+    name: tobs-timescaledb
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: ts-observability-timescaledb
+  name: tobs-timescaledb
 ---
-# Source: timescale-observability/charts/grafana/templates/service.yaml
+# Source: tobs/charts/grafana/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -5066,18 +5066,18 @@ spec:
 
   selector:
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
 ---
-# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/service.yaml
+# Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: ts-observability-kube-state-metrics
-  namespace: ts-observability
+  name: tobs-kube-state-metrics
+  namespace: tobs
   labels:
     app.kubernetes.io/name: kube-state-metrics
     helm.sh/chart: "kube-state-metrics-2.7.2"
-    app.kubernetes.io/instance: "ts-observability"
+    app.kubernetes.io/instance: "tobs"
     app.kubernetes.io/managed-by: "Helm"
   annotations:
     prometheus.io/scrape: 'true'
@@ -5090,9 +5090,9 @@ spec:
     targetPort: 8080
   selector:
     app.kubernetes.io/name: kube-state-metrics
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
 ---
-# Source: timescale-observability/charts/prometheus/templates/node-exporter-service.yaml
+# Source: tobs/charts/prometheus/templates/node-exporter-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -5101,10 +5101,10 @@ metadata:
   labels:
     component: "node-exporter"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-node-exporter
+  name: tobs-prometheus-node-exporter
 spec:
   clusterIP: None
   ports:
@@ -5115,20 +5115,20 @@ spec:
   selector:
     component: "node-exporter"
     app: prometheus
-    release: ts-observability
+    release: tobs
   type: "ClusterIP"
 ---
-# Source: timescale-observability/charts/prometheus/templates/server-service.yaml
+# Source: tobs/charts/prometheus/templates/server-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     component: "server"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-server
+  name: tobs-prometheus-server
 spec:
   ports:
     - name: http
@@ -5138,49 +5138,49 @@ spec:
   selector:
     component: "server"
     app: prometheus
-    release: ts-observability
+    release: tobs
   sessionAffinity: None
   type: "ClusterIP"
 ---
-# Source: timescale-observability/charts/timescale-prometheus/templates/svc-connector.yaml
+# Source: tobs/charts/timescale-prometheus/templates/svc-connector.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: ts-observability-timescale-prometheus-connector
+  name: tobs-timescale-prometheus-connector
   labels:
-    app: ts-observability-timescale-prometheus
+    app: tobs-timescale-prometheus
     chart: timescale-prometheus-0.1.0-alpha.3.1
-    release: ts-observability
+    release: tobs
     heritage: Helm
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
 spec:
   selector:
-    app: ts-observability-timescale-prometheus
+    app: tobs-timescale-prometheus
   type: ClusterIP
   ports:
   - name: connector-port
     port: 9201
     protocol: TCP
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/svc-timescaledb-config.yaml
+# Source: tobs/charts/timescaledb-single/templates/svc-timescaledb-config.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: ts-observability-config
+  name: tobs-config
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
 spec:
   selector:
-    app: ts-observability-timescaledb
-    cluster-name: ts-observability
+    app: tobs-timescaledb
+    cluster-name: tobs
   type: ClusterIP
   clusterIP: None
   ports:
@@ -5188,27 +5188,27 @@ spec:
     port: 8008
     protocol: TCP
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/svc-timescaledb-replica.yaml
+# Source: tobs/charts/timescaledb-single/templates/svc-timescaledb-replica.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: ts-observability-replica
+  name: tobs-replica
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
     role: replica
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
 spec:
   selector:
-    app: ts-observability-timescaledb
-    cluster-name: ts-observability
+    app: tobs-timescaledb
+    cluster-name: tobs
     role: replica
   type: ClusterIP
   ports:
@@ -5217,20 +5217,20 @@ spec:
     port: 5432
     protocol: TCP
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/svc-timescaledb.yaml
+# Source: tobs/charts/timescaledb-single/templates/svc-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: ts-observability
+  name: tobs
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
     role: master
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
@@ -5243,23 +5243,23 @@ spec:
     targetPort: postgresql
     protocol: TCP
 ---
-# Source: timescale-observability/charts/prometheus/templates/node-exporter-daemonset.yaml
+# Source: tobs/charts/prometheus/templates/node-exporter-daemonset.yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
     component: "node-exporter"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-node-exporter
+  name: tobs-prometheus-node-exporter
 spec:
   selector:
     matchLabels:
       component: "node-exporter"
       app: prometheus
-      release: ts-observability
+      release: tobs
   updateStrategy:
     type: RollingUpdate
   template:
@@ -5267,11 +5267,11 @@ spec:
       labels:
         component: "node-exporter"
         app: prometheus
-        release: ts-observability
+        release: tobs
         chart: prometheus-11.1.5
         heritage: Helm
     spec:
-      serviceAccountName: ts-observability-prometheus-node-exporter
+      serviceAccountName: tobs-prometheus-node-exporter
       containers:
         - name: prometheus-node-exporter
           image: "prom/node-exporter:v0.18.1"
@@ -5302,16 +5302,16 @@ spec:
           hostPath:
             path: /sys
 ---
-# Source: timescale-observability/charts/grafana/templates/deployment.yaml
+# Source: tobs/charts/grafana/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ts-observability-grafana
-  namespace: ts-observability
+  name: tobs-grafana
+  namespace: tobs
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -5319,22 +5319,22 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: grafana
-      app.kubernetes.io/instance: ts-observability
+      app.kubernetes.io/instance: tobs
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
         app.kubernetes.io/name: grafana
-        app.kubernetes.io/instance: ts-observability
+        app.kubernetes.io/instance: tobs
       annotations:
         checksum/config: eb6d27d942131bb459497000fab8403a79383789bddaa9b540871cc2132a832c
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
         checksum/sc-dashboard-provider-config: 55569e387d481a4035ce77496fb57bd0d3c74c3fdd23e144988e0949d4007165
         checksum/secret: dde032a0de8e3384d810378de88a0318e6d314d97357fd63c3fb8f9e14795e88
     spec:
-      
-      serviceAccountName: ts-observability-grafana
+
+      serviceAccountName: tobs-grafana
       securityContext:
         fsGroup: 472
         runAsGroup: 472
@@ -5363,7 +5363,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: METHOD
-              value: 
+              value:
             - name: LABEL
               value: "grafana_dashboard"
             - name: FOLDER
@@ -5386,7 +5386,7 @@ spec:
               mountPath: "/var/lib/grafana"
             - name: sc-dashboard-volume
               mountPath: "/tmp/dashboards"
-      
+
             - name: sc-dashboard-provider
               mountPath: "/etc/grafana/provisioning/dashboards/sc-dashboardproviders.yaml"
               subPath: provider.yaml
@@ -5403,16 +5403,16 @@ spec:
             - name: GF_SECURITY_ADMIN_USER
               valueFrom:
                 secretKeyRef:
-                  name: ts-observability-grafana
+                  name: tobs-grafana
                   key: admin-user
             - name: GF_SECURITY_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ts-observability-grafana
+                  name: tobs-grafana
                   key: admin-password
           envFrom:
             - secretRef:
-                name: ts-observability-grafana-db
+                name: tobs-grafana-db
           livenessProbe:
             failureThreshold: 10
             httpGet:
@@ -5429,27 +5429,27 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: ts-observability-grafana
+            name: tobs-grafana
         - name: storage
           emptyDir: {}
         - name: sc-dashboard-volume
           emptyDir: {}
         - name: sc-dashboard-provider
           configMap:
-            name: ts-observability-grafana-config-dashboards
+            name: tobs-grafana-config-dashboards
         - name: sc-datasources-volume
           emptyDir: {}
 ---
-# Source: timescale-observability/charts/prometheus/charts/kube-state-metrics/templates/deployment.yaml
+# Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ts-observability-kube-state-metrics
-  namespace: ts-observability
+  name: tobs-kube-state-metrics
+  namespace: tobs
   labels:
     app.kubernetes.io/name: kube-state-metrics
     helm.sh/chart: "kube-state-metrics-2.7.2"
-    app.kubernetes.io/instance: "ts-observability"
+    app.kubernetes.io/instance: "tobs"
     app.kubernetes.io/managed-by: "Helm"
 spec:
   selector:
@@ -5460,10 +5460,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-state-metrics
-        app.kubernetes.io/instance: "ts-observability"
+        app.kubernetes.io/instance: "tobs"
     spec:
       hostNetwork: false
-      serviceAccountName: ts-observability-kube-state-metrics
+      serviceAccountName: tobs-kube-state-metrics
       securityContext:
         fsGroup: 65534
         runAsUser: 65534
@@ -5563,34 +5563,34 @@ spec:
           initialDelaySeconds: 5
           timeoutSeconds: 5
 ---
-# Source: timescale-observability/charts/prometheus/templates/server-deployment.yaml
+# Source: tobs/charts/prometheus/templates/server-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     component: "server"
     app: prometheus
-    release: ts-observability
+    release: tobs
     chart: prometheus-11.1.5
     heritage: Helm
-  name: ts-observability-prometheus-server
+  name: tobs-prometheus-server
 spec:
   selector:
     matchLabels:
       component: "server"
       app: prometheus
-      release: ts-observability
+      release: tobs
   replicas: 1
   template:
     metadata:
       labels:
         component: "server"
         app: prometheus
-        release: ts-observability
+        release: tobs
         chart: prometheus-11.1.5
         heritage: Helm
     spec:
-      serviceAccountName: ts-observability-prometheus-server
+      serviceAccountName: tobs-prometheus-server
       containers:
         - name: prometheus-server-configmap-reload
           image: "jimmidyson/configmap-reload:v0.3.0"
@@ -5650,36 +5650,36 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: ts-observability-prometheus-config
+            name: tobs-prometheus-config
         - name: storage-volume
           persistentVolumeClaim:
-            claimName: ts-observability-prometheus-server
+            claimName: tobs-prometheus-server
 ---
-# Source: timescale-observability/charts/timescale-prometheus/templates/deployment-connector.yaml
+# Source: tobs/charts/timescale-prometheus/templates/deployment-connector.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ts-observability-timescale-prometheus
+  name: tobs-timescale-prometheus
   labels:
-    app: ts-observability-timescale-prometheus
+    app: tobs-timescale-prometheus
     chart: timescale-prometheus-0.1.0-alpha.3.1
-    release: ts-observability
+    release: tobs
     heritage: Helm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ts-observability-timescale-prometheus
+      app: tobs-timescale-prometheus
   template:
     metadata:
       labels:
-        app: ts-observability-timescale-prometheus
-      
-      annotations: 
+        app: tobs-timescale-prometheus
+
+      annotations:
         prometheus.io/path: /metrics
         prometheus.io/port: "9201"
         prometheus.io/scrape: "true"
-      
+
     spec:
       containers:
         - image: timescale/timescale-prometheus:0.1.0-alpha.3.1
@@ -5700,47 +5700,47 @@ spec:
             - name: TS_PROM_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ts-observability-timescaledb-passwords
+                  name: tobs-timescaledb-passwords
                   key: postgres
             - name: TS_PROM_DB_HOST
-              value: ts-observability.ts-observability.svc.cluster.local
+              value: tobs.tobs.svc.cluster.local
             - name: TS_PROM_DB_NAME
               value: postgres
             - name: TS_PROM_DB_SSL_MODE
               value: require
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/statefulset-timescaledb.yaml
+# Source: tobs/charts/timescaledb-single/templates/statefulset-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: ts-observability-timescaledb
+  name: tobs-timescaledb
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
 spec:
-  serviceName: ts-observability-timescaledb
+  serviceName: tobs-timescaledb
   replicas: 1
   updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: ts-observability-timescaledb
-      release: ts-observability
+      app: tobs-timescaledb
+      release: tobs
   template:
     metadata:
-      name: ts-observability-timescaledb
+      name: tobs-timescaledb
       labels:
-        app: ts-observability-timescaledb
-        release: ts-observability
-        cluster-name: ts-observability
+        app: tobs-timescaledb
+        release: tobs
+        cluster-name: tobs
     spec:
-      serviceAccountName: ts-observability-timescaledb
+      serviceAccountName: tobs-timescaledb
       securityContext:
         # The postgres user inside the TimescaleDB image has uid=1000.
         # This configuration ensures the permissions of the mounts are suitable
@@ -5781,7 +5781,7 @@ spec:
           - /bin/bash
           - "-c"
           - |
-            
+
             install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/data" "/var/lib/postgresql/wal/pg_wal" || exit 1
             TABLESPACES=""
             for tablespace in ; do
@@ -5825,27 +5825,27 @@ spec:
         - name: PATRONI_admin_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: ts-observability-timescaledb-passwords
+              name: tobs-timescaledb-passwords
               key: "admin"
         - name: PATRONI_postgres_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: ts-observability-timescaledb-passwords
+              name: tobs-timescaledb-passwords
               key: "postgres"
         - name: PATRONI_standby_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: ts-observability-timescaledb-passwords
+              name: tobs-timescaledb-passwords
               key: "standby"
         - name: PATRONI_REPLICATION_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: ts-observability-timescaledb-passwords
+              name: tobs-timescaledb-passwords
               key: standby
         - name: PATRONI_SUPERUSER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: ts-observability-timescaledb-passwords
+              name: tobs-timescaledb-passwords
               key: postgres
         - name: PATRONI_REPLICATION_USERNAME
           value: standby
@@ -5867,11 +5867,11 @@ spec:
         - name: PATRONI_POSTGRESQL_DATA_DIR
           value: "/var/lib/postgresql/data"
         - name: PATRONI_KUBERNETES_NAMESPACE
-          value: ts-observability
+          value: tobs
         - name: PATRONI_KUBERNETES_LABELS
-          value: "{app: ts-observability-timescaledb, cluster-name: ts-observability, release: ts-observability}"
+          value: "{app: tobs-timescaledb, cluster-name: tobs, release: tobs}"
         - name: PATRONI_SCOPE
-          value: ts-observability
+          value: tobs
         - name: PGBACKREST_CONFIG
           value: /etc/pgbackrest/pgbackrest.conf
         # PGDATA and PGHOST are not required to let Patroni/PostgreSQL run correctly,
@@ -5917,7 +5917,7 @@ spec:
           readOnly: true
         - name: socket-directory
           mountPath: /var/run/postgresql
-        
+
         resources:
           {}
       affinity:
@@ -5928,42 +5928,42 @@ spec:
               topologyKey: "kubernetes.io/hostname"
               labelSelector:
                 matchLabels:
-                  app: ts-observability-timescaledb
-                  release: "ts-observability"
-                  cluster-name: ts-observability
+                  app: tobs-timescaledb
+                  release: "tobs"
+                  cluster-name: tobs
           - weight: 50
             podAffinityTerm:
               topologyKey: failure-domain.beta.kubernetes.io/zone
               labelSelector:
                 matchLabels:
-                  app: ts-observability-timescaledb
-                  release: "ts-observability"
-                  cluster-name: ts-observability
-        
+                  app: tobs-timescaledb
+                  release: "tobs"
+                  cluster-name: tobs
+
       volumes:
       - name: socket-directory
         emptyDir: {}
       - name: patroni-config
         configMap:
-          name: ts-observability-timescaledb-patroni
+          name: tobs-timescaledb-patroni
       - name: timescaledb-scripts
         configMap:
-          name: ts-observability-timescaledb-scripts
+          name: tobs-timescaledb-scripts
           defaultMode: 488 # 0750 permissions
-      
+
       - name: certificate
         secret:
-          secretName: ts-observability-timescaledb-certificate
+          secretName: tobs-timescaledb-certificate
           defaultMode: 416 # 0640 permissions
   volumeClaimTemplates:
     - metadata:
         name: storage-volume
         annotations:
         labels:
-          app: ts-observability-timescaledb
-          release: ts-observability
+          app: tobs-timescaledb
+          release: tobs
           heritage: Helm
-          cluster-name: ts-observability
+          cluster-name: tobs
           purpose: data-directory
       spec:
         accessModes:
@@ -5975,10 +5975,10 @@ spec:
         name: wal-volume
         annotations:
         labels:
-          app: ts-observability-timescaledb
-          release: ts-observability
+          app: tobs-timescaledb
+          release: tobs
           heritage: Helm
-          cluster-name: ts-observability
+          cluster-name: tobs
           purpose: wal-directory
       spec:
         accessModes:
@@ -5987,21 +5987,21 @@ spec:
           requests:
             storage: "1Gi"
 ---
-# Source: timescale-observability/templates/grafana-db-user-job.yaml
+# Source: tobs/templates/grafana-db-user-job.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ts-observability-grafana-db
+  name: tobs-grafana-db
   labels:
-    app: ts-observability-timescale-observability
-    chart: timescale-observability-0.1.0-alpha.3.1
-    release: ts-observability
+    app: tobs-tobs
+    chart: tobs-0.1.0-alpha.3.1
+    release: tobs
     heritage: Helm
 spec:
   template:
     spec:
       containers:
-        - name: timescale-observability-grafana-db
+        - name: tobs-grafana-db
           image: postgres:12-alpine
           volumeMounts:
             - name: sql-volume
@@ -6015,16 +6015,16 @@ spec:
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ts-observability-timescaledb-passwords
+                  name: tobs-timescaledb-passwords
                   key: postgres
             - name: PGHOST
-              value: ts-observability.ts-observability.svc.cluster.local
+              value: tobs.tobs.svc.cluster.local
           command: ['psql', '-f', '/add-users.sql']
       restartPolicy: OnFailure
-      volumes: 
+      volumes:
         - name: sql-volume
           configMap:
-            name: ts-observability-grafana-db
+            name: tobs-grafana-db
       initContainers:
         - name: init-db
           image: busybox:1.28
@@ -6034,18 +6034,18 @@ spec:
               subPath: wait-for-ts.sh
           env:
             - name: PGHOST
-              value: ts-observability.ts-observability.svc.cluster.local
+              value: tobs.tobs.svc.cluster.local
           command: ['sh', '/wait-for-ts.sh']
 ---
-# Source: timescale-observability/charts/timescale-prometheus/templates/cronjob-dropchunk.yaml
+# Source: tobs/charts/timescale-prometheus/templates/cronjob-dropchunk.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: ts-observability-timescale-prometheus-drop-chunk
+  name: tobs-timescale-prometheus-drop-chunk
   labels:
-    app: ts-observability-timescale-prometheus
+    app: tobs-timescale-prometheus
     chart: timescale-prometheus-0.1.0-alpha.3.1
-    release: ts-observability
+    release: tobs
     heritage: Helm
 spec:
   schedule: 0,30 * * * *
@@ -6068,50 +6068,50 @@ spec:
               - name: PGPASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: ts-observability-timescaledb-passwords
+                    name: tobs-timescaledb-passwords
                     key: postgres
               - name: PGHOST
-                value: ts-observability.ts-observability.svc.cluster.local
+                value: tobs.tobs.svc.cluster.local
               - name:  PGDATABASE
                 value: postgres
           restartPolicy: OnFailure
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/pgbackrest.yaml
+# Source: tobs/charts/timescaledb-single/templates/pgbackrest.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/sec-passwords.yaml
+# Source: tobs/charts/timescaledb-single/templates/sec-passwords.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/sec-pgbackrest.yaml
+# Source: tobs/charts/timescaledb-single/templates/sec-pgbackrest.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/svc-prometheus.yaml
+# Source: tobs/charts/timescaledb-single/templates/svc-prometheus.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 #
 # This service is only created if Prometheus is enabled.
 ---
-# Source: timescale-observability/charts/grafana/templates/tests/test.yaml
+# Source: tobs/charts/grafana/templates/tests/test.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: ts-observability-grafana-test
+  name: tobs-grafana-test
   labels:
     helm.sh/chart: grafana-5.0.24
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/instance: ts-observability
+    app.kubernetes.io/instance: tobs
     app.kubernetes.io/version: "6.7.3"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test-success
-  namespace: ts-observability
+  namespace: tobs
 spec:
-  serviceAccountName: ts-observability-grafana-test
+  serviceAccountName: tobs-grafana-test
   containers:
-    - name: ts-observability-test
+    - name: tobs-test
       image: "bats/bats:v1.1.0"
       imagePullPolicy: "IfNotPresent"
       command: ["/opt/bats/bin/bats", "-t", "/tests/run.sh"]
@@ -6122,23 +6122,23 @@ spec:
   volumes:
   - name: tests
     configMap:
-      name: ts-observability-grafana-test
+      name: tobs-grafana-test
   restartPolicy: Never
 ---
-# Source: timescale-observability/charts/timescaledb-single/templates/job-update-patroni.yaml
+# Source: tobs/charts/timescaledb-single/templates/job-update-patroni.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "ts-observability-patroni-8t"
+  name: "tobs-patroni-8t"
   labels:
-    app: ts-observability-timescaledb
+    app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
-    release: ts-observability
+    release: tobs
     heritage: Helm
-    cluster-name: ts-observability
+    cluster-name: tobs
   annotations:
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
@@ -6147,14 +6147,14 @@ spec:
   template:
     metadata:
       labels:
-        app: ts-observability-timescaledb
+        app: tobs-timescaledb
         chart: timescaledb-single-0.5.5
-        release: ts-observability
+        release: tobs
         heritage: Helm
     spec:
       restartPolicy: OnFailure
       containers:
-      - name: ts-observability-timescaledb-patch-patroni-config
+      - name: tobs-timescaledb-patch-patroni-config
         image: curlimages/curl
         command: ["/usr/bin/curl"]
         args:
@@ -6168,4 +6168,4 @@ spec:
         - PATCH
         - --data
         - "{\"loop_wait\":10,\"maximum_lag_on_failover\":33554432,\"postgresql\":{\"parameters\":{\"archive_command\":\"/etc/timescaledb/scripts/pgbackrest_archive.sh %p\",\"archive_mode\":\"on\",\"archive_timeout\":\"1800s\",\"autovacuum_analyze_scale_factor\":0.02,\"autovacuum_max_workers\":10,\"autovacuum_vacuum_scale_factor\":0.05,\"hot_standby\":\"on\",\"log_autovacuum_min_duration\":0,\"log_checkpoints\":\"on\",\"log_connections\":\"on\",\"log_disconnections\":\"on\",\"log_line_prefix\":\"%t [%p]: [%c-%l] %u@%d,app=%a [%e] \",\"log_lock_waits\":\"on\",\"log_min_duration_statement\":\"1s\",\"log_statement\":\"ddl\",\"max_connections\":100,\"max_prepared_transactions\":150,\"shared_preload_libraries\":\"timescaledb,pg_stat_statements\",\"ssl\":\"on\",\"ssl_cert_file\":\"/etc/certificate/tls.crt\",\"ssl_key_file\":\"/etc/certificate/tls.key\",\"tcp_keepalives_idle\":900,\"tcp_keepalives_interval\":100,\"temp_file_limit\":\"1GB\",\"timescaledb.passfile\":\"../.pgpass\",\"unix_socket_directories\":\"/var/run/postgresql\",\"unix_socket_permissions\":\"0750\",\"wal_level\":\"hot_standby\",\"wal_log_hints\":\"on\"},\"use_pg_rewind\":true,\"use_slots\":true},\"retry_timeout\":10,\"ttl\":30}"
-        - "http://ts-observability-config:8008/config"
+        - "http://tobs-config:8008/config"

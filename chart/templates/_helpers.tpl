@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "timescale-observability.name" -}}
+{{- define "tobs.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "timescale-observability.fullname" -}}
+{{- define "tobs.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "timescale-observability.chart" -}}
+{{- define "tobs.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "timescale-observability.labels" -}}
-helm.sh/chart: {{ include "timescale-observability.chart" . }}
-{{ include "timescale-observability.selectorLabels" . }}
+{{- define "tobs.labels" -}}
+helm.sh/chart: {{ include "tobs.chart" . }}
+{{ include "tobs.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,28 +46,28 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "timescale-observability.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "timescale-observability.name" . }}
+{{- define "tobs.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "tobs.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "timescale-observability.serviceAccountName" -}}
+{{- define "tobs.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "timescale-observability.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "tobs.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-CLI release name and namespace 
+CLI release name and namespace
 */}}
-{{- define "timescale-observability.cliOptions" -}}
-{{- if ne .Release.Name "ts-obs" }} -n {{ .Release.Name }}
+{{- define "tobs.cliOptions" -}}
+{{- if ne .Release.Name "tobs" }} -n {{ .Release.Name }}
 {{- end -}}
-{{- if ne .Release.Namespace "default" }} --namespace {{ .Release.Namespace }} 
+{{- if ne .Release.Namespace "default" }} --namespace {{ .Release.Namespace }}
 {{- end -}}
 {{- end -}}

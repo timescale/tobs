@@ -6,19 +6,19 @@
 {{ if $anyDataSources -}}
 apiVersion: v1
 kind: Secret
-metadata: 
+metadata:
   name: {{ .Release.Name }}-grafana-datasources
   labels:
     grafana_datasource: "1"
-    app: {{ template "timescale-observability.fullname" . }}
-    chart: {{ template "timescale-observability.chart" . }}
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
     release: {{ .Release.Name }}
 type: Opaque
-stringData: 
+stringData:
   datasource.yaml: |-
     # config file version
     apiVersion: 1
-    
+
     datasources:
 {{- if $promEnabled }}
       - name: Prometheus

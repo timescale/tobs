@@ -5,8 +5,8 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}-grafana-db
   labels:
-    app: {{ template "timescale-observability.fullname" . }}
-    chart: {{ template "timescale-observability.chart" . }}
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -35,7 +35,7 @@ spec:
               value: {{ tpl .database.host $ }}
           command: ['psql', '-d', {{ .database.dbName }}, '-f', '/add-users.sql']
       restartPolicy: OnFailure
-      volumes: 
+      volumes:
         - name: sql-volume
           configMap:
             name: {{ $.Release.Name }}-grafana-db

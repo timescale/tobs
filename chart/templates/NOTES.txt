@@ -1,5 +1,5 @@
 ###############################################################################
-👋🏽 Welcome to timescale-observability
+👋🏽 Welcome to tobs, The Observability Stack for Kubernetes
 
 ✨ Auto-configured and deployed:
 {{- if .Values.prometheus.enabled }}
@@ -42,7 +42,7 @@ Get the Prometheus server URL by running these commands in the same shell:
   echo http://$SERVICE_IP:{{ .Values.prometheus.server.service.servicePort }}
 {{- else if contains "ClusterIP"  .Values.prometheus.server.service.type }}
 {{- if .Values.cli }}
-  ts-obs {{- template "timescale-observability.cliOptions" . }} prometheus port-forward
+  tobs {{- template "tobs.cliOptions" . }} prometheus port-forward
 {{- else }}
   export SERVICE_NAME=$(kubectl get services --namespace {{ .Release.Namespace }} -l "app={{ template "prometheus.name" $promEnv }},component={{ .Values.prometheus.server.name }}" -o jsonpath="{.items[0].metadata.name}")
   kubectl --namespace {{ .Release.Namespace }} port-forward service/$SERVICE_NAME 9090:{{ .Values.prometheus.server.service.servicePort }}
@@ -141,7 +141,7 @@ TimescaleDB can be accessed via port 5432 on the following DNS name from within 
 To get your password for superuser run:
 
 {{- if .Values.cli }}
-    ts-obs {{- template "timescale-observability.cliOptions" . }} timescaledb get-password -U <user>
+    tobs {{- template "tobs.cliOptions" . }} timescaledb get-password -U <user>
 {{- else }}
     # superuser password
     PGPASSWORD_POSTGRES=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "timescaledb.fullname" $tsEnv }}-passwords -o jsonpath="{.data.postgres}" | base64 --decode)
@@ -155,7 +155,7 @@ To connect to your database, chose one of these options:
 1. Run a postgres pod and connect using the psql cli:
 
 {{- if .Values.cli }}
-    ts-obs {{- template "timescale-observability.cliOptions" . }} timescaledb connect -U <user>
+    tobs {{- template "tobs.cliOptions" . }} timescaledb connect -U <user>
 {{- else }}
     # login as superuser
     kubectl run -i --tty --rm psql --image=postgres \
@@ -173,7 +173,7 @@ To connect to your database, chose one of these options:
 2. Directly execute a psql session on the master node
 
 {{- if .Values.cli }}
-   ts-obs {{- template "timescale-observability.cliOptions" . }} timescaledb connect -m
+   tobs {{- template "tobs.cliOptions" . }} timescaledb connect -m
 {{- else }}
    MASTERPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l release={{ .Release.Name }},role=master)"
    kubectl exec -i --tty --namespace {{ .Release.Namespace }} ${MASTERPOD} -- psql -U postgres
@@ -192,7 +192,7 @@ To connect to your database, chose one of these options:
 
    You can access grafana locally by executing:
 {{- if .Values.cli }}
-    ts-obs {{- template "timescale-observability.cliOptions" . }} grafana port-forward
+    tobs {{- template "tobs.cliOptions" . }} grafana port-forward
 {{- else }}
       kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ template "grafana.fullname" $grafanaEnv }} 8080:{{ .Values.grafana.service.port }}
 {{- end }}
@@ -203,7 +203,7 @@ To connect to your database, chose one of these options:
 
 2. Get your '{{ .Values.grafana.adminUser }}' user password by running:
 {{- if .Values.cli }}
-    ts-obs {{- template "timescale-observability.cliOptions" . }} grafana get-password
+    tobs {{- template "tobs.cliOptions" . }} grafana get-password
 {{- else }}
     kubectl get secret --namespace {{ template "grafana.namespace" $grafanaEnv }} {{ template "grafana.fullname" $grafanaEnv }} -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 {{- end }}
@@ -216,7 +216,7 @@ WARNING! Persistence is disabled!!! You will lose your data when
 
 2. The '{{ .Values.grafana.adminUser }}' user password can be retrieved by:
 {{- if .Values.cli }}
-    ts-obs {{- template "timescale-observability.cliOptions" . }} grafana get-password
+    tobs {{- template "tobs.cliOptions" . }} grafana get-password
 {{- else }}
     kubectl get secret --namespace {{ template "grafana.namespace" $grafanaEnv }} {{ template "grafana.fullname" $grafanaEnv }} -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 {{- end }}
@@ -231,7 +231,7 @@ WARNING! Persistence is disabled!!! You will lose your data when
 
 3. You can reset the admin user password with grafana-cli from inside the pod.
 {{- if .Values.cli }}
-    ts-obs {{- template "timescale-observability.cliOptions" . }} grafana change-password <password-you-want-to-set>
+    tobs {{- template "tobs.cliOptions" . }} grafana change-password <password-you-want-to-set>
 {{- else }}
    First attach yourself to the grafana container:
     GRAFANAPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana)"
