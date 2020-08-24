@@ -1,17 +1,17 @@
 # tobs - The Observability Stack for Kubernetes CLI
 
-This is a CLI tool for installing and managing the The Observability Stack for Kubernetes. 
+This is a CLI tool for installing and managing the The Observability Stack for Kubernetes.
 
 ## Quick Start
 
 __Dependencies__: [Go](https://golang.org/doc/install), [Helm](https://helm.sh/docs/intro/install/)
 
-To build from source, run `go build -o tobs` from inside the `cli` folder. 
-Then, move the `tobs` binary from the current directory to your `/bin` folder. 
+To build from source, run `go build -o tobs` from inside the `cli` folder.
+Then, move the `tobs` binary from the current directory to your `/bin` folder.
 
 ## Commands
 
-The following are the commands possible with the CLI. 
+The following are the commands possible with the CLI.
 
 ### Base Commands
 
@@ -68,7 +68,7 @@ The following are the commands possible with the CLI.
 
 ## Global Flags
 
-The following are global flags that can be used with any of the above commands: 
+The following are global flags that can be used with any of the above commands:
 
 | Flag           | Description          |
 |----------------|----------------------|
@@ -77,6 +77,8 @@ The following are global flags that can be used with any of the above commands:
 
 ## Testing
 
+WARNING: Tests start, stop, and delete the active minikube cluster. Make sure it's safe to delete your minikube cluster before starting the test.
+
 A testing suite is included in the `tests` folder. This testing suite has additional dependencies on [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) and [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/).
 
-The testing suite can be run by calling `go test -timeout 30m` from within the `tests` folder. 
+The testing suite can be run by calling `go test -timeout 30m` from within the `tests` folder. At least 4 cpus should be allocated for minikube with e.g. `minikube config set cpus 4`.
