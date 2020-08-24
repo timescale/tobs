@@ -1,6 +1,6 @@
 apiVersion: v2
-name: timescale-observability
-description: A Helm chart for the Timescale Observability Suite
+name: tobs
+description: A Helm chart for tobs, The Observability Stack for Kubernetes
 
 type: application
 

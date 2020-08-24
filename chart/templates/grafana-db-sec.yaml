@@ -2,14 +2,14 @@
 {{ if .Values.grafana.timescale.database.enabled -}}
 apiVersion: v1
 kind: Secret
-metadata: 
+metadata:
   name: {{ .Release.Name }}-grafana-db
   labels:
-    app: {{ template "timescale-observability.fullname" . }}
-    chart: {{ template "timescale-observability.chart" . }}
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
     release: {{ .Release.Name }}
 type: Opaque
-data: 
+data:
 {{- $host := tpl .Values.grafana.timescale.database.host $ -}}
 {{- $port := .Values.grafana.timescale.database.port | int -}}
 {{- $fullhost := printf "%s:%d" $host $port -}}

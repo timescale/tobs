@@ -20,8 +20,8 @@ set -o pipefail
 
 DIR=$(cd $(dirname "${BASH_SOURCE}") && pwd -P)
 
-RELEASE_NAME=ts-observability
-NAMESPACE=ts-observability
+RELEASE_NAME=tobs
+NAMESPACE=tobs
 
 NAMESPACE_VAR="
 apiVersion: v1
@@ -30,7 +30,7 @@ metadata:
   name: $NAMESPACE
   labels:
     app.kubernetes.io/name: $RELEASE_NAME
-    app.kubernetes.io/instance: timescale-observability
+    app.kubernetes.io/instance: tobs
 "
 helm dependency update ${DIR}/chart
 

@@ -7,8 +7,8 @@ metadata:
   name: {{ .Release.Name }}-grafana-dashboards
   labels:
    grafana_dashboard: "1"
-   app: {{ template "timescale-observability.fullname" . }}
-   chart: {{ template "timescale-observability.chart" . }}
+   app: {{ template "tobs.fullname" . }}
+   chart: {{ template "tobs.chart" . }}
    release: {{ .Release.Name }}
 data:
 {{ range $dash := .Values.grafana.sidecar.dashboards.files }}

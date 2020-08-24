@@ -24,9 +24,9 @@ func helmShowValues(cmd *cobra.Command, args []string) error {
 
 	var showvalues *exec.Cmd
 	if DEVEL {
-		showvalues = exec.Command("helm", "show", "values", "timescale/timescale-observability", "--devel")
+		showvalues = exec.Command("helm", "show", "values", "timescale/tobs", "--devel")
 	} else {
-		showvalues = exec.Command("helm", "show", "values", "timescale/timescale-observability")
+		showvalues = exec.Command("helm", "show", "values", "timescale/tobs")
 	}
 
 	var out []byte
