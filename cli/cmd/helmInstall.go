@@ -72,7 +72,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	fmt.Println("Installing The Observability Stack")
 	out, err := install.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
+		return fmt.Errorf("could not install The Observability Stack: %w \nOutput: %v", err, string(out))
 	}
 
 	time.Sleep(10 * time.Second)
