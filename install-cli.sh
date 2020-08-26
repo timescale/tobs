@@ -58,40 +58,34 @@ case $OS in
     ;;
 esac
 
-tarbin=$(command -v tar) || {
-  echo "Failed to find unpacking binary. Please install tar."
-  exit 1
-}
-
 checksumbin=$(command -v shasum) || {
   echo "Failed to find checksum binary. Please install shasum."
   exit 1
 }
 
 tmpdir=$(mktemp -d /tmp/tobs.XXXXXX)
-srcfile="tobs_${TOBS_VERSION}_${OS}_${arch}.tar.gz"
+srcfile="tobs_${TOBS_VERSION}_${OS}_${arch}"
 dstfile="${INSTALLROOT}/bin/tobs-${TOBS_VERSION}"
 url="https://github.com/timescale/tobs/releases/download/${TOBS_VERSION}"
 
 (
   cd "$tmpdir"
 
+  echo "\n"
   echo "Downloading ${srcfile}..."
-  curl -fLO "${url}/${srcfile}"
+  curl --proto '=https' --tlsv1.2 -sSfO "${url}/${srcfile}"
   echo "Download complete!"
 
   if ! validate_checksum "${srcfile}"; then
     exit 1
   fi
 
-  $tarbin -xvf $srcfile
-
   echo ""
 )
 
 (
   mkdir -p "${INSTALLROOT}/bin"
-  mv "${tmpdir}/tobs" "${dstfile}"
+  mv "${tmpdir}/${srcfile}" "${dstfile}"
   chmod +x "${dstfile}"
   rm -f "${INSTALLROOT}/bin/tobs"
   ln -s "${dstfile}" "${INSTALLROOT}/bin/tobs"

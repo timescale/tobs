@@ -10,6 +10,7 @@ builds:
   - CGO_ENABLED=0
 archives:
 - name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  format: binary
   replacements:
     darwin: Darwin
     linux: Linux
