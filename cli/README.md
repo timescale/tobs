@@ -4,10 +4,15 @@ This is a CLI tool for installing and managing the The Observability Stack for K
 
 ## Quick Start
 
-__Dependencies__: [Go](https://golang.org/doc/install), [Helm](https://helm.sh/docs/intro/install/)
+__Dependencies__: [Helm](https://helm.sh/docs/intro/install/)
 
-To build from source, run `go build -o tobs` from inside the `cli` folder.
-Then, move the `tobs` binary from the current directory to your `/bin` folder.
+To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
+```
+
+Alternatively, you can download the CLI directly via [our releases page](/releases).
 
 ## Commands
 
@@ -22,6 +27,8 @@ The following are the commands possible with the CLI.
 | `tobs port-forward` | Port-forwards TimescaleDB, Grafana, and Prometheus to localhost. | `--timescaledb`, `-t` : port for TimescaleDB <br> `--grafana`, `-g` : port for Grafana <br> `--prometheus`, `-p` : port for Prometheus |
 
 ### Helm Commands
+
+Documentation about Helm configuration can be found in the [Helm chart directory](/chart/README.md).
 
 | Command                 | Description                                                                  | Flags                                                |
 |-------------------------|------------------------------------------------------------------------------|------------------------------------------------------|
@@ -74,6 +81,18 @@ The following are global flags that can be used with any of the above commands:
 |----------------|----------------------|
 | `--name`, `-n` | Helm release name    |
 | `--namespace`  | Kubernetes namespace |
+
+## Advanced configuration
+
+Documentation about Helm configuration can be found in the [Helm chart directory](/chart/README.md).
+Custom values.yml files can be used with the `tobs helm install -f values.yml` command.
+
+## Building from source
+
+__Dependencies__: [Go](https://golang.org/doc/install), [Helm](https://helm.sh/docs/intro/install/)
+
+To build from source, run `go build -o tobs` from inside the `cli` folder.
+Then, move the `tobs` binary from the current directory to your `/bin` folder.
 
 ## Testing
 
