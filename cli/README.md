@@ -6,13 +6,36 @@ This is a CLI tool for installing and managing the The Observability Stack for K
 
 __Dependencies__: [Helm](https://helm.sh/docs/intro/install/)
 
+Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
+
+### Installing the CLI tool
+
 To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
 ```
 
-Alternatively, you can download the CLI directly via [our releases page](/releases).
+Alternatively, you can download the CLI directly via [our releases page](/releases)
+
+### Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
+
+After setting up tobs run the following to install the tobs helm charts into your Kubernetes cluster
+
+```bash
+tobs install
+```
+
+This will deploy all of the tobs components into your cluster and provide instructions as to next steps.
+
+### Getting started by viewing your metrics in Grafana
+To see your Grafana dashboards after installation run
+
+```bash
+tobs grafana change-password <new_password>
+tobs grafana port-forward
+```
+Then, point your browser to http://127.0.0.1:8080/ and login with the `admin` username.
 
 ## Commands
 
