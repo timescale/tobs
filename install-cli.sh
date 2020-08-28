@@ -3,7 +3,7 @@
 set -eu
 
 INSTALLROOT=${INSTALLROOT:-"${HOME}/.tobs"}
-TOBS_VERSION=${TOBS_VERSION:-0.1.0-beta.1}
+TOBS_VERSION=${TOBS_VERSION:-0.1.0-beta.3}
 
 happyexit() {
   echo ""
@@ -73,7 +73,7 @@ url="https://github.com/timescale/tobs/releases/download/${TOBS_VERSION}"
 
   echo "\n"
   echo "Downloading ${srcfile}..."
-  curl --proto '=https' --tlsv1.2 -sSfO "${url}/${srcfile}"
+  curl --proto '=https' --tlsv1.2 -sSfLO "${url}/${srcfile}"
   echo "Download complete!"
 
   if ! validate_checksum "${srcfile}"; then
