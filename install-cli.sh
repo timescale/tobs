@@ -35,63 +35,66 @@ validate_checksum() {
   fi
 }
 
-OS=$(uname -s)
-arch=$(uname -m)
-case $OS in
-  Darwin)
-    ;;
-  Linux)
-    case $arch in
-      x86_64)
-        ;;
-      i386)
-        ;;
-      *)
-        echo "The Observability Stack does not support $OS/$arch. Please open an issue with your platform details."
-        exit 1
-        ;;
-    esac
-    ;;
-  *)
-    echo "The Observability Stack does not support $OS/$arch. Please open an issue with your platform details."
+install_tobs () {
+  OS=$(uname -s)
+  arch=$(uname -m)
+  case $OS in
+    Darwin)
+      ;;
+    Linux)
+      case $arch in
+        x86_64)
+          ;;
+        i386)
+          ;;
+        *)
+          echo "The Observability Stack does not support $OS/$arch. Please open an issue with your platform details."
+          exit 1
+          ;;
+      esac
+      ;;
+    *)
+      echo "The Observability Stack does not support $OS/$arch. Please open an issue with your platform details."
+      exit 1
+      ;;
+  esac
+
+  checksumbin=$(command -v shasum) || {
+    echo "Failed to find checksum binary. Please install shasum."
     exit 1
-    ;;
-esac
+  }
 
-checksumbin=$(command -v shasum) || {
-  echo "Failed to find checksum binary. Please install shasum."
-  exit 1
-}
+  tmpdir=$(mktemp -d /tmp/tobs.XXXXXX)
+  srcfile="tobs_${TOBS_VERSION}_${OS}_${arch}"
+  dstfile="${INSTALLROOT}/bin/tobs-${TOBS_VERSION}"
+  url="https://github.com/timescale/tobs/releases/download/${TOBS_VERSION}"
 
-tmpdir=$(mktemp -d /tmp/tobs.XXXXXX)
-srcfile="tobs_${TOBS_VERSION}_${OS}_${arch}"
-dstfile="${INSTALLROOT}/bin/tobs-${TOBS_VERSION}"
-url="https://github.com/timescale/tobs/releases/download/${TOBS_VERSION}"
+  (
+    cd "$tmpdir"
 
-(
-  cd "$tmpdir"
+    echo "\n"
+    echo "Downloading ${srcfile}..."
+    curl --proto '=https' --tlsv1.2 -sSfLO "${url}/${srcfile}"
+    echo "Download complete!"
 
-  echo "\n"
-  echo "Downloading ${srcfile}..."
-  curl --proto '=https' --tlsv1.2 -sSfLO "${url}/${srcfile}"
-  echo "Download complete!"
+    if ! validate_checksum "${srcfile}"; then
+      exit 1
+    fi
 
-  if ! validate_checksum "${srcfile}"; then
-    exit 1
-  fi
+    echo ""
+  )
 
+  (
+    mkdir -p "${INSTALLROOT}/bin"
+    mv "${tmpdir}/${srcfile}" "${dstfile}"
+    chmod +x "${dstfile}"
+    rm -f "${INSTALLROOT}/bin/tobs"
+    ln -s "${dstfile}" "${INSTALLROOT}/bin/tobs"
+  )
+
+  rm -r "$tmpdir"
+  echo "tobs ${TOBS_VERSION} was successfully installed 🎉"
   echo ""
-)
-
-(
-  mkdir -p "${INSTALLROOT}/bin"
-  mv "${tmpdir}/${srcfile}" "${dstfile}"
-  chmod +x "${dstfile}"
-  rm -f "${INSTALLROOT}/bin/tobs"
-  ln -s "${dstfile}" "${INSTALLROOT}/bin/tobs"
-)
-
-rm -r "$tmpdir"
-echo "tobs ${TOBS_VERSION} was successfully installed 🎉"
-echo ""
-happyexit
+  happyexit
+}
+install_tobs
