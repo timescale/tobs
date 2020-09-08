@@ -7,11 +7,13 @@ TOBS_VERSION=${TOBS_VERSION:-0.1.0-beta.4}
 
 happyexit() {
   echo ""
-  echo "Add the tobs CLI to your path with:"
+  echo "Add the tobs CLI to your system binaries with:"
   echo ""
-  echo "  export PATH=\$PATH:${INSTALLROOT}/bin"
+  echo "  sudo cp ${INSTALLROOT}/bin/tobs /usr/local/bin"
   echo ""
-  echo "After starting your cluster, run"
+  echo "Alternatively, add tobs to your path in the current session with: export PATH=\$PATH:${INSTALLROOT}/bin"
+  echo ""
+  echo "After starting your Kubernetes cluster, run"
   echo ""
   echo "  tobs install"
   echo ""
