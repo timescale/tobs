@@ -110,9 +110,10 @@ grafana:
   prometheus:
     datasource:
       enabled: true
-      # By default url of data source is set to prometheus instance
-      # deployed with this chart
-      url: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
+      # By default url of data source is set to ts-prom connector instance
+      # deployed with this chart. If a connector isn't used this should be
+      # set to the prometheus-server.
+      url: "http://{{ .Release.Name }}-timescale-prometheus-connector.{{ .Release.Namespace }}.svc.cluster.local:9201"
   timescale:
     database:
       enabled: true
