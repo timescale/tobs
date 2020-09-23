@@ -11,6 +11,9 @@
 {{- if index .Values "timescale-prometheus" "enabled" }}
 🤝 Timescale-Prometheus connector
 {{- end }}
+{{- if .Values.promlens.enabled }}
+🧐 PromLens
+{{- end }}
 {{- if .Values.grafana.enabled }}
 📈 Grafana
 {{- end }}
@@ -180,6 +183,25 @@ To connect to your database, chose one of these options:
 {{- end }}
 {{- end }}
 
+{{ if .Values.promlens.enabled }}
+###############################################################################
+🧐 PROMLENS NOTES:
+###############################################################################
+{{- $tsPromEnv := (set (set (deepCopy .) "Values" (index .Values "timescale-prometheus")) "Chart" (dict "Name" "timescale-prometheus"))  }}
+   PromLens is a PromQL query builder, analyzer, and visualizer.
+
+   You can access PromLens via a local browser by executing:
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} promlens port-forward
+{{- else }}
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name }}-promlens 8081:80
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "connector.fullname" $tsPromEnv |trunc 53 }}-connector 9201:{{ index .Values "timescale-prometheus" "service" "port"}}
+      (Note: You have to port-forward both PromLens and the connector at the same time)
+{{- end }}
+
+   Then you can point your browser to http://127.0.0.1:8081/.
+
+{{- end -}}
 {{ if .Values.grafana.enabled }}
 ###############################################################################
 📈 GRAFANA NOTES:

@@ -137,3 +137,14 @@ grafana:
     adminUser: postgres
     adminPassSecret: *dbPassSecret
 
+#Enable PromLens  https://promlens.com/
+#PromLens is a PromQL query builder, analyzer, and visualizer
+promlens:
+  enabled: true
+  image: "promlabs/promlens:latest"
+  # This default URL assumes access via port-forwarding to the connector. If using
+  # a load balancer for the connector, change as appropriate
+  # NOTE: the internal cluster address does not work here as requests are made by the browser.
+  defaultPrometheusUrl:  "http://localhost:9201"
+  loadBalancer:
+    enabled: false

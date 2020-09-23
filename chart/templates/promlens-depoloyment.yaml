@@ -1,0 +1,35 @@
+{{ if .Values.promlens.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-promlens
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    component: promlens
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "tobs.fullname" . }}
+      component: promlens
+  template:
+    metadata:
+      labels:
+        app: {{ template "tobs.fullname" . }}
+        component: promlens
+    spec:
+      containers:
+        - image: {{ .Values.promlens.image }}
+          imagePullPolicy: IfNotPresent
+          name: promlens
+          command: ["/promlens", "--web.default-prometheus-url", "{{ tpl .Values.promlens.defaultPrometheusUrl . }}" , "--web.listen-address", ":8080"]
+          {{- if .Values.promlens.resources }}
+          resources:
+            {{- toYaml .Values.promlens.resources | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: 8080
+              name: promlens-web
+{{- end -}}

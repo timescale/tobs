@@ -14,7 +14,7 @@ var installCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(installCmd)
-	installCmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
+	addHelmInstallFlags(installCmd)
 }
 
 func install(cmd *cobra.Command, args []string) error {

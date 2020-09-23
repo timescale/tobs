@@ -74,6 +74,14 @@ func KubeGetServiceName(namespace string, labelmap map[string]string) (string, e
 		return "", err
 	}
 
+	if len(services.Items) < 1 {
+		return "", fmt.Errorf("No such service found")
+	}
+
+	if len(services.Items) > 1 {
+		return "", fmt.Errorf("Too many services found")
+	}
+
 	return services.Items[0].Name, nil
 }
 
