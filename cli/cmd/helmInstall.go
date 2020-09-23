@@ -23,14 +23,23 @@ var helmInstallCmd = &cobra.Command{
 
 func init() {
 	helmCmd.AddCommand(helmInstallCmd)
-	helmInstallCmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
+	addHelmInstallFlags(helmInstallCmd)
+}
+
+func addHelmInstallFlags(cmd *cobra.Command) {
+	cmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
+	cmd.Flags().StringP("chart-reference", "c", "timescale/tobs", "Helm chart reference")
 }
 
 func helmInstall(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var file string
+	var file, ref string
 	file, err = cmd.Flags().GetString("filename")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+	ref, err = cmd.Flags().GetString("chart-reference")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -57,7 +66,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	cmds := []string{"install", name, "timescale/tobs", "--set", "cli=true"}
+	cmds := []string{"install", name, ref, "--set", "cli=true"}
 	if namespace != "default" {
 		cmds = append(cmds, "--create-namespace", "--namespace", namespace)
 	}

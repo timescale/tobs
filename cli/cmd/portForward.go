@@ -19,6 +19,8 @@ func init() {
 	portForwardCmd.Flags().IntP("timescaledb", "t", LISTEN_PORT_TSDB, "Port to listen from for TimescaleDB")
 	portForwardCmd.Flags().IntP("grafana", "g", LISTEN_PORT_GRAFANA, "Port to listen from for Grafana")
 	portForwardCmd.Flags().IntP("prometheus", "p", LISTEN_PORT_PROM, "Port to listen from for Prometheus")
+	portForwardCmd.Flags().IntP("connector", "c", LISTEN_PORT_CONNECTOR, "Port to listen from for the Connector")
+	portForwardCmd.Flags().IntP("promlens", "l", LISTEN_PORT_PROMLENS, "Port to listen from for PromLens")
 }
 
 func portForward(cmd *cobra.Command, args []string) error {
@@ -38,6 +40,18 @@ func portForward(cmd *cobra.Command, args []string) error {
 
 	var prometheus int
 	prometheus, err = cmd.Flags().GetInt("prometheus")
+	if err != nil {
+		return fmt.Errorf("could not port-forward: %w", err)
+	}
+
+	var connector int
+	connector, err = cmd.Flags().GetInt("connector")
+	if err != nil {
+		return fmt.Errorf("could not port-forward: %w", err)
+	}
+
+	var promlens int
+	promlens, err = cmd.Flags().GetInt("promlens")
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
@@ -75,6 +89,13 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
+	if err := portForwardPromlens(promlens); err != nil {
+		return err
+	}
+
+	if err := portForwardConnector(connector); err != nil {
+		return err
+	}
 	select {}
 
 	return nil
