@@ -4382,12 +4382,12 @@ data:
       scrape_interval: 1m
       scrape_timeout: 10s
     remote_write:
-    - url: http://tobs-timescale-prometheus-connector.tobs.svc.cluster.local:9201/write
+    - url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201/write
       queue_config:
         max_shards: 30
 
     remote_read:
-    - url: http://tobs-timescale-prometheus-connector.tobs.svc.cluster.local:9201/read
+    - url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201/read
 
     rule_files:
     - /etc/config/recording_rules.yml
@@ -5142,21 +5142,21 @@ spec:
   sessionAffinity: None
   type: "ClusterIP"
 ---
-# Source: tobs/charts/timescale-prometheus/templates/svc-connector.yaml
+# Source: tobs/charts/promscale/templates/svc-connector.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: tobs-timescale-prometheus-connector
+  name: tobs-promscale-connector
   labels:
-    app: tobs-timescale-prometheus
-    chart: timescale-prometheus-0.1.0-alpha.3.1
+    app: tobs-promscale
+    chart: promscale-0.1.0-alpha.3.1
     release: tobs
     heritage: Helm
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
 spec:
   selector:
-    app: tobs-timescale-prometheus
+    app: tobs-promscale
   type: ClusterIP
   ports:
   - name: connector-port
@@ -5655,25 +5655,25 @@ spec:
           persistentVolumeClaim:
             claimName: tobs-prometheus-server
 ---
-# Source: tobs/charts/timescale-prometheus/templates/deployment-connector.yaml
+# Source: tobs/charts/promscale/templates/deployment-connector.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tobs-timescale-prometheus
+  name: tobs-promscale
   labels:
-    app: tobs-timescale-prometheus
-    chart: timescale-prometheus-0.1.0-alpha.3.1
+    app: tobs-promscale
+    chart: promscale-0.1.0-alpha.3.1
     release: tobs
     heritage: Helm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tobs-timescale-prometheus
+      app: tobs-promscale
   template:
     metadata:
       labels:
-        app: tobs-timescale-prometheus
+        app: tobs-promscale
 
       annotations:
         prometheus.io/path: /metrics
@@ -5682,9 +5682,9 @@ spec:
 
     spec:
       containers:
-        - image: timescale/timescale-prometheus:0.1.0-alpha.3.1
+        - image: timescale/promscale:0.1.0-alpha.3.1
           imagePullPolicy: IfNotPresent
-          name: timescale-prometheus-connector
+          name: promscale-connector
           resources:
             requests:
               cpu: 1
@@ -6037,14 +6037,14 @@ spec:
               value: tobs.tobs.svc.cluster.local
           command: ['sh', '/wait-for-ts.sh']
 ---
-# Source: tobs/charts/timescale-prometheus/templates/cronjob-dropchunk.yaml
+# Source: tobs/charts/promscale/templates/cronjob-dropchunk.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: tobs-timescale-prometheus-drop-chunk
+  name: tobs-promscale-drop-chunk
   labels:
-    app: tobs-timescale-prometheus
-    chart: timescale-prometheus-0.1.0-alpha.3.1
+    app: tobs-promscale
+    chart: promscale-0.1.0-alpha.3.1
     release: tobs
     heritage: Helm
 spec:
@@ -6054,7 +6054,7 @@ spec:
       template:
         spec:
           containers:
-          - name: timescale-prometheus-drop-chunk
+          - name: promscale-drop-chunk
             image: postgres:12-alpine
             args:
             - psql

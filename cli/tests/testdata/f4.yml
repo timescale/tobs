@@ -14,12 +14,12 @@ timescaledb-single:
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
 
-# Values for configuring the deployment of the Timescale Prometheus Connector
+# Values for configuring the deployment of the Promscale Connector
 # The charts README is at:
-#   https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
-timescale-prometheus:
+#   https://github.com/timescale/promscale/tree/master/helm-chart
+promscale:
   enabled: true
-  image: timescale/timescale-prometheus:0.1.0-alpha.4.1
+  image: timescale/promscale:0.1.0-alpha.4.1
   # connection options
   connection:
     # the db name in which the metrics will be stored
@@ -28,7 +28,7 @@ timescale-prometheus:
     user: postgres
     password:
       # Name of a secret object (templated) containing the connection password
-      # Key must be value of timescale-prometheus.connection.user
+      # Key must be value of promscale.connection.user
       # Created by default if timescaledb-single.enabled=true
       secretTemplate: &dbPassSecret "{{ .Release.Name }}-timescaledb-passwords"
     host:
@@ -36,7 +36,7 @@ timescale-prometheus:
       # to service created in timescaledb-single
       nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
 
-  # configuration options for the service exposed by timescale-prometheus
+  # configuration options for the service exposed by promscale
   service:
     # we disable the load balancer by default, only a ClusterIP service
     # will get created
@@ -60,16 +60,16 @@ prometheus:
     enabled: false
   server:
     # we provide a config map which will have the
-    # timescale-prometheus connector already configured as
+    # promscale connector already configured as
     # a remote endpoint for read/write (if enabled)
     # this overrides the config map the prometheus chart
     # creates
     configMapOverrideName: "prometheus-config"
     # values to be used in the override config map
-    # for a Timescale-Prometheus remote_write and remote_read config
+    # for a Promscale remote_write and remote_read config
     timescaleRemote:
       # templated
-      host: "{{ .Release.Name }}-timescale-prometheus-connector.{{ .Release.Namespace }}.svc.cluster.local"
+      host: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local"
       protocol: http
       port: "9201"
       write:

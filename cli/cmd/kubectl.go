@@ -155,7 +155,7 @@ func KubeGetAllPods(namespace string, name string) ([]corev1.Pod, error) {
 	}
 	allpods = append(allpods, pods...)
 
-	pods, err = KubeGetPods(namespace, map[string]string{"app": name + "-timescale-prometheus"})
+	pods, err = KubeGetPods(namespace, map[string]string{"app": name + "-promscale"})
 	if err != nil {
 		return nil, err
 	}

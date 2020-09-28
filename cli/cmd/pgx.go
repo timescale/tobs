@@ -18,7 +18,7 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 	os.Stdout = nil
 	defer func() { os.Stdout = stdout }()
 
-	tspromPods, err := KubeGetPods(namespace, map[string]string{"app": name + "-timescale-prometheus"})
+	tspromPods, err := KubeGetPods(namespace, map[string]string{"app": name + "-promscale"})
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		return nil, errors.New("user not found")
 	}
 
-    tsdbPods, err := KubeGetPods(namespace, map[string]string{"release": name, "role": "master"})
+	tsdbPods, err := KubeGetPods(namespace, map[string]string{"release": name, "role": "master"})
 	if err != nil {
 		return nil, err
 	}

@@ -40,7 +40,7 @@ func portForwardPromlens(listenPort int) error {
 }
 
 func portForwardConnector(listenPort int) error {
-	serviceNameConnector, err := KubeGetServiceName(namespace, map[string]string{"release": name, "app": name + "-timescale-prometheus"})
+	serviceNameConnector, err := KubeGetServiceName(namespace, map[string]string{"release": name, "app": name + "-promscale"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
