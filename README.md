@@ -4,7 +4,7 @@ Tobs is a tool that aims to make it as easy as possible to install a full observ
 stack into a Kubernetes cluster. Currently this stack includes:
  * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
  * [Grafana](https://github.com/grafana/grafana) to visualize what's going on
- * [Timescale-Prometheus](https://github.com/timescale/timescale-prometheus) ([design doc][design-doc]) to store metrics for the long-term and allow analysis with both PromQL and SQL.
+ * [Promscale](https://github.com/timescale/promscale) ([design doc][design-doc]) to store metrics for the long-term and allow analysis with both PromQL and SQL.
 
  We plan to expand this stack over time and welcome contributions.
 
@@ -73,8 +73,8 @@ you're a new contributor.
 [design-doc]: https://tsdb.co/prom-design-doc
 [timescaledb-helm-cleanup]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#optional-delete-the-s3-backups
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
-[timescale-prometheus-repo]: https://github.com/timescale/timescale-prometheus
-[timescale-prometheus-helm]: https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
+[promscale-repo]: https://github.com/timescale/promscale
+[promscale-helm]: https://github.com/timescale/promscale/tree/master/helm-chart
 [prometheus-helm-hub]: https://hub.helm.sh/charts/stable/prometheus
 [prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
 [grafana-helm-hub]: https://hub.helm.sh/charts/stable/grafana

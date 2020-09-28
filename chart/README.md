@@ -1,6 +1,6 @@
 # tobs Helm Charts
 
-A Helm chart for deploying Prometheus configured to use TimescaleDB as compressed long-term store for time-series metrics through the Timescale-Prometheus Connector.
+A Helm chart for deploying Prometheus configured to use TimescaleDB as compressed long-term store for time-series metrics through the Promscale Connector.
 
 ### Table of contents
 * **[Installing](#installing)**
@@ -10,8 +10,8 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
 * **[Configuring Helm Chart](#configuring-helm-chart)**
   * **[TimescaleDB related values](#timescaledb-related-values)**
     * [Additional configuration for TimescaleDB](#additional-configuration-for-timescaledb)
-  * **[Timescale-Prometheus related values](#timescale-prometheus-related-values)**
-    * [Additional configuration for Timescale-Prometheus Connector](#additional-configuration-for-timescale-prometheus-connector)
+  * **[Promscale related values](#promscale-related-values)**
+    * [Additional configuration for Promscale Connector](#additional-configuration-for-promscale-connector)
   * **[Prometheus related values](#prometheus-related-values)**
     * [Additional configuration for Prometheus](#additional-configuration-for-prometheus)
   * **[Grafana related values](#grafana-related-values)**
@@ -22,7 +22,7 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
 The recommended way to deploy tobs is through the [CLI tool](/cli). However, we also
 support helm deployments that do not use the CLI.
 
-The following command will install Prometheus, TimescaleDB, Timescale-Prometheus Connector, and Grafana
+The following command will install Prometheus, TimescaleDB, Promscale Connector, and Grafana
 into your Kubernetes cluster:
 ```
 helm repo add timescale https://charts.timescale.com/
@@ -94,25 +94,25 @@ interested in a replicated setup for high-availability with automated backups, p
 
 You can set up the credentials, nodeSelector, volume sizes (default volumes created are 1GB for WAL and 2GB for storage).
 
-## Timescale-Prometheus related values
+## Promscale related values
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
-| `timescale-prometheus.enabled`                      | If false Timescale-Prometheus Connector will not be created| `true` |
-| `timescale-prometheus.image`                        | Docker image to use for the Connector                 | `timescale/timescale-prometheus:0.1.0-alpha.2` |
-| `timescale-prometheus.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
-| `timescale-prometheus.connection.user`              | User used for connection to db | `postgres` |
-| `timescale-prometheus.connection.password.secretTemplate` | Name (templated) of secret object containing the connection password. Key must be value of `timescale-prometheus.connection.user`. Defaults to secret created by timescaledb-single chart | `"{{ .Release.Name }}-timescaledb-passwords"` |
-| `timescale-prometheus.connection.host.nameTemplate` | Host name (templated) of the database instance. Defaults to service created in `timescaledb-single` | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"` |
-| `timescale-prometheus.service.loadBalancer.enabled` | Create a LB for the connector instead of a Cluster IP | `false`     |
-| `timescale-prometheus.resources.requests.memory`    | Amount of memory for the Connector pod                | `2Gi`       |
-| `timescale-prometheus.resources.requests.cpu`       | Number of vCPUs for the Connector pod                 | `1`         |
+| `promscale.enabled`                      | If false Promscale Connector will not be created| `true` |
+| `promscale.image`                        | Docker image to use for the Connector                 | `timescale/promscale:0.1.0-alpha.2` |
+| `promscale.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
+| `promscale.connection.user`              | User used for connection to db | `postgres` |
+| `promscale.connection.password.secretTemplate` | Name (templated) of secret object containing the connection password. Key must be value of `promscale.connection.user`. Defaults to secret created by timescaledb-single chart | `"{{ .Release.Name }}-timescaledb-passwords"` |
+| `promscale.connection.host.nameTemplate` | Host name (templated) of the database instance. Defaults to service created in `timescaledb-single` | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"` |
+| `promscale.service.loadBalancer.enabled` | Create a LB for the connector instead of a Cluster IP | `false`     |
+| `promscale.resources.requests.memory`    | Amount of memory for the Connector pod                | `2Gi`       |
+| `promscale.resources.requests.cpu`       | Number of vCPUs for the Connector pod                 | `1`         |
 
-### Additional configuration for Timescale-Prometheus Connector
+### Additional configuration for Promscale Connector
 
 The connector is configured to connect to the TimescaleDB instance deployed with this chart.
 But it can be configured to connect to any TimescaleDB host, and expose whichever port you like.
-For more details about how to configure the Timescale-Prometheus connector please see the
-[Helm chart directory][timescale-prometheus-helm] of the [Timescale-Prometheus][timescale-prometheus-repo] repo.
+For more details about how to configure the Promscale connector please see the
+[Helm chart directory][promscale-helm] of the [Promscale][promscale-repo] repo.
 
 ## Prometheus related values
 
@@ -122,25 +122,25 @@ For more details about how to configure the Timescale-Prometheus connector pleas
 | `prometheus.alertmanager.enabled`                   | If true will create the Prometheus Alert Manager       | `false`    |
 | `prometheus.pushgateway.enabled`                    | If true will create the Prometheus Push Gateway        | `false`    |
 | `prometheus.server.configMapOverrideName`           | The name of the ConfigMap that provides the Prometheus config. Resolves to `{{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}` | `prometheus-config` |
-| `prometheus.server.timescaleRemote.host` | Templated hostname of Timescale-Prometheus connector to be used as Long Term Storage | `{{ .Release.Name }}-timescale-prometheus.{{ .Release.Namespace }}.svc.cluster.local` |
-| `prometheus.server.timescaleRemote.protocol` | Protocol to use to send the metrics to Timescale-Prometheus | `http` |
-| `prometheus.server.timescaleRemote.port` | Listening Port of Timescale-Prometheus Connector | `9201` |
-| `prometheus.server.timescaleRemote.write.enabled` | If false, Timescale-Prometheus Connector will not be set up as remote_write| `true` |
-| `prometheus.server.timescaleRemote.write.endpoint` | Write endpoint of Timescale-Prometheus. Used to generate url of remote_write as {protocol}://{host}:{port}/{endpoint} | `write` |
+| `prometheus.server.timescaleRemote.host` | Templated hostname of Promscale connector to be used as Long Term Storage | `{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc.cluster.local` |
+| `prometheus.server.timescaleRemote.protocol` | Protocol to use to send the metrics to Promscale | `http` |
+| `prometheus.server.timescaleRemote.port` | Listening Port of Promscale Connector | `9201` |
+| `prometheus.server.timescaleRemote.write.enabled` | If false, Promscale Connector will not be set up as remote_write| `true` |
+| `prometheus.server.timescaleRemote.write.endpoint` | Write endpoint of Promscale. Used to generate url of remote_write as {protocol}://{host}:{port}/{endpoint} | `write` |
 | `prometheus.server.timescaleRemote.write.queue` | remote_write queue config | `{max_shards: 30}`
-| `prometheus.server.timescaleRemote.read.enabled` | If false Timescale-Prometheus Connector will not be set up as remote_read | `true` |
-| `prometheus.server.timescaleRemote.write.endpoint` | Read endpoint of Timescale-Prometheus. Used to generate url of remote_read as {protocol}://{host}:{port}/{endpoint} | `read` |
+| `prometheus.server.timescaleRemote.read.enabled` | If false Promscale Connector will not be set up as remote_read | `true` |
+| `prometheus.server.timescaleRemote.write.endpoint` | Read endpoint of Promscale. Used to generate url of remote_read as {protocol}://{host}:{port}/{endpoint} | `read` |
 
 ### Additional configuration for Prometheus
 
 The stable/prometheus chart is used as a dependency for deploying Prometheus. We specify
-a ConfigMap override where the Timescale-Prometheus Connector is already configured as a `remote_write`
+a ConfigMap override where the Promscale Connector is already configured as a `remote_write`
 and `remote_read` endpoint. We create a ConfigMap that is still compatible and respects all the configuration
 properties for the prometheus chart, so no functionality is lost.
 
-The Timescale-Prometheus connection is set using the values in `prometheus.server.timescaleRemote`.
+The Promscale connection is set using the values in `prometheus.server.timescaleRemote`.
 This doesn't change the way the `prometheus.server.remoteWrite` configuration is handled. The configuration
-is separate so we can use templating and set the endpoint properly when deploying Timescale-Prometheus and
+is separate so we can use templating and set the endpoint properly when deploying Promscale and
 Prometheus in the same release. If you specify more endpoints in `prometheus.server.remoteWrite` (or `remoteRead`)
 They will be added additionally.
 
@@ -148,7 +148,7 @@ For all the properties that can be configured and more details on how to set up 
 deployment see the [Helm hub entry][prometheus-helm-hub].
 
 For more information about the `remote_write` configuration that can be set with
-`timescale-prometheus.remote.queue` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
+`promscale.remote.queue` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
 
 ## Grafana related values
 
@@ -171,7 +171,7 @@ For more information about the `remote_write` configuration that can be set with
 | `grafana.timescale.datasource.enabled` |  If false a TimescaleDB data source will not be provisioned | `true` |
 | `grafana.timescale.datasource.user` | User to connect with | `grafana` |
 | `grafana.timescale.datasource.pass` | Pass for user | `grafana` |
-| `grafana.timescale.datasource.dbName` | Database storing the metrics (Should be same with `timescale-prometheus.connection.dbName`) | `postgres` |
+| `grafana.timescale.datasource.dbName` | Database storing the metrics (Should be same with `promscale.connection.dbName`) | `postgres` |
 | `grafana.timescale.datasource.sslMode` | SSL mode for connection | `require` |
 | `grafana.timescale.adminUser`                | Admin user to create the users and schemas with | `postgres` |
 | `grafana.timescale.adminPassSecret`      | Name (templated) of secret containing password for admin user | `"{{ .Release.Name }}-timescaledb-passwords"` |
@@ -190,7 +190,7 @@ the name of a secret that contains the password for this user.
 
 The chart is configured to provision a TimescaleDB data source. This is controlled with the `grafana.timescale.datasource.enabled`
 If enabled it will run a Job that creates a user (as specified with `grafana.timescale.datasource.user`) and grant read-only
-access to the timescale-prometheus schemas. In order for the user and schema to be created, the `grafana.timescale.adminUser`
+access to the promscale schemas. In order for the user and schema to be created, the `grafana.timescale.adminUser`
 must be set to a db user with the ability to do so (e.g. postgres), and `grafana.timescale.adminPassSecret` must be
 the name of a secret that contains the password for this user.
 
@@ -218,8 +218,8 @@ For all the properties that can be configured and more details on how to set up 
 [design-doc]: https://tsdb.co/prom-design-doc
 [timescaledb-helm-cleanup]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#optional-delete-the-s3-backups
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
-[timescale-prometheus-repo]: https://github.com/timescale/timescale-prometheus
-[timescale-prometheus-helm]: https://github.com/timescale/timescale-prometheus/tree/master/helm-chart
+[promscale-repo]: https://github.com/timescale/promscale
+[promscale-helm]: https://github.com/timescale/promscale/tree/master/helm-chart
 [prometheus-helm-hub]: https://hub.helm.sh/charts/stable/prometheus
 [prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
 [grafana-helm-hub]: https://hub.helm.sh/charts/stable/grafana

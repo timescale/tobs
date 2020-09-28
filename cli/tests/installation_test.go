@@ -10,7 +10,7 @@ import (
 )
 
 func testInstall(t testing.TB, name, namespace, filename string) {
-	cmds := []string{"install"}
+	cmds := []string{"install", "--chart-reference", "../../chart"}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
 	} else {
@@ -36,7 +36,7 @@ func testInstall(t testing.TB, name, namespace, filename string) {
 }
 
 func testHelmInstall(t testing.TB, name, namespace, filename string) {
-	cmds := []string{"helm", "install"}
+	cmds := []string{"helm", "install", "--chart-reference", "../../chart"}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
 	} else {
