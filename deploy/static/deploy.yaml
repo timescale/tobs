@@ -15,10 +15,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
   annotations:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default'
@@ -69,10 +69,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 spec:
   allowPrivilegeEscalation: true
@@ -100,10 +100,10 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana
   namespace: tobs
@@ -113,10 +113,10 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana-test
   namespace: tobs
@@ -143,9 +143,10 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-node-exporter
+  namespace: tobs
   annotations:
     {}
 ---
@@ -157,9 +158,10 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-server
+  namespace: tobs
   annotations:
     {}
 ---
@@ -183,15 +185,15 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 type: Opaque
 data:
   admin-user: "YWRtaW4="
-  admin-password: "MXJYNU9TOWhMWnF2b2hyOUVUVjI3WjFSVEowU09Jd2s5UTBSa3RKNg=="
+  admin-password: "WUZEa2tEU0hTcUI5ZlZRdFNON0tISnhBajd4WFBhRGxBaDdoVUdNTA=="
   ldap-toml: ""
 ---
 # Source: tobs/charts/timescaledb-single/templates/sec-certificate.yaml
@@ -209,8 +211,8 @@ metadata:
     heritage: Helm
     cluster-name: tobs
 data:
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBekNDQWV1Z0F3SUJBZ0lSQU90ZUxYd3M3MFMxZ1hOSlhBQjF1TmN3RFFZSktvWklodmNOQVFFTEJRQXcKR3pFWk1CY0dBMVVFQXhNUWRITXRiMkp6WlhKMllXSnBiR2wwZVRBZUZ3MHlNREEyTURNeE5UVXpOVEJhRncweQpOVEEyTURNeE5UVXpOVEJhTUJzeEdUQVhCZ05WQkFNVEVIUnpMVzlpYzJWeWRtRmlhV3hwZEhrd2dnRWlNQTBHCkNTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDek5FSk9mbmU3YXNDc0J3TFNBR09MMEw3dW9ZYzQKdEd0SFlwNGc0bkFuT3AxRFFaN3JaUWg2OGZiQVdPV2lQcmFxUmhoUlk1eUhuaVpwTkkrT3llNmoremwwUU00WAo0OTRoeG5GOGcyWUZtTjlVZCtGZ0hFZi82Mk1oSHkzb0RyT2dtQjFhNHdWWk1vMGltMkNxUnIyenhPeGZxcmpyCmkzaUYxMXpwRGFjK1Fmajh1VzhNWUhFUmM0SVNhNUg4SE13QTcyamJ1cElJaFdPTWgvREM4SitSZFEyN3BxOFEKd2R1cmgxRzRsb0JJRzd0L3M2ZDVIRnNEaFp5OVVYV2xia2tpMEhRV01aZWJxSUNEek9NY3VMUWlBenJaeWJkWgpudnQyeXdKZElqNDZ6eEs2clpxVi9XRmRieTgxWmhJNndMaW9tQlFWc3gzQnF1ZGFjTXdxUkRBSEFnTUJBQUdqClFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUgKQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQUxpdVFwZld4TmFYVwpLY21IUWZFSVJidnVxRkJ4Z3ZKUkorS0RHQWRwakpaQlhqeUZ0a3RxTHhoZ1Z2eEl2Y1JoR1l3Rm85SHQxYkZxCnFRMzZxMDUxOHpRWFJrdmdtY3RSejdNRjJGdHRqOG5sSHlkSE1zS0RPWm9TeFdiS2VBT0RXSFhNMEhpYXRabEYKMjFodkdWTXlUV3c4Y0ZRUHJMT2E1bGdHT2todmJwN3E2ZGtYSVFqYkc0NHpzdDcwTGdEbVdNSFlVd1dTTWdaRwp4dzgxYklRaDZaUityOENueVcyZ1RvTjN6WDJmNzNSYTh4Q3FhT3ozQkVPaXY1Wmxmb3l2RlNVQlNjcFNkMm1CCmhBaXEreVlBalhuRzZIbWFuc09hK05Dem5WdThzMzgyMy9NRkxzNGlMdGo2azczQkNPbEdUUWlDVzdNZVQzTzEKMzRVMWFYZThVdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBc3pSQ1RuNTN1MnJBckFjQzBnQmppOUMrN3FHSE9MUnJSMktlSU9Kd0p6cWRRMEdlCjYyVUlldkgyd0ZqbG9qNjJxa1lZVVdPY2g1NG1hVFNQanNudW8vczVkRURPRitQZUljWnhmSU5tQlpqZlZIZmgKWUJ4SC8rdGpJUjh0NkE2em9KZ2RXdU1GV1RLTklwdGdxa2E5czhUc1g2cTQ2NHQ0aGRkYzZRMm5Qa0g0L0xsdgpER0J4RVhPQ0VtdVIvQnpNQU85bzI3cVNDSVZqaklmd3d2Q2ZrWFVOdTZhdkVNSGJxNGRSdUphQVNCdTdmN09uCmVSeGJBNFdjdlZGMXBXNUpJdEIwRmpHWG02aUFnOHpqSExpMElnTTYyY20zV1o3N2Rzc0NYU0krT3M4U3VxMmEKbGYxaFhXOHZOV1lTT3NDNHFKZ1VGYk1kd2FyblduRE1La1F3QndJREFRQUJBb0lCQUVEbDdoVnJLNFZPRmRTMgovVWg4SjVEYzJpaWxpc2o0WGRtT1YySGxYMlIxajdwcHExbm9UdmZuWk1zbjVwR3BVSkc5ck5UYzFEVXhDd3dTCm91SzlNcFZrUjl4WUU4c0hGTXo2aHVMbTJ5MnZ2VUZqNE5UanFSZC9jWGp2UjdyQWlFRGlsYzd5WkY5M05UR1IKUDZLcTE4eWd4bEduREMwUloyWmhKaDZvZVNiTU5rYVdSY1NWeHNuY3RpWm5XMEhBcTBURUhuL2JiaGFadzBEVApMZVFiR0xqUFpNcVUvbTRnRGg0WFAxZmRZMlJYUHNLclN2VzYyeVFPTDhZUHhHdlNndW9DVkJSakk0em9vNDBvClJLejJpeTE5cVBYTG0wZEs3VHcwOHFxTklrQ0RWWGRHUlJSU3dSU2xodkJmbHFOSlppdWJWUHZNa2swaUxzdnQKUEcwMTR6RUNnWUVBNElLT0FTeWNyamhsbFZ1NFJEZk41U0wyNlYvYm5QY0VTckFsdXVlNklJN1J4UWhlaUtRKwpaNWlEK1dKLzRyWk1aWTZrdmpRcWtqRklNSlY5NUFIRlRXSy9wMkhjZ3lqMWxqa2hoU3N6cFYyZ0c3VCtncnRsClNWVmxHVk8yZXhpRXBOYTVVc0VBQVBLemRVMTBmZkdHeW0xd0xGdEdiV3A5UnM3S2EyRUIvcFVDZ1lFQXpGYnEKRlIycE1NNXlOdm03TS9SSlBTUXNpZUhOS1I5UDcyUnZyM2ZBMms1S2hJcmhCZUZ1U2NwdHZ4TGg0UUlGMWx6OApDaEhuOWFrV1JUYjBJMWdKNW43czBOdzA1UHo1NGk3QnNqdzJRSWpMaklXVlNOSmRISytmaFZXZDdsanFwZDFGCkJicEk3Z0RUNUV3RE1Xa0FpRDlUSVVWeExNQjlWb2VCOWNLeWVTc0NnWUVBazZsS2ZMczYwZHVGOUpZK3U1OTQKYkJ4ekNVdGl4Zm94ZUc0aVlxdkdYMk9QMUdlTXhaSkErU0gycXk5OXJUNzVRRkp4U0NoSFY1L1NPeUlYaXI4ZgpaYVp0SjBuV0h1M3htTHc2cjd1YVhFa1g1U0ZGdy9ZOHg5N0NmOFh2WDBiZzl3bkRHZ3FXVmdsS3Z2d1Nna000CnhDcjJmRFlNUENxdCtzUkhuaGhQbDRFQ2dZRUFoeDJGaFZicWxEbytiYm11SG9tT2tCNUdVUm44OWc4ZFpSZE4KZm9JNkJHQTJoL1BwSFdGVjh2Y21vR3pVN1ZyUUQxSEcyc1hDVXI5dTJXK2YrV3J5aVBZdWsyQzRuUjNtQWJpWApIY3NRdUpWN3VyeHQzUXcwdzQ0aGRpSUozeHZ1ZEtTZVNrNUdnUklOQ20xMHd3eENiTlVxbTlwMkhuaGRxSVRMCjIzelZWS2NDZ1lFQXNhTUpraHdoRkNQUFdyVCtBbTNLbHRLWHNieUJWWFRXT1BtRzBNN1hVdVhyK1JOMGJUVmsKbExVM0diTGpJaDMxYWJ5ZkRNZ3doOFJOZUx0MUhoUGJTZEI3Q0JFV1c3ZDh4Q1h4V2VyWW1BTUVuem1kU1dGZApBYkpqYW94US9rSDFabFA5Vkp2N2QxMkVmaEROREM0c1Bkc2IveVRxU3ZkTnJDVnFXSGVmTmtNPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM2ekNDQWRPZ0F3SUJBZ0lSQU12TDUxa0pJYW1yc0lCVG1lUFFOSWd3RFFZSktvWklodmNOQVFFTEJRQXcKRHpFTk1Bc0dBMVVFQXhNRWRHOWljekFlRncweU1EQTVNamt4TnpVeE16bGFGdzB5TlRBNU1qa3hOelV4TXpsYQpNQTh4RFRBTEJnTlZCQU1UQkhSdlluTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCCkFRRFYvaXVFcjIzSEFpWEU0Z3hiNVI4Uzhwd2NXWGdhS3NULzdIRzFxRzROVXNnV05DTWQ3R09HRmg0SkY1ZmgKLzRaM2U4Wk9oYjh1U2dJcTZzaDE5THVNRlNQODJvNk9Ka2RsUnhITXVBR2lNOXpydnlIS0FKSGhnQ0dYT0FSVwpObURSWDlFVy9rOXRBOFIvVzlYZ21qSHJ4U3Q0MzNnMm9EZUcyMFhiTCt4cG9GSHFGQnBhUXFydTdyK1h0NGtxCmV1emF2OHBIUllVMzY4aGc4QkVmenBTczI1azU4SHVWMXU5eGcwcWV5Sk5uWTUvNXBOWkFrQWEyK0RRUDZqSEIKUkhQbEh3VWJIU1lLSE5yNnA4OHlQaWU4Tm1tQUZLUVY1OXkyU0ZRKzFDNEdYMXpycytnY3VkREhINCtpc0RZcgpyU2RJcmNjVm1KSHBWRGlObE9pOWd0blBBZ01CQUFHalFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQWRCZ05WCkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3EKaGtpRzl3MEJBUXNGQUFPQ0FRRUExWHlUZHJ4VlphYklZWE9ZL3RGMlh1a2dmb3E4YWM2MFgzSzhmTHA1TzBCOApJVWZoSnFHTVUyZVlFcTVmbGJiVEE0Qk5CY2ZYc0tjQmlOalhsak0yMyt6YTZHYzdheVdXRG5yNEc1Q1gyZExlCnA2VEFBUFZ4NHp2UXFlNWJTTlFCUHZZdzZCRnBhTHJZK01HNXI0ZVlmaklpMG96dE9FWkRHZldnREp2SGwyQWEKYUJObS90RWlKbWd4QXJRdDFuRUl5OUl2K3ZlOEVZMTdGWm1WR0ZEL0xpdmdDSjNqbnUwSXpuVm1YNFh3c0lFZQp5dW9yRHh5NTVseXJUU3BRYjN5M3phODVjYkdiU01OZExSZUtYRGxpTGxOSFFEZkMrVVkweEI4TlNsUTc3WU45CjRqMnlId1MyRi93dE1BMjBKN1VBZDd5bk5wcGh4Vk1KSHhrOTNxbXVyZz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBMWY0cmhLOXR4d0lseE9JTVcrVWZFdktjSEZsNEdpckUvK3h4dGFodURWTElGalFqCkhleGpoaFllQ1JlWDRmK0dkM3ZHVG9XL0xrb0NLdXJJZGZTN2pCVWovTnFPamlaSFpVY1J6TGdCb2pQYzY3OGgKeWdDUjRZQWhsemdFVmpaZzBWL1JGdjVQYlFQRWYxdlY0Sm94NjhVcmVOOTROcUEzaHR0RjJ5L3NhYUJSNmhRYQpXa0txN3U2L2w3ZUpLbnJzMnIvS1IwV0ZOK3ZJWVBBUkg4NlVyTnVaT2ZCN2xkYnZjWU5LbnNpVFoyT2YrYVRXClFKQUd0dmcwRCtveHdVUno1UjhGR3gwbUNoemErcWZQTWo0bnZEWnBnQlNrRmVmY3RraFVQdFF1Qmw5YzY3UG8KSExuUXh4K1BvckEySzYwblNLM0hGWmlSNlZRNGpaVG92WUxaendJREFRQUJBb0lCQUNFQlByME1RYVk4RW84MwpQaWkrUWZpdUtwM0V2dDFxVTFBVnE4UVU0a1J6ekNDQWtobi9aNm82cHc5SDhFa1BIREk1aVBCN2VHMHZSUDVSCmovR0JlWnUxZHdOOHdoZnlsM2hyYWJkbGVmc0dmTUJ2amtxVm8rcGYxTTU1K1ZGQ3VkUVJMektZcnE5bHNWemoKVVMxL0dzditjU0lIZFljWFZ2a1p3TUI1dDhEaWpOZllMZWVNTHUxQkJRaEhFazdkSitrZHgyM1ZXcFBWbnQzaApPL0pnUGxWWkFQL1gyNlVkNHcyeTJBbm5CSGplcGdCTy8xQlE4TVZqTWp3Zk1uYW5CMTFycTluZ3RiUGM0VzgwClE0dkx0RmlJOUI3cUJYNTZLT0tRL2Z6cERuMFBYOHNydjJzZWsraHArb0xvalczY1lPKzd2dVVLaWdGRElQK1IKNGdpeWZrRUNnWUVBMlFPaERscHd0Y1VvVDR5cnFkRWpacGxwYXZuS29kWDlqTjIwUVVma05ndmpyNjE1K0dmUwoxaFppYk8rRW40aFh3WGt0NjZnaWVLSFlXUDdoTldZOURybExmNEdZcUprSTFxVDBseHpxZ0ZwZzIxa2hza3k2CnZzd0N1dWZrZ0VkOWZmOENmUkJZWmNRVWlSS2tGTk1WYjdOYlFiRjZoRUMyUnFiNXVrN3p1RGNDZ1lFQS9HK1gKZVFMb1lvbUN0Um5WbTdxYjc5d1hDdExIWFI5RUxEcGtZNmlaMEVEeWU5QWRFb0MrZjJHcVMwZFplSHZKOHBZNApVYVFTV2llcUMrbkxINm9jYW0xL05BSmEzU2xKeHdya3NDRVk1SkNheUFCTUZWVGl4a1JpOXJJSTBWb0pKK2JVCk02bW9kVVR5QjhHQ0pLREhLS05KQ0hZRElWRXBTTnF1TDY3NTd5a0NnWUJTM00vaWF5WWVRZW5pZGhRV0E0VkEKNTlNWXhjaFpneHdOYlpvbVV3MFFsZm1hV3VMM3RxMEtrZ0dERnZITStJS0puWHVyUDhmcHgrS1VHTDVsWldScQordFdaR2lMd1BYN2lkcG51R1Z4eEpoRlZyL0x0NGQ1c2UvbU81SHliZnJDc0szTUh6Zlh5NWF2eHF1eDhCeDFvClNWUFBBYldHU2k5UFN2S1A4UldlZ1FLQmdRQ1A3alNJZTk3eUtBT05yTkE5ZmJYaG1qVE5LQWNpRW15MVp3bk0KUk5xR2dqRi81Tlplc1dkc2k4d2tKZWRlcWY0b1FmeVVtQjhhcGxqdmQvc243NzlKODJxK3hjVDNLczUxSGNIcwpwc0podUExNGthclAwdG1HUUlISXRSUVFBZTBNZ2pGbHo0dE1hZVl5QStSbmJBQ0NMQys5RWtTUW40MFJqQllhCi9BSm5tUUtCZ0IrS2Y0NGlJdXhORlRIaHY2cDdoMmFEZFhUYzg0NXNFQWVHSTZoMEc3eVpUVW1yZmFzTXlOdE0KMVVBNnlDNXFYVkhmKzVtcS9EVDFVM3dDVHh6eGluT1Z6NG1uN0Z2eUpTdmk2WDNFeFpMMFlYYk5VenFDVEZnRApXODlxNWZHZ3N0Q3ZFUS9sRW1uc1BJT21Qai83OHltbm5CZWxDeXlqNENQeXZMODdzSEp5Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
 ...
 ---
 # Source: tobs/charts/timescaledb-single/templates/sec-passwords.yaml
@@ -237,8 +239,8 @@ metadata:
   name: tobs-grafana-datasources
   labels:
     grafana_datasource: "1"
-    app: tobs-tobs
-    chart: tobs-0.1.0-alpha.3.1
+    app: tobs
+    chart: tobs-0.1.0-beta.5
     release: tobs
 type: Opaque
 stringData:
@@ -249,12 +251,12 @@ stringData:
     datasources:
       - name: Prometheus
         type: prometheus
-        url: http://tobs-prometheus-server.tobs.svc.cluster.local
+        url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201
         isDefault: true
         editable: true
         access: proxy
       - name: TimescaleDB
-        url: tobs.tobs.svc.cluster.local
+        url: tobs.tobs.svc.cluster.local:5432
         type: postgres
         isDefault: false
         access: proxy
@@ -274,13 +276,13 @@ kind: Secret
 metadata:
   name: tobs-grafana-db
   labels:
-    app: tobs-tobs
-    chart: tobs-0.1.0-alpha.3.1
+    app: tobs
+    chart: tobs-0.1.0-beta.5
     release: tobs
 type: Opaque
 data:
   GF_DATABASE_TYPE: cG9zdGdyZXM=
-  GF_DATABASE_HOST: dHMtb2JzZXJ2YWJpbGl0eS50cy1vYnNlcnZhYmlsaXR5LnN2Yy5jbHVzdGVyLmxvY2Fs
+  GF_DATABASE_HOST: dG9icy50b2JzLnN2Yy5jbHVzdGVyLmxvY2FsOjU0MzI=
   GF_DATABASE_NAME: cG9zdGdyZXM=
   GF_DATABASE_USER: Z3JhZmFuYWRi
   GF_DATABASE_PASSWORD: Z3JhZmFuYWRi
@@ -291,10 +293,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana-config-dashboards
   namespace: tobs
@@ -318,10 +320,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 data:
   grafana.ini: |
@@ -344,10 +346,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 data:
   run.sh: |-
@@ -670,10 +672,11 @@ metadata:
   name: tobs-grafana-dashboards
   labels:
    grafana_dashboard: "1"
-   app: tobs-tobs
-   chart: tobs-0.1.0-alpha.3.1
+   app: tobs
+   chart: tobs-0.1.0-beta.5
    release: tobs
 data:
+
   k8s-cluster.json: |-
     {
       "annotations": {
@@ -1547,7 +1550,7 @@ data:
               "value": "$__all"
             },
             "datasource": "Prometheus",
-            "definition": "kube_namespace_labels",
+            "definition": "label_values(kube_namespace_labels, namespace)",
             "hide": 0,
             "includeAll": true,
             "index": -1,
@@ -1555,9 +1558,9 @@ data:
             "multi": false,
             "name": "Namespace",
             "options": [],
-            "query": "kube_namespace_labels",
+            "query": "label_values(kube_namespace_labels, namespace)",
             "refresh": 1,
-            "regex": ".*namespace=\"(.*)\".*",
+            "regex": "",
             "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
@@ -1659,7 +1662,7 @@ data:
       },
       "version": 1
     }
-
+    
   k8s-hardware.json: |-
     {
       "annotations": {
@@ -4313,8 +4316,8 @@ kind: ConfigMap
 metadata:
   name: tobs-grafana-db
   labels:
-   app: tobs-tobs
-   chart: tobs-0.1.0-alpha.3.1
+   app: tobs
+   chart: tobs-0.1.0-beta.5
    release: tobs
 data:
   add-users.sql: |-
@@ -4326,6 +4329,7 @@ data:
         RAISE NOTICE 'role grafanadb already exists, skipping create';
       END
     $$;
+    GRANT grafanadb TO postgres;
     CREATE SCHEMA IF NOT EXISTS grafanadb AUTHORIZATION grafanadb;
     ALTER ROLE grafanadb SET search_path = grafanadb;
     DO $$
@@ -4368,7 +4372,7 @@ metadata:
     component: "server"
     app: tobs
     release: tobs
-    chart: tobs-0.1.0-alpha.3.1
+    chart: tobs-0.1.0-beta.5
     heritage: Helm
   name: tobs-prometheus-config
 data:
@@ -4383,7 +4387,7 @@ data:
       scrape_timeout: 10s
     remote_write:
     - url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201/write
-      queue_config:
+      queue_config: 
         max_shards: 30
 
     remote_read:
@@ -4642,9 +4646,10 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-server
+  namespace: tobs
 spec:
   accessModes:
     - ReadWriteOnce
@@ -4657,10 +4662,10 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana-clusterrole
 rules:
@@ -4803,7 +4808,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-server
 rules:
@@ -4842,10 +4847,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: tobs-grafana-clusterrolebinding
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 subjects:
   - kind: ServiceAccount
@@ -4883,7 +4888,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-server
 subjects:
@@ -4902,10 +4907,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:      ['extensions']
@@ -4920,10 +4925,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:      ['policy']
@@ -4989,10 +4994,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -5010,10 +5015,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -5051,10 +5056,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -5102,9 +5107,10 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-node-exporter
+  namespace: tobs
 spec:
   clusterIP: None
   ports:
@@ -5126,9 +5132,10 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-server
+  namespace: tobs
 spec:
   ports:
     - name: http
@@ -5149,7 +5156,7 @@ metadata:
   name: tobs-promscale-connector
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.0-alpha.3.1
+    chart: promscale-0.1.0-beta.5
     release: tobs
     heritage: Helm
   annotations:
@@ -5243,6 +5250,29 @@ spec:
     targetPort: postgresql
     protocol: TCP
 ---
+# Source: tobs/templates/promlens-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: tobs-promlens
+  labels:
+    app: tobs
+    chart: tobs-0.1.0-beta.5
+    release: tobs
+    component: promlens
+  annotations:
+    null
+spec:
+  selector:
+    app: tobs
+    component: promlens
+  type: ClusterIP
+  ports:
+  - name: promlens-port
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+---
 # Source: tobs/charts/prometheus/templates/node-exporter-daemonset.yaml
 apiVersion: apps/v1
 kind: DaemonSet
@@ -5251,9 +5281,10 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-node-exporter
+  namespace: tobs
 spec:
   selector:
     matchLabels:
@@ -5268,7 +5299,7 @@ spec:
         component: "node-exporter"
         app: prometheus
         release: tobs
-        chart: prometheus-11.1.5
+        chart: prometheus-11.4.0
         heritage: Helm
     spec:
       serviceAccountName: tobs-prometheus-node-exporter
@@ -5279,6 +5310,7 @@ spec:
           args:
             - --path.procfs=/host/proc
             - --path.sysfs=/host/sys
+            - --web.listen-address=:9100
           ports:
             - name: metrics
               containerPort: 9100
@@ -5309,10 +5341,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -5328,12 +5360,12 @@ spec:
         app.kubernetes.io/name: grafana
         app.kubernetes.io/instance: tobs
       annotations:
-        checksum/config: eb6d27d942131bb459497000fab8403a79383789bddaa9b540871cc2132a832c
+        checksum/config: bbf62cea42b4ca62022cf94acc610bb0b926138e317d585ddf9140d2291aa27b
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/sc-dashboard-provider-config: 55569e387d481a4035ce77496fb57bd0d3c74c3fdd23e144988e0949d4007165
-        checksum/secret: dde032a0de8e3384d810378de88a0318e6d314d97357fd63c3fb8f9e14795e88
+        checksum/sc-dashboard-provider-config: 914ee9ebc1b2df3137de6ff390449452e5323b27229f0e129c5445219ab05bff
+        checksum/secret: 2b9979e0a4a53a9b35899dee7ebc4313530a90d593943f2a6c82a98304b712da
     spec:
-
+      
       serviceAccountName: tobs-grafana
       securityContext:
         fsGroup: 472
@@ -5341,7 +5373,7 @@ spec:
         runAsUser: 472
       initContainers:
         - name: grafana-sc-datasources
-          image: "kiwigrid/k8s-sidecar:0.1.99"
+          image: "kiwigrid/k8s-sidecar:0.1.151"
           imagePullPolicy: IfNotPresent
           env:
             - name: METHOD
@@ -5359,11 +5391,11 @@ spec:
               mountPath: "/etc/grafana/provisioning/datasources"
       containers:
         - name: grafana-sc-dashboard
-          image: "kiwigrid/k8s-sidecar:0.1.99"
+          image: "kiwigrid/k8s-sidecar:0.1.151"
           imagePullPolicy: IfNotPresent
           env:
             - name: METHOD
-              value:
+              value: 
             - name: LABEL
               value: "grafana_dashboard"
             - name: FOLDER
@@ -5376,7 +5408,7 @@ spec:
             - name: sc-dashboard-volume
               mountPath: "/tmp/dashboards"
         - name: grafana
-          image: "grafana/grafana:6.7.3"
+          image: "grafana/grafana:7.0.3"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: config
@@ -5386,7 +5418,7 @@ spec:
               mountPath: "/var/lib/grafana"
             - name: sc-dashboard-volume
               mountPath: "/tmp/dashboards"
-
+      
             - name: sc-dashboard-provider
               mountPath: "/etc/grafana/provisioning/dashboards/sc-dashboardproviders.yaml"
               subPath: provider.yaml
@@ -5571,9 +5603,10 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.1.5
+    chart: prometheus-11.4.0
     heritage: Helm
   name: tobs-prometheus-server
+  namespace: tobs
 spec:
   selector:
     matchLabels:
@@ -5587,7 +5620,7 @@ spec:
         component: "server"
         app: prometheus
         release: tobs
-        chart: prometheus-11.1.5
+        chart: prometheus-11.4.0
         heritage: Helm
     spec:
       serviceAccountName: tobs-prometheus-server
@@ -5606,7 +5639,7 @@ spec:
               readOnly: true
 
         - name: prometheus-server
-          image: "prom/prometheus:v2.16.0"
+          image: "prom/prometheus:v2.18.1"
           imagePullPolicy: "IfNotPresent"
           args:
             - --storage.tsdb.retention.time=15d
@@ -5662,7 +5695,7 @@ metadata:
   name: tobs-promscale
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.0-alpha.3.1
+    chart: promscale-0.1.0-beta.5
     release: tobs
     heritage: Helm
 spec:
@@ -5674,15 +5707,15 @@ spec:
     metadata:
       labels:
         app: tobs-promscale
-
-      annotations:
+      
+      annotations: 
         prometheus.io/path: /metrics
         prometheus.io/port: "9201"
         prometheus.io/scrape: "true"
-
+      
     spec:
       containers:
-        - image: timescale/promscale:0.1.0-alpha.3.1
+        - image: timescale/promscale:0.1.0-beta.5
           imagePullPolicy: IfNotPresent
           name: promscale-connector
           resources:
@@ -5708,6 +5741,37 @@ spec:
               value: postgres
             - name: TS_PROM_DB_SSL_MODE
               value: require
+---
+# Source: tobs/templates/promlens-depoloyment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tobs-promlens
+  labels:
+    app: tobs
+    chart: tobs-0.1.0-beta.5
+    release: tobs
+    component: promlens
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tobs
+      component: promlens
+  template:
+    metadata:
+      labels:
+        app: tobs
+        component: promlens
+    spec:
+      containers:
+        - image: promlabs/promlens:latest
+          imagePullPolicy: IfNotPresent
+          name: promlens
+          command: ["/promlens", "--web.default-prometheus-url", "http://localhost:9201" , "--web.listen-address", ":8080"]
+          ports:
+            - containerPort: 8080
+              name: promlens-web
 ---
 # Source: tobs/charts/timescaledb-single/templates/statefulset-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -5754,7 +5818,7 @@ spec:
       terminationGracePeriodSeconds: 600
       containers:
       - name: timescaledb
-        image: "timescaledev/timescaledb-ha:pg12-ts1.7"
+        image: "timescaledev/timescaledb-ha:pg12-ts1.7-latest"
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
@@ -5781,7 +5845,7 @@ spec:
           - /bin/bash
           - "-c"
           - |
-
+            
             install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/data" "/var/lib/postgresql/wal/pg_wal" || exit 1
             TABLESPACES=""
             for tablespace in ; do
@@ -5917,7 +5981,7 @@ spec:
           readOnly: true
         - name: socket-directory
           mountPath: /var/run/postgresql
-
+        
         resources:
           {}
       affinity:
@@ -5939,7 +6003,7 @@ spec:
                   app: tobs-timescaledb
                   release: "tobs"
                   cluster-name: tobs
-
+        
       volumes:
       - name: socket-directory
         emptyDir: {}
@@ -5950,7 +6014,7 @@ spec:
         configMap:
           name: tobs-timescaledb-scripts
           defaultMode: 488 # 0750 permissions
-
+      
       - name: certificate
         secret:
           secretName: tobs-timescaledb-certificate
@@ -5970,7 +6034,7 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: "2Gi"
+            storage: "150Gi"
     - metadata:
         name: wal-volume
         annotations:
@@ -5985,7 +6049,7 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: "1Gi"
+            storage: "20Gi"
 ---
 # Source: tobs/templates/grafana-db-user-job.yaml
 apiVersion: batch/v1
@@ -5993,8 +6057,8 @@ kind: Job
 metadata:
   name: tobs-grafana-db
   labels:
-    app: tobs-tobs
-    chart: tobs-0.1.0-alpha.3.1
+    app: tobs
+    chart: tobs-0.1.0-beta.5
     release: tobs
     heritage: Helm
 spec:
@@ -6019,7 +6083,7 @@ spec:
                   key: postgres
             - name: PGHOST
               value: tobs.tobs.svc.cluster.local
-          command: ['psql', '-f', '/add-users.sql']
+          command: ['psql', '-d', postgres, '-f', '/add-users.sql']
       restartPolicy: OnFailure
       volumes:
         - name: sql-volume
@@ -6044,7 +6108,7 @@ metadata:
   name: tobs-promscale-drop-chunk
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.0-alpha.3.1
+    chart: promscale-0.1.0-beta.5
     release: tobs
     heritage: Helm
 spec:
@@ -6059,7 +6123,7 @@ spec:
             args:
             - psql
             - -c
-            - CALL prom_api.drop_chunks();
+            - CALL prom_api.execute_maintenance();
             env:
               - name: PGPORT
                 value: "5432"
@@ -6100,10 +6164,10 @@ kind: Pod
 metadata:
   name: tobs-grafana-test
   labels:
-    helm.sh/chart: grafana-5.0.24
+    helm.sh/chart: grafana-5.1.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "6.7.3"
+    app.kubernetes.io/version: "7.0.3"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test-success
@@ -6132,7 +6196,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "tobs-patroni-8t"
+  name: "tobs-patroni-e3"
   labels:
     app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
