@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const DEVEL = true
+const DEVEL = false
 const REPO_LOCATION = "https://charts.timescale.com"
 
 // helmInstallCmd represents the helm install command
