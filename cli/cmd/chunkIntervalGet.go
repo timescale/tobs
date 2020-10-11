@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/pgconn"
+
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +27,7 @@ func chunkIntervalGet(cmd *cobra.Command, args []string) error {
 
 	metric := args[0]
 
-	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
+	pool, err := pgconn.OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not get chunk interval for %v: %w", metric, err)
 	}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/timescale/tobs/cli/pkg/pgconn"
+
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +27,7 @@ func retentionSet(cmd *cobra.Command, args []string) error {
 	metric := args[0]
 	retention_period := args[1]
 
-	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
+	pool, err := pgconn.OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not set retention period for %v: %w", metric, err)
 	}

@@ -82,7 +82,10 @@ func testTimescalePortForward(t testing.TB, port string) {
 		t.Fatal(err)
 	}
 
-	portforward.Process.Signal(syscall.SIGINT)
+	err = portforward.Process.Signal(syscall.SIGINT)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testTimescaleConnect(t testing.TB, master bool, user string) {
@@ -106,10 +109,16 @@ func testTimescaleConnect(t testing.TB, master bool, user string) {
 		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Second)
-	connect.Process.Signal(syscall.SIGINT)
+	err = connect.Process.Signal(syscall.SIGINT)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	deletepod := exec.Command("kubectl", "delete", "pods", "psql")
-	deletepod.Run()
+	err = deletepod.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestTimescale(t *testing.T) {

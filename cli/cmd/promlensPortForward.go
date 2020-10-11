@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"github.com/spf13/cobra"
 )
 
@@ -26,12 +28,12 @@ func init() {
 }
 
 func portForwardPromlens(listenPort int) error {
-	serviceNamePromlens, err := KubeGetServiceName(namespace, map[string]string{"release": name, "component": "promlens"})
+	serviceNamePromlens, err := k8s.KubeGetServiceName(namespace, map[string]string{"release": name, "component": "promlens"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
 
-	_, err = KubePortForwardService(namespace, serviceNamePromlens, listenPort, FORWARD_PORT_PROMLENS)
+	_, err = k8s.KubePortForwardService(namespace, serviceNamePromlens, listenPort, FORWARD_PORT_PROMLENS)
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
@@ -40,12 +42,12 @@ func portForwardPromlens(listenPort int) error {
 }
 
 func portForwardConnector(listenPort int) error {
-	serviceNameConnector, err := KubeGetServiceName(namespace, map[string]string{"release": name, "app": name + "-promscale"})
+	serviceNameConnector, err := k8s.KubeGetServiceName(namespace, map[string]string{"release": name, "app": name + "-promscale"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
 
-	_, err = KubePortForwardService(namespace, serviceNameConnector, listenPort, FORWARD_PORT_CONNECTOR)
+	_, err = k8s.KubePortForwardService(namespace, serviceNameConnector, listenPort, FORWARD_PORT_CONNECTOR)
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
@@ -78,5 +80,4 @@ func promlensPortForward(cmd *cobra.Command, args []string) error {
 
 	select {}
 
-	return nil
 }

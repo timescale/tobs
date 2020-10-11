@@ -1,10 +1,12 @@
-package cmd
+package pgconn
 
 import (
 	"context"
 	"errors"
 	"os"
 	"strconv"
+
+	"github.com/timescale/tobs/cli/pkg/k8s"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -18,7 +20,7 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 	os.Stdout = nil
 	defer func() { os.Stdout = stdout }()
 
-	tspromPods, err := KubeGetPods(namespace, map[string]string{"app": name + "-promscale"})
+	tspromPods, err := k8s.KubeGetPods(namespace, map[string]string{"app": name + "-promscale"})
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +38,7 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		}
 	}
 
-	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
 	if err != nil {
 		return nil, err
 	}
@@ -48,18 +50,21 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		return nil, errors.New("user not found")
 	}
 
-	tsdbPods, err := KubeGetPods(namespace, map[string]string{"release": name, "role": "master"})
+	tsdbPods, err := k8s.KubeGetPods(namespace, map[string]string{"release": name, "role": "master"})
 	if err != nil {
 		return nil, err
 	}
 
 	if len(tsdbPods) != 0 {
-		pf, err := KubePortForwardPod(namespace, tsdbPods[0].Name, 0, remote)
+		pf, err := k8s.KubePortForwardPod(namespace, tsdbPods[0].Name, 0, remote)
 		if err != nil {
 			return nil, err
 		}
 
 		ports, err := pf.GetPorts()
+		if err != nil {
+			return nil, err
+		}
 		local := int(ports[0].Local)
 
 		pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@localhost:"+strconv.Itoa(local)+"/"+dbname)

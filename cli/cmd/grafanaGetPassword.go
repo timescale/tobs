@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // grafanaGetPasswordCmd represents the grafana get-password command
@@ -21,7 +22,7 @@ func init() {
 func grafanaGetPassword(cmd *cobra.Command, args []string) error {
 	var err error
 
-	secret, err := KubeGetSecret(namespace, name+"-grafana")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-grafana")
 	if err != nil {
 		return fmt.Errorf("could not get Grafana password: %w", err)
 	}

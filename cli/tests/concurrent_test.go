@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 func changeRelease(t testing.TB) {
@@ -67,14 +67,14 @@ func TestConcurrent(t *testing.T) {
 	time.Sleep(10 * time.Second)
 
 	t.Logf("Waiting for pods to initialize...")
-	pods, err := cmd.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
+	pods, err := k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
 	if err != nil {
 		t.Logf("Error getting all pods")
 		t.Fatal(err)
 	}
 
 	for _, pod := range pods {
-		err = cmd.KubeWaitOnPod(NAMESPACE, pod.Name)
+		err = k8s.KubeWaitOnPod(NAMESPACE, pod.Name)
 		if err != nil {
 			t.Logf("Error while waiting on pod")
 			t.Fatal(err)

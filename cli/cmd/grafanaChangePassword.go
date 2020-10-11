@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 
 	"github.com/spf13/cobra"
 )
@@ -23,7 +24,7 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 
 	password := args[0]
 
-	secret, err := KubeGetSecret(namespace, name+"-grafana")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-grafana")
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
@@ -31,21 +32,21 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 	oldpassword := secret.Data["admin-password"]
 
 	secret.Data["admin-password"] = []byte(password)
-	err = KubeUpdateSecret(namespace, secret)
+	err = k8s.KubeUpdateSecret(namespace, secret)
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
 	fmt.Println("Changing password...")
-	grafanaPod, err := KubeGetPodName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
+	grafanaPod, err := k8s.KubeGetPodName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
-	err = KubeExecCmd(namespace, grafanaPod, "grafana", "grafana-cli admin reset-admin-password "+password, nil, false)
+	err = k8s.KubeExecCmd(namespace, grafanaPod, "grafana", "grafana-cli admin reset-admin-password "+password, nil, false)
 	if err != nil {
 		secret.Data["admin-password"] = oldpassword
-		_ = KubeUpdateSecret(namespace, secret)
+		_ = k8s.KubeUpdateSecret(namespace, secret)
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
