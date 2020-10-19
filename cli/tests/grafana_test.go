@@ -33,7 +33,10 @@ func testGrafanaPortForward(t testing.TB, port string) {
 		t.Fatal(err)
 	}
 
-	portforward.Process.Signal(syscall.SIGINT)
+	err = portforward.Process.Signal(syscall.SIGINT)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testGrafanaGetPass(t testing.TB) {

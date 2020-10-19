@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "cli/cmd"
+import "github.com/timescale/tobs/cli/cmd"
 
 func main() {
 	cmd.Execute()

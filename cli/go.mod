@@ -1,4 +1,4 @@
-module cli
+module github.com/timescale/tobs/cli
 
 go 1.14
 

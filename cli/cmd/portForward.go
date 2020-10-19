@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"github.com/spf13/cobra"
 )
 
@@ -57,34 +59,34 @@ func portForward(cmd *cobra.Command, args []string) error {
 	}
 
 	// Port-forward TimescaleDB
-	podName, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
+	podName, err := k8s.KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	_, err = KubePortForwardPod(namespace, podName, timescaledb, FORWARD_PORT_TSDB)
+	_, err = k8s.KubePortForwardPod(namespace, podName, timescaledb, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
 	// Port-forward Grafana
-	serviceName, err := KubeGetServiceName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
+	serviceName, err := k8s.KubeGetServiceName(namespace, map[string]string{"app.kubernetes.io/instance": name, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	_, err = KubePortForwardService(namespace, serviceName, grafana, FORWARD_PORT_GRAFANA)
+	_, err = k8s.KubePortForwardService(namespace, serviceName, grafana, FORWARD_PORT_GRAFANA)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
 	// Port-forward Prometheus
-	serviceName, err = KubeGetServiceName(namespace, map[string]string{"release": name, "app": "prometheus", "component": "server"})
+	serviceName, err = k8s.KubeGetServiceName(namespace, map[string]string{"release": name, "app": "prometheus", "component": "server"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	_, err = KubePortForwardService(namespace, serviceName, prometheus, FORWARD_PORT_PROM)
+	_, err = k8s.KubePortForwardService(namespace, serviceName, prometheus, FORWARD_PORT_PROM)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
@@ -97,6 +99,4 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	select {}
-
-	return nil
 }

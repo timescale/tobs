@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"github.com/spf13/cobra"
 )
 
@@ -53,9 +55,9 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Waiting for pods to terminate...")
 	for i := 0; i < 1000; i++ {
-		pods, err := KubeGetAllPods(namespace, name)
+		pods, err := k8s.KubeGetAllPods(namespace, name)
 		if err != nil {
-		    return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
+			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
 		if len(pods) == 0 {
 			break
@@ -66,28 +68,28 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("Deleting remaining artifacts")
-	err = KubeDeleteService(namespace, name+"-config")
+	err = k8s.KubeDeleteService(namespace, name+"-config")
 	if err != nil {
 		fmt.Println(err, ", skipping")
 	}
 
-	err = KubeDeleteEndpoint(namespace, name)
+	err = k8s.KubeDeleteEndpoint(namespace, name)
 	if err != nil {
 		fmt.Println(err, ", skipping")
 	}
 
 	if deleteData {
 		fmt.Println("Checking Persistent Volume Claims")
-		pvcnames, err := KubeGetPVCNames(namespace, map[string]string{"release": name})
+		pvcnames, err := k8s.KubeGetPVCNames(namespace, map[string]string{"release": name})
 		if err != nil {
-		    return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
+			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
 
 		fmt.Println("Removing Persistent Volume Claims")
 		for _, s := range pvcnames {
-			err = KubeDeletePVC(namespace, s)
+			err = k8s.KubeDeletePVC(namespace, s)
 			if err != nil {
-		        return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
+				return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 			}
 		}
 	} else {

@@ -73,7 +73,10 @@ func testpf(t testing.TB, timescale, grafana, prometheus, connector, promlens st
 		t.Fatal(err)
 	}
 
-	portforward.Process.Signal(syscall.SIGINT)
+	err = portforward.Process.Signal(syscall.SIGINT)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestPortForward(t *testing.T) {

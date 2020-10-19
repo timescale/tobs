@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/pgconn"
+
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +36,7 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not set default chunk interval: %w", errors.New("Chunk interval must be at least 1 minute"))
 	}
 
-	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
+	pool, err := pgconn.OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not set default chunk interval: %w", err)
 	}

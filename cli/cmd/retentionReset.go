@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/timescale/tobs/cli/pkg/pgconn"
+
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +26,7 @@ func retentionReset(cmd *cobra.Command, args []string) error {
 
 	metric := args[0]
 
-	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
+	pool, err := pgconn.OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not reset retention period for %v: %w", metric, err)
 	}

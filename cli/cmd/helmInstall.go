@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"github.com/spf13/cobra"
 )
 
@@ -87,13 +89,13 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	time.Sleep(10 * time.Second)
 
 	fmt.Println("Waiting for pods to initialize...")
-	pods, err := KubeGetAllPods(namespace, name)
+	pods, err := k8s.KubeGetAllPods(namespace, name)
 	if err != nil {
 		return err
 	}
 
 	for _, pod := range pods {
-		err = KubeWaitOnPod(namespace, pod.Name)
+		err = k8s.KubeWaitOnPod(namespace, pod.Name)
 		if err != nil {
 			return err
 		}

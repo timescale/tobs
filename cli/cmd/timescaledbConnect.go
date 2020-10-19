@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"github.com/spf13/cobra"
 
 	corev1 "k8s.io/api/core/v1"
@@ -41,7 +43,7 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
-	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
@@ -54,37 +56,37 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 	}
 
 	if master {
-		masterpod, err := KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
+		masterpod, err := k8s.KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
-		err = KubeExecCmd(namespace, masterpod, "", "psql -U postgres", os.Stdin, true)
+		err = k8s.KubeExecCmd(namespace, masterpod, "", "psql -U postgres", os.Stdin, true)
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 	} else {
 		pod := getPodObject(name, namespace, user, pass)
 
-		err = KubeCreatePod(pod)
+		err = k8s.KubeCreatePod(pod)
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
 		time.Sleep(time.Second)
 
-		err = KubeWaitOnPod(namespace, "psql")
+		err = k8s.KubeWaitOnPod(namespace, "psql")
 		if err != nil {
-			KubeDeletePod(namespace, "psql")
+			_ = k8s.KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
-		err = KubeExecCmd(namespace, "psql", "", "psql -U "+user+" -h "+name+"."+namespace+".svc.cluster.local postgres", os.Stdin, true)
+		err = k8s.KubeExecCmd(namespace, "psql", "", "psql -U "+user+" -h "+name+"."+namespace+".svc.cluster.local postgres", os.Stdin, true)
 		if err != nil {
-			KubeDeletePod(namespace, "psql")
+			_ = k8s.KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
-		err = KubeDeletePod(namespace, "psql")
+		err = k8s.KubeDeletePod(namespace, "psql")
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}

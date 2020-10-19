@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"github.com/spf13/cobra"
 )
 
@@ -31,17 +33,15 @@ func prometheusPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
-	serviceName, err := KubeGetServiceName(namespace, map[string]string{"release": name, "app": "prometheus", "component": "server"})
+	serviceName, err := k8s.KubeGetServiceName(namespace, map[string]string{"release": name, "app": "prometheus", "component": "server"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
-	_, err = KubePortForwardService(namespace, serviceName, port, FORWARD_PORT_PROM)
+	_, err = k8s.KubePortForwardService(namespace, serviceName, port, FORWARD_PORT_PROM)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
 	select {}
-
-	return nil
 }

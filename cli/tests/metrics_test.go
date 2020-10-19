@@ -10,8 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"github.com/jackc/pgx/v4/pgxpool"
-	"cli/cmd"
 )
 
 var PASS string
@@ -241,7 +242,7 @@ func TestMetrics(t *testing.T) {
 		t.Skip("Skipping metrics tests")
 	}
 
-	secret, err := cmd.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-timescaledb-passwords")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -252,14 +253,14 @@ func TestMetrics(t *testing.T) {
 		t.Fatal(errors.New("user not found"))
 	}
 
-	podName, err := cmd.KubeGetPodName(NAMESPACE, map[string]string{"release": RELEASE_NAME, "role": "master"})
+	podName, err := k8s.KubeGetPodName(NAMESPACE, map[string]string{"release": RELEASE_NAME, "role": "master"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	stdout := os.Stdout
 	os.Stdout = os.NewFile(0, os.DevNull)
-	_, err = cmd.KubePortForwardPod(NAMESPACE, podName, 5433, 5432)
+	_, err = k8s.KubePortForwardPod(NAMESPACE, podName, 5433, 5432)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"github.com/timescale/tobs/cli/pkg/k8s"
+	"github.com/timescale/tobs/cli/pkg/pgconn"
 )
 
 // timescaledbChangePasswordCmd represents the timescaledb change-password command
@@ -39,13 +42,13 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("Changing password...")
-	pool, err := OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
+	pool, err := pgconn.OpenConnectionToDB(namespace, name, user, dbname, FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 	defer pool.Close()
 
-	secret, err := KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
@@ -53,14 +56,14 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 	oldpassword := secret.Data[user]
 
 	secret.Data[user] = []byte(password)
-	err = KubeUpdateSecret(namespace, secret)
+	err = k8s.KubeUpdateSecret(namespace, secret)
 	if err != nil {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 	_, err = pool.Exec(context.Background(), "ALTER USER "+user+" WITH PASSWORD '"+password+"'")
 	if err != nil {
 		secret.Data[user] = oldpassword
-		_ = KubeUpdateSecret(namespace, secret)
+		_ = k8s.KubeUpdateSecret(namespace, secret)
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 

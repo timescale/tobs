@@ -1,4 +1,4 @@
-package cmd
+package k8s
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 
 var HOME = os.Getenv("HOME")
 
-func KubeInit() (kubernetes.Interface, *rest.Config) {
+func kubeInit() (kubernetes.Interface, *rest.Config) {
 	var err error
 
 	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -45,7 +45,7 @@ func KubeInit() (kubernetes.Interface, *rest.Config) {
 func KubeGetPodName(namespace string, labelmap map[string]string) (string, error) {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
@@ -63,7 +63,7 @@ func KubeGetPodName(namespace string, labelmap map[string]string) (string, error
 func KubeGetServiceName(namespace string, labelmap map[string]string) (string, error) {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
@@ -89,7 +89,7 @@ func KubeGetServiceName(namespace string, labelmap map[string]string) (string, e
 func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, error) {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
@@ -112,7 +112,7 @@ func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, er
 func KubeGetPods(namespace string, labelmap map[string]string) ([]corev1.Pod, error) {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
@@ -130,7 +130,7 @@ func KubeGetPods(namespace string, labelmap map[string]string) ([]corev1.Pod, er
 func KubeGetSecret(namespace string, secretName string) (*corev1.Secret, error) {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
@@ -175,7 +175,7 @@ func KubeGetAllPods(namespace string, name string) ([]corev1.Pod, error) {
 func KubeExecCmd(namespace string, podName string, container string, command string, stdin io.Reader, tty bool) error {
 	var err error
 
-	client, config := KubeInit()
+	client, config := kubeInit()
 
 	shcmd := []string{
 		"/bin/sh",
@@ -220,7 +220,7 @@ func KubeExecCmd(namespace string, podName string, container string, command str
 func KubePortForwardPod(namespace string, podName string, local int, remote int) (*portforward.PortForwarder, error) {
 	var err error
 
-	client, config := KubeInit()
+	client, config := kubeInit()
 
 	fmt.Printf("Listening to pod %v from port %d\n", podName, local)
 	url := client.CoreV1().RESTClient().Post().
@@ -259,13 +259,19 @@ func KubePortForwardPod(namespace string, podName string, local int, remote int)
 func KubePortForwardService(namespace string, serviceName string, local int, remote int) (*portforward.PortForwarder, error) {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	service, err := client.CoreV1().Services(namespace).Get(context.Background(), serviceName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
 
 	set := labels.Set(service.Spec.Selector)
 	listOptions := metav1.ListOptions{LabelSelector: set.AsSelector().String()}
 	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), listOptions)
+	if err != nil {
+		return nil, err
+	}
 
 	podName := pods.Items[0].Name
 
@@ -281,7 +287,7 @@ func KubePortForwardService(namespace string, serviceName string, local int, rem
 func KubeCreatePod(pod *corev1.Pod) error {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	fmt.Println("Creating pod...")
 	_, err = client.CoreV1().Pods(pod.Namespace).Create(context.Background(), pod, metav1.CreateOptions{})
@@ -295,7 +301,7 @@ func KubeCreatePod(pod *corev1.Pod) error {
 func KubeDeletePod(namespace string, podName string) error {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	fmt.Printf("Deleting pod %v...\n", podName)
 	err = client.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{})
@@ -307,7 +313,7 @@ func KubeDeletePod(namespace string, podName string) error {
 }
 
 func KubeWaitOnPod(namespace string, podName string) error {
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	fmt.Printf("Waiting on pod %v...\n", podName)
 	for i := 0; i < 6000; i++ {
@@ -332,7 +338,7 @@ func KubeWaitOnPod(namespace string, podName string) error {
 func KubeDeleteService(namespace string, serviceName string) error {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	fmt.Printf("Deleting service %v...\n", serviceName)
 	err = client.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
@@ -346,7 +352,7 @@ func KubeDeleteService(namespace string, serviceName string) error {
 func KubeDeleteEndpoint(namespace string, endpointName string) error {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	fmt.Printf("Deleting endpoint %v...\n", endpointName)
 	err = client.CoreV1().Endpoints(namespace).Delete(context.Background(), endpointName, metav1.DeleteOptions{})
@@ -360,7 +366,7 @@ func KubeDeleteEndpoint(namespace string, endpointName string) error {
 func KubeDeletePVC(namespace string, PVCName string) error {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	fmt.Printf("Deleting PVC %v...\n", PVCName)
 	err = client.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), PVCName, metav1.DeleteOptions{})
@@ -374,7 +380,7 @@ func KubeDeletePVC(namespace string, PVCName string) error {
 func KubeUpdateSecret(namespace string, secret *corev1.Secret) error {
 	var err error
 
-	client, _ := KubeInit()
+	client, _ := kubeInit()
 
 	fmt.Println("Updating secret...")
 	_, err = client.CoreV1().Secrets(namespace).Update(context.Background(), secret, metav1.UpdateOptions{})
