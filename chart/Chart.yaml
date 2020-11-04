@@ -18,9 +18,9 @@ dependencies:
     repository: https://charts.timescale.com
   - name: prometheus
     condition: prometheus.enabled
-    version: 11.4.0
-    repository: https://kubernetes-charts.storage.googleapis.com
+    version: 11.16.7
+    repository: https://prometheus-community.github.io/helm-charts
   - name: grafana
     condition: grafana.enabled
-    version: 5.1.4
-    repository: https://kubernetes-charts.storage.googleapis.com
+    version: 6.1.0
+    repository: https://grafana.github.io/helm-charts

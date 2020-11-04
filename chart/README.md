@@ -133,7 +133,7 @@ For more details about how to configure the Promscale connector please see the
 
 ### Additional configuration for Prometheus
 
-The stable/prometheus chart is used as a dependency for deploying Prometheus. We specify
+The Prometheus Community chart is used as a dependency for deploying Prometheus. We specify
 a ConfigMap override where the Promscale Connector is already configured as a `remote_write`
 and `remote_read` endpoint. We create a ConfigMap that is still compatible and respects all the configuration
 properties for the prometheus chart, so no functionality is lost.
@@ -145,7 +145,7 @@ Prometheus in the same release. If you specify more endpoints in `prometheus.ser
 They will be added additionally.
 
 For all the properties that can be configured and more details on how to set up the Prometheus
-deployment see the [Helm hub entry][prometheus-helm-hub].
+deployment see the [Prometheus Community Chart Repo][prometheus-helm-hub].
 
 For more information about the `remote_write` configuration that can be set with
 `promscale.remote.queue` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
@@ -196,7 +196,7 @@ the name of a secret that contains the password for this user.
 
 ### Additional configuration for Grafana
 
-The stable/grafana chart is used as a dependency for deploying Grafana. We specify a Secret that
+The Grafana Community chart is used as a dependency for deploying Grafana. We specify a Secret that
 sets up the Prometheus Server and TimescaleDB as provisioned data sources (if they are enabled).
 
 To get the initial password for the `admin` user after deployment execute
@@ -213,13 +213,13 @@ kubectl port-forward svc/<release_name>-grafana 8080:80
 
 And then navigate to http://localhost:8080.
 
-For all the properties that can be configured and more details on how to set up the Grafana deployment see the [Helm hub entry][grafana-helm-hub]
+For all the properties that can be configured and more details on how to set up the Grafana deployment see the [Grafana Community Chart Repo][grafana-helm-hub]
 
 [design-doc]: https://tsdb.co/prom-design-doc
 [timescaledb-helm-cleanup]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#optional-delete-the-s3-backups
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 [promscale-repo]: https://github.com/timescale/promscale
 [promscale-helm]: https://github.com/timescale/promscale/tree/master/helm-chart
-[prometheus-helm-hub]: https://hub.helm.sh/charts/stable/prometheus
+[prometheus-helm-hub]: https://prometheus-community.github.io/helm-charts
 [prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
-[grafana-helm-hub]: https://hub.helm.sh/charts/stable/grafana
+[grafana-helm-hub]: https://grafana.github.io/helm-charts
