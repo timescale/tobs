@@ -1,0 +1,83 @@
+timescaledb-single:
+  enabled: true
+  image:
+    tag: pg12-ts1.7
+  loadBalancer:
+    enabled: false
+  replicaCount: 1
+
+promscale:
+  enabled: true
+  image: timescale/promscale:0.1.1
+  connection:
+    dbName: &metricDB postgres
+    user: postgres
+    password:
+      secretTemplate: &dbPassSecret "{{ .Release.Name }}-timescaledb-passwords"
+    host:
+      nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
+  service:
+    loadBalancer:
+      enabled: false
+  resources:
+    requests:
+      memory: 4Gi
+      cpu: 2
+prometheus:
+  enabled: true
+  alertmanager:
+    enabled: true
+  pushgateway:
+    enabled: true
+  server:
+    configMapOverrideName: "prometheus-config"
+    timescaleRemote:
+      host: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local"
+      protocol: http
+      port: "9201"
+      write:
+        enabled: true
+        endpoint: "write"
+        queue:
+          max_shards: 30
+      read:
+        enabled: true
+        endpoint: "read"
+
+grafana:
+  enabled: false
+  sidecar:
+    datasources:
+      enabled: true
+    dashboards:
+      enabled: true
+      files:
+        - dashboards/k8s-cluster.json
+        - dashboards/k8s-hardware.json
+  envFromSecret: "{{ .Release.Name }}-grafana-db"
+  prometheus:
+    datasource:
+      enabled: true
+      url: "http://{{ .Release.Name}}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local"
+  timescale:
+    database:
+      enabled: true
+      host:  *dbHost
+      user: grafanadb
+      pass: grafanadb
+      dbName: *metricDB
+      schema: grafanadb
+      sslMode: require
+    datasource:
+      enabled: true
+      user: grafana
+      pass: grafana
+      dbName: *metricDB
+      sslMode: require
+      # By default the url/host is set to the db instance deployed
+      # with this chart
+      host: *dbHost
+    adminUser: postgres
+    adminPassSecret: *dbPassSecret
+
+

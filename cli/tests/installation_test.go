@@ -194,13 +194,13 @@ func TestInstallation(t *testing.T) {
 	testInstall(t, "we-3oiwo3o-s-d", "", "")
 	testUninstall(t, "we-3oiwo3o-s-d", "", false)
 
-	testInstall(t, "f1", "", "./testdata/f1.yml")
+	testInstall(t, "f1", "", "./testdata/f1-defaults.yml")
 	testHelmUninstall(t, "f1", "", false)
-	testHelmInstall(t, "f2", "", "./testdata/f2.yml")
+	testHelmInstall(t, "f2", "", "./testdata/f2-everything-disabled.yml")
 	testUninstall(t, "f2", "", false)
-	testHelmInstall(t, "f3", "nas", "./testdata/f3.yml")
+	testHelmInstall(t, "f3", "nas", "./testdata/f3-grafana-disabled.yml")
 	testHelmUninstall(t, "f3", "nas", false)
-	testInstall(t, "f4", "", "./testdata/f4.yml")
+	testInstall(t, "f4", "", "./testdata/f4-grafana-on-datasources-off.yml")
 	testUninstall(t, "f4", "", false)
 
 	testInstall(t, "", "", "")

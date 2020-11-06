@@ -1,6 +1,6 @@
 module github.com/timescale/tobs/cli
 
-go 1.14
+go 1.15
 
 require (
 	github.com/imdario/mergo v0.3.10 // indirect
