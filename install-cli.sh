@@ -3,7 +3,7 @@
 set -eu
 
 INSTALLROOT=${INSTALLROOT:-"${HOME}/.tobs"}
-TOBS_VERSION=${TOBS_VERSION:-0.1.1}
+TOBS_VERSION=${TOBS_VERSION:-0.1.2}
 
 happyexit() {
   echo ""
