@@ -193,7 +193,7 @@ metadata:
 type: Opaque
 data:
   admin-user: "YWRtaW4="
-  admin-password: "ZTZhS2dBaE5YY0RKZEVtYlo2V2UzY1A2VjE2Q2c4Y2w4OEVsYktPYg=="
+  admin-password: "eVd3YlJicWtvbUdMcmxoclRZTmV5UVJTemMwRTlVdTZ3Y1MzSEpwSQ=="
   ldap-toml: ""
 ---
 # Source: tobs/charts/timescaledb-single/templates/sec-certificate.yaml
@@ -211,8 +211,8 @@ metadata:
     heritage: Helm
     cluster-name: tobs
 data:
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM2akNDQWRLZ0F3SUJBZ0lRR2FYN2FCaWFmQ3g3VlZUUGF0Uno4VEFOQmdrcWhraUc5dzBCQVFzRkFEQVAKTVEwd0N3WURWUVFERXdSMGIySnpNQjRYRFRJd01UQXlOakUyTVRZMU5sb1hEVEkxTVRBeU5qRTJNVFkxTmxvdwpEekVOTUFzR0ExVUVBeE1FZEc5aWN6Q0NBU0l3RFFZSktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCCkFOWFZtMHhRS0tqUUx1SG5kS1ZMLyt1SUhzdzI3V1JXNkRJV3JaQXBzWXVHZnNnT2RQdFZvKy85a0M4QTdHT2kKNDhhaXo0dElIa0twdTFITkxIUUMwZlEwVXFjcUNQaFp6ZmhOdFFEck14d3hPMXd0Zmh4QUFMdzZMV3gxRzlQOApQSXd2QzFLdU94Skd5N3R0WGc4c0pZWm5yMlloVjY2UUZTdHY2MHVYWlI4TkdqUFRkWXVaTTc5N3A2Wlp4V0xaCjN6d3phV0xkcXoxR0duVCt4NnRUTVRXZVJWa2plcnhHa3B6a3VsOTR5c0pPckJlazY2ck1BUThuMktxVEN6SUoKV3pMY2pzZ2VWSE1kTEp2TFowVFUyTnVzT2pLbzE5dkloTzZySUZBVEtWMmJkU0l2WDJTcFFhVzRTQ3NEekU0LwpFaVhLTXE5anJmTHpqWmN4VXlOM3MzTUNBd0VBQWFOQ01FQXdEZ1lEVlIwUEFRSC9CQVFEQWdLa01CMEdBMVVkCkpRUVdNQlFHQ0NzR0FRVUZCd01CQmdnckJnRUZCUWNEQWpBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUEwR0NTcUcKU0liM0RRRUJDd1VBQTRJQkFRQ0xBTllsNE5zdVpDM0xkamdFU2VFVGt6QnBrcS95QTFjYWx4QTU3U3lrRU9mbQpwZ3FZWE1qNVlKU21ZMjFnMkduVUdodHM5ZHlzazBOQkV1ZmJLZEtKUjVHRkdXd1BmNUtEWWJmRGtEOWxGZGM2CldQTUJlWFB4QmNTRndXZTVuZHZnUHJ0ZDlUNDZ3bU04SWhVL3FaZUI0VjBsSWVNRGhTU2xuSGxjbUd5VDBPUDIKWHVBSFJxMW1wczdvWmQwUzdBQ2lBTitkOFh1THplRXlvR1Jmc0swMmVKZHo2d09tR2xkbXYyZjVTYW05a1ZxVgo2bFpSdUJDNXhCQ0NXcjluY1dadjBNNWkrR2JMSmsrTDdjTWsrcHQyNHdRbFUxM2dET3hOckQ3SE5hbUpKOXU5CjNacDFoZkM4RGxxVmtUQnJ2YzgyU2c4VU0rVjEzYkhUUjlDbzF3WXAKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
-  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBMWRXYlRGQW9xTkF1NGVkMHBVdi82NGdlekRidFpGYm9NaGF0a0NteGk0Wit5QTUwCisxV2o3LzJRTHdEc1k2TGp4cUxQaTBnZVFxbTdVYzBzZEFMUjlEUlNweW9JK0ZuTitFMjFBT3N6SERFN1hDMSsKSEVBQXZEb3RiSFViMC93OGpDOExVcTQ3RWtiTHUyMWVEeXdsaG1ldlppRlhycEFWSzIvclM1ZGxIdzBhTTlOMQppNWt6djN1bnBsbkZZdG5mUEROcFl0MnJQVVlhZFA3SHExTXhOWjVGV1NONnZFYVNuT1M2WDNqS3drNnNGNlRyCnFzd0JEeWZZcXBNTE1nbGJNdHlPeUI1VWN4MHNtOHRuUk5UWTI2dzZNcWpYMjhpRTdxc2dVQk1wWFp0MUlpOWYKWktsQnBiaElLd1BNVGo4U0pjb3lyMk90OHZPTmx6RlRJM2V6Y3dJREFRQUJBb0lCQUFsUEREeXRQS2Zrc0RYTApZcXVUZkdlZmZGKzlnR1llMW1yZnk5eDd4Q3ZqeGY4bGlmZ3JDVUQ0VTkrSDljSjhvOWZRM0tJZW1KcWtVdkJECnMweTFscmcvMHQxT0dpZmRtUGJYUXlyd0VrQ0c4Q09hSTJSTmNQckF1WnVBR1o4SDJ3YnJRVjN2RWNsQTVidWEKRGo4dzE4MWJGQ3FwQnUwbGZwWnVmOXJCazNoZmdEVEluSDkxbHA3Y1RGdERUQ0JFa2diUE9Jdk1peVp6bkRVcAo4TzNoSE1CcXF5OHpFNDRyTWlqTGNNamkvSDhub3FoMGw5dkx2eGFaQ3JwbWt4RGVnbXdtb3p6M2oxOSsyakh4CmJndmMzc1ErNko5K040Z2NhZy80dEp0bzkvRVFvckRNcW9DQ2QrZHlvSndSaytWeUNJSW0ycGxrQko1dC8xaUIKNWJVY3hDa0NnWUVBL2htM1V2MnFRTGI5dUVDWWd3cDNpR2R0K3NjcWNwaEVTcllCcDUzVHovUXB0dWNhZnluNQp5alc0VkpTcmlsTHdqVlJ0RnMvTGRBeWN5dkg2Z2VxQ1habktSZ3YxbFMwOENYeUZVYnB0a3Z4MUM5U0pqNmorClhoMHhCaGgzWks5VFFSazBjcFl2bmZpcnJ5dFVFRXJzS0J6VnBPUE8wZFZxdkZaU2NnTm03dzhDZ1lFQTEyN1UKM1MvTWZGNmozeHNoYWpsMFdUaENlK0x3RUJaRW1lMmlsRVR5Y20rMzQ4cGxWa1JCem1wd2lsOXFWYkE3RFcrLwpIY1Zwb3BxZndJTnl6c2ZLTEJ2TmhCVUNsTk5kRlEyS2RaMkYvbSsxelZWWHowMXh3SDNIazhxSTVMWWdZcERqCnFHcWJzeDM0d3h3R1BNWUxaMGdYd0J5a1lkemZtMGZDRG9jZmRWMENnWUFRNkpNcllaZlhzSldYa2l6VDQzbHEKeVQ4blJlT01OcGVzeFFtOUpxSjJudys3alF0VlZPeTdTUEhZSndCM051ZXM3K1pHYzFOZGlJMVNiK0cwalc5WgpYU2Q1bThnZXdpRFJuTWllVktKLyttNnJkOXdqaENKUkR1NDVNcDJYUkpkc3FJbTE2a3FHMzRwRklNUDZSWklMClpVZk9MaDZRRmZ5QlJkazhudjlWZndLQmdEdHRDUzdTWnBmUUMyZ1p0Y2YxZlZDM0lpL0dVKzQ4RmtSWHRzY3IKbGExWGYrUklDbGdYa0FkK2VQalNoU1NKN21Bd2VRbWZVUnBYaU1Xei9ORnBieTFucGZOUFVGejVTTzNyeEV2WgpYZ0xua2NESVQrYVJPRldlM0pTNkE3VURRRCt3TS94YkhBUDJ1bzRuaHRqdzBHaDNESVlqNEh4V1R5QW9WVEZvCnVKYkpBb0dBRmMzcTRud2pkS2JJbXM0TUEyT3NZak9wRzZKdmEvWU4yTjlzS0swU2JZVWVSNGdrcnY2Q2phbWoKQXAwUm9BZENDM2g0M1BPU0xnc0J1WlVwVUxIekVRZFhVRk8vaDNlcXRsQzRlR2VtWUpsU1JRS1RBQytLVUlBMApQVXdpRG1lcDVZQUc3ZTRkRmRwUDZsV2ZnSWJxV0EzVzRCYm5XNWlQYXpESjhjNDlkVTQ9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM2akNDQWRLZ0F3SUJBZ0lRV2ZyM3hsZ2V4YVBka1FZaThJaTNGREFOQmdrcWhraUc5dzBCQVFzRkFEQVAKTVEwd0N3WURWUVFERXdSMGIySnpNQjRYRFRJd01URXdPVEl3TkRjME5sb1hEVEkxTVRFd09USXdORGMwTmxvdwpEekVOTUFzR0ExVUVBeE1FZEc5aWN6Q0NBU0l3RFFZSktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCCkFMZGRmQkZ3dmxHMEhwWmZiOUVDdGgyS2ZZbWFlT1g2REtTdFdncTl3TDVvRmg3MXVidXZHYXd4QytYbUdmQzIKUjliUU5TdjdxN2ZCRVo1RW5mWEJiT1ZYZWRiNzZLMVQrUFp5NStMWTVMNWJOTXc4SVIydjFoSW1TSmw1V2tjeQpGVzRLTTlBTERnSFdISm9oVUpTaWk5dnprK0hUeTh6aXhtWkZxVE1Xcyt5TGtSM0NqaEhBSzZqK253RjRWRS8rCi91ZERlNkhMOWtMYis4T1ZsUVIvbXcrVTZmZkQ4QXdaQmZmamozcWNJYUVJVFJUTXp3QzF5RmpBMVYzbDRnM1gKZFNhdWYvdmtiZ05rUTI0dlFIVDA1c1p1Q2NUTnJ2RnNqWGFvTndudEtNM2tXeFBkRnFwQnY1VHhTdW5iM1BjVQplVnEwQnBqUmVOWXJ5MWc5Z1ZGeG1ZMENBd0VBQWFOQ01FQXdEZ1lEVlIwUEFRSC9CQVFEQWdLa01CMEdBMVVkCkpRUVdNQlFHQ0NzR0FRVUZCd01CQmdnckJnRUZCUWNEQWpBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUEwR0NTcUcKU0liM0RRRUJDd1VBQTRJQkFRQ1B0L3ZCMG5YVVZTVFFUT3c4NkJOc1lGdFcxZ2NZUURMNThzT0JoNlNVOWRCSAp5MmxtckRSMDVZT0FBSU9yL1hDeWtsQUgrakR2bVdWYWhLRFF0WnlnQUViN2dyMXdaRkdyd0ZteG5YRFNxczVQClIvcTduRFZrKzMxSDVQNTR0YTBxa3Jqa0dHOXRpMTkzNkZIWnVPQ1dydXNNOEhFSWZtMVVGaHlqUnNCallWT0kKSzd0MUMybWtOeGdQWFlIUVBhLy9ZaUV1WnlMUk1rcUFMa2xuN0JqQ29LT20zSWxBMTBjejMxd3JmRElmUE9nWQpsMjZsVGFGd2Uxb3dYSkR4bEEzdExoTVU1dDI0K3lIY0VhNGtsWi80VUtUY1FEZnVhQTFGeVRLTm02VmEzaXlmCjFnNUtGdDdpVGdZSjJXZHJFeE8zSkpiRkllN0xEei9SeVpIRHFHRC8KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdDExOEVYQytVYlFlbGw5djBRSzJIWXA5aVpwNDVmb01wSzFhQ3IzQXZtZ1dIdlc1CnU2OFpyREVMNWVZWjhMWkgxdEExSy91cnQ4RVJua1NkOWNGczVWZDUxdnZvclZQNDluTG40dGprdmxzMHpEd2gKSGEvV0VpWkltWGxhUnpJVmJnb3owQXNPQWRZY21pRlFsS0tMMi9PVDRkUEx6T0xHWmtXcE14YXo3SXVSSGNLTwpFY0FycVA2ZkFYaFVULzcrNTBON29jdjJRdHY3dzVXVkJIK2JENVRwOThQd0RCa0Y5K09QZXB3aG9RaE5GTXpQCkFMWElXTURWWGVYaURkZDFKcTUvKytSdUEyUkRiaTlBZFBUbXhtNEp4TTJ1OFd5TmRxZzNDZTBvemVSYkU5MFcKcWtHL2xQRks2ZHZjOXhSNVdyUUdtTkY0MWl2TFdEMkJVWEdaalFJREFRQUJBb0lCQURvWkg3OXk1b3FDdEpKVwpxTm9qcnNwTFlCMWlXVjRjelRhOFNtUk8zU3czVkpMNHJxRytDRGRienZaSDR2NDI4eW9vREVEa1cvTTc5RFllCmJhSTVhQ1IrZy9kUEY5a2JXeTNUR0kveXd2OWhiS2d0Z1J5ajR3TWJLRE9nbEs4c09rZ0VhWWhJaUdhaWphdDAKVk5EVGM5YjhKV1lQTW1xM2k3OUo0U056MVF4a1h0TmNoaTRBdFVDMzVkWlJrZFVBdGE3NW1rb3RITzlMMlJUbQpJeGFxZjlVcWpxbkVaUSsyMWlySDl4SlU1QjA3VEJkN1NLQjZ2WHk1VXdqUVRlakpjSzRLbEQ2VWp2YUVvYVdoCnkvWnhrdVVhTDYxSlp3QW1pNVltTWM5ZjIvSmpFb0gwS3dkZ3B5NjFEbFNQdHlVcytmZjBZYklxSVFMODI5TUkKN3kvaVowRUNnWUVBelBhUldGUC9EclJHQ2Zzcyt4SUtmNHJQV2tRL1NwZURSRjJvdFB2NUx0dnhuVTY5ZjRlZwptUE50ZGJtZlZNV3JZdFVaZ2JIZGYzNlFTeHJ0NndqQlhlanhhSkZoTjhDQXBmVkVwVzZMaWJvcTUyckJJckgzClJ5dHprVjYwVnJadHR2ZVB1V29rUlI4RDVUZ1pqYmhoZkF0MytRNUFVUWQzYk1RcklVR3BhTjBDZ1lFQTVRWWwKejlESFRJQmdMaTJYcGI3SDByZTBoK1ExUXJaWW9CemprVHQ3elQ0eTFFZ0pZRFNoK1dHalZlQkF2SnRES0MxagpWcUdXdkJTYXBEK01xVi9PbElFbHVDb2l5Tmh3SlJ0R3h5aHJTM3ZlM3FhRmRpeFVlTXQ1TVpvVzZkdWIwQVl0Ck9XZXJMOVVKelM4YUI2My9zZnZOd1RKbGJLSzdDcHhZM2RPR2tIRUNnWUFlKzhyKzhqdWxTbVVvRHhzK25QeVAKU1RtTktMSDBvYkRMUGVsSjZxbEJoeWdnSW80TTRFREx2a2kydWllMjFlYlJtdXN2S3VjVDVkc0VMMzcxdjY0VApkeW8vSjNMdHphRGs5WTI2QUZzQnArM2lhOFhrYThpNHJuM2E1TmtZSHAyNVFmVXREem1LWldUZVdydXFLOHc0Cnh6Y01wRFhleWVVb3dRTFFGUy81MVFLQmdRQzJzSDY5RlhmRmlLb3dhK0lLTHZOTEhZdCswd1hCWDUrMnFSVEcKcDBLTWFFODNrdmNYclNSL3Yra0ErYy9xSTVnZ2xvUWxlT1M2eDF6TUpIMWFKcml0TVpBYkpsRjFFV0h6MTV4UQpCZWdBNEtEWnpzK3JncFVuZm5nQW4wQWo4RENNY2tEbEI5TkFacHBZK0hlMUpKRlJNdUhnZVFqNjdaeHlUR0YvCklkcTNvUUtCZ1FDcmRVYzB3ZFpTTjFhc1ZzRFM2VXVmUEJtT1EzYUVnOHppbVc1dEd2RXQrV2FHelhiQ1NxUUgKdUdkQlFlcTc2QUNJV2xTN1dNNFM0VHFwWlRzMEllTDRCMzd6M3lHaGpzREp6VlF2aEFiVWhybm5KeGg4YktBVgoyOC92WW1NdGEzak1ER0VZT2JJOGlka1FDaEtVNldPOVBhUW5PWWE5ZHYxS1JDbTBSalEzN3c9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
 ...
 ---
 # Source: tobs/charts/timescaledb-single/templates/sec-passwords.yaml
@@ -240,7 +240,7 @@ metadata:
   labels:
     grafana_datasource: "1"
     app: tobs
-    chart: tobs-0.1.1
+    chart: tobs-0.1.2
     release: tobs
 type: Opaque
 stringData:
@@ -277,7 +277,7 @@ metadata:
   name: tobs-grafana-db
   labels:
     app: tobs
-    chart: tobs-0.1.1
+    chart: tobs-0.1.2
     release: tobs
 type: Opaque
 data:
@@ -673,7 +673,7 @@ metadata:
   labels:
    grafana_dashboard: "1"
    app: tobs
-   chart: tobs-0.1.1
+   chart: tobs-0.1.2
    release: tobs
 data:
 
@@ -4317,7 +4317,7 @@ metadata:
   name: tobs-grafana-db
   labels:
    app: tobs
-   chart: tobs-0.1.1
+   chart: tobs-0.1.2
    release: tobs
 data:
   add-users.sql: |-
@@ -4372,7 +4372,7 @@ metadata:
     component: "server"
     app: tobs
     release: tobs
-    chart: tobs-0.1.1
+    chart: tobs-0.1.2
     heritage: Helm
   name: tobs-prometheus-config
 data:
@@ -5156,7 +5156,7 @@ metadata:
   name: tobs-promscale-connector
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.1
+    chart: promscale-0.1.2
     release: tobs
     heritage: Helm
   annotations:
@@ -5257,7 +5257,7 @@ metadata:
   name: tobs-promlens
   labels:
     app: tobs
-    chart: tobs-0.1.1
+    chart: tobs-0.1.2
     release: tobs
     component: promlens
   annotations:
@@ -5363,7 +5363,7 @@ spec:
         checksum/config: bbf62cea42b4ca62022cf94acc610bb0b926138e317d585ddf9140d2291aa27b
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
         checksum/sc-dashboard-provider-config: 914ee9ebc1b2df3137de6ff390449452e5323b27229f0e129c5445219ab05bff
-        checksum/secret: 4b13410275562ede50ec6cc45bcbbe30b39116ffecb0b5190451ad4c3405643b
+        checksum/secret: d786754d47d50a2d79603e033c2afa2a0ca6aba368c568f0cfa0cd074efe92b0
     spec:
       
       serviceAccountName: tobs-grafana
@@ -5695,7 +5695,7 @@ metadata:
   name: tobs-promscale
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.1
+    chart: promscale-0.1.2
     release: tobs
     heritage: Helm
 spec:
@@ -5715,7 +5715,7 @@ spec:
       
     spec:
       containers:
-        - image: timescale/promscale:0.1.1
+        - image: timescale/promscale:0.1.2
           imagePullPolicy: IfNotPresent
           name: promscale-connector
           resources:
@@ -5749,7 +5749,7 @@ metadata:
   name: tobs-promlens
   labels:
     app: tobs
-    chart: tobs-0.1.1
+    chart: tobs-0.1.2
     release: tobs
     component: promlens
 spec:
@@ -6058,7 +6058,7 @@ metadata:
   name: tobs-grafana-db
   labels:
     app: tobs
-    chart: tobs-0.1.1
+    chart: tobs-0.1.2
     release: tobs
     heritage: Helm
 spec:
@@ -6108,7 +6108,7 @@ metadata:
   name: tobs-promscale-drop-chunk
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.1
+    chart: promscale-0.1.2
     release: tobs
     heritage: Helm
 spec:
@@ -6196,7 +6196,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "tobs-patroni-z9"
+  name: "tobs-patroni-46"
   labels:
     app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
