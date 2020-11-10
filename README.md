@@ -75,6 +75,6 @@ you're a new contributor.
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 [promscale-repo]: https://github.com/timescale/promscale
 [promscale-helm]: https://github.com/timescale/promscale/tree/master/helm-chart
-[prometheus-helm-hub]: https://hub.helm.sh/charts/stable/prometheus
+[prometheus-helm-hub]: https://prometheus-community.github.io/helm-charts
 [prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
-[grafana-helm-hub]: https://hub.helm.sh/charts/stable/grafana
+[grafana-helm-hub]: https://grafana.github.io/helm-charts
