@@ -11,6 +11,12 @@ stack into a Kubernetes cluster. Currently this stack includes:
 Tobs provides a CLI tool to make deployment and operations easier. We also provide
 Helm charts that can be used directly or as sub-charts for other projects.
 
+See a demo of tobs in action by clicking the video below:
+
+<p align="center">
+<a href="https://www.youtube.com/watch?v=MSvBsXOI1ks"> <img src="https://media.giphy.com/media/e8y7Lq7V5F0K9zQs20/giphy.gif"> </a>
+</p>
+
 # 🔥 Quick start
 
 __Dependencies__: [Helm](https://helm.sh/docs/intro/install/)
