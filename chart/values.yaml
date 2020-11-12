@@ -56,8 +56,8 @@ promscale:
       memory: 2Gi
       cpu: 1
 # Values for configuring the deployment of Prometheus
-# The Prometheus chart from the prometheus-community is used 
-# the guide for it can be found at: 
+# The Prometheus chart from the prometheus-community is used
+# the guide for it can be found at:
 #   https://artifacthub.io/packages/helm/prometheus-community/prometheus
 # with the default values documented at:
 #   https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
@@ -93,6 +93,9 @@ prometheus:
         enabled: true
         # complete url = {protocol}://{host}:{port}/endpoint
         endpoint: "read"
+  #You can add other configs from https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml here
+  #For example, adding additional scrape jobs
+  #extraScrapeConfigs:
 
 # Values for configuring the deployment of Grafana
 # The Grafana Community chart is used and the guide for it
