@@ -62,19 +62,19 @@ More details about the CLI tool can be found [here](/cli/README.md)
 # Configuring the stack
 
 All configuration for all components happens through the helm values.yml file.
-You can view the self-documenting [default values.yml](chart/values.yml) in the repo.
+You can view the self-documenting [default values.yaml](chart/values.yaml) in the repo.
 We also have additional documentation about individual configuration settings in our
 [Helm chart docs](chart/README.md#configuring-helm-chart).
 
-To modify the settings, first create a values.yml file:
+To modify the settings, first create a values.yaml file:
 ```bash
-tobs helm show-values > values.yml
+tobs helm show-values > values.yaml
 ```
 
-Then modify the values.yml file using your favorite editor.
+Then modify the values.yaml file using your favorite editor.
 Finally, deploy with the new settings using:
 ```bash
-tobs install -f values.yml
+tobs install -f values.yaml
 ```
 
 # 🛠Alternative deployment methods
