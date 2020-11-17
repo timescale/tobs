@@ -1,5 +1,8 @@
 # tobs - The Observability Stack for Kubernetes
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/timescale/tobs)](https://goreportcard.com/report/github.com/timescale/tobs)
+[![GoDoc](https://godoc.org/github.com/timescale/tobs/cli?status.svg)](https://pkg.go.dev/github.com/timescale/tobs/cli)
+
 Tobs is a tool that aims to make it as easy as possible to install a full observability
 stack into a Kubernetes cluster. Currently this stack includes:
  * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
