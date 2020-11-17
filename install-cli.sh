@@ -28,7 +28,7 @@ validate_checksum() {
 
   checksum=$($checksumbin -a256 "${filename}")
 
-  if grep -Fxq "${checksum}" <<< "${checksumlist}"; then
+  if echo "${checksumlist}" | grep -Fxq "${checksum}"; then
     echo "Checksum valid."
     return 0
   else
