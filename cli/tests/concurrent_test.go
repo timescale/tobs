@@ -31,11 +31,7 @@ func TestConcurrent(t *testing.T) {
 	}
 
 	// skipping concurrent tests for now
-	// as this needs some work re-writing the concurrent tests
-	// adding just an return will fail go vet check so wrapping it into if block.
-	if true {
-		return
-	}
+	t.Skip("Skipping concurrent tests as it needs changes on multiple tobs installations on the same cluster.")
 
 	testUninstall(t, "", "", false)
 

@@ -121,4 +121,4 @@ Then, move the `tobs` binary from the current directory to your `/bin` folder.
 
 __Dependencies__: [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), [kind](https://kind.sigs.k8s.io/)
 
-A testing suite is included in the `tests` folder. The testing suite can be run by `./e2e-tests.sh` this script will create kind cluster executes the test suite and deletes the kind cluster.
+A testing suite is included in the `tests` folder. The testing suite can be run by `./e2e-tests.sh` this script will create a [kind](https://kind.sigs.k8s.io) cluster, execute the test suite, and delete the kind cluster.
