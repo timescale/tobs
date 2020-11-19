@@ -1,5 +1,12 @@
 #!/bin/sh
 
-kind create cluster
+kind create cluster --name tobs
+
+clean_up() {
+  kind delete cluster --name tobs
+  exit
+}
+
+trap clean_up SIGHUP SIGINT SIGTERM
 go test -v ./tests/ --timeout 30m
-kind delete cluster
+clean_up
