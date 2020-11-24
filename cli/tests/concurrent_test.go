@@ -30,6 +30,9 @@ func TestConcurrent(t *testing.T) {
 		t.Skip("Skipping concurrent tests")
 	}
 
+	// skipping concurrent tests for now
+	t.Skip("Skipping concurrent tests as it needs changes on multiple tobs installations on the same cluster.")
+
 	testUninstall(t, "", "", false)
 
 	oldname := RELEASE_NAME

@@ -26,7 +26,7 @@ func testInstall(t testing.TB, name, namespace, filename string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	install := exec.Command("tobs", cmds...)
+	install := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := install.CombinedOutput()
 	if err != nil {
@@ -52,7 +52,7 @@ func testHelmInstall(t testing.TB, name, namespace, filename string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	install := exec.Command("tobs", cmds...)
+	install := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := install.CombinedOutput()
 	if err != nil {
@@ -78,7 +78,7 @@ func testUninstall(t testing.TB, name, namespace string, deleteData bool) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	uninstall := exec.Command("tobs", cmds...)
+	uninstall := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -104,7 +104,7 @@ func testHelmUninstall(t testing.TB, name, namespace string, deleteData bool) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	uninstall := exec.Command("tobs", cmds...)
+	uninstall := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := uninstall.CombinedOutput()
 	if err != nil {
@@ -136,7 +136,7 @@ func testHelmDeleteData(t testing.TB, name, namespace string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	deletedata := exec.Command("tobs", cmds...)
+	deletedata := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := deletedata.CombinedOutput()
 	if err != nil {
@@ -157,7 +157,7 @@ func testHelmShowValues(t testing.TB) {
 	var showvalues *exec.Cmd
 
 	t.Logf("Running 'tobs helm show-values'")
-	showvalues = exec.Command("tobs", "helm", "show-values")
+	showvalues = exec.Command("./../bin/tobs", "helm", "show-values")
 
 	out, err := showvalues.CombinedOutput()
 	if err != nil {

@@ -119,8 +119,6 @@ Then, move the `tobs` binary from the current directory to your `/bin` folder.
 
 ## Testing
 
-WARNING: Tests start, stop, and delete the active minikube cluster. Make sure it's safe to delete your minikube cluster before starting the test.
+__Dependencies__: [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), [kind](https://kind.sigs.k8s.io/)
 
-A testing suite is included in the `tests` folder. This testing suite has additional dependencies on [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) and [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/).
-
-The testing suite can be run by calling `go test -timeout 30m` from within the `tests` folder. At least 4 cpus should be allocated for minikube with e.g. `minikube config set cpus 4`.
+A testing suite is included in the `tests` folder. The testing suite can be run by `./e2e-tests.sh` this script will create a [kind](https://kind.sigs.k8s.io) cluster, execute the test suite, and delete the kind cluster.

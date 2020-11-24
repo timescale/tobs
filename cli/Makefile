@@ -2,7 +2,7 @@ build:
 		go build -o bin/tobs .
 
 test:
-		go test -v ./tests/
+		./e2e-tests.sh
 
 go-vet:
 		go vet ./...

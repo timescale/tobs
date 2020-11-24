@@ -42,12 +42,6 @@ promscale:
     # will get created
     loadBalancer:
       enabled: false
-  resources:
-    requests:
-      # By default this should be enough for a cluster
-      # with only a few pods
-      memory: 2Gi
-      cpu: 1
 # Values for configuring the deployment of Prometheus
 # The stable/prometheus chart is used and the guide for it
 # can be found at:

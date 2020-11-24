@@ -27,7 +27,7 @@ func testRetentionSetDefault(t testing.TB, period int, user, dbname string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	set := exec.Command("tobs", cmds...)
+	set := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -46,7 +46,7 @@ func testRetentionSet(t testing.TB, metric string, period int, user, dbname stri
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	set := exec.Command("tobs", cmds...)
+	set := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -65,7 +65,7 @@ func testRetentionReset(t testing.TB, metric, user, dbname string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	reset := exec.Command("tobs", cmds...)
+	reset := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := reset.CombinedOutput()
 	if err != nil {
@@ -84,7 +84,7 @@ func testRetentionGet(t testing.TB, metric string, expectedDays int64, user, dbn
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	get := exec.Command("tobs", cmds...)
+	get := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := get.CombinedOutput()
 	if err != nil {
@@ -112,7 +112,7 @@ func testChunkIntervalSetDefault(t testing.TB, interval, user, dbname string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	set := exec.Command("tobs", cmds...)
+	set := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -131,7 +131,7 @@ func testChunkIntervalSet(t testing.TB, metric, interval, user, dbname string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	set := exec.Command("tobs", cmds...)
+	set := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := set.CombinedOutput()
 	if err != nil {
@@ -150,7 +150,7 @@ func testChunkIntervalReset(t testing.TB, metric, user, dbname string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	reset := exec.Command("tobs", cmds...)
+	reset := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := reset.CombinedOutput()
 	if err != nil {
@@ -169,7 +169,7 @@ func testChunkIntervalGet(t testing.TB, metric string, expectedDuration time.Dur
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	get := exec.Command("tobs", cmds...)
+	get := exec.Command("./../bin/tobs", cmds...)
 
 	out, err := get.CombinedOutput()
 	if err != nil {
