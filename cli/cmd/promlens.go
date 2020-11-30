@@ -4,10 +4,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// grafanaCmd represents the grafana command
+// promlensCmd represents the promlens command
 var promlensCmd = &cobra.Command{
 	Use:   "promlens",
-	Short: "Subcommand for Grafana operations",
+	Short: "Subcommand for Promlens operations",
 }
 
 func init() {

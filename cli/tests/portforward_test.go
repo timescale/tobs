@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func testpf(t testing.TB, timescale, grafana, prometheus, connector, promlens string) {
+func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens string) {
 	cmds := []string{"port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
 	if timescale != "" {
 		cmds = append(cmds, "-t", timescale)
@@ -20,8 +20,8 @@ func testpf(t testing.TB, timescale, grafana, prometheus, connector, promlens st
 	if prometheus != "" {
 		cmds = append(cmds, "-p", prometheus)
 	}
-	if connector != "" {
-		cmds = append(cmds, "-c", connector)
+	if promscale != "" {
+		cmds = append(cmds, "-c", promscale)
 	}
 	if promlens != "" {
 		cmds = append(cmds, "-l", promlens)
@@ -45,8 +45,8 @@ func testpf(t testing.TB, timescale, grafana, prometheus, connector, promlens st
 	if prometheus == "" {
 		prometheus = "9090"
 	}
-	if connector == "" {
-		connector = "9201"
+	if promscale == "" {
+		promscale = "9201"
 	}
 	if promlens == "" {
 		promlens = "8081"
@@ -64,7 +64,7 @@ func testpf(t testing.TB, timescale, grafana, prometheus, connector, promlens st
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = net.DialTimeout("tcp", "localhost:"+connector, 2*time.Second)
+	_, err = net.DialTimeout("tcp", "localhost:"+promscale, 2*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

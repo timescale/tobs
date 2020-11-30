@@ -11,7 +11,7 @@ import (
 // portForwardCmd represents the port-forward command
 var portForwardCmd = &cobra.Command{
 	Use:   "port-forward",
-	Short: "Port-forwards TimescaleDB, Grafana, and Prometheus to localhost",
+	Short: "Port-forwards TimescaleDB, Promscale, Promlens, Grafana, and Prometheus to localhost",
 	Args:  cobra.ExactArgs(0),
 	RunE:  portForward,
 }
@@ -21,7 +21,7 @@ func init() {
 	portForwardCmd.Flags().IntP("timescaledb", "t", LISTEN_PORT_TSDB, "Port to listen from for TimescaleDB")
 	portForwardCmd.Flags().IntP("grafana", "g", LISTEN_PORT_GRAFANA, "Port to listen from for Grafana")
 	portForwardCmd.Flags().IntP("prometheus", "p", LISTEN_PORT_PROM, "Port to listen from for Prometheus")
-	portForwardCmd.Flags().IntP("connector", "c", LISTEN_PORT_CONNECTOR, "Port to listen from for the Connector")
+	portForwardCmd.Flags().IntP("promscale", "c", LISTEN_PORT_PROMSCALE, "Port to listen from for the Promscale")
 	portForwardCmd.Flags().IntP("promlens", "l", LISTEN_PORT_PROMLENS, "Port to listen from for PromLens")
 }
 
@@ -46,8 +46,8 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	var connector int
-	connector, err = cmd.Flags().GetInt("connector")
+	var promscale int
+	promscale, err = cmd.Flags().GetInt("promscale")
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
@@ -95,7 +95,7 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := portForwardConnector(connector); err != nil {
+	if err := portForwardPromscale(promscale); err != nil {
 		return err
 	}
 	select {}
