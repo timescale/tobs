@@ -31,7 +31,9 @@ func TestConcurrent(t *testing.T) {
 	}
 
 	// skipping concurrent tests for now
-	t.Skip("Skipping concurrent tests as it needs changes on multiple tobs installations on the same cluster.")
+	if true {
+		t.Skip("Skipping concurrent tests as it needs changes on multiple tobs installations on the same cluster.")
+	}
 
 	testUninstall(t, "", "", false)
 
