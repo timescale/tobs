@@ -9,7 +9,7 @@ import (
 // volumeGetCmd represents the volume expand command
 var volumeGetCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get PVC's volume",
+	Short: "Get PVC's volume sizes",
 	Args:  cobra.ExactArgs(0),
 	RunE:  volumeGet,
 }
@@ -35,6 +35,10 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	promStorage, err := cmd.Flags().GetBool("prometheus-storage")
 	if err != nil {
 		return fmt.Errorf("could not get prometheus-storage flag %w", err)
+	}
+
+	if !promStorage && !tsDBStorage && !tsDBWal {
+		promStorage, tsDBStorage, tsDBWal = true, true, true
 	}
 
 	if tsDBStorage {
@@ -67,14 +71,18 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func volumeGetPrint(pvcPrefix string, results map[string]string) {
+func volumeGetPrint(pvcPrefix string, results []*k8s.PVCData) {
 	if len(results) == 0 {
 		return
 	}
 
 	fmt.Printf("PVC's of %s\n", pvcPrefix)
-	for pvcName, value := range results {
-		fmt.Printf("Existing size of PVC: %s is %s\n", pvcName, value)
+	for _, pvc := range results {
+		if pvc.SpecSize != pvc.StatusSize {
+			fmt.Printf("Existing size of PVC: %s is %s and PVC expansion is in progress to %s\n", pvc.Name, pvc.StatusSize, pvc.SpecSize)
+		} else {
+			fmt.Printf("Existing size of PVC: %s is %s\n", pvc.Name, pvc.SpecSize)
+		}
 	}
 	fmt.Println()
 }

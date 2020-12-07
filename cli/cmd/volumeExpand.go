@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 
@@ -36,6 +37,10 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 	promStorage, err := cmd.Flags().GetString("prometheus-storage")
 	if err != nil {
 		return fmt.Errorf("could not get prometheus-storage flag %w", err)
+	}
+
+	if promStorage == "" && tsDBStorage == "" && tsDBWal == "" {
+		return errors.New("use resource specific flag and provide the desired size for pvc expansion")
 	}
 
 	if tsDBStorage != "" {

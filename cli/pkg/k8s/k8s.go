@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -399,13 +400,22 @@ func buildPVCNames(pvcPrefix string, pods []corev1.Pod) (pvcNames []string) {
 	return pvcNames
 }
 
-func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) (map[string]string, error) {
+type PVCData struct {
+	Name string
+	SpecSize string
+	StatusSize string
+}
+
+func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCData, error) {
 	var pvcs []string
-	pvcSizes := make(map[string]string)
+	var pvcData []*PVCData
 	if labels != nil {
 		pods, err := KubeGetPods(namespace, labels)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get the pods using labels %w", err)
+		}
+		if len(pods) == 0 {
+			return nil, errors.New("failed to get the pod's for timescaledb")
 		}
 		pvcs = buildPVCNames(pvcPrefix, pods)
 	} else {
@@ -419,11 +429,19 @@ func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) (map[str
 			fmt.Println(fmt.Errorf("failed to get the pvc for %s %w", pvcName, err))
 		}
 
-		existingSize := podPVC.Spec.Resources.Requests["storage"]
-		pvcSizes[pvcName] = existingSize.String()
+		specSize := podPVC.Spec.Resources.Requests["storage"]
+		statusSize := podPVC.Status.Capacity["storage"]
+		pvc := &PVCData{
+			Name:       pvcName,
+			SpecSize:   specSize.String(),
+			StatusSize: statusSize.String(),
+		}
+		if podPVC.Name != "" {
+			pvcData = append(pvcData, pvc)
+		}
 	}
 
-	return pvcSizes, nil
+	return pvcData, nil
 }
 
 func ExpandTimescaleDBPVC(namespace, value, pvcPrefix string, labels map[string]string) (map[string]string, error) {
@@ -497,3 +515,16 @@ func UpdateStorageClassAllowVolumeExpand() error {
 	return nil
 }
 
+func GetAllPVCSizes() (map[string]string, error){
+	client, _ := kubeInit()
+	pvcs, err := client.CoreV1().PersistentVolumeClaims("ns").List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	results := make(map[string]string)
+	for _, pvc := range pvcs.Items {
+		size := pvc.Spec.Resources.Requests["storage"]
+		results[pvc.Name] = size.String()
+	}
+	return results, nil
+}
