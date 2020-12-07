@@ -2,8 +2,10 @@ package k8s
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"log"
 	"net/http"
 	"os"
@@ -389,4 +391,140 @@ func KubeUpdateSecret(namespace string, secret *corev1.Secret) error {
 	}
 
 	return nil
+}
+
+func buildPVCNames(pvcPrefix string, pods []corev1.Pod) (pvcNames []string) {
+	for _, pod := range pods {
+		pvcNames = append(pvcNames, pvcPrefix+"-"+pod.Name)
+	}
+	return pvcNames
+}
+
+type PVCData struct {
+	Name string
+	SpecSize string
+	StatusSize string
+}
+
+func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCData, error) {
+	var pvcs []string
+	var pvcData []*PVCData
+	if labels != nil {
+		pods, err := KubeGetPods(namespace, labels)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get the pods using labels %w", err)
+		}
+		if len(pods) == 0 {
+			return nil, errors.New("failed to get the pod's for timescaledb")
+		}
+		pvcs = buildPVCNames(pvcPrefix, pods)
+	} else {
+		pvcs = append(pvcs, pvcPrefix)
+	}
+
+	client, _ := kubeInit()
+	for _, pvcName := range pvcs {
+		podPVC, err := client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
+		if err != nil {
+			fmt.Println(fmt.Errorf("failed to get the pvc for %s %w", pvcName, err))
+		}
+
+		specSize := podPVC.Spec.Resources.Requests["storage"]
+		statusSize := podPVC.Status.Capacity["storage"]
+		pvc := &PVCData{
+			Name:       pvcName,
+			SpecSize:   specSize.String(),
+			StatusSize: statusSize.String(),
+		}
+		if podPVC.Name != "" {
+			pvcData = append(pvcData, pvc)
+		}
+	}
+
+	return pvcData, nil
+}
+
+func ExpandTimescaleDBPVC(namespace, value, pvcPrefix string, labels map[string]string) (map[string]string, error) {
+	pvcResults := make(map[string]string)
+	pods, err := KubeGetPods(namespace, labels)
+	if err != nil {
+		return pvcResults, fmt.Errorf("failed to get the pods using labels %w", err)
+	}
+
+	pvcs := buildPVCNames(pvcPrefix, pods)
+	for _, pvc := range pvcs {
+		err := ExpandPVC(namespace, pvc, value)
+		if err != nil {
+			fmt.Println(fmt.Errorf("%w",err))
+		} else {
+			pvcResults[pvc] = value
+		}
+	}
+	return pvcResults, nil
+}
+
+func ExpandPVC(namespace, pvcName, value string) error {
+	client, _ := kubeInit()
+	podPVC, err := client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get the pvc for %s %w", pvcName, err)
+	}
+
+	newSize, err := resource.ParseQuantity(value)
+	if err != nil {
+		return fmt.Errorf("failed to parse the volume size %w", err)
+	}
+
+	existingSize := podPVC.Spec.Resources.Requests["storage"]
+	if yes := newSize.Cmp(existingSize); yes != 1 {
+		return fmt.Errorf("provided volume size for pvc: %s is less than or equal to the existing size: %s", pvcName, existingSize.String())
+	}
+
+	podPVC.Spec.Resources.Requests["storage"] = newSize
+	_, err = client.CoreV1().PersistentVolumeClaims(namespace).Update(context.Background(), podPVC, metav1.UpdateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to update persistent volume claim %w", err)
+	}
+
+	return nil
+}
+
+
+/*
+#########################################
+Kubernetes utils for e2e tests.
+#########################################
+ */
+
+// By default local storage provider doesn't let us to expand PVC's
+// For e2e tests to run we are configuring storageClass to allow PVC expansion
+func UpdateStorageClassAllowVolumeExpand() error {
+	client, _ := kubeInit()
+	storageClass, err := client.StorageV1().StorageClasses().Get(context.Background(), "standard", metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	setTrue := true
+	storageClass.AllowVolumeExpansion = &setTrue
+	_, err = client.StorageV1().StorageClasses().Update(context.Background(), storageClass, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetAllPVCSizes() (map[string]string, error){
+	client, _ := kubeInit()
+	pvcs, err := client.CoreV1().PersistentVolumeClaims("ns").List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	results := make(map[string]string)
+	for _, pvc := range pvcs.Items {
+		size := pvc.Spec.Resources.Requests["storage"]
+		results[pvc.Name] = size.String()
+	}
+	return results, nil
 }

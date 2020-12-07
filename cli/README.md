@@ -96,6 +96,17 @@ Documentation about Helm configuration can be found in the [Helm chart directory
 | `tobs metrics chunk-interval set`         | Sets the chunk interval of a specific metric to the specified duration.              | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
 | `tobs metrics chunk-interval reset`       | Resets chunk interval of a specific metric to the default value.                     | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
 
+### Volume Commands
+
+The volume operation is available for TimescaleDB & Prometheus PVC's.
+
+**Note**: To expand PVC's in Kubernetes cluster make sure you have configured `storageClass` with `allowVolumeExpansion: true` to allow PVC expansion.
+
+| Command                        | Description                                       | Flags                                |
+|--------------------------------|---------------------------------------------------|--------------------------------------|
+| `tobs volume get`     | Displays Persistent Volume Claims sizes. | `--timescaleDB-storage`, `s`, `--timescaleDB-wal`, `w`, `prometheus-storage`, `-p`  |
+| `tobs volume expand`  | Expands the Persistent Volume Claims for provided resources to specified sizes. The expansion size is allowed in `Ki`, `Mi` & `Gi` units. example: `150Gi`. | `--timescaleDB-storage`, `s`, `--timescaleDB-wal`, `w`, `prometheus-storage`, `-p` |
+
 ## Global Flags
 
 The following are global flags that can be used with any of the above commands:
