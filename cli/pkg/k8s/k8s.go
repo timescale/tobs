@@ -5,19 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	rest "k8s.io/client-go/rest"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/tools/remotecommand"
@@ -29,7 +29,7 @@ var HOME = os.Getenv("HOME")
 func kubeInit() (kubernetes.Interface, *rest.Config) {
 	var err error
 
-    loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 
 	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		loadingRules,
@@ -403,8 +403,8 @@ func buildPVCNames(pvcPrefix string, pods []corev1.Pod) (pvcNames []string) {
 }
 
 type PVCData struct {
-	Name string
-	SpecSize string
+	Name       string
+	SpecSize   string
 	StatusSize string
 }
 
@@ -457,7 +457,7 @@ func ExpandTimescaleDBPVC(namespace, value, pvcPrefix string, labels map[string]
 	for _, pvc := range pvcs {
 		err := ExpandPVC(namespace, pvc, value)
 		if err != nil {
-			fmt.Println(fmt.Errorf("%w",err))
+			fmt.Println(fmt.Errorf("%w", err))
 		} else {
 			pvcResults[pvc] = value
 		}
@@ -505,44 +505,4 @@ func DeletePods(namespace string, labels map[string]string) error {
 		}
 	}
 	return nil
-}
-
-
-/*
-#########################################
-Kubernetes utils for e2e tests.
-#########################################
- */
-
-// By default local storage provider doesn't let us to expand PVC's
-// For e2e tests to run we are configuring storageClass to allow PVC expansion
-func UpdateStorageClassAllowVolumeExpand() error {
-	client, _ := kubeInit()
-	storageClass, err := client.StorageV1().StorageClasses().Get(context.Background(), "standard", metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
-
-	setTrue := true
-	storageClass.AllowVolumeExpansion = &setTrue
-	_, err = client.StorageV1().StorageClasses().Update(context.Background(), storageClass, metav1.UpdateOptions{})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func GetAllPVCSizes() (map[string]string, error){
-	client, _ := kubeInit()
-	pvcs, err := client.CoreV1().PersistentVolumeClaims("ns").List(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	results := make(map[string]string)
-	for _, pvc := range pvcs.Items {
-		size := pvc.Spec.Resources.Requests["storage"]
-		results[pvc.Name] = size.String()
-	}
-	return results, nil
 }

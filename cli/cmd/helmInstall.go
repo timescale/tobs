@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"os/exec"
 	"time"
+
+	"github.com/timescale/tobs/cli/pkg/utils"
 
 	"github.com/timescale/tobs/cli/pkg/k8s"
 
@@ -13,7 +13,6 @@ import (
 )
 
 const DEVEL = false
-const REPO_LOCATION = "https://charts.timescale.com"
 
 // helmInstallCmd represents the helm install command
 var helmInstallCmd = &cobra.Command{
@@ -46,26 +45,27 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	w := io.Writer(os.Stdout)
-
-	addchart := exec.Command("helm", "repo", "add", "timescale", REPO_LOCATION)
-
-	addchart.Stdout = w
-	addchart.Stderr = w
-	fmt.Println("Adding Timescale Helm Repository")
-	err = addchart.Run()
+	err = installStack(file, ref)
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
+	return nil
+}
 
-	update := exec.Command("helm", "repo", "update")
+func installStack(file, ref string) error {
+	var err error
+	// if custom helm chart is provided there is no point
+	// of adding & upgrading the default tobs helm chart
+	if ref == utils.DEFAULT_CHART {
+		err = utils.AddTobsHelmChart()
+		if err != nil {
+			return err
+		}
 
-	update.Stdout = w
-	update.Stderr = w
-	fmt.Println("Fetching updates from repository")
-	err = update.Run()
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
+		err = utils.UpdateTobsHelmChart(false)
+		if err != nil {
+			return err
+		}
 	}
 
 	cmds := []string{"install", name, ref, "--set", "cli=true"}
