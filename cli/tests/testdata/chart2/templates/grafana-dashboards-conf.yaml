@@ -1,0 +1,20 @@
+{{ if  .Values.prometheus.server.enabled -}}
+{{ if .Values.grafana.enabled -}}
+{{ if .Values.grafana.sidecar.dashboards.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards
+  labels:
+   grafana_dashboard: "1"
+   app: {{ template "tobs.fullname" . }}
+   chart: {{ template "tobs.chart" . }}
+   release: {{ .Release.Name }}
+data:
+{{ range $dash := .Values.grafana.sidecar.dashboards.files }}
+  {{ base $dash -}}: |-
+{{ $.Files.Get $dash | indent 4 }}
+{{- end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

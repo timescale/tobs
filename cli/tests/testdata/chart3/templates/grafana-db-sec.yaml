@@ -1,0 +1,25 @@
+{{ if .Values.grafana.enabled -}}
+{{ if .Values.grafana.timescale.database.enabled -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-grafana-db
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+type: Opaque
+data:
+{{- $host := tpl .Values.grafana.timescale.database.host $ -}}
+{{- $port := .Values.grafana.timescale.database.port | int -}}
+{{- $fullhost := printf "%s:%d" $host $port -}}
+{{- with .Values.grafana.timescale.database }}
+  GF_DATABASE_TYPE: {{ "postgres" | b64enc }}
+  GF_DATABASE_HOST: {{ $fullhost | b64enc }}
+  GF_DATABASE_NAME: {{ .dbName | b64enc }}
+  GF_DATABASE_USER: {{ .user | b64enc }}
+  GF_DATABASE_PASSWORD: {{ .pass | b64enc }}
+  GF_DATABASE_SSL_MODE: {{ .sslMode | b64enc }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

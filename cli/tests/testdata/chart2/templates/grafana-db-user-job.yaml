@@ -1,0 +1,55 @@
+{{- if .Values.grafana.enabled -}}
+{{- if .Values.grafana.timescale.database.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-grafana-db
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    spec:
+{{- $vals := .Values -}}
+{{- with .Values.grafana.timescale }}
+      containers:
+        - name: {{ $.Chart.Name }}-grafana-db
+          image: postgres:12-alpine
+          volumeMounts:
+            - name: sql-volume
+              mountPath: /add-users.sql
+              subPath: add-users.sql
+          env:
+            - name: PGPORT
+              value: {{ .database.port | quote }}
+            - name: PGUSER
+              value: {{ .adminUser }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .adminPassSecret $ }}
+                  key: {{ .adminUser }}
+            - name: PGHOST
+              value: {{ tpl .database.host $ }}
+          command: ['psql', '-d', {{ .database.dbName }}, '-f', '/add-users.sql']
+      restartPolicy: OnFailure
+      volumes:
+        - name: sql-volume
+          configMap:
+            name: {{ $.Release.Name }}-grafana-db
+      initContainers:
+        - name: init-db
+          image: busybox:1.28
+          volumeMounts:
+            - name: sql-volume
+              mountPath: /wait-for-ts.sh
+              subPath: wait-for-ts.sh
+          env:
+            - name: PGHOST
+              value: {{ tpl .database.host $ }}
+          command: ['sh', '/wait-for-ts.sh']
+{{- end -}}
+{{- end -}}
+{{- end -}}

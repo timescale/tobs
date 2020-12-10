@@ -1,0 +1,54 @@
+{{ if .Values.grafana.enabled -}}
+{{ if .Values.grafana.sidecar.datasources.enabled }}
+{{- $tsEnabled := .Values.grafana.timescale.datasource.enabled -}}
+{{- $promEnabled := .Values.grafana.prometheus.datasource.enabled -}}
+{{- $anyDataSources := or $tsEnabled $promEnabled -}}
+{{ if $anyDataSources -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-grafana-datasources
+  labels:
+    grafana_datasource: "1"
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+type: Opaque
+stringData:
+  datasource.yaml: |-
+    # config file version
+    apiVersion: 1
+
+    datasources:
+{{- if $promEnabled }}
+      - name: Prometheus
+        type: prometheus
+        url: {{ tpl .Values.grafana.prometheus.datasource.url . }}
+        isDefault: true
+        editable: true
+        access: proxy
+{{- end -}}
+{{ if $tsEnabled -}}
+{{- $isDefault := not $promEnabled -}}
+{{- $host := tpl .Values.grafana.timescale.database.host $ -}}
+{{- $port := .Values.grafana.timescale.database.port | int -}}
+{{ with .Values.grafana.timescale.datasource }}
+      - name: TimescaleDB
+        url: {{ printf "%s:%d" $host $port }}
+        type: postgres
+        isDefault: {{ $isDefault }}
+        access: proxy
+        user: {{ .user }}
+        database: {{ .dbName }}
+        editable: true
+        secureJsonData:
+          password: {{ .pass }}
+        jsonData:
+          sslmode: {{ .sslMode }}
+          postgresVersion: 1000
+          timescaledb: true
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

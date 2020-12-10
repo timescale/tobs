@@ -1,0 +1,62 @@
+{{ if .Values.grafana.enabled -}}
+{{- $timescaleAsDB := .Values.grafana.timescale.database -}}
+{{- $timescaleAsDS := .Values.grafana.timescale.datasource -}}
+{{ if or $timescaleAsDB.enabled $timescaleAsDS.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-db
+  labels:
+   app: {{ template "tobs.fullname" . }}
+   chart: {{ template "tobs.chart" . }}
+   release: {{ .Release.Name }}
+data:
+  add-users.sql: |-
+    \set ON_ERROR_STOP on
+    {{ if $timescaleAsDB.enabled -}}
+    DO $$
+      BEGIN
+        CREATE ROLE {{ $timescaleAsDB.user }} WITH LOGIN PASSWORD '{{ $timescaleAsDB.pass }}';
+      EXCEPTION WHEN duplicate_object THEN
+        RAISE NOTICE 'role {{ $timescaleAsDB.user }} already exists, skipping create';
+      END
+    $$;
+    GRANT {{ $timescaleAsDB.user }} TO {{ .Values.grafana.timescale.adminUser }};
+    CREATE SCHEMA IF NOT EXISTS {{ $timescaleAsDB.schema }} AUTHORIZATION {{ $timescaleAsDB.user }};
+    ALTER ROLE {{ $timescaleAsDB.user }} SET search_path = {{ $timescaleAsDB.schema }};
+    {{- end }}
+    {{ if $timescaleAsDS.enabled -}}
+    DO $$
+      BEGIN
+        CREATE ROLE prom_reader;
+      EXCEPTION WHEN duplicate_object THEN
+        RAISE NOTICE 'role prom_reader already exists, skipping create';
+      END
+    $$;
+    DO $$
+      BEGIN
+        CREATE ROLE {{ $timescaleAsDS.user }} WITH LOGIN PASSWORD '{{ $timescaleAsDS.pass }}';
+      EXCEPTION WHEN duplicate_object THEN
+        RAISE NOTICE 'role {{ $timescaleAsDS.user }} already exists, skipping create';
+      END
+    $$;
+    GRANT prom_reader TO {{ $timescaleAsDS.user }};
+    {{- end }}
+  wait-for-ts.sh: |-
+    echo Checking if ${PGHOST} is up
+    NUM_TIMES_FAILED=0;
+    until nslookup ${PGHOST};
+    do
+      echo Num times failed: ${NUM_TIMES_FAILED}
+      NUM_TIMES_FAILED=$(( $NUM_TIMES_FAILED + 1 ));
+      if [ "${NUM_TIMES_FAILED}" -gt "5" ]
+      then
+        echo Failed 5 times while waiting for ${PGHOST}, exiting
+        exit 1;
+      fi
+      echo Waiting 5 seconds;
+      sleep 5;
+      echo Checking if ${PGHOST} is up
+    done
+{{- end -}}
+{{- end -}}

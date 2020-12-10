@@ -63,7 +63,7 @@ func testVolumeGet(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusS
 
 func TestVolume(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping Prometheus tests")
+		t.Skip("Skipping Volume tests")
 	}
 
 	test1 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-gg-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-gg-timescaledb-0 is 20Gi\n\nPVC's of gg-prometheus-server\nExisting size of PVC: gg-prometheus-server is 8Gi\n\n"
@@ -97,13 +97,13 @@ func TestVolume(t *testing.T) {
 	}
 
 	// update default storageClass in Kind to allow pvc expansion
-	err := k8s.UpdateStorageClassAllowVolumeExpand()
+	err := UpdateStorageClassAllowVolumeExpand()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	testVolumeExpansion(t, "151Gi", "21Gi", "9Gi", false)
-	res, err := k8s.GetAllPVCSizes()
+	res, err := GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "152Gi", "22Gi", "", false)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "153Gi", "", "", false)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "23Gi", "", false)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +139,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "24Gi", "10Gi", false)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "11Gi", false)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +178,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "12Gi", true)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +227,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "154Gi", "24Gi", "13Gi", true)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "155Gi", "25Gi", "", true)
-	res, err = k8s.GetAllPVCSizes()
+	res, err = GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}

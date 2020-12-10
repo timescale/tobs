@@ -18,16 +18,22 @@ var helmShowValuesCmd = &cobra.Command{
 
 func init() {
 	helmCmd.AddCommand(helmShowValuesCmd)
+	addHelmInstallFlags(helmShowValuesCmd)
 }
 
 func helmShowValues(cmd *cobra.Command, args []string) error {
 	var err error
 
+	chart, err := cmd.Flags().GetString("chart-reference")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+
 	var showvalues *exec.Cmd
 	if DEVEL {
-		showvalues = exec.Command("helm", "show", "values", "timescale/tobs", "--devel")
+		showvalues = exec.Command("helm", "show", "values", chart, "--devel")
 	} else {
-		showvalues = exec.Command("helm", "show", "values", "timescale/tobs")
+		showvalues = exec.Command("helm", "show", "values", chart)
 	}
 	showvalues.Stderr = os.Stderr
 

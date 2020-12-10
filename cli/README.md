@@ -107,6 +107,15 @@ The volume operation is available for TimescaleDB & Prometheus PVC's.
 | `tobs volume get`     | Displays Persistent Volume Claims sizes. | `--timescaleDB-storage`, `s`, `--timescaleDB-wal`, `w`, `prometheus-storage`, `-p`  |
 | `tobs volume expand`  | Expands the Persistent Volume Claims for provided resources to specified sizes. The expansion size is allowed in `Ki`, `Mi` & `Gi` units. example: `150Gi`. | `--timescaleDB-storage`, `s`, `--timescaleDB-wal`, `w`, `prometheus-storage`, `-p`, `--restart-pods`, `-r` to restart pods bound to PVC after PVC expansion. |
 
+### Upgrade Command
+
+The upgrade cmd helps to upgrade the existing tobs deployment. You can upgrade the tobs to latest helm chart provided the helm chart is released to timescale helm repository. 
+You can also upgrade your existing tobs deployment to latest `values.yaml` configuration. This internally uses the `helm upgrade` utility.
+
+| Command                        | Description                                       | Flags                                |
+|--------------------------------|---------------------------------------------------|--------------------------------------|
+| `tobs upgrade`     | Upgrades the tobs deployment if new helm chart is available. Also, upgrades tobs if updated `values.yaml` is provided. | `--filename`, `-f`, `--chart-reference`, `-c`, `--reuse-values` native helm upgrade flag to use existing values from release, `--reset-values` native helm flag to reset values to default helm chart values, `--confirm`, `-y` to approve upgrade action, `--same-chart` this helps you to upgrade the helm release with latest values.yaml but the chart remains the same.  |
+
 ## Global Flags
 
 The following are global flags that can be used with any of the above commands:
