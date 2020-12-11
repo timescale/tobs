@@ -43,37 +43,7 @@ Use "tobs [command] --help" for more information about a command.
 
 This will successfully deploy all the above listed components to your k8s cluster.
 
-You can use `--name` flag to set helm release name default name is `tobs`, `--namespace` flag to deploy observability stack in namespace of your choice default is set to `default` namespace, `--chart-reference` flag to use helm chart of your choice default is set to `timescale/tobs`, `--filename` to use values.yml file of your choice with helm chart.
-
-### Actions for Grafana:
-
-tobs CLI offers a grafana cmd to interact with grafana with ease. Actions such as get grafana instance password, change grafana instance password and port forwarding to locally interact with grafana. Usually to perform these actions we need view grafana secret & decode it from base64 and changing password needs secret updation. All this actions will be performed by tobs.
-
-#### get grafana password:
-
-```
-tobs grafana get-password
-```
-
-#### change grafana password:
-
-```
-tobs grafana change-password <PASSWORD>
-```
-
-#### port forward grafana
-
-By default this will port-forward to port `8080` of your local machine. Use `--port` flag to port-forward to port of your choice. 
-
-```
-tobs grafana port-forward
-```
-
-Acessing `localhost:8080` will have pre-built dashbaords for kubernetes monitoring. i.e
-
-
-
-<img src="https://i.imgur.com/x81brpV.png" width="800" height="350" />
+You can use `--name` flag to set helm release name default name is `tobs`, `--namespace` flag to deploy observability stack in namespace of your choice default is set to `default` namespace, `--chart-reference` flag to use helm chart of your choice default is set to `timescale/tobs`, `--filename` to use values.yaml file that we usually use with helm chart you can provide values.yaml of your choice by default values.yaml from the chart will be used.
 
 ### Actions for Helm:
 
@@ -246,7 +216,7 @@ By default this will port-forward to port `5432` of your local machine. Use `--p
 tobs timescaledb port-forward
 ```
 
-### Actions for Volume
+### Actions for Volumes
 
 The volume cmd helps to get and expand the existing size of PVC's for `TimescaleDB` and `Prometheus`
 
@@ -260,6 +230,38 @@ Expand PVC size. To expand size of a specific resource use  `--prometheus-storag
 ```
 tobs volume expand --timescaleDB-storage 175Gi --timescaleDB-wal 25Gi --prometheus-storage 15Gi
 ```
+
+### Actions for Grafana:
+
+tobs CLI offers a grafana cmd to interact with grafana with ease.
+
+Actions such as: get grafana instance password, change grafana instance password and port forwarding to locally interact with grafana. 
+
+Usually to perform these actions we need to view the grafana K8s Secret & decode it from base64 and changing password needs Secret modification. All these actions will be performed by tobs.
+
+#### get grafana password:
+
+```
+tobs grafana get-password
+```
+
+#### change grafana password:
+
+```
+tobs grafana change-password <PASSWORD>
+```
+
+#### port forward grafana
+
+By default this will port-forward to port `8080` of your local machine. Use `--port` flag to port-forward to port of your choice. 
+
+```
+tobs grafana port-forward
+```
+
+Acessing `localhost:8080` will have pre-built dashbaords for kubernetes monitoring. i.e
+
+![tobs-grafana-dashboard](./assets/grafana-tobs-sample-dashboard.png)
 
 ### Uninstall tobs
 
