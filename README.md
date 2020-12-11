@@ -8,8 +8,12 @@ stack into a Kubernetes cluster. Currently this stack includes:
  * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
  * [Grafana](https://github.com/grafana/grafana) to visualize what's going on
  * [Promscale](https://github.com/timescale/promscale) ([design doc][design-doc]) to store metrics for the long-term and allow analysis with both PromQL and SQL.
-
- We plan to expand this stack over time and welcome contributions.
+ * [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL.
+ * [Kube-State-Metrics](https://github.com/kubernetes/kube-state-metrics) to get metrics from kubernetes api-server. 
+ * [Promlens](https://promlens.com/) tool to build and analyse promql queries with ease. 
+ * [Node-Exporter](https://github.com/prometheus/node_exporter) to export metrics from the nodes.
+ 
+We plan to expand this stack over time and welcome contributions.
 
 Tobs provides a CLI tool to make deployment and operations easier. We also provide
 Helm charts that can be used directly or as sub-charts for other projects.
@@ -22,7 +26,7 @@ See a demo of tobs in action by clicking the video below:
 
 # 🔥 Quick start
 
-__Dependencies__: [Helm](https://helm.sh/docs/intro/install/)
+__Dependencies__: [Helm 3](https://helm.sh/docs/intro/install/)
 
 ## Using the tobs CLI tool
 
