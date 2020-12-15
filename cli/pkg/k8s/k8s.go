@@ -499,7 +499,7 @@ func DeletePods(namespace string, labels map[string]string) error {
 	for _, pod := range pods {
 		err = client.CoreV1().Pods(namespace).Delete(context.Background(), pod.Name, metav1.DeleteOptions{})
 		if err != nil {
-			fmt.Printf("failed to delete the pod: %s %v\n", pod.Name, err)
+			return fmt.Errorf("failed to delete the pod: %s %v\n", pod.Name, err)
 		}
 	}
 	return nil

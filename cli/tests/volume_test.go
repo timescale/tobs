@@ -314,5 +314,4 @@ func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]st
 type podDetails struct {
 	name string
 	oldPodCreateTimestamp string
-	newPodCreateTimestamp string
 }

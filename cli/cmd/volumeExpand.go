@@ -70,11 +70,10 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcPrefix, results)
 
 		if restartsPods {
-			err = k8s.DeletePods(namespace, timescaleDBPodLabels)
+			err = restartPods(timescaleDBPodLabels)
 			if err != nil {
-				return fmt.Errorf("failed to restart pods after PVC expansion: %w", err)
+				return err
 			}
-			fmt.Println("Triggered to restart the pods bound by the PVC's.")
 		}
 	}
 
@@ -88,11 +87,10 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcPrefix, results)
 
 		if restartsPods {
-			err = k8s.DeletePods(namespace, timescaleDBPodLabels)
+			err = restartPods(timescaleDBPodLabels)
 			if err != nil {
-				return fmt.Errorf("failed to restart pods after PVC expansion: %w", err)
+				return err
 			}
-			fmt.Println("Triggered to restart the pods bound by the PVC's.")
 		}
 	}
 
@@ -105,11 +103,10 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcPrefix, map[string]string{pvcPrefix: promStorage})
 
 		if restartsPods {
-			err = k8s.DeletePods(namespace, prometheusPodLabels)
+			err = restartPods(prometheusPodLabels)
 			if err != nil {
-				return fmt.Errorf("failed to restart pods after PVC expansion: %w", err)
+				return err
 			}
-			fmt.Println("Triggered to restart the pod bound by the PVC.")
 		}
 	}
 
@@ -126,4 +123,13 @@ func expandSuccessPrint(pvcPrefix string, results map[string]string) {
 		fmt.Printf("Successfully expanded PVC: %s to %s\n", pvcName, value)
 	}
 	fmt.Println()
+}
+
+func restartPods(labels map[string]string) error {
+	err := k8s.DeletePods(namespace, labels)
+	if err != nil {
+		return fmt.Errorf("failed to restart pods after PVC expansion: %w", err)
+	}
+	fmt.Println("Triggered to restart the pods bound by the PVC's.")
+	return nil
 }
