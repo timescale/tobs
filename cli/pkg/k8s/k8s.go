@@ -489,6 +489,22 @@ func ExpandPVC(namespace, pvcName, value string) error {
 	return nil
 }
 
+func DeletePods(namespace string, labels map[string]string) error {
+	pods, err := KubeGetPods(namespace, labels)
+	if err != nil {
+		return fmt.Errorf("failed to get the pods using labels %w", err)
+	}
+
+	client, _ := kubeInit()
+	for _, pod := range pods {
+		err = client.CoreV1().Pods(namespace).Delete(context.Background(), pod.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return fmt.Errorf("failed to delete the pod: %s %v\n", pod.Name, err)
+		}
+	}
+	return nil
+}
+
 
 /*
 #########################################

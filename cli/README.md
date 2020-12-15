@@ -105,7 +105,7 @@ The volume operation is available for TimescaleDB & Prometheus PVC's.
 | Command                        | Description                                       | Flags                                |
 |--------------------------------|---------------------------------------------------|--------------------------------------|
 | `tobs volume get`     | Displays Persistent Volume Claims sizes. | `--timescaleDB-storage`, `s`, `--timescaleDB-wal`, `w`, `prometheus-storage`, `-p`  |
-| `tobs volume expand`  | Expands the Persistent Volume Claims for provided resources to specified sizes. The expansion size is allowed in `Ki`, `Mi` & `Gi` units. example: `150Gi`. | `--timescaleDB-storage`, `s`, `--timescaleDB-wal`, `w`, `prometheus-storage`, `-p` |
+| `tobs volume expand`  | Expands the Persistent Volume Claims for provided resources to specified sizes. The expansion size is allowed in `Ki`, `Mi` & `Gi` units. example: `150Gi`. | `--timescaleDB-storage`, `s`, `--timescaleDB-wal`, `w`, `prometheus-storage`, `-p`, `--restart-pods`, `-r` to restart pods bound to PVC after PVC expansion. |
 
 ## Global Flags
 
