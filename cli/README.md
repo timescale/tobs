@@ -16,7 +16,7 @@ To download and install tobs, run the following in your terminal, then follow th
 curl --proto '=https' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
 ```
 
-Alternatively, you can download the CLI directly via [our releases page](/releases)
+Alternatively, you can download the CLI directly via [our releases page](https://github.com/timescale/tobs/releases/latest)
 
 ### Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
 
