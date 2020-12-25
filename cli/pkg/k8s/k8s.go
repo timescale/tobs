@@ -29,8 +29,10 @@ var HOME = os.Getenv("HOME")
 func kubeInit() (kubernetes.Interface, *rest.Config) {
 	var err error
 
+    loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+
 	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: HOME + "/.kube/config"},
+		loadingRules,
 		&clientcmd.ConfigOverrides{}).ClientConfig()
 	if err != nil {
 		log.Fatal(err)
