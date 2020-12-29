@@ -25,7 +25,7 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.1.3
+  image: timescale/promscale:0.1.4
   # connection options
   connection:
     # the db name in which the metrics will be stored
