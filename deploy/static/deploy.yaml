@@ -195,7 +195,7 @@ metadata:
 type: Opaque
 data:
   admin-user: "YWRtaW4="
-  admin-password: "U3hDNEx5QmxteUdRR2ZRdHdoR2l4OEprVzFydk1FNUo1MUNuTWtCcg=="
+  admin-password: "WEhuc25obVVzQmRscDZEMlIzTkExa0FUQ1JSTWhzYmNPRllidU1CQQ=="
   ldap-toml: ""
 ---
 # Source: tobs/charts/timescaledb-single/templates/sec-certificate.yaml
@@ -213,8 +213,8 @@ metadata:
     heritage: Helm
     cluster-name: tobs
 data:
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM2ekNDQWRPZ0F3SUJBZ0lSQUtZdnNXK29lYjJCdFEra1djRUVJY2t3RFFZSktvWklodmNOQVFFTEJRQXcKRHpFTk1Bc0dBMVVFQXhNRWRHOWljekFlRncweU1ERXlNVEV3TURBME1EQmFGdzB5TlRFeU1URXdNREEwTURCYQpNQTh4RFRBTEJnTlZCQU1UQkhSdlluTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCCkFRRENwTUtSNUN0S3BkS3RoWGxpYnN6NWtBYUdRanE5SStLdnVYNjhMdTZQbllVTDFzZDk3YUpReFZsVTNJSmcKNkRnMlJOK1lWQy82TUhiTVh4OGtNUDRxOHlkMTVCK3pCVFlmVmEwci8zclY2OU1SMDh6bG05YzJVMzdiMU9WcQphaWw0TjZMUHRGTjdKRW9QMklFaTFvY21SUWtsUFkyVDZVTHFuRjZOakRtdzc3YUhnV25MWFhYaSs0ZUw0WVRQCitETjhDQnBna1Rqa1NUYmt0Vm9HM0dvMGllemp2UHhKR05kVEZwbUxqNThTNVhlQ0ZBTGhCbkVTQ2NEWTBLT2UKUVl3WEU4Rm9JRDc3QjMwd0lpeVNGd3JNOXovT01FVVdmWkhrR3lGTzlDcWdteWs5RFhRUENHblI3b2MyWE9xYQovQklBVWFmM0MyN3JiZ0dVWE1hVXIrVFJBZ01CQUFHalFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQWRCZ05WCkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3EKaGtpRzl3MEJBUXNGQUFPQ0FRRUFkUFdmK1pFTTF2bDNBSHJpdGNFQU8zTWpMQ0NlWm8zYnJsM1FFUkV4T3NGRgpzY2N6ajFsVVNGZVRXNFN1b3dqR0VveWwwaERxaS9ka1BvbndBWXpOWHhNL3ZrSnM1M3RoeW9pQTZQdWYreGd4CjZPcnFZbVg1UEJRT1RwRUsxRG5lR0J0NmJDbDQ5STJMazlQRzVWWnFuakZuTFFCTFJGT1dQN3VLTE1MeEFFZ2gKTkxva2RBOThHSjJsVHRhSkpyMDlNeWRjMy9ZWkJSRDRab01lT1lmVUxOWlJUaUo5aUQvclBYRjl0Q21oUmU0VwpERm5IRjdKUExqK2dTbzZxWmZzMTZJeHR3RDJlTUdFMXpxZUlKcEJwTmwzMUg3NTVRdDBSL2ZabXFKc2tUUzRwCjlPZkZPK2VXdXR1MFF5Z01VaEJMVmZ2c1ptNVJxWm9RaGZ2cElPdWhtZz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcGdJQkFBS0NBUUVBd3FUQ2tlUXJTcVhTcllWNVltN00rWkFHaGtJNnZTUGlyN2wrdkM3dWo1MkZDOWJICmZlMmlVTVZaVk55Q1lPZzROa1RmbUZRditqQjJ6RjhmSkREK0t2TW5kZVFmc3dVMkgxV3RLLzk2MWV2VEVkUE0KNVp2WE5sTisyOVRsYW1vcGVEZWl6N1JUZXlSS0Q5aUJJdGFISmtVSkpUMk5rK2xDNnB4ZWpZdzVzTysyaDRGcAp5MTExNHZ1SGkrR0V6L2d6ZkFnYVlKRTQ1RWsyNUxWYUJ0eHFOSW5zNDd6OFNSalhVeGFaaTQrZkV1VjNnaFFDCjRRWnhFZ25BMk5Dam5rR01GeFBCYUNBKyt3ZDlNQ0lza2hjS3pQYy96akJGRm4yUjVCc2hUdlFxb0pzcFBRMTAKRHdocDBlNkhObHpxbXZ3U0FGR245d3R1NjI0QmxGekdsSy9rMFFJREFRQUJBb0lCQVFDQm0ySXY4U1hlaS9KdwpOdHR2N3VXd0cvWXNPamVRc0MrRzRWYUJpaUt5SUtweUNxOUZyQkdVQlFVSjI5YzVIZ2dvSXM1Y1NWcTFGc1pVCktkYTdxNS9qQzR3d0ZSb0NnNnJaVEp5R0dwVTVrdEUySXJsaC90WmNSMWJHbk1teWhVUmQxM1lqSmlrY2F6cWgKdUlHc3AvclFRZEhvS1VkM3dUQWN0c2pES2lkVUorOU5aeDVxb3Z5UW9IWnU3MjIrTVB6VjE4OUJwSVN2aENxZApUck53NHMvRzBKQ1UySTBTcUdhekJwTTVtR3BGNDBHNTNMVTFGeHJoRjY3L1FVbFR1S1RLejNwdFpQekVlZGY1Cmh2YzEybExwUTY4L1hoZlR5QTVaZ1F0d0ZidDdSQkpBVGR0REZOVlZvdXFnVEJBTlZYOHFtamVRbGtaUHBEMW8KL0tNSjg4eVJBb0dCQVBueHZHd055S2ZtcE1PTkcvQ04rUFF0d0kwa25tN0hpVGFVZ1lkUWNKMEN3ZWhlQXh3egpEdTVNU0R6SEcvSFUrNnNpWXJHQ0V3bThTMVg1MFduNjFsb24vVHN1dHRDaFZXTjZ0Z1B1NGZHTTFWVStEV24vClJnTlUwMW55YTRTNm9ZNm5tYmZ1eGFhME9xNmNVU2NEUFdaVUp5bmd5SW43UW9MOEx4N0dBMHlWQW9HQkFNZGMKQm1ET2NFMmlEK1R6SnNTcHVJMWRLaGNxaHRweHBHeEVyRndVb0hFaStRWERmRitXMHkvc29RYXFvV1pIK2d6ZgppbDc1MzFYT0pBVis1alV4RDU1d3dWK1c2QnoxWEU4UGhJWG9OekE4dFh4NE9wdDlKcGM2RUdPdUtackduRWVPClFPVGlzWHNDcTBrZHlaMEsrcnVhMXl3Y3ZSaVY3bG1CbkVEQUYyeE5Bb0dCQU1MTUFVTGhsMElzUXJ0WmphMzAKcUZOK0dQU24xb2FXSXIyVURrTnNrT2Y5enl5UG9MTG9wRGxhNEczbDdFU1U3clBZNzd4U21RM2NYNGFaVmZuWQpFaGxmMHorOXo2TllLZG1IT0xabUJsZ2duOTk0cGpHM1QxU25WclZpZHlPUjVQbnVhNkpyaUVXOWI0TEl0NExGClJxUXE3LzcyZnJUelMwb1V5NUNiV05UbEFvR0JBTWE0ZlljYjRLZ1NCb1B5dUU5SzJyTFhEakMvYkdMczZyZ2QKa0MzTlJjemd6cGVuTUIvY3FURFpULzNrTWpSUlJQaDJEMmp5N0dPTXN5MWpQRGdEYW8xRjJndmQwZ3VqckZzRwpuZFFaRUlJZDBjNTd6ZmZXUFpSN0JZRkhSeU9JSEpuYk8rYXI3Ynd2Z2V2RkxJWkZQbitwTGhsRG9GNlVmVjF0CkxBTURONVgxQW9HQkFMeUdMU0R1aVI0bFZQcVFDRVF1TXhHRmNjSHN1eDdhQjhOT1l2ZFdCQkxlZHhIOUxyY2gKdllvYlNsWjlHVlEzZXMyZGxhT2pPMGpkNmppODUramVvNXJmdk1BS1NtSzVkdWY1aUhmQ1RPZkQrMUFhYklpdwo2WnBGUnllUDVnVEloRFhMZGtVazhtdmUxWC9uZ3lrOGlyUkt2c3pHS3dWa0VmM2dhb0Y4amhXOQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM2akNDQWRLZ0F3SUJBZ0lRWlptTUR0azA3bURxV3VCb1pTMlhvakFOQmdrcWhraUc5dzBCQVFzRkFEQVAKTVEwd0N3WURWUVFERXdSMGIySnpNQjRYRFRJd01USXlPVEl3TWpReU1Wb1hEVEkxTVRJeU9USXdNalF5TVZvdwpEekVOTUFzR0ExVUVBeE1FZEc5aWN6Q0NBU0l3RFFZSktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCCkFPdE9qTUt2TWgxYUc5aFNTMkJuMGx0Z1RmV2dWTk1VT3ZzL2hWMlM3TXIzL0kxemxmMmEyWE5iKzNPNVVZd1MKcjQ0L3h2Y1pjUDQ2SkVvMHdWYi9XYmhDNUdsT29la3pTWE1qcC80Y1N3MG9VblRqWFBDZ28rNzNNYVhOc1pacApXbzc4dmlpNFNGWE1hR2xnWndSWlk3NkNoL2xWWG9TVjhLR0s5M3plTkJuc2kyemVVTDhyRm5Id2RzRmxsQ1R0CmpHMUpFM2U1dXZVd1VLRDhlMy9BM2ozaUNuK1czNmtuRmtJaDd0cXR5WTNIdk5UZTNicjRsdDZuRk8wTmFVTGgKbGRFeUNRaUVxUlpyMkk3aU0xK1MrSXhXaWppU1RXL1NGUFVXR0pySkRLeGNtbEhHRCthVjNVcTlnTFA3cWNtRApnMDQ4T3FtUVhwQWxlc0RPcWF2OWxxRUNBd0VBQWFOQ01FQXdEZ1lEVlIwUEFRSC9CQVFEQWdLa01CMEdBMVVkCkpRUVdNQlFHQ0NzR0FRVUZCd01CQmdnckJnRUZCUWNEQWpBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUEwR0NTcUcKU0liM0RRRUJDd1VBQTRJQkFRQzR3SHdGLzBvUkJCZWp0aUpSMzdRZTNrZDExaWwzL21yZTJmcTRDb3RjS3llUApwTk9GcDFqdWVOTThMaW55alErQnh2a0NJS0p2RTlKcFZhZzBJVTA3azFrSkFjVmhvOFVEdjZHOXdJdHRJZVdkCnFKODVqSlpvMVJlWlFITjFxV1R2OGprdjlNWmRlN1ZWM3NsNmU2UUpJQSs5dm5pZWR4dEN1NUJUTUpaSUFuRnYKT2pqMmRSRW5HekN4WURad2p2TkFiVy96VE5mdU92aDJDalQ2SHFiekRWWW9taTRhekwvQjl2MmYyNDBQV3RIUwp5OFRNeUJTSEttc0tzQkM4Yk1PckFkUTRsbFZ6Z3h5eWVRazIxYUt6RzNQOEtnbXdlVGFGMVhCazFORE10blpEClNDY1c3RUpCL3JzWDY4cGV0aXlpQVZXTi9Ra1M0M0drdTdNV2RsSnIKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBNjA2TXdxOHlIVm9iMkZKTFlHZlNXMkJOOWFCVTB4UTYreitGWFpMc3l2ZjhqWE9WCi9aclpjMXY3YzdsUmpCS3Zqai9HOXhsdy9qb2tTalRCVnY5WnVFTGthVTZoNlROSmN5T24vaHhMRFNoU2RPTmMKOEtDajd2Y3hwYzJ4bG1sYWp2eStLTGhJVmN4b2FXQm5CRmxqdm9LSCtWVmVoSlh3b1lyM2ZONDBHZXlMYk41UQp2eXNXY2ZCMndXV1VKTzJNYlVrVGQ3bTY5VEJRb1B4N2Y4RGVQZUlLZjViZnFTY1dRaUh1MnEzSmpjZTgxTjdkCnV2aVczcWNVN1ExcFF1R1YwVElKQ0lTcEZtdllqdUl6WDVMNGpGYUtPSkpOYjlJVTlSWVltc2tNckZ5YVVjWVAKNXBYZFNyMkFzL3VweVlPRFRqdzZxWkJla0NWNndNNnBxLzJXb1FJREFRQUJBb0lCQUFpamU1dHlIeDdndmdEMQpGSHRYbEd0eVg2cFMxb3BoUmNFUGxlL1hnd1g0a0xjSXRVcjRNbDkvMHYxdW9rWElNZFhCRmFiZ3NqdERHeTMyClBkclp5UXR3dVQzOGV3azZyc21oVjN1R3dtS2JSbHV3TlN0SVdueGRhdDh4YkFHZm9JbDdVZWZnekJjS1NCTUcKVFFIbDNqbVNSVGVzSUtveGJ3SWZQZkxCblp3Tjl4RU8wQzM3RlQyVjhwLzYxd2RKUXYwV0twcTFvTktITXE3VwptQVlyTlJha2x4V2RuOVpGSWFUaEZJdCtOeGNJRXlhRkpqOFErZmVSVGcyRTY4TzZ2Z0N3UmY2VmI1MVJmUVVPCnlSd1lLQzI4c2p3RC9lVCtyM0RGUUFnWm9Va3IweWlnVnZLYWtlOTI5UUNPWHVuRW5kU3NML0o3dFplSENORjkKYllkTHJSa0NnWUVBL0tjUk9yOXZoWDRvN2VMWXgxaVlUdjZ5djZlVytxcEVNQkF2Tmg5ZmxXd1ZQc3YyNzJmOQpKVStvMEZwZ29ycmFSNDVCTkE1dGxjRzNSeWVBa1JocE43VXA0YURuZm96K3N5NUhFVUdCRHcwMEF4M2txczVQClhiQ2dBV2hPWG5tTUdEaWpnWEdPM3huZVF3Q1VmanFaQmdGN2drNE9tYlVWYWxvbHZyVUNJdjhDZ1lFQTdteW0KYiszdmtwVmh5dzdwcjlnQmxHNUFZM2VWN1MxWFFBNXVlNDlITUYwQm1YVnBUb2xweW0zU0lhSFgxZ29oeWJIVgorVDBlSnlXR3VHZGpiS0hNUFdZT3JaZFhqeHlSU1VoZUNwMmRzWXFJZG00U2d6NS9EVXdNZEsra2RIR3ZmU2ZmCkpNNnJBV0VWUGkyZUlSM0JkaVBrbmh5TjVBR0RYWmVUOUhhL1psOENnWUVBNGtDMmxEYVZKeVdZZjVmUzY0bnkKTTJPeExTSm1lU2w3RU5PZGc4bEtycVB3enFDWERVUEJsZVVsVnhob1M3SXJBVU5xTHJUdys5aFRTZHdkTFZKLwovd3cwYWtMT3JDeVZkbDV0OUEwR0J6V2FxMlBjdi8wclk4cGxMMzE2R082ZVA1NlJCYjFzNVd2ajkzcVFnQTMzCnRVSWttY2RQR2VUcFBhbG0vY1paR0g4Q2dZQlZsS0paWXVxdmp2Yy9UK2NKdTFzMTBDMUVodFJHQWhSalpjcTYKaHo5aVdNQU9PVnJIV2dPaktiQlhhaVJ6SzhmZEFmeHdMa1A0Z1R2T1RTNGUvQ1MzbFQ2SGlOOWcrendiTmVLcgpwTS9KdnBRbERuV09yb3drVmJ2UzFva05VeEZPdDFVZGZTRmNxV0JhcFQweFhlRG5heExRdmljZ1JIckd5WFhPCk5pR1Z1UUtCZ0RUNlpxUHhGZlFsb3plRHByVE0xc0ZyOVhNbWFpMlVXS2pyYi9GQldySWtFTVM4WTAyK0MrSlEKZEJwNTd2M1lUYjRkbjdzdm1aT1p2UHJONFZndDNGNnhGVGlaVC9WV1AxMzdsQytOUmdvYlJ4L0xYWVNWY3V3cwp3V00rZFVqVHpUL25DUGJOcEViUGR2NlR6dk0wL05QUFZwVjFJd3hvWnhtM0pNUDFwbGNXCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
 ...
 ---
 # Source: tobs/charts/timescaledb-single/templates/sec-passwords.yaml
@@ -242,7 +242,7 @@ metadata:
   labels:
     grafana_datasource: "1"
     app: tobs
-    chart: tobs-0.1.3
+    chart: tobs-0.1.4
     release: tobs
 type: Opaque
 stringData:
@@ -279,7 +279,7 @@ metadata:
   name: tobs-grafana-db
   labels:
     app: tobs
-    chart: tobs-0.1.3
+    chart: tobs-0.1.4
     release: tobs
 type: Opaque
 data:
@@ -362,6 +362,30 @@ data:
       code=$(wget --server-response --spider --timeout 10 --tries 1 ${url} 2>&1 | awk '/^  HTTP/{print $2}')
       [ "$code" == "200" ]
     }
+---
+# Source: tobs/charts/promscale/templates/config-maintenance.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tobs-promscale-maintenance
+  labels:
+    app: tobs-promscale
+    chart: promscale-0.1.4
+    release: tobs
+    heritage: Helm
+data:
+  execute_maintenance.sh: |-
+    #!/bin/sh
+    psql $PROMSCALE_DB_URI \
+    -e -q -c "CALL prom_api.execute_maintenance();"
+    if [ $? -eq 0 ]
+    then
+      echo "Maintenance completed successfully."
+      echo "Retention policies executed."
+    else
+      echo "Maintenance job failed!"
+      exit 1
+    fi
 ---
 # Source: tobs/charts/timescaledb-single/templates/configmap-patroni.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -676,7 +700,7 @@ metadata:
   labels:
    grafana_dashboard: "1"
    app: tobs
-   chart: tobs-0.1.3
+   chart: tobs-0.1.4
    release: tobs
 data:
 
@@ -4320,7 +4344,7 @@ metadata:
   name: tobs-grafana-db
   labels:
    app: tobs
-   chart: tobs-0.1.3
+   chart: tobs-0.1.4
    release: tobs
 data:
   add-users.sql: |-
@@ -4375,7 +4399,7 @@ metadata:
     component: "server"
     app: tobs
     release: tobs
-    chart: tobs-0.1.3
+    chart: tobs-0.1.4
     heritage: Helm
   name: tobs-prometheus-config
 data:
@@ -5188,7 +5212,7 @@ metadata:
   name: tobs-promscale-connector
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.3
+    chart: promscale-0.1.4
     release: tobs
     heritage: Helm
   annotations:
@@ -5289,7 +5313,7 @@ metadata:
   name: tobs-promlens
   labels:
     app: tobs
-    chart: tobs-0.1.3
+    chart: tobs-0.1.4
     release: tobs
     component: promlens
   annotations:
@@ -5396,7 +5420,7 @@ spec:
         checksum/config: 33e6971e93f0ab5f523ace3bf23c89c50b860eef3325be20de2f998076f1b6d6
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
         checksum/sc-dashboard-provider-config: b512baccf98a03404ffc2c62e6b1d5f812e1e8de3278aadc86c99d8955efbf89
-        checksum/secret: 7587c7fdbd1aa085f919a8aa9733b4ec26d15c1ad2d5f155bdb350bcaeca4031
+        checksum/secret: 373039196f46424cf900b2242015ca93c45917329f83b29daa7afac941747b41
     spec:
       
       serviceAccountName: tobs-grafana
@@ -5740,7 +5764,7 @@ metadata:
   name: tobs-promscale
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.3
+    chart: promscale-0.1.4
     release: tobs
     heritage: Helm
 spec:
@@ -5760,7 +5784,7 @@ spec:
       
     spec:
       containers:
-        - image: timescale/promscale:0.1.3
+        - image: timescale/promscale:0.1.4
           imagePullPolicy: IfNotPresent
           name: promscale-connector
           resources:
@@ -5771,20 +5795,20 @@ spec:
             - containerPort: 9201
               name: connector-port
           env:
-            - name: TS_PROM_DB_PORT
+            - name: PROMSCALE_DB_PORT
               value: "5432"
-            - name: TS_PROM_DB_USER
+            - name: PROMSCALE_DB_USER
               value: postgres
-            - name: TS_PROM_DB_PASSWORD
+            - name: PROMSCALE_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: tobs-timescaledb-passwords
                   key: postgres
-            - name: TS_PROM_DB_HOST
+            - name: PROMSCALE_DB_HOST
               value: tobs.tobs.svc.cluster.local
-            - name: TS_PROM_DB_NAME
+            - name: PROMSCALE_DB_NAME
               value: postgres
-            - name: TS_PROM_DB_SSL_MODE
+            - name: PROMSCALE_DB_SSL_MODE
               value: require
 ---
 # Source: tobs/templates/promlens-depoloyment.yaml
@@ -5794,7 +5818,7 @@ metadata:
   name: tobs-promlens
   labels:
     app: tobs
-    chart: tobs-0.1.3
+    chart: tobs-0.1.4
     release: tobs
     component: promlens
 spec:
@@ -6103,7 +6127,7 @@ metadata:
   name: tobs-grafana-db
   labels:
     app: tobs
-    chart: tobs-0.1.3
+    chart: tobs-0.1.4
     release: tobs
     heritage: Helm
 spec:
@@ -6146,29 +6170,31 @@ spec:
               value: tobs.tobs.svc.cluster.local
           command: ['sh', '/wait-for-ts.sh']
 ---
-# Source: tobs/charts/promscale/templates/cronjob-dropchunk.yaml
+# Source: tobs/charts/promscale/templates/cronjob-maintenance.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: tobs-promscale-drop-chunk
+  name: tobs-promscale-maintenance
   labels:
     app: tobs-promscale
-    chart: promscale-0.1.3
+    chart: promscale-0.1.4
     release: tobs
     heritage: Helm
 spec:
   schedule: 0,30 * * * *
+  startingDeadlineSeconds: 200
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: promscale-drop-chunk
+          - name: promscale-maintenance
             image: postgres:12-alpine
             args:
-            - psql
-            - -c
-            - CALL prom_api.execute_maintenance();
+            - sh
+            - ./execute_maintenance.sh
             env:
               - name: PGPORT
                 value: "5432"
@@ -6183,6 +6209,14 @@ spec:
                 value: tobs.tobs.svc.cluster.local
               - name:  PGDATABASE
                 value: postgres
+            volumeMounts:
+              - name: script-volume
+                mountPath: /execute_maintenance.sh
+                subPath: execute_maintenance.sh
+          volumes:
+            - name: script-volume
+              configMap:
+                name: tobs-promscale-maintenance
           restartPolicy: OnFailure
 ---
 # Source: tobs/charts/timescaledb-single/templates/pgbackrest.yaml
@@ -6241,7 +6275,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "tobs-patroni-2e"
+  name: "tobs-patroni-3s"
   labels:
     app: tobs-timescaledb
     chart: timescaledb-single-0.5.5
