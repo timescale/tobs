@@ -1,0 +1,267 @@
+###############################################################################
+👋🏽 Welcome to tobs, The Observability Stack for Kubernetes
+
+✨ Auto-configured and deployed:
+{{- if .Values.prometheus.enabled }}
+🔥 Prometheus
+{{- end }}
+{{- if index .Values "timescaledb-single" "enabled" }}
+🐯 TimescaleDB
+{{- end }}
+{{- if index .Values "promscale" "enabled" }}
+🤝 Promscale connector
+{{- end }}
+{{- if .Values.promlens.enabled }}
+🧐 PromLens
+{{- end }}
+{{- if .Values.grafana.enabled }}
+📈 Grafana
+{{- end }}
+{{ if .Values.prometheus.enabled }}
+###############################################################################
+🔥 PROMETHEUS NOTES:
+###############################################################################
+{{- $promEnv := (set (set (deepCopy .) "Values" .Values.prometheus) "Chart" (dict "Name" "prometheus")) }}
+{{ if .Values.prometheus.server.enabled }}
+Prometheus can be accessed via port {{ .Values.prometheus.server.service.servicePort }} on the following DNS name from within your cluster:
+{{ template "prometheus.server.fullname" $promEnv }}.{{ .Release.Namespace }}.svc.cluster.local
+
+{{ if .Values.prometheus.server.ingress.enabled -}}
+Server URL(s) from outside the cluster:
+{{- range .Values.prometheus.server.ingress.hosts }}
+http://{{ . }}
+{{- end }}
+{{- else }}
+Get the Prometheus server URL by running these commands in the same shell:
+{{- if contains "NodePort" .Values.prometheus.server.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "prometheus.server.fullname" $promEnv }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.prometheus.server.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status of by running 'kubectl get svc --namespace {{ .Release.Namespace }} -w {{ template "prometheus.server.fullname" $promEnv }}'
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ template "prometheus.server.fullname" $promEnv }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:{{ .Values.prometheus.server.service.servicePort }}
+{{- else if contains "ClusterIP"  .Values.prometheus.server.service.type }}
+{{- if .Values.cli }}
+  tobs {{- template "tobs.cliOptions" . }} prometheus port-forward
+{{- else }}
+  export SERVICE_NAME=$(kubectl get services --namespace {{ .Release.Namespace }} -l "app={{ template "prometheus.name" $promEnv }},component={{ .Values.prometheus.server.name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/$SERVICE_NAME 9090:{{ .Values.prometheus.server.service.servicePort }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.prometheus.server.persistentVolume.enabled }}
+{{- else }}
+WARNING! Persistence is disabled on Prometheus server
+         You will lose your data when the Server pod is terminated.
+         (Data will still persist in TimescaleDB.)
+{{- end }}
+{{- end }}
+
+{{ if .Values.prometheus.alertmanager.enabled }}
+The Prometheus alertmanager can be accessed via port {{ .Values.prometheus.alertmanager.service.servicePort }} on the following DNS name from within your cluster:
+{{ template "prometheus.alertmanager.fullname" $promEnv }}.{{ .Release.Namespace }}.svc.cluster.local
+
+{{ if .Values.prometheus.alertmanager.ingress.enabled -}}
+From outside the cluster, the alertmanager URL(s) are:
+{{- range .Values.prometheus.alertmanager.ingress.hosts }}
+http://{{ . }}
+{{- end }}
+{{- else }}
+Get the Alertmanager URL by running these commands in the same shell:
+{{- if contains "NodePort" .Values.prometheus.alertmanager.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "prometheus.alertmanager.fullname" $promEnv }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.prometheus.alertmanager.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status of by running 'kubectl get svc --namespace {{ .Release.Namespace }} -w {{ template "prometheus.alertmanager.fullname" $promEnv }}'
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ template "prometheus.alertmanager.fullname" $promEnv }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:{{ .Values.prometheus.alertmanager.service.servicePort }}
+{{- else if contains "ClusterIP"  .Values.prometheus.alertmanager.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ template "prometheus.name" $promEnv }},component={{ .Values.prometheus.alertmanager.name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 9093
+{{- end }}
+{{- end }}
+
+{{- if .Values.prometheus.alertmanager.persistentVolume.enabled }}
+{{- else }}
+WARNING! Persistence is disabled on AlertManager.
+         You will lose your data when the AlertManager pod is terminated.
+{{- end }}
+{{- end }}
+
+{{- if .Values.prometheus.nodeExporter.podSecurityPolicy.enabled }}
+{{- else }}
+WARNING! Pod Security Policy is disabled.
+  Use .Values.prometheus.podSecurityPolicy.enabled with pod-based annotations
+  (eg .Values.prometheus.nodeExporter.podSecurityPolicy.annotations)
+{{- end }}
+
+{{- if .Values.prometheus.pushgateway.enabled }}
+The Prometheus PushGateway can be accessed via port {{ .Values.prometheus.pushgateway.service.servicePort }} on the following DNS name from within your cluster:
+{{- template "prometheus.pushgateway.fullname" $promEnv }}.{{ .Release.Namespace }}.svc.cluster.local
+
+{{- if .Values.prometheus.pushgateway.ingress.enabled -}}
+From outside the cluster, the pushgateway URL(s) are:
+{{- range .Values.prometheus.pushgateway.ingress.hosts }}
+http://{{ . }}
+{{- end }}
+{{- else }}
+Get the PushGateway URL by running these commands in the same shell:
+{{- if contains "NodePort" .Values.prometheus.pushgateway.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "prometheus.pushgateway.fullname" $promEnv }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.prometheus.pushgateway.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status of by running 'kubectl get svc --namespace {{ .Release.Namespace }} -w {{ template "prometheus.pushgateway.fullname" $promEnv }}'
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ template "prometheus.pushgateway.fullname" $promEnv }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:{{ .Values.prometheus.pushgateway.service.servicePort }}
+{{- else if contains "ClusterIP"  .Values.prometheus.pushgateway.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ template "prometheus.name" $promEnv }},component={{ .Values.prometheus.pushgateway.name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 9091
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- end }}
+{{- if index .Values "timescaledb-single" "enabled" }}
+{{- $tsEnv := (set (set (deepCopy .) "Values" (index .Values "timescaledb-single")) "Chart" (dict "Name" "timescaledb")) }}
+
+###############################################################################
+🐯 TIMESCALEDB NOTES:
+###############################################################################
+
+TimescaleDB can be accessed via port 5432 on the following DNS name from within your cluster:
+{{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc.cluster.local
+
+To get your password for superuser run:
+
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} timescaledb get-password -U <user>
+{{- else }}
+    # superuser password
+    PGPASSWORD_POSTGRES=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "timescaledb.fullname" $tsEnv }}-passwords -o jsonpath="{.data.postgres}" | base64 --decode)
+
+    # admin password
+    PGPASSWORD_ADMIN=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "timescaledb.fullname" $tsEnv }}-passwords -o jsonpath="{.data.admin}" | base64 --decode)
+{{- end }}
+
+To connect to your database, chose one of these options:
+
+1. Run a postgres pod and connect using the psql cli:
+
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} timescaledb connect -U <user>
+{{- else }}
+    # login as superuser
+    kubectl run -i --tty --rm psql --image=postgres \
+      --env "PGPASSWORD=$PGPASSWORD_POSTGRES" \
+      --command -- psql -U postgres \
+      -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc.cluster.local postgres
+
+    # login as admin
+    kubectl run -i --tty --rm psql --image=postgres \
+      --env "PGPASSWORD=$PGPASSWORD_ADMIN" \
+      --command -- psql -U admin \
+      -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc.cluster.local postgres
+{{- end }}
+
+2. Directly execute a psql session on the master node
+
+{{- if .Values.cli }}
+   tobs {{- template "tobs.cliOptions" . }} timescaledb connect -m
+{{- else }}
+   MASTERPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l release={{ .Release.Name }},role=master)"
+   kubectl exec -i --tty --namespace {{ .Release.Namespace }} ${MASTERPOD} -- psql -U postgres
+{{- end }}
+{{- end }}
+
+{{ if .Values.promlens.enabled }}
+###############################################################################
+🧐 PROMLENS NOTES:
+###############################################################################
+{{- $tsPromEnv := (set (set (deepCopy .) "Values" (index .Values "promscale")) "Chart" (dict "Name" "promscale"))  }}
+   PromLens is a PromQL query builder, analyzer, and visualizer.
+
+   You can access PromLens via a local browser by executing:
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} promlens port-forward
+{{- else }}
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name }}-promlens 8081:80
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "connector.fullname" $tsPromEnv |trunc 53 }}-connector 9201:{{ index .Values "promscale" "service" "port"}}
+      (Note: You have to port-forward both PromLens and the connector at the same time)
+{{- end }}
+
+   Then you can point your browser to http://127.0.0.1:8081/.
+
+{{- end -}}
+{{ if .Values.grafana.enabled }}
+###############################################################################
+📈 GRAFANA NOTES:
+###############################################################################
+{{- $grafanaEnv := (set (set (deepCopy .) "Values" (index .Values "grafana")) "Chart" (dict "Name" "grafana"))  }}
+
+1. The Grafana server can be accessed via port {{ .Values.grafana.service.port }} on
+   the following DNS name from within your cluster:
+   {{ template "grafana.fullname" $grafanaEnv }}.{{ template "grafana.namespace" $grafanaEnv }}.svc.cluster.local
+
+   You can access grafana locally by executing:
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} grafana port-forward
+{{- else }}
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ template "grafana.fullname" $grafanaEnv }} 8080:{{ .Values.grafana.service.port }}
+{{- end }}
+
+   Then you can point your browser to http://127.0.0.1:8080/.
+
+{{- if not (or .Values.grafana.persistence.enabled .Values.grafana.timescale.database.enabled) }}
+
+2. Get your '{{ .Values.grafana.adminUser }}' user password by running:
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} grafana get-password
+{{- else }}
+    kubectl get secret --namespace {{ template "grafana.namespace" $grafanaEnv }} {{ template "grafana.fullname" $grafanaEnv }} -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+{{- end }}
+
+WARNING! Persistence is disabled!!! You will lose your data when
+         the Grafana pod is terminated.
+{{- end }}
+{{- if or .Values.grafana.persistence.enabled .Values.grafana.timescale.database.enabled }}
+{{- if .Release.IsInstall }}
+
+2. The '{{ .Values.grafana.adminUser }}' user password can be retrieved by:
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} grafana get-password
+{{- else }}
+    kubectl get secret --namespace {{ template "grafana.namespace" $grafanaEnv }} {{ template "grafana.fullname" $grafanaEnv }} -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+{{- end }}
+{{- end -}}
+{{- if .Release.IsUpgrade }}
+
+2. Persistence is enabled, and you did an upgrade. If you don't have the password
+   for '{{ .Values.grafana.adminUser }}', it can not be retrieved again, you need
+   to reset it (see 3.)
+{{- end -}}
+{{- end }}
+
+3. You can reset the admin user password with grafana-cli from inside the pod.
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} grafana change-password <password-you-want-to-set>
+{{- else }}
+   First attach yourself to the grafana container:
+    GRAFANAPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana)"
+    kubectl exec -it ${GRAFANAPOD} -c grafana -- /bin/sh
+
+   And then execute in the shell:
+    grafana-cli admin reset-admin-password <password-you-want-to-set>
+{{- end }}
+{{- end }}
+
+🚀 Happy observing!

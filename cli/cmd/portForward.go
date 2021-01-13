@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/timescale/tobs/cli/pkg/utils"
+
 	"github.com/timescale/tobs/cli/pkg/k8s"
 
 	"github.com/spf13/cobra"
@@ -59,14 +61,21 @@ func portForward(cmd *cobra.Command, args []string) error {
 	}
 
 	// Port-forward TimescaleDB
-	podName, err := k8s.KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
+	// if db-uri exists skip the port-forwarding as it isn't the db within the cluster
+	uri, err := utils.GetTimescaleDBURI(namespace, name)
 	if err != nil {
-		return fmt.Errorf("could not port-forward: %w", err)
+		return err
 	}
+	if uri == "" {
+		podName, err := k8s.KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
+		if err != nil {
+			return fmt.Errorf("could not port-forward: %w", err)
+		}
 
-	_, err = k8s.KubePortForwardPod(namespace, podName, timescaledb, FORWARD_PORT_TSDB)
-	if err != nil {
-		return fmt.Errorf("could not port-forward: %w", err)
+		_, err = k8s.KubePortForwardPod(namespace, podName, timescaledb, FORWARD_PORT_TSDB)
+		if err != nil {
+			return fmt.Errorf("could not port-forward: %w", err)
+		}
 	}
 
 	// Port-forward Grafana

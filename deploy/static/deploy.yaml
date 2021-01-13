@@ -90,12 +90,12 @@ spec:
   runAsUser:
     rule: RunAsAny
   volumes:
-  - configMap
-  - downwardAPI
-  - emptyDir
-  - projected
-  - csi
-  - secret
+    - configMap
+    - downwardAPI
+    - emptyDir
+    - projected
+    - csi
+    - secret
 ---
 # Source: tobs/charts/grafana/templates/serviceaccount.yaml
 apiVersion: v1
@@ -698,10 +698,10 @@ kind: ConfigMap
 metadata:
   name: tobs-grafana-dashboards
   labels:
-   grafana_dashboard: "1"
-   app: tobs
-   chart: tobs-0.2.0
-   release: tobs
+    grafana_dashboard: "1"
+    app: tobs
+    chart: tobs-0.2.0
+    release: tobs
 data:
 
   k8s-cluster.json: |-
@@ -1689,7 +1689,7 @@ data:
       },
       "version": 1
     }
-    
+
   k8s-hardware.json: |-
     {
       "annotations": {
@@ -4343,9 +4343,9 @@ kind: ConfigMap
 metadata:
   name: tobs-grafana-db
   labels:
-   app: tobs
-   chart: tobs-0.2.0
-   release: tobs
+    app: tobs
+    chart: tobs-0.2.0
+    release: tobs
 data:
   add-users.sql: |-
     \set ON_ERROR_STOP on
@@ -4414,7 +4414,7 @@ data:
       scrape_timeout: 10s
     remote_write:
     - url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201/write
-      queue_config: 
+      queue_config:
         max_shards: 30
 
     remote_read:
@@ -4704,9 +4704,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana-clusterrole
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources: ["configmaps", "secrets"]
-  verbs: ["get", "watch", "list"]
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "watch", "list"]
 ---
 # Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -4720,140 +4720,140 @@ metadata:
   name: tobs-kube-state-metrics
 rules:
 
-- apiGroups: ["certificates.k8s.io"]
-  resources:
-  - certificatesigningrequests
-  verbs: ["list", "watch"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources:
+      - certificatesigningrequests
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - configmaps
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - configmaps
+    verbs: ["list", "watch"]
 
-- apiGroups: ["batch"]
-  resources:
-  - cronjobs
-  verbs: ["list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - cronjobs
+    verbs: ["list", "watch"]
 
-- apiGroups: ["extensions", "apps"]
-  resources:
-  - daemonsets
-  verbs: ["list", "watch"]
+  - apiGroups: ["extensions", "apps"]
+    resources:
+      - daemonsets
+    verbs: ["list", "watch"]
 
-- apiGroups: ["extensions", "apps"]
-  resources:
-  - deployments
-  verbs: ["list", "watch"]
+  - apiGroups: ["extensions", "apps"]
+    resources:
+      - deployments
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - endpoints
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - endpoints
+    verbs: ["list", "watch"]
 
-- apiGroups: ["autoscaling"]
-  resources:
-  - horizontalpodautoscalers
-  verbs: ["list", "watch"]
+  - apiGroups: ["autoscaling"]
+    resources:
+      - horizontalpodautoscalers
+    verbs: ["list", "watch"]
 
-- apiGroups: ["extensions", "networking.k8s.io"]
-  resources:
-  - ingresses
-  verbs: ["list", "watch"]
+  - apiGroups: ["extensions", "networking.k8s.io"]
+    resources:
+      - ingresses
+    verbs: ["list", "watch"]
 
-- apiGroups: ["batch"]
-  resources:
-  - jobs
-  verbs: ["list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - limitranges
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - limitranges
+    verbs: ["list", "watch"]
 
-- apiGroups: ["admissionregistration.k8s.io"]
-  resources:
-    - mutatingwebhookconfigurations
-  verbs: ["list", "watch"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources:
+      - mutatingwebhookconfigurations
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - namespaces
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - namespaces
+    verbs: ["list", "watch"]
 
-- apiGroups: ["networking.k8s.io"]
-  resources:
-  - networkpolicies
-  verbs: ["list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - networkpolicies
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - nodes
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - nodes
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - persistentvolumeclaims
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - persistentvolumeclaims
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - persistentvolumes
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - persistentvolumes
+    verbs: ["list", "watch"]
 
-- apiGroups: ["policy"]
-  resources:
-    - poddisruptionbudgets
-  verbs: ["list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - poddisruptionbudgets
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - pods
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs: ["list", "watch"]
 
-- apiGroups: ["extensions", "apps"]
-  resources:
-  - replicasets
-  verbs: ["list", "watch"]
+  - apiGroups: ["extensions", "apps"]
+    resources:
+      - replicasets
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - replicationcontrollers
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - replicationcontrollers
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - resourcequotas
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - resourcequotas
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - secrets
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - secrets
+    verbs: ["list", "watch"]
 
-- apiGroups: [""]
-  resources:
-  - services
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - services
+    verbs: ["list", "watch"]
 
-- apiGroups: ["apps"]
-  resources:
-  - statefulsets
-  verbs: ["list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - statefulsets
+    verbs: ["list", "watch"]
 
-- apiGroups: ["storage.k8s.io"]
-  resources:
-    - storageclasses
-  verbs: ["list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources:
+      - storageclasses
+    verbs: ["list", "watch"]
 
-- apiGroups: ["admissionregistration.k8s.io"]
-  resources:
-    - validatingwebhookconfigurations
-  verbs: ["list", "watch"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources:
+      - validatingwebhookconfigurations
+    verbs: ["list", "watch"]
 
-- apiGroups: ["storage.k8s.io"]
-  resources:
-    - volumeattachments
-  verbs: ["list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources:
+      - volumeattachments
+    verbs: ["list", "watch"]
 ---
 # Source: tobs/charts/prometheus/templates/server/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -4932,9 +4932,9 @@ roleRef:
   kind: ClusterRole
   name: tobs-kube-state-metrics
 subjects:
-- kind: ServiceAccount
-  name: tobs-kube-state-metrics
-  namespace: tobs
+  - kind: ServiceAccount
+    name: tobs-kube-state-metrics
+    namespace: tobs
 ---
 # Source: tobs/charts/prometheus/templates/server/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -4969,10 +4969,10 @@ metadata:
     app.kubernetes.io/version: "7.3.1"
     app.kubernetes.io/managed-by: Helm
 rules:
-- apiGroups:      ['extensions']
-  resources:      ['podsecuritypolicies']
-  verbs:          ['use']
-  resourceNames:  [tobs-grafana]
+  - apiGroups:      ['extensions']
+    resources:      ['podsecuritypolicies']
+    verbs:          ['use']
+    resourceNames:  [tobs-grafana]
 ---
 # Source: tobs/charts/grafana/templates/tests/test-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -4987,10 +4987,10 @@ metadata:
     app.kubernetes.io/version: "7.3.1"
     app.kubernetes.io/managed-by: Helm
 rules:
-- apiGroups:      ['policy']
-  resources:      ['podsecuritypolicies']
-  verbs:          ['use']
-  resourceNames:  [tobs-grafana-test]
+  - apiGroups:      ['policy']
+    resources:      ['podsecuritypolicies']
+    verbs:          ['use']
+    resourceNames:  [tobs-grafana-test]
 ---
 # Source: tobs/charts/timescaledb-single/templates/role-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -5005,43 +5005,43 @@ metadata:
     release: tobs
     heritage: Helm
 rules:
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs:
-  - create
-  - get
-  - list
-  - patch
-  - update
-  - watch
-  # delete is required only for 'patronictl remove'
-  - delete
-- apiGroups: [""]
-  resources: ["services"]
-  verbs:
-  - create
-- apiGroups: [""]
-  resources:
-  - endpoints
-  - endpoints/restricted
-  verbs:
-  - create
-  - get
-  - patch
-  - update
-  # the following three privileges are necessary only when using endpoints
-  - list
-  - watch
-  # delete is required only for for 'patronictl remove'
-  - delete
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs:
-  - get
-  - list
-  - patch
-  - update
-  - watch
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      # delete is required only for 'patronictl remove'
+      - delete
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs:
+      - create
+  - apiGroups: [""]
+    resources:
+      - endpoints
+      - endpoints/restricted
+    verbs:
+      - create
+      - get
+      - patch
+      - update
+      # the following three privileges are necessary only when using endpoints
+      - list
+      - watch
+      # delete is required only for for 'patronictl remove'
+      - delete
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+      - watch
 ---
 # Source: tobs/charts/grafana/templates/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -5060,9 +5060,9 @@ roleRef:
   kind: Role
   name: tobs-grafana
 subjects:
-- kind: ServiceAccount
-  name: tobs-grafana
-  namespace: tobs
+  - kind: ServiceAccount
+    name: tobs-grafana
+    namespace: tobs
 ---
 # Source: tobs/charts/grafana/templates/tests/test-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -5081,9 +5081,9 @@ roleRef:
   kind: Role
   name: tobs-grafana-test
 subjects:
-- kind: ServiceAccount
-  name: tobs-grafana-test
-  namespace: tobs
+  - kind: ServiceAccount
+    name: tobs-grafana-test
+    namespace: tobs
 ---
 # Source: tobs/charts/timescaledb-single/templates/rolebinding-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -5145,10 +5145,10 @@ metadata:
 spec:
   type: "ClusterIP"
   ports:
-  - name: "http"
-    protocol: TCP
-    port: 8080
-    targetPort: 8080
+    - name: "http"
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
   selector:
     app.kubernetes.io/name: kube-state-metrics
     app.kubernetes.io/instance: tobs
@@ -5222,9 +5222,9 @@ spec:
     app: tobs-promscale
   type: ClusterIP
   ports:
-  - name: connector-port
-    port: 9201
-    protocol: TCP
+    - name: connector-port
+      port: 9201
+      protocol: TCP
 ---
 # Source: tobs/charts/timescaledb-single/templates/svc-timescaledb-config.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -5247,9 +5247,9 @@ spec:
   type: ClusterIP
   clusterIP: None
   ports:
-  - name: patroni
-    port: 8008
-    protocol: TCP
+    - name: patroni
+      port: 8008
+      protocol: TCP
 ---
 # Source: tobs/charts/timescaledb-single/templates/svc-timescaledb-replica.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -5275,10 +5275,10 @@ spec:
     role: replica
   type: ClusterIP
   ports:
-  - name: postgresql
-    # This always defaults to 5432, even if `!replicaLoadBalancer.enabled`.
-    port: 5432
-    protocol: TCP
+    - name: postgresql
+      # This always defaults to 5432, even if `!replicaLoadBalancer.enabled`.
+      port: 5432
+      protocol: TCP
 ---
 # Source: tobs/charts/timescaledb-single/templates/svc-timescaledb.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -5300,11 +5300,11 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: postgresql
-    # This always defaults to 5432, even if `!loadBalancer.enabled`.
-    port: 5432
-    targetPort: postgresql
-    protocol: TCP
+    - name: postgresql
+      # This always defaults to 5432, even if `!loadBalancer.enabled`.
+      port: 5432
+      targetPort: postgresql
+      protocol: TCP
 ---
 # Source: tobs/templates/promlens-svc.yaml
 apiVersion: v1
@@ -5324,10 +5324,10 @@ spec:
     component: promlens
   type: ClusterIP
   ports:
-  - name: promlens-port
-    port: 80
-    targetPort: 8080
-    protocol: TCP
+    - name: promlens-port
+      port: 80
+      targetPort: 8080
+      protocol: TCP
 ---
 # Source: tobs/charts/prometheus/templates/node-exporter/daemonset.yaml
 apiVersion: apps/v1
@@ -5422,7 +5422,7 @@ spec:
         checksum/sc-dashboard-provider-config: b512baccf98a03404ffc2c62e6b1d5f812e1e8de3278aadc86c99d8955efbf89
         checksum/secret: 9afd1ee00ba80463fd2f56225016624eca10cf3c3d9febc155bf2896d624dabe
     spec:
-      
+
       serviceAccountName: tobs-grafana
       securityContext:
         fsGroup: 472
@@ -5452,7 +5452,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: METHOD
-              value: 
+              value:
             - name: LABEL
               value: "grafana_dashboard"
             - name: FOLDER
@@ -5475,7 +5475,7 @@ spec:
               mountPath: "/var/lib/grafana"
             - name: sc-dashboard-volume
               mountPath: "/tmp/dashboards"
-      
+
             - name: sc-dashboard-provider
               mountPath: "/etc/grafana/provisioning/dashboards/sc-dashboardproviders.yaml"
               subPath: provider.yaml
@@ -5499,7 +5499,7 @@ spec:
                 secretKeyRef:
                   name: tobs-grafana
                   key: admin-password
-            
+
           envFrom:
             - secretRef:
                 name: tobs-grafana-db
@@ -5559,108 +5559,108 @@ spec:
         runAsGroup: 65534
         runAsUser: 65534
       containers:
-      - name: kube-state-metrics
-        args:
+        - name: kube-state-metrics
+          args:
 
-        - --collectors=certificatesigningrequests
-
-
-        - --collectors=configmaps
+            - --collectors=certificatesigningrequests
 
 
-        - --collectors=cronjobs
+            - --collectors=configmaps
 
 
-        - --collectors=daemonsets
+            - --collectors=cronjobs
 
 
-        - --collectors=deployments
+            - --collectors=daemonsets
 
 
-        - --collectors=endpoints
+            - --collectors=deployments
 
 
-        - --collectors=horizontalpodautoscalers
+            - --collectors=endpoints
 
 
-        - --collectors=ingresses
+            - --collectors=horizontalpodautoscalers
 
 
-        - --collectors=jobs
+            - --collectors=ingresses
 
 
-        - --collectors=limitranges
+            - --collectors=jobs
 
 
-        - --collectors=mutatingwebhookconfigurations
+            - --collectors=limitranges
 
 
-        - --collectors=namespaces
+            - --collectors=mutatingwebhookconfigurations
 
 
-        - --collectors=networkpolicies
+            - --collectors=namespaces
 
 
-        - --collectors=nodes
+            - --collectors=networkpolicies
 
 
-        - --collectors=persistentvolumeclaims
+            - --collectors=nodes
 
 
-        - --collectors=persistentvolumes
+            - --collectors=persistentvolumeclaims
 
 
-        - --collectors=poddisruptionbudgets
+            - --collectors=persistentvolumes
 
 
-        - --collectors=pods
+            - --collectors=poddisruptionbudgets
 
 
-        - --collectors=replicasets
+            - --collectors=pods
 
 
-        - --collectors=replicationcontrollers
+            - --collectors=replicasets
 
 
-        - --collectors=resourcequotas
+            - --collectors=replicationcontrollers
 
 
-        - --collectors=secrets
+            - --collectors=resourcequotas
 
 
-        - --collectors=services
+            - --collectors=secrets
 
 
-        - --collectors=statefulsets
+            - --collectors=services
 
 
-        - --collectors=storageclasses
+            - --collectors=statefulsets
 
 
-        - --collectors=validatingwebhookconfigurations
+            - --collectors=storageclasses
 
 
-
-        - --collectors=volumeattachments
+            - --collectors=validatingwebhookconfigurations
 
 
 
-        imagePullPolicy: IfNotPresent
-        image: "quay.io/coreos/kube-state-metrics:v1.9.7"
-        ports:
-        - containerPort: 8080
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          timeoutSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 5
-          timeoutSeconds: 5
+            - --collectors=volumeattachments
+
+
+
+          imagePullPolicy: IfNotPresent
+          image: "quay.io/coreos/kube-state-metrics:v1.9.7"
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
 ---
 # Source: tobs/charts/prometheus/templates/server/deploy.yaml
 apiVersion: apps/v1
@@ -5776,12 +5776,12 @@ spec:
     metadata:
       labels:
         app: tobs-promscale
-      
-      annotations: 
+
+      annotations:
         prometheus.io/path: /metrics
         prometheus.io/port: "9201"
         prometheus.io/scrape: "true"
-      
+
     spec:
       containers:
         - image: timescale/promscale:0.2.0
@@ -5886,208 +5886,208 @@ spec:
       # we can still serve clients.
       terminationGracePeriodSeconds: 600
       containers:
-      - name: timescaledb
-        image: "timescaledev/timescaledb-ha:pg12-ts1.7-latest"
-        imagePullPolicy: IfNotPresent
-        lifecycle:
-          preStop:
+        - name: timescaledb
+          image: "timescaledev/timescaledb-ha:pg12-ts1.7-latest"
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - psql
+                  - -X
+                  - --file
+                  - "/etc/timescaledb/scripts/lifecycle_preStop.psql"
+          # When reusing an already existing volume it sometimes happens that the permissions
+          # of the PGDATA and/or wal directory are incorrect. To guard against this, we always correctly
+          # set the permissons of these directories before we hand over to Patroni.
+          # We also create all the tablespaces that are defined, to ensure a smooth restore/recovery on a
+          # pristine set of Volumes.
+          # As PostgreSQL requires to have full control over the permissions of the tablespace directories,
+          # we create a subdirectory "data" in every tablespace mountpoint. The full path of every tablespace
+          # therefore always ends on "/data".
+          # By creating a .pgpass file in the $HOME directory, we expose the superuser password
+          # to processes that may not have it in their environment (like the preStop lifecycle hook).
+          # To ensure Patroni will not mingle with this file, we give Patroni its own pgpass file.
+          # As these files are in the $HOME directory, they are only available to *this* container,
+          # and they are ephemeral.
+          command:
+            - /bin/bash
+            - "-c"
+            - |
+
+              install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/data" "/var/lib/postgresql/wal/pg_wal" || exit 1
+              TABLESPACES=""
+              for tablespace in ; do
+                install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/tablespaces/${tablespace}/data"
+              done
+
+              # Environment variables can be read by regular users of PostgreSQL. Especially in a Kubernetes
+              # context it is likely that some secrets are part of those variables.
+              # To ensure we expose as little as possible to the underlying PostgreSQL instance, we have a list
+              # of allowed environment variable patterns to retain.
+              #
+              # We need the KUBERNETES_ environment variables for the native Kubernetes support of Patroni to work.
+              #
+              # NB: Patroni will remove all PATRONI_.* environment variables before starting PostgreSQL
+
+              # We store the current environment, as initscripts, callbacks, archive_commands etc. may require
+              # to have the environment available to them
+              set -o posix
+              export -p > "${HOME}/.pod_environment"
+              export -p | grep PGBACKREST > "${HOME}/.pgbackrest_environment"
+
+              for UNKNOWNVAR in $(env | awk -F '=' '!/^(PATRONI_.*|HOME|PGDATA|PGHOST|LC_.*|LANG|PATH|KUBERNETES_SERVICE_.*)=/ {print $1}')
+              do
+                  unset "${UNKNOWNVAR}"
+              done
+
+              echo "*:*:*:postgres:${PATRONI_SUPERUSER_PASSWORD}" >> ${HOME}/.pgpass
+              chmod 0600 ${HOME}/.pgpass
+
+              export PATRONI_POSTGRESQL_PGPASS="${HOME}/.pgpass.patroni"
+
+              exec patroni /etc/timescaledb/patroni.yaml
+          env:
+            # We use mixed case environment variables for Patroni User management,
+            # as the variable themselves are documented to be PATRONI_<username>_OPTIONS.
+            # Where possible, we want to have lowercase usernames in PostgreSQL as more complex postgres usernames
+            # requiring quoting to be done in certain contexts, which many tools do not do correctly, or even at all.
+            # https://patroni.readthedocs.io/en/latest/ENVIRONMENT.html#bootstrap-configuration
+            - name: PATRONI_admin_OPTIONS
+              value: createrole,createdb
+            - name: PATRONI_admin_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tobs-timescaledb-passwords
+                  key: "admin"
+            - name: PATRONI_postgres_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tobs-timescaledb-passwords
+                  key: "postgres"
+            - name: PATRONI_standby_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tobs-timescaledb-passwords
+                  key: "standby"
+            - name: PATRONI_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tobs-timescaledb-passwords
+                  key: standby
+            - name: PATRONI_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tobs-timescaledb-passwords
+                  key: postgres
+            - name: PATRONI_REPLICATION_USERNAME
+              value: standby
+            # To specify the PostgreSQL and Rest API connect addresses we need
+            # the PATRONI_KUBERNETES_POD_IP to be available as a bash variable, so we can compose an
+            # IP:PORT address later on
+            - name: PATRONI_KUBERNETES_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: PATRONI_POSTGRESQL_CONNECT_ADDRESS
+              value: "$(PATRONI_KUBERNETES_POD_IP):5432"
+            - name: PATRONI_RESTAPI_CONNECT_ADDRESS
+              value: "$(PATRONI_KUBERNETES_POD_IP):8008"
+            - name: PATRONI_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PATRONI_POSTGRESQL_DATA_DIR
+              value: "/var/lib/postgresql/data"
+            - name: PATRONI_KUBERNETES_NAMESPACE
+              value: tobs
+            - name: PATRONI_KUBERNETES_LABELS
+              value: "{app: tobs-timescaledb, cluster-name: tobs, release: tobs}"
+            - name: PATRONI_SCOPE
+              value: tobs
+            - name: PGBACKREST_CONFIG
+              value: /etc/pgbackrest/pgbackrest.conf
+            # PGDATA and PGHOST are not required to let Patroni/PostgreSQL run correctly,
+            # but for interactive sessions, callbacks and PostgreSQL tools they should be correct.
+            - name: PGDATA
+              value: "$(PATRONI_POSTGRESQL_DATA_DIR)"
+            - name: PGHOST
+              value: "/var/run/postgresql"
+              # pgBackRest is also called using the archive_command if the backup is enabled.
+              # this script will also need access to the environment variables specified for
+              # the backup. This can be removed once we do not directly invoke pgBackRest
+              # from inside the TimescaleDB container anymore
+          ports:
+            - containerPort: 8008
+            - containerPort: 5432
+          readinessProbe:
             exec:
               command:
-              - psql
-              - -X
-              - --file
-              - "/etc/timescaledb/scripts/lifecycle_preStop.psql"
-        # When reusing an already existing volume it sometimes happens that the permissions
-        # of the PGDATA and/or wal directory are incorrect. To guard against this, we always correctly
-        # set the permissons of these directories before we hand over to Patroni.
-        # We also create all the tablespaces that are defined, to ensure a smooth restore/recovery on a
-        # pristine set of Volumes.
-        # As PostgreSQL requires to have full control over the permissions of the tablespace directories,
-        # we create a subdirectory "data" in every tablespace mountpoint. The full path of every tablespace
-        # therefore always ends on "/data".
-        # By creating a .pgpass file in the $HOME directory, we expose the superuser password
-        # to processes that may not have it in their environment (like the preStop lifecycle hook).
-        # To ensure Patroni will not mingle with this file, we give Patroni its own pgpass file.
-        # As these files are in the $HOME directory, they are only available to *this* container,
-        # and they are ephemeral.
-        command:
-          - /bin/bash
-          - "-c"
-          - |
-            
-            install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/data" "/var/lib/postgresql/wal/pg_wal" || exit 1
-            TABLESPACES=""
-            for tablespace in ; do
-              install -o postgres -g postgres -d -m 0700 "/var/lib/postgresql/tablespaces/${tablespace}/data"
-            done
+                - pg_isready
+                - -h
+                - /var/run/postgresql
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          volumeMounts:
+            - name: storage-volume
+              mountPath: "/var/lib/postgresql"
+              subPath: ""
+            - name: wal-volume
+              mountPath: "/var/lib/postgresql/wal"
+              subPath: ""
+            - mountPath: /etc/timescaledb/patroni.yaml
+              subPath: patroni.yaml
+              name: patroni-config
+              readOnly: true
+            - mountPath: /etc/timescaledb/scripts
+              name: timescaledb-scripts
+              readOnly: true
+            - mountPath: /etc/certificate
+              name: certificate
+              readOnly: true
+            - name: socket-directory
+              mountPath: /var/run/postgresql
 
-            # Environment variables can be read by regular users of PostgreSQL. Especially in a Kubernetes
-            # context it is likely that some secrets are part of those variables.
-            # To ensure we expose as little as possible to the underlying PostgreSQL instance, we have a list
-            # of allowed environment variable patterns to retain.
-            #
-            # We need the KUBERNETES_ environment variables for the native Kubernetes support of Patroni to work.
-            #
-            # NB: Patroni will remove all PATRONI_.* environment variables before starting PostgreSQL
-
-            # We store the current environment, as initscripts, callbacks, archive_commands etc. may require
-            # to have the environment available to them
-            set -o posix
-            export -p > "${HOME}/.pod_environment"
-            export -p | grep PGBACKREST > "${HOME}/.pgbackrest_environment"
-
-            for UNKNOWNVAR in $(env | awk -F '=' '!/^(PATRONI_.*|HOME|PGDATA|PGHOST|LC_.*|LANG|PATH|KUBERNETES_SERVICE_.*)=/ {print $1}')
-            do
-                unset "${UNKNOWNVAR}"
-            done
-
-            echo "*:*:*:postgres:${PATRONI_SUPERUSER_PASSWORD}" >> ${HOME}/.pgpass
-            chmod 0600 ${HOME}/.pgpass
-
-            export PATRONI_POSTGRESQL_PGPASS="${HOME}/.pgpass.patroni"
-
-            exec patroni /etc/timescaledb/patroni.yaml
-        env:
-        # We use mixed case environment variables for Patroni User management,
-        # as the variable themselves are documented to be PATRONI_<username>_OPTIONS.
-        # Where possible, we want to have lowercase usernames in PostgreSQL as more complex postgres usernames
-        # requiring quoting to be done in certain contexts, which many tools do not do correctly, or even at all.
-        # https://patroni.readthedocs.io/en/latest/ENVIRONMENT.html#bootstrap-configuration
-        - name: PATRONI_admin_OPTIONS
-          value: createrole,createdb
-        - name: PATRONI_admin_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: "admin"
-        - name: PATRONI_postgres_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: "postgres"
-        - name: PATRONI_standby_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: "standby"
-        - name: PATRONI_REPLICATION_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: standby
-        - name: PATRONI_SUPERUSER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: postgres
-        - name: PATRONI_REPLICATION_USERNAME
-          value: standby
-        # To specify the PostgreSQL and Rest API connect addresses we need
-        # the PATRONI_KUBERNETES_POD_IP to be available as a bash variable, so we can compose an
-        # IP:PORT address later on
-        - name: PATRONI_KUBERNETES_POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        - name: PATRONI_POSTGRESQL_CONNECT_ADDRESS
-          value: "$(PATRONI_KUBERNETES_POD_IP):5432"
-        - name: PATRONI_RESTAPI_CONNECT_ADDRESS
-          value: "$(PATRONI_KUBERNETES_POD_IP):8008"
-        - name: PATRONI_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: PATRONI_POSTGRESQL_DATA_DIR
-          value: "/var/lib/postgresql/data"
-        - name: PATRONI_KUBERNETES_NAMESPACE
-          value: tobs
-        - name: PATRONI_KUBERNETES_LABELS
-          value: "{app: tobs-timescaledb, cluster-name: tobs, release: tobs}"
-        - name: PATRONI_SCOPE
-          value: tobs
-        - name: PGBACKREST_CONFIG
-          value: /etc/pgbackrest/pgbackrest.conf
-        # PGDATA and PGHOST are not required to let Patroni/PostgreSQL run correctly,
-        # but for interactive sessions, callbacks and PostgreSQL tools they should be correct.
-        - name: PGDATA
-          value: "$(PATRONI_POSTGRESQL_DATA_DIR)"
-        - name: PGHOST
-          value: "/var/run/postgresql"
-          # pgBackRest is also called using the archive_command if the backup is enabled.
-          # this script will also need access to the environment variables specified for
-          # the backup. This can be removed once we do not directly invoke pgBackRest
-          # from inside the TimescaleDB container anymore
-        ports:
-        - containerPort: 8008
-        - containerPort: 5432
-        readinessProbe:
-          exec:
-            command:
-              - pg_isready
-              - -h
-              - /var/run/postgresql
-          initialDelaySeconds: 5
-          periodSeconds: 30
-          timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 6
-        volumeMounts:
-        - name: storage-volume
-          mountPath: "/var/lib/postgresql"
-          subPath: ""
-        - name: wal-volume
-          mountPath: "/var/lib/postgresql/wal"
-          subPath: ""
-        - mountPath: /etc/timescaledb/patroni.yaml
-          subPath: patroni.yaml
-          name: patroni-config
-          readOnly: true
-        - mountPath: /etc/timescaledb/scripts
-          name: timescaledb-scripts
-          readOnly: true
-        - mountPath: /etc/certificate
-          name: certificate
-          readOnly: true
-        - name: socket-directory
-          mountPath: /var/run/postgresql
-        
-        resources:
-          {}
+          resources:
+            {}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              topologyKey: "kubernetes.io/hostname"
-              labelSelector:
-                matchLabels:
-                  app: tobs-timescaledb
-                  release: "tobs"
-                  cluster-name: tobs
-          - weight: 50
-            podAffinityTerm:
-              topologyKey: failure-domain.beta.kubernetes.io/zone
-              labelSelector:
-                matchLabels:
-                  app: tobs-timescaledb
-                  release: "tobs"
-                  cluster-name: tobs
-        
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: "kubernetes.io/hostname"
+                labelSelector:
+                  matchLabels:
+                    app: tobs-timescaledb
+                    release: "tobs"
+                    cluster-name: tobs
+            - weight: 50
+              podAffinityTerm:
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+                labelSelector:
+                  matchLabels:
+                    app: tobs-timescaledb
+                    release: "tobs"
+                    cluster-name: tobs
+
       volumes:
-      - name: socket-directory
-        emptyDir: {}
-      - name: patroni-config
-        configMap:
-          name: tobs-timescaledb-patroni
-      - name: timescaledb-scripts
-        configMap:
-          name: tobs-timescaledb-scripts
-          defaultMode: 488 # 0750 permissions
-      
-      - name: certificate
-        secret:
-          secretName: tobs-timescaledb-certificate
-          defaultMode: 416 # 0640 permissions
+        - name: socket-directory
+          emptyDir: {}
+        - name: patroni-config
+          configMap:
+            name: tobs-timescaledb-patroni
+        - name: timescaledb-scripts
+          configMap:
+            name: tobs-timescaledb-scripts
+            defaultMode: 488 # 0750 permissions
+
+        - name: certificate
+          secret:
+            secretName: tobs-timescaledb-certificate
+            defaultMode: 416 # 0640 permissions
   volumeClaimTemplates:
     - metadata:
         name: storage-volume
@@ -6100,7 +6100,7 @@ spec:
           purpose: data-directory
       spec:
         accessModes:
-        - ReadWriteOnce
+          - ReadWriteOnce
         resources:
           requests:
             storage: "150Gi"
@@ -6115,7 +6115,7 @@ spec:
           purpose: wal-directory
       spec:
         accessModes:
-        - ReadWriteOnce
+          - ReadWriteOnce
         resources:
           requests:
             storage: "20Gi"
@@ -6190,29 +6190,29 @@ spec:
       template:
         spec:
           containers:
-          - name: promscale-maintenance
-            image: postgres:12-alpine
-            args:
-            - sh
-            - ./execute_maintenance.sh
-            env:
-              - name: PGPORT
-                value: "5432"
-              - name: PGUSER
-                value: postgres
-              - name: PGPASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: tobs-timescaledb-passwords
-                    key: postgres
-              - name: PGHOST
-                value: tobs.tobs.svc.cluster.local
-              - name:  PGDATABASE
-                value: postgres
-            volumeMounts:
-              - name: script-volume
-                mountPath: /execute_maintenance.sh
-                subPath: execute_maintenance.sh
+            - name: promscale-maintenance
+              image: postgres:12-alpine
+              args:
+                - sh
+                - ./execute_maintenance.sh
+              env:
+                - name: PGPORT
+                  value: "5432"
+                - name: PGUSER
+                  value: postgres
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: tobs-timescaledb-passwords
+                      key: postgres
+                - name: PGHOST
+                  value: tobs.tobs.svc.cluster.local
+                - name:  PGDATABASE
+                  value: postgres
+              volumeMounts:
+                - name: script-volume
+                  mountPath: /execute_maintenance.sh
+                  subPath: execute_maintenance.sh
           volumes:
             - name: script-volume
               configMap:
@@ -6263,9 +6263,9 @@ spec:
           name: tests
           readOnly: true
   volumes:
-  - name: tests
-    configMap:
-      name: tobs-grafana-test
+    - name: tests
+      configMap:
+        name: tobs-grafana-test
   restartPolicy: Never
 ---
 # Source: tobs/charts/timescaledb-single/templates/job-update-patroni.yaml
@@ -6297,18 +6297,18 @@ spec:
     spec:
       restartPolicy: OnFailure
       containers:
-      - name: tobs-timescaledb-patch-patroni-config
-        image: curlimages/curl
-        command: ["/usr/bin/curl"]
-        args:
-        - --connect-timeout
-        - '10'
-        - --include
-        - --silent
-        - --show-error
-        - --fail
-        - --request
-        - PATCH
-        - --data
-        - "{\"loop_wait\":10,\"maximum_lag_on_failover\":33554432,\"postgresql\":{\"parameters\":{\"archive_command\":\"/etc/timescaledb/scripts/pgbackrest_archive.sh %p\",\"archive_mode\":\"on\",\"archive_timeout\":\"1800s\",\"autovacuum_analyze_scale_factor\":0.02,\"autovacuum_max_workers\":10,\"autovacuum_vacuum_scale_factor\":0.05,\"hot_standby\":\"on\",\"log_autovacuum_min_duration\":0,\"log_checkpoints\":\"on\",\"log_connections\":\"on\",\"log_disconnections\":\"on\",\"log_line_prefix\":\"%t [%p]: [%c-%l] %u@%d,app=%a [%e] \",\"log_lock_waits\":\"on\",\"log_min_duration_statement\":\"1s\",\"log_statement\":\"ddl\",\"max_connections\":100,\"max_prepared_transactions\":150,\"shared_preload_libraries\":\"timescaledb,pg_stat_statements\",\"ssl\":\"on\",\"ssl_cert_file\":\"/etc/certificate/tls.crt\",\"ssl_key_file\":\"/etc/certificate/tls.key\",\"tcp_keepalives_idle\":900,\"tcp_keepalives_interval\":100,\"temp_file_limit\":\"1GB\",\"timescaledb.passfile\":\"../.pgpass\",\"unix_socket_directories\":\"/var/run/postgresql\",\"unix_socket_permissions\":\"0750\",\"wal_level\":\"hot_standby\",\"wal_log_hints\":\"on\"},\"use_pg_rewind\":true,\"use_slots\":true},\"retry_timeout\":10,\"ttl\":30}"
-        - "http://tobs-config:8008/config"
+        - name: tobs-timescaledb-patch-patroni-config
+          image: curlimages/curl
+          command: ["/usr/bin/curl"]
+          args:
+            - --connect-timeout
+            - '10'
+            - --include
+            - --silent
+            - --show-error
+            - --fail
+            - --request
+            - PATCH
+            - --data
+            - "{\"loop_wait\":10,\"maximum_lag_on_failover\":33554432,\"postgresql\":{\"parameters\":{\"archive_command\":\"/etc/timescaledb/scripts/pgbackrest_archive.sh %p\",\"archive_mode\":\"on\",\"archive_timeout\":\"1800s\",\"autovacuum_analyze_scale_factor\":0.02,\"autovacuum_max_workers\":10,\"autovacuum_vacuum_scale_factor\":0.05,\"hot_standby\":\"on\",\"log_autovacuum_min_duration\":0,\"log_checkpoints\":\"on\",\"log_connections\":\"on\",\"log_disconnections\":\"on\",\"log_line_prefix\":\"%t [%p]: [%c-%l] %u@%d,app=%a [%e] \",\"log_lock_waits\":\"on\",\"log_min_duration_statement\":\"1s\",\"log_statement\":\"ddl\",\"max_connections\":100,\"max_prepared_transactions\":150,\"shared_preload_libraries\":\"timescaledb,pg_stat_statements\",\"ssl\":\"on\",\"ssl_cert_file\":\"/etc/certificate/tls.crt\",\"ssl_key_file\":\"/etc/certificate/tls.key\",\"tcp_keepalives_idle\":900,\"tcp_keepalives_interval\":100,\"temp_file_limit\":\"1GB\",\"timescaledb.passfile\":\"../.pgpass\",\"unix_socket_directories\":\"/var/run/postgresql\",\"unix_socket_permissions\":\"0750\",\"wal_level\":\"hot_standby\",\"wal_log_hints\":\"on\"},\"use_pg_rewind\":true,\"use_slots\":true},\"retry_timeout\":10,\"ttl\":30}"
+            - "http://tobs-config:8008/config"

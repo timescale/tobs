@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/utils"
+
 	"github.com/timescale/tobs/cli/pkg/k8s"
 
 	"github.com/spf13/cobra"
@@ -31,7 +33,8 @@ func init() {
 func timescaledbConnect(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var user string
+	var user, host, psqlCMD string
+
 	user, err = cmd.Flags().GetString("user")
 	if err != nil {
 		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
@@ -55,6 +58,12 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
 	}
 
+	uri, err := utils.GetTimescaleDBURI(namespace, name)
+	if err != nil {
+		return err
+	}
+
+
 	if master {
 		masterpod, err := k8s.KubeGetPodName(namespace, map[string]string{"release": name, "role": "master"})
 		if err != nil {
@@ -66,7 +75,14 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 	} else {
-		pod := getPodObject(name, namespace, user, pass)
+		if uri == "" {
+			host = name + "." + namespace + ".svc.cluster.local"
+			psqlCMD = "psql -U "+user+" -h "+host+" "+dbname
+		} else {
+			psqlCMD = "psql "+uri
+		}
+
+		pod := getPodObject(dbname, namespace, user, pass, host, uri)
 
 		err = k8s.KubeCreatePod(pod)
 		if err != nil {
@@ -80,7 +96,9 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 			_ = k8s.KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
-		err = k8s.KubeExecCmd(namespace, "psql", "", "psql -U "+user+" -h "+name+"."+namespace+".svc.cluster.local postgres", os.Stdin, true)
+
+
+		err = k8s.KubeExecCmd(namespace, "psql", "", psqlCMD, os.Stdin, true)
 		if err != nil {
 			_ = k8s.KubeDeletePod(namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
@@ -96,7 +114,13 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getPodObject(name, namespace, user, pass string) *corev1.Pod {
+func getPodObject(name, namespace, user, pass, host, uri string) *corev1.Pod {
+	var args []string
+	if uri == "" {
+		args = []string{"-U", user, "-h", host, name}
+	} else {
+		args = []string{uri}
+	}
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "psql",
@@ -122,13 +146,7 @@ func getPodObject(name, namespace, user, pass string) *corev1.Pod {
 					Command: []string{
 						"psql",
 					},
-					Args: []string{
-						"-U",
-						user,
-						"-h",
-						name + "." + namespace + ".svc.cluster.local",
-						"postgres",
-					},
+					Args: args,
 				},
 			},
 		},

@@ -144,6 +144,19 @@ func KubeGetSecret(namespace string, secretName string) (*corev1.Secret, error) 
 	return secret, nil
 }
 
+func KubeGetAllSecrets(namespace string) (*corev1.SecretList, error) {
+	var err error
+
+	client, _ := kubeInit()
+
+	secrets, err := client.CoreV1().Secrets(namespace).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return secrets, nil
+}
+
 func KubeGetAllPods(namespace string, name string) ([]corev1.Pod, error) {
 	var err error
 	var allpods []corev1.Pod

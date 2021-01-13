@@ -30,12 +30,13 @@ func init() {
 func addHelmInstallFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
 	cmd.Flags().StringP("chart-reference", "c", "timescale/tobs", "Helm chart reference")
+	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 }
 
 func helmInstall(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var file, ref string
+	var file, ref, dbURI string
 	file, err = cmd.Flags().GetString("filename")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
@@ -44,15 +45,19 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
+	dbURI, err = cmd.Flags().GetString("external-timescaledb-uri")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
 
-	err = installStack(file, ref)
+	err = installStack(file, ref, dbURI)
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 	return nil
 }
 
-func installStack(file, ref string) error {
+func installStack(file, ref, dbURI string) error {
 	var err error
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
@@ -68,7 +73,15 @@ func installStack(file, ref string) error {
 		}
 	}
 
-	cmds := []string{"install", name, ref, "--set", "cli=true"}
+	cmds := []string{"install", name, ref}
+	cmds = append(cmds, "--set", "cli=true")
+	if dbURI != "" {
+		cmds, err = appendDBURIValues(dbURI, name, cmds)
+		if err != nil {
+			return err
+		}
+	}
+
 	if namespace != "default" {
 		cmds = append(cmds, "--create-namespace", "--namespace", namespace)
 	}
@@ -104,4 +117,13 @@ func installStack(file, ref string) error {
 	fmt.Println("The Observability Stack has been installed successfully")
 	fmt.Println(string(out))
 	return nil
+}
+
+func appendDBURIValues(dbURI, name string, cmds []string) ([]string, error) {
+	cmds = append(cmds, "--set",
+		"timescaledb-single.enabled=false,"+
+			"timescaledbExternal.enabled=true,"+
+			"timescaledbExternal.db_uri="+dbURI+
+			",promscale.connection.uri.secretTemplate="+name+"-timescaledb-uri,")
+	return cmds, nil
 }

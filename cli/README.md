@@ -45,7 +45,7 @@ The following are the commands possible with the CLI.
 
 | Command             | Description                                                      | Flags                                                |
 |---------------------|------------------------------------------------------------------|------------------------------------------------------|
-| `tobs install`      | Alias for `tobs helm install`.                                   | `--filename`, `-f` : file to load configuration from |
+| `tobs install`      | Alias for `tobs helm install`.                                   | `--filename`, `-f` : file to load configuration from <br> `--external-timescaledb-uri`, `-e`: external database URI, TimescaleDB installation will be skipped & Promscale connects to the provided database  |
 | `tobs uninstall`    | Alias for `tobs helm unintall`.                                  | None                                                 |
 | `tobs port-forward` | Port-forwards TimescaleDB, Grafana, and Prometheus to localhost. | `--timescaledb`, `-t` : port for TimescaleDB <br> `--grafana`, `-g` : port for Grafana <br> `--prometheus`, `-p` : port for Prometheus |
 

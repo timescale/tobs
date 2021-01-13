@@ -43,5 +43,17 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
+	uninstallsObs()
+
 	os.Exit(code)
+}
+
+func uninstallsObs() {
+	log.Println("Uninstalling The Observability Stack")
+	obsinstall := exec.Command("./../bin/tobs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--delete-data")
+	err := obsinstall.Run()
+	if err != nil {
+		log.Println("Error installing The Observability Stack:", err)
+		os.Exit(1)
+	}
 }

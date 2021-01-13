@@ -1,4 +1,4 @@
-## Usage 
+# Usage 
 
 tobs CLI installation
 
@@ -37,19 +37,19 @@ Flags:
 Use "tobs [command] --help" for more information about a command.
 ```
 
-### Deploying monitoring stack
+## Deploying monitoring stack
 
 `tobs install`
 
 This will successfully deploy all the above listed components to your k8s cluster.
 
-You can use `--name` flag to set helm release name default name is `tobs`, `--namespace` flag to deploy observability stack in namespace of your choice default is set to `default` namespace, `--chart-reference` flag to use helm chart of your choice default is set to `timescale/tobs`, `--filename` to use values.yaml file that we usually use with helm chart you can provide values.yaml of your choice by default values.yaml from the chart will be used.
+You can use `--name` flag to set helm release name default name is `tobs`, `--namespace` flag to deploy observability stack in namespace of your choice default is set to `default` namespace, `--chart-reference` flag to use helm chart of your choice default is set to `timescale/tobs`, `--filename` to use values.yaml file that we usually use with helm chart you can provide values.yaml of your choice by default values.yaml from the chart will be used, `--external-timescaledb-uri`, `-e` to install tobs and to connect an existing database, skip TimescaleDB deployment during tobs install. 
 
-### Actions for Helm:
+## Actions for Helm:
 
 tobs CLI internally uses helm to deploy observability stack. You can also use helm cmds such helm install, helm uninstall, show-values i.e values.yml file and delete-data to delete persistent volume claims.
 
-#### install tobs using helm 
+### install tobs using helm 
 
 `tobs install` is an alias for below cmd
 
@@ -57,7 +57,7 @@ tobs CLI internally uses helm to deploy observability stack. You can also use he
 tobs helm install
 ```
 
-#### uninstall tobs using helm
+### uninstall tobs using helm
 
 
 `tobs uninstall` is an alias for below cmd
@@ -66,13 +66,13 @@ tobs helm install
 tobs helm uninstall
 ```
 
-#### deletes all persistent volume claims
+### deletes all persistent volume claims
 
 ```
 tobs helm delete-data 
 ```
 
-#### show values.yml file used in helm
+### show values.yml file used in helm
 
 This cmd helps us to understand values passed over to helm chart for different components.
 
@@ -80,7 +80,7 @@ This cmd helps us to understand values passed over to helm chart for different c
 tobs helm show-values
 ```
 
-### Port-forward
+## Port-forward
 
 This helps to port-forward `TimescaleDB`, `Grafana`, `Prometheus`, `Promscale` and `Promlens` to localhost i.e 
 
@@ -96,11 +96,11 @@ You can also port-forward to ports of your choice by using the flags exposed for
 tobs port-forward
 ```
 
-### Metrics
+## Metrics
 
 You can perform metric specifc actions such as ```chunk-interval``` & ```retantion``` 
 
-#### chunk-interval
+### chunk-interval
 
 Shows the chunk-interval per metric i.e hybertable distribution per metric in TimescaleDB.
 
@@ -126,7 +126,7 @@ Set default chunk-interval to all metrics except for which we set chunk-interval
 tobs metrics chunk-interval set-default 3h
 ```
 
-#### retention
+### retention
 
 Using TimescaleDB for long term storage of metrics allows you to set retention per metric.
 
@@ -155,34 +155,34 @@ Set default retention to all metrics except for which we set retention explicitl
 tobs metrics retention set-default 3
 ```
 
-### Actions for Prometheus
+## Actions for Prometheus
 
 This helps to port-forward prometheus to localhost i.e to port `9090` by default. Use `--port` flag to port-forward to port of your choice. 
 
-#### port forward prometheus
+### port forward prometheus
 
 ```
 tobs prometheus port-forward
 ```
 
-### Actions for Promlens
+## Actions for Promlens
 
 This helps to port-forward promlens and promscale to localhost i.e 
 promlens to `8081` and promscale to `9201` by default. Use `--port` flag to port-forward promlens and `--port-connector` flag to port-forward promscale to port of your choice. 
 
-#### port forward promlens
+### port forward promlens
 
 ```
 tobs promlens port-forward
 ```
 
-### Actions for TimescaleDB
+## Actions for TimescaleDB
 
 This helps to perform timescaleDB operations such as get password for specific user using `--user` flag, change password for specific database and user using `--dbname` & `--user` flags, connect to psql prompt, and port-forward to localhost.
 
 By default tobs CLI uses DB & USER as `postgres`
 
-#### get password
+### get password
 
 Use `--user` flag to get password for specifc user.
 
@@ -190,7 +190,7 @@ Use `--user` flag to get password for specifc user.
 tobs timescaledb get-password
 ```
 
-#### change password
+### change password
 
 Use `--user` & `--dbname` flags to change password for specific user and database.
 
@@ -198,7 +198,7 @@ Use `--user` & `--dbname` flags to change password for specific user and databas
 tobs timescaledb change-password
 ```
 
-#### connect to psql prompt
+### connect to psql prompt
 
 Opens up an interactive psql shell to query timescaledb.
 
@@ -208,7 +208,7 @@ Use `master` flag to connect with master node and `--user` flag to connect to db
 tobs timescaledb connect
 ```
 
-#### port forward timescaledb
+### port forward timescaledb
 
 By default this will port-forward to port `5432` of your local machine. Use `--port` flag to port-forward to port of your choice. 
 
@@ -216,7 +216,7 @@ By default this will port-forward to port `5432` of your local machine. Use `--p
 tobs timescaledb port-forward
 ```
 
-### Actions for Volumes
+## Actions for Volumes
 
 The volume cmd helps to get and expand the existing size of PVC's for `TimescaleDB` and `Prometheus`
 
@@ -231,7 +231,7 @@ Expand PVC size. To expand size of a specific resource use  `--prometheus-storag
 tobs volume expand --timescaleDB-storage 175Gi --timescaleDB-wal 25Gi --prometheus-storage 15Gi
 ```
 
-### Actions for Grafana:
+## Actions for Grafana:
 
 tobs CLI offers a grafana cmd to interact with grafana with ease.
 
@@ -239,19 +239,19 @@ Actions such as: get grafana instance password, change grafana instance password
 
 Usually to perform these actions we need to view the grafana K8s Secret & decode it from base64 and changing password needs Secret modification. All these actions will be performed by tobs.
 
-#### get grafana password:
+### get grafana password:
 
 ```
 tobs grafana get-password
 ```
 
-#### change grafana password:
+### change grafana password:
 
 ```
 tobs grafana change-password <PASSWORD>
 ```
 
-#### port forward grafana
+### port forward grafana
 
 By default this will port-forward to port `8080` of your local machine. Use `--port` flag to port-forward to port of your choice. 
 
@@ -263,7 +263,7 @@ Acessing `localhost:8080` will have pre-built dashbaords for kubernetes monitori
 
 ![tobs-grafana-dashboard](./assets/grafana-tobs-sample-dashboard.png)
 
-### Uninstall tobs
+## Uninstall tobs
 
 To uninstall monitoring stack deployed by tobs. Use `--delete-data` flag to delete persistent volume claims (pvc's) and `--pvc` to remove pvc's.
 

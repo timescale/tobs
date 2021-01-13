@@ -22,6 +22,7 @@ data:
 {{- $sslInfo := get $values "query"}}
 {{- $sslDetails := split "=" $sslInfo }}
 {{- $sslMode := $sslDetails._1 }}
+{{- with .Values.grafana.timescale.database }}
   GF_DATABASE_TYPE: {{ "postgres" | b64enc }}
   GF_DATABASE_HOST: {{ $hostURL | b64enc }}
   GF_DATABASE_NAME: {{ $dbName | b64enc }}
@@ -39,6 +40,7 @@ data:
   GF_DATABASE_USER: {{ .user | b64enc }}
   GF_DATABASE_PASSWORD: {{ .pass | b64enc }}
   GF_DATABASE_SSL_MODE: {{ .sslMode | b64enc }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

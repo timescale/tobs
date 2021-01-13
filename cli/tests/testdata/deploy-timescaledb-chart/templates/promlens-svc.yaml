@@ -1,0 +1,27 @@
+{{ if .Values.promlens.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-promlens
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    component: promlens
+  annotations:
+{{ .Values.promlens.loadBalancer.annotations | toYaml | indent 4 }}
+spec:
+  selector:
+    app: {{ template "tobs.fullname" . }}
+    component: promlens
+{{- if .Values.promlens.loadBalancer.enabled }}
+  type: LoadBalancer
+{{- else }}
+  type: ClusterIP
+{{- end }}
+  ports:
+  - name: promlens-port
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+{{- end -}}
