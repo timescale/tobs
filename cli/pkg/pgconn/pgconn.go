@@ -3,8 +3,11 @@ package pgconn
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/timescale/tobs/cli/pkg/utils"
 
 	"github.com/timescale/tobs/cli/pkg/k8s"
 
@@ -36,6 +39,11 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		} else if env.Name == "TS_PROM_DB_SSL_MODE" {
 			sslmode = env.Value
 		}
+	}
+
+	dbURI, err := utils.GetTimescaleDBURI(namespace, name)
+	if err != nil {
+		return nil, err
 	}
 
 	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
@@ -72,11 +80,39 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 			return nil, err
 		}
 	} else {
-		pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@"+host+":"+port+"/tsdb?sslmode="+sslmode)
-		if err != nil {
-			return nil, err
+		if dbURI != "" {
+			pool, err = pgxpool.Connect(context.Background(), dbURI)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@"+host+":"+port+"/"+dbname+"?sslmode="+sslmode)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	return pool, nil
+}
+
+func UpdatePasswordInDBURI(dburi, newpass string) (string, error) {
+	db, err := pgxpool.ParseConfig(dburi)
+	if err != nil {
+		return "", err
+	}
+
+	var sslmode string
+	if db.ConnConfig.TLSConfig == nil {
+		sslmode = "allow"
+	} else {
+		sslmode = "require"
+	}
+	port := strconv.Itoa(int(db.ConnConfig.Port))
+	connectTimeOut := ""
+	if db.ConnConfig.ConnectTimeout.String() != "0s" {
+		connectTimeOut = "&connect_timeout=" + fmt.Sprintf("%.f", db.ConnConfig.ConnectTimeout.Seconds())
+	}
+	res := "postgres://" + db.ConnConfig.User + ":" + newpass + "@" + db.ConnConfig.Host + ":" + port + "/" + db.ConnConfig.Database + "?sslmode=" + sslmode + connectTimeOut
+	return res, nil
 }

@@ -1,0 +1,100 @@
+{{- if and .Values.prometheus.enabled .Values.prometheus.server.enabled -}}
+{{- if .Values.prometheus.server.configMapOverrideName -}}
+{{- $promContext := dict "Release" .Release "Chart" .Chart "Values" .Values.prometheus -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "prometheus.server.labels" $promContext | nindent 4 }}
+  name: {{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}
+data:
+{{- $root := . -}}
+{{- range $key, $value := .Values.prometheus.serverFiles }}
+  {{ $key }}: |
+{{- if eq $key "prometheus.yml" }}
+    global:
+{{ $root.Values.prometheus.server.global | toYaml | trimSuffix "\n" | indent 6 }}
+{{- $hasRemoteWrite := or $root.Values.prometheus.server.remoteWrite $root.Values.prometheus.server.timescaleRemote.write.enabled -}}
+{{- if $hasRemoteWrite }}
+    remote_write:
+{{- if $root.Values.prometheus.server.timescaleRemote.write.enabled -}}
+{{ with $root.Values.prometheus.server.timescaleRemote }}
+    - url: {{ printf "%s://%s:%s/%s" .protocol (tpl .host $root) .port .write.endpoint }}
+      queue_config: 
+{{ toYaml .write.queue | indent 8 }}
+{{- end -}}
+{{- end }}
+{{ if $root.Values.prometheus.server.remoteWrite -}}
+{{ $root.Values.prometheus.server.remoteWrite | toYaml | indent 4 }}
+{{- end -}}
+{{- end }}
+{{- $hasRemoteRead := or $root.Values.prometheus.server.remoteRead $root.Values.prometheus.server.timescaleRemote.read.enabled -}}
+{{- if $hasRemoteRead }}
+    remote_read:
+{{- if $root.Values.prometheus.server.timescaleRemote.read.enabled -}}
+{{ with $root.Values.prometheus.server.timescaleRemote }}
+    - url: {{ printf "%s://%s:%s/%s" .protocol (tpl .host $root) .port .read.endpoint }}
+{{- end -}}
+{{- end }}
+{{ if $root.Values.prometheus.server.remoteRead -}}
+{{ $root.Values.prometheus.server.remoteRead | toYaml | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if eq $key "alerts" }}
+{{- if and (not (empty $value)) (empty $value.groups) }}
+    groups:
+{{- range $ruleKey, $ruleValue := $value }}
+    - name: {{ $ruleKey -}}.rules
+      rules:
+{{ $ruleValue | toYaml | trimSuffix "\n" | indent 6 }}
+{{- end }}
+{{- else }}
+{{ toYaml $value | indent 4 }}
+{{- end }}
+{{- else }}
+{{ toYaml $value | default "{}" | indent 4 }}
+{{- end }}
+{{- if eq $key "prometheus.yml" -}}
+{{- if $root.Values.prometheus.extraScrapeConfigs }}
+{{ tpl $root.Values.prometheus.extraScrapeConfigs $root | indent 4 }}
+{{- end -}}
+{{- if or ($root.Values.prometheus.alertmanager.enabled) ($root.Values.prometheus.server.alertmanagers) }}
+    alerting:
+{{- if $root.Values.prometheus.alertRelabelConfigs }}
+{{ $root.Values.prometheus.alertRelabelConfigs | toYaml  | trimSuffix "\n" | indent 6 }}
+{{- end }}
+      alertmanagers:
+{{- if $root.Values.prometheus.server.alertmanagers }}
+{{ toYaml $root.Values.prometheus.server.alertmanagers | indent 8 }}
+{{- else }}
+      - kubernetes_sd_configs:
+          - role: pod
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        {{- if $root.Values.prometheus.alertmanager.prefixURL }}
+        path_prefix: {{ $root.Values.prometheus.alertmanager.prefixURL }}
+        {{- end }}
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          regex: {{ $root.Release.Namespace }}
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          regex: {{ template "prometheus.name" $root }}
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_label_component]
+          regex: alertmanager
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_probe]
+          regex: {{ index $root.Values.prometheus.alertmanager.podAnnotations "prometheus.io/probe" | default ".*" }}
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_container_port_number]
+          regex:
+          action: drop
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

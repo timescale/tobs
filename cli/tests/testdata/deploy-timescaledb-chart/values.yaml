@@ -24,8 +24,8 @@ timescaledb-single:
 # The charts README is at:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
-  enabled: true
-  image: timescale/promscale:0.2.0
+  enabled: false
+  image: vineeth97/promscale:uri-test
   # connection options
   connection:
     # the db name in which the metrics will be stored
@@ -62,7 +62,7 @@ promscale:
 # with the default values documented at:
 #   https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
 prometheus:
-  enabled: true
+  enabled: false
   alertmanager:
     enabled: false
   pushgateway:
@@ -95,19 +95,14 @@ prometheus:
         endpoint: "read"
   #You can add other configs from https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml here
   #For example, adding additional scrape jobs
-  #extraScrapeConfigs: |
-    #example of adding hypotetical scrape job for https://github.com/AICoE/prometheus-anomaly-detector
-    #- job_name: prometheus-anomaly
-    #  static_configs:
-    #    - targets:
-    #      - prometheus-anomaly-svc.default:8080
+  #extraScrapeConfigs:
 
 # Values for configuring the deployment of Grafana
 # The Grafana Community chart is used and the guide for it
 # can be found at:
 #   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
 grafana:
-  enabled: true
+  enabled: false
   sidecar:
     datasources:
       enabled: true
@@ -150,7 +145,7 @@ grafana:
 #Enable PromLens  https://promlens.com/
 #PromLens is a PromQL query builder, analyzer, and visualizer
 promlens:
-  enabled: true
+  enabled: false
   image: "promlabs/promlens:latest"
   # This default URL assumes access via port-forwarding to the connector. If using
   # a load balancer for the connector, change as appropriate

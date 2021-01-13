@@ -7,6 +7,7 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
   * **[Cleanup](#cleanup)**
     * [TimescaleDB PVCs and Backup](#timescaledb-pvcs-and-backup)
     * [TimescaleDB config service](#timescaledb-config-service)
+    * [Connecting to External TimescaleDB](#timescaledb-external-integration)
 * **[Configuring Helm Chart](#configuring-helm-chart)**
   * **[TimescaleDB related values](#timescaledb-related-values)**
     * [Additional configuration for TimescaleDB](#additional-configuration-for-timescaledb)
@@ -94,6 +95,17 @@ interested in a replicated setup for high-availability with automated backups, p
 
 You can set up the credentials, nodeSelector, volume sizes (default volumes created are 1GB for WAL and 2GB for storage).
 
+### Configuring External TimescaleDB
+
+To configure tobs to connect with an external TimescaleDB you need to modify few fields in the default values.yaml while performing the installation
+
+Below is the helm command to disable TimescaleDB installation and to set external db uri details:
+```
+helm install <release-name> timescale/tobs \
+--set timescaledb-single.enabled=false,timescaledbExternal.enabled=true,timescaledbExternal.db_uri=<timescaledb-uri>, \
+promscale.connection.uri.secretTemplate=<release-name>-timescaledb-uri
+```
+
 ## Promscale related values
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
@@ -101,6 +113,7 @@ You can set up the credentials, nodeSelector, volume sizes (default volumes crea
 | `promscale.image`                        | Docker image to use for the Connector                 | `timescale/promscale:0.1.0-alpha.2` |
 | `promscale.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
 | `promscale.connection.user`              | User used for connection to db | `postgres` |
+| `promscale.connection.dbURI.secretTemplate` | The template for generating the name of a secret object which will hold the db URI | `` |
 | `promscale.connection.password.secretTemplate` | Name (templated) of secret object containing the connection password. Key must be value of `promscale.connection.user`. Defaults to secret created by timescaledb-single chart | `"{{ .Release.Name }}-timescaledb-passwords"` |
 | `promscale.connection.host.nameTemplate` | Host name (templated) of the database instance. Defaults to service created in `timescaledb-single` | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"` |
 | `promscale.service.loadBalancer.enabled` | Create a LB for the connector instead of a Cluster IP | `false`     |

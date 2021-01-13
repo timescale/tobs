@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -134,7 +136,7 @@ func DeployedValuesYaml(chart, releaseName, namespace string) (interface{}, erro
 		return nil, fmt.Errorf("failed to do helm get values on the helm release %w", err)
 	}
 
-	var i  interface{}
+	var i interface{}
 	err = yaml.Unmarshal(k, &i)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal existing values.yaml file %w", err)
@@ -160,7 +162,7 @@ func NewValuesYaml(chart, file string) (interface{}, error) {
 		}
 	}
 
-	var i  interface{}
+	var i interface{}
 	err = yaml.Unmarshal(res, &i)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal existing values.yaml file %w", err)
@@ -225,4 +227,26 @@ func ConvertMapI2MapS(v interface{}) interface{} {
 	}
 
 	return v
+}
+
+func GetTimescaleDBURI(namespace, name string) (string, error) {
+	secretName := name + "-timescaledb-uri"
+	secrets, err := k8s.KubeGetAllSecrets(namespace)
+	if err != nil {
+		return "", err
+	}
+
+	for _, s := range secrets.Items {
+		if s.Name == secretName {
+			if bytepass, exists := s.Data["db-uri"]; exists {
+				uriData := string(bytepass)
+				return uriData, nil
+			} else {
+				// found the secret but failed to find the value with indexed key.
+				return  "", fmt.Errorf("could not get TimescaleDB URI with secret key index as db-uri from %s", secretName)
+			}
+		}
+	}
+
+	return "", nil
 }

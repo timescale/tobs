@@ -92,7 +92,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		if !confirm {
 			utils.ConfirmAction()
 		}
-		err = installStack(file, ref)
+		err = installStack(file, ref, "")
 		if err != nil {
 			return err
 		}
