@@ -95,7 +95,12 @@ prometheus:
         endpoint: "read"
   #You can add other configs from https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml here
   #For example, adding additional scrape jobs
-  #extraScrapeConfigs:
+  #extraScrapeConfigs: |
+    #example of adding hypotetical scrape job for https://github.com/AICoE/prometheus-anomaly-detector
+    #- job_name: prometheus-anomaly
+    #  static_configs:
+    #    - targets:
+    #      - prometheus-anomaly-svc.default:8080
 
 # Values for configuring the deployment of Grafana
 # The Grafana Community chart is used and the guide for it
