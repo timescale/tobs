@@ -11,13 +11,15 @@ import (
 
 var RELEASE_NAME = "gg"
 var NAMESPACE = "ns"
+var PATH_TO_TOBS = "./../../bin/tobs"
+var PATH_TO_CHART = "./../../../chart/"
 
 func installObs() {
 	var err error
 
 	log.Println("Installing The Observability Stack")
 
-	obsinstall := exec.Command("./../bin/tobs", "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", "../../chart")
+	obsinstall := exec.Command(PATH_TO_TOBS, "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART)
 	err = obsinstall.Run()
 	if err != nil {
 		log.Println("Error installing The Observability Stack:", err)
@@ -50,7 +52,7 @@ func TestMain(m *testing.M) {
 
 func uninstallsObs() {
 	log.Println("Uninstalling The Observability Stack")
-	obsinstall := exec.Command("./../bin/tobs", "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--delete-data")
+	obsinstall := exec.Command(PATH_TO_TOBS, "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--delete-data")
 	err := obsinstall.Run()
 	if err != nil {
 		log.Println("Error installing The Observability Stack:", err)

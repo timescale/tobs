@@ -7,6 +7,8 @@
 {{- end }}
 {{- if index .Values "timescaledb-single" "enabled" }}
 🐯 TimescaleDB
+{{- else }}
+🐯 Connecting to an External TimescaleDB
 {{- end }}
 {{- if index .Values "promscale" "enabled" }}
 🤝 Promscale connector
@@ -131,15 +133,21 @@ Get the PushGateway URL by running these commands in the same shell:
 {{- end -}}
 
 {{- end }}
-{{- if index .Values "timescaledb-single" "enabled" }}
+{{- if or .Values "timescaledb-single" "enabled" .Values.timescaledbExternal.enabled }}
 {{- $tsEnv := (set (set (deepCopy .) "Values" (index .Values "timescaledb-single")) "Chart" (dict "Name" "timescaledb")) }}
 
 ###############################################################################
 🐯 TIMESCALEDB NOTES:
 ###############################################################################
 
+{{- if index .Values "timescaledb-single" "enabled" }}
+
 TimescaleDB can be accessed via port 5432 on the following DNS name from within your cluster:
 {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc.cluster.local
+{{- else }}
+
+Connecting to an external TimescaleDB, As external DB URI has been configured during the installation.
+{{- end }}
 
 To get your password for superuser run:
 

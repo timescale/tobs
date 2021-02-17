@@ -1,8 +1,11 @@
 build:
 		go build -o bin/tobs .
 
-test:
-		./e2e-tests.sh
+e2e-tests:
+		./tests/e2e-tests.sh
+
+external-db-tests:
+		./tests/external-db-tests.sh
 
 go-vet:
 		go vet ./...
@@ -13,4 +16,4 @@ go-fmt:
 go-lint:
 		golangci-lint run
 
-all: build test go-vet go-fmt go-lint
+all: build e2e-tests external-db-tests go-vet go-fmt go-lint
