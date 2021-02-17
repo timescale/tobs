@@ -1,8 +1,9 @@
-package tests
+package tobs_cli_tests
 
 import (
 	"errors"
 	"github.com/timescale/tobs/cli/pkg/k8s"
+	"github.com/timescale/tobs/cli/tests/test-utils"
 	v1 "k8s.io/api/core/v1"
 	"os/exec"
 	"strings"
@@ -97,13 +98,13 @@ func TestVolume(t *testing.T) {
 	}
 
 	// update default storageClass in Kind to allow pvc expansion
-	err := UpdateStorageClassAllowVolumeExpand()
+	err := test_utils.UpdateStorageClassAllowVolumeExpand()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	testVolumeExpansion(t, "151Gi", "21Gi", "9Gi", false)
-	res, err := GetAllPVCSizes()
+	res, err := test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +113,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "152Gi", "22Gi", "", false)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "153Gi", "", "", false)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +131,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "23Gi", "", false)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +140,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "24Gi", "10Gi", false)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +149,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "11Gi", false)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +179,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "12Gi", true)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +228,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "154Gi", "24Gi", "13Gi", true)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +266,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "155Gi", "25Gi", "", true)
-	res, err = GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
