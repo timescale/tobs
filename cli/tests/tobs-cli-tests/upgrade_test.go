@@ -1,7 +1,8 @@
-package tests
+package tobs_cli_tests
 
 import (
 	"errors"
+	"github.com/timescale/tobs/cli/tests/test-utils"
 	"os/exec"
 	"testing"
 
@@ -71,7 +72,7 @@ func TestUpgrade(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	size, err := GetUpdatedPromscaleMemResource()
+	size, err := test_utils.GetUpdatedPromscaleMemResource()
 	if err != nil {
 		t.Fatal(err)
 	}

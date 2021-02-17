@@ -1,4 +1,4 @@
-package tests
+package tobs_cli_tests
 
 import (
 	"context"
