@@ -16,7 +16,7 @@ func testPromlensPortForward(t testing.TB, portPromlens string) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	portforward := exec.Command("./../bin/tobs", cmds...)
+	portforward := exec.Command(PATH_TO_TOBS, cmds...)
 
 	err := portforward.Start()
 	if err != nil {

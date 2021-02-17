@@ -50,7 +50,13 @@ jobs:
       - uses: engineerd/setup-kind@v0.5.0
         with:
           version: "v0.7.0"
-      - name: Tests
+
+      - name: E2E-Tests
         working-directory: ${{env.working-directory}}
         run: |
-          make test
+          make e2e-tests
+
+      - name: External-DB-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make external-db-tests

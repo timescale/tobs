@@ -19,7 +19,8 @@ data:
 {{- $password := $userDetails._1 }}
 {{- $dbDetails := get $values "path" }}
 {{- $dbName := trimPrefix "/" $dbDetails }}
-{{- $sslInfo := get $values "query"}}
+{{- $queryInfo := get $values "query" }}
+{{- $sslInfo := regexFind "ssl[mM]ode=[^&]+" $queryInfo}}
 {{- $sslDetails := split "=" $sslInfo }}
 {{- $sslMode := $sslDetails._1 }}
   GF_DATABASE_TYPE: {{ "postgres" | b64enc }}

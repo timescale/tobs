@@ -30,7 +30,7 @@ func testVolumeExpansion(t testing.TB, timescaleDBStorage, timescaleDBWal, prome
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	 expand := exec.Command("./../bin/tobs", cmds...)
+	 expand := exec.Command(PATH_TO_TOBS, cmds...)
 	 _, err := expand.CombinedOutput()
 	 if err != nil {
 		 t.Fatal(err)
@@ -52,7 +52,7 @@ func testVolumeGet(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusS
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	expand := exec.Command("./../bin/tobs", cmds...)
+	expand := exec.Command(PATH_TO_TOBS, cmds...)
 	out, err := expand.CombinedOutput()
 	if err != nil {
 		t.Fatal(err)
