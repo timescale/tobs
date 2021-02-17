@@ -30,7 +30,7 @@ __Dependencies__: [Helm 3](https://helm.sh/docs/intro/install/)
 
 ## Using the tobs CLI tool
 
-The [CLI tool](/cli/README.md) provides the most seamless experience for interacting with tobs.
+The [CLI tool](/cli/README.md) ([usage docs](docs/cli-usage.md)) provides the most seamless experience for interacting with tobs.
 
 Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
 
@@ -63,6 +63,9 @@ tobs grafana port-forward
 ```
 Then, point your browser to http://127.0.0.1:8080/ and login with the `admin` username.
 
+### Do more with the CLI 
+
+Our [**full usage docs**](docs/cli-usage.md) give a good overview of what you can do with the CLI tool.
 
 More details about the CLI tool can be found [here](/cli/README.md)
 
