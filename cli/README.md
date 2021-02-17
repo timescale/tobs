@@ -37,6 +37,10 @@ tobs grafana port-forward
 ```
 Then, point your browser to http://127.0.0.1:8080/ and login with the `admin` username.
 
+## Usage guide
+
+Our [**usage guide**](docs/cli-usage.md) provides a good high-level overview of what tobs can do.
+
 ## Commands
 
 The following are the commands possible with the CLI.
