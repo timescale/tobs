@@ -148,3 +148,8 @@ promlens:
   defaultPrometheusUrl:  "http://localhost:9201"
   loadBalancer:
     enabled: false
+
+#Enable Promscale to connect to an existing database by providing the db-uri
+timescaledbExternal:
+  enabled: false
+  db_uri: ""

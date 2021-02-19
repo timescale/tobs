@@ -11,15 +11,7 @@ metadata:
    chart: {{ template "tobs.chart" . }}
    release: {{ .Release.Name }}
 data:
-  {{- $user := "" }}
-  {{- if .Values.timescaledbExternal.enabled }}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
-  {{- $userInfo := get $values "userinfo" }}
-  {{- $userDetails :=  split ":" $userInfo }}
-  {{- $user = $userDetails._0 }}
-  {{- else }}
-  {{- $user = .Values.grafana.timescale.adminUser }}
-  {{- end }}
+  {{- $user := ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
    add-users.sql: |-
     \set ON_ERROR_STOP on
     {{ if $timescaleAsDB.enabled -}}

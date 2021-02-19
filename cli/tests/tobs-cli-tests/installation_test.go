@@ -157,8 +157,8 @@ func testHelmShowValues(t testing.TB) {
 	var showvalues *exec.Cmd
 
 	t.Logf("Running 'tobs helm show-values'")
-	showvalues = exec.Command(PATH_TO_TOBS, "helm", "show-values")
 
+	showvalues = exec.Command(PATH_TO_TOBS, "helm", "show-values", "-c", PATH_TO_CHART)
 	out, err := showvalues.CombinedOutput()
 	if err != nil {
 		t.Logf(string(out))

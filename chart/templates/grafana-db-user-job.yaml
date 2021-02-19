@@ -12,31 +12,20 @@ metadata:
 spec:
   template:
     spec:
-{{- $user := "" }}
-{{- $port := "" }}
 {{- $host := "" }}
-{{- $dbName := "" }}
+{{- $port := "" }}
 {{- if .Values.timescaledbExternal.enabled }}
 {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
-{{- $userInfo := get $values "userinfo" }}
-{{- $userDetails :=  split ":" $userInfo }}
-{{- $user = $userDetails._0 }}
-{{- $password := $userDetails._1 }}
 {{- $hostURL := get $values "host" }}
 {{- $hostDetails := split ":" $hostURL}}
 {{- $port = $hostDetails._1 | quote }}
 {{- $host = tpl $hostDetails._0 $ }}
-{{- $dbDetails := get $values "path" }}
-{{- $dbName = trimPrefix "/" $dbDetails }}
 {{- else }}
 {{- with .Values.grafana.timescale }}
-{{- $user = .adminUser }}
 {{- $port = .database.port | quote }}
 {{- $host = tpl .database.host $ }}
-{{- $dbName = .database.dbName }}
 {{- end -}}
-{{- end -}}
-{{- with .Values.grafana.timescale }}
+{{- end }}
       containers:
       - name: {{ $.Chart.Name }}-grafana-db
         image: postgres:12-alpine
@@ -48,15 +37,15 @@ spec:
         - name: PGPORT
           value: {{ $port }}
         - name: PGUSER
-          value: {{ $user }}
+          value: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ tpl .adminPassSecret $ }}
-              key: {{ $user }}
+              name: {{ tpl .Values.grafana.timescale.adminPassSecret $ }}
+              key: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
         - name: PGHOST
           value: {{ $host }}
-        command: [ 'psql', '-d', {{ $dbName }}, '-f', '/add-users.sql' ]
+        command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) (.Values.grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}, '-f', '/add-users.sql' ]
       restartPolicy: OnFailure
       volumes:
       - name: sql-volume
@@ -73,6 +62,5 @@ spec:
         - name: PGHOST
           value: {{ $host }}
         command: [ 'sh', '/wait-for-ts.sh' ]
-{{- end -}}
 {{- end -}}
 {{- end -}}

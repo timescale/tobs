@@ -17,17 +17,16 @@ func TestTimescale(t *testing.T) {
 		Namespace: NAMESPACE,
 	}
 
-	//releaseInfo.TestTimescaleGetPassword(t, "")
-	//releaseInfo.TestTimescaleChangePassword(t, "", "postgres", "battery")
-	//releaseInfo.VerifyTimescalePassword(t, "postgres", "battery")
-	//releaseInfo.TestTimescaleGetPassword(t, "admin")
-	//releaseInfo.TestTimescaleChangePassword(t, "admin", "", "chips")
-	//releaseInfo.VerifyTimescalePassword(t, "admin", "chips")
+	releaseInfo.TestTimescaleGetPassword(t, "")
+	releaseInfo.TestTimescaleChangePassword(t, "postgres", "postgres", "battery")
+	releaseInfo.VerifyTimescalePassword(t, "postgres", "battery")
+
+	releaseInfo.TestTimescaleGetPassword(t, "")
+	releaseInfo.TestTimescaleChangePassword(t, "", "", "chips")
+	releaseInfo.VerifyTimescalePassword(t, "postgres", "chips")
 
 	releaseInfo.TestTimescaleConnect(t, true, "")
 	releaseInfo.TestTimescaleConnect(t, false, "")
 	releaseInfo.TestTimescaleConnect(t, false, "postgres")
 	releaseInfo.TestTimescaleConnect(t, false, "postgres")
-	releaseInfo.TestTimescaleConnect(t, false, "admin")
-	releaseInfo.TestTimescaleConnect(t, false, "admin")
 }
