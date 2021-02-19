@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"testing"
 	"time"
+
+	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
 var RELEASE_NAME = "gg"
@@ -44,6 +46,11 @@ func TestMain(m *testing.M) {
 	time.Sleep(30 * time.Second)
 
 	code := m.Run()
+
+	err := test_utils.CheckPodsRunning(NAMESPACE)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	uninstallsObs()
 

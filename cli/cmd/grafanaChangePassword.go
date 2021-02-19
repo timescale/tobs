@@ -45,10 +45,27 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 
 	err = k8s.KubeExecCmd(namespace, grafanaPod, "grafana", "grafana-cli admin reset-admin-password "+password, nil, false)
 	if err != nil {
-		secret.Data["admin-password"] = oldpassword
-		_ = k8s.KubeUpdateSecret(namespace, secret)
+		err1 := updateToOldPassword(oldpassword)
+		if err1 != nil {
+			// on failure just print the error, to indicate users the there is an inconsistency in pwd change.
+			fmt.Println(err1)
+		}
+		return fmt.Errorf("could not change Grafana password: %s", err)
+	}
+
+	return nil
+}
+
+func updateToOldPassword(oldpassword []byte) error {
+	secret, err := k8s.KubeGetSecret(namespace, name+"-grafana")
+	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
+	secret.Data["admin-password"] = oldpassword
+	err = k8s.KubeUpdateSecret(namespace, secret)
+	if err != nil {
+		return fmt.Errorf("failed to update secret to old password on change password failure %v", err)
+	}
 	return nil
 }

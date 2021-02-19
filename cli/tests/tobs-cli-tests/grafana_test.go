@@ -52,14 +52,14 @@ func testGrafanaGetPass(t testing.TB) {
 	}
 }
 
-func testGrafanaChangePass(t testing.TB, newpass string) {
+func testGrafanaChangePass(t testing.TB, newpass string, expectError bool) {
 	cmds := []string{"grafana", "change-password", "\"" + newpass + "\"", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	changepass := exec.Command(PATH_TO_TOBS, cmds...)
 
 	out, err := changepass.CombinedOutput()
-	if err != nil {
+	if err != nil && !expectError {
 		t.Logf(string(out))
 		t.Fatal(err)
 	}
@@ -90,13 +90,18 @@ func TestGrafana(t *testing.T) {
 	testGrafanaPortForward(t, "7390")
 
 	testGrafanaGetPass(t)
-	testGrafanaChangePass(t, "kraken")
+	testGrafanaChangePass(t, "kraken", false)
 	testGrafanaGetPass(t)
 	verifyGrafanaPass(t, "kraken")
-	testGrafanaChangePass(t, "cereal")
+	testGrafanaChangePass(t, "cereal", false)
 	testGrafanaGetPass(t)
 	verifyGrafanaPass(t, "cereal")
-	testGrafanaChangePass(t, "23498MSDF(*9389m*(@#M24309mDj")
+	testGrafanaChangePass(t, "23498MSDF(*9389m*(@#M24309mDj", false)
+
+	// failure case due to pwd is short
+	// the pwd should be older pwd
+	testGrafanaChangePass(t, "hii", true)
+
 	testGrafanaGetPass(t)
 	verifyGrafanaPass(t, "23498MSDF(*9389m*(@#M24309mDj")
 }

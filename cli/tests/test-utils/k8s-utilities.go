@@ -2,6 +2,8 @@ package test_utils
 
 import (
 	"context"
+	"fmt"
+	v1 "k8s.io/api/core/v1"
 	"log"
 	"os"
 
@@ -78,4 +80,70 @@ func GetUpdatedPromscaleMemResource() (string, error) {
 	}
 	mem := promscale.Spec.Template.Spec.Containers[0].Resources.Requests["memory"]
 	return mem.String(), nil
+}
+
+func CheckPodsRunning(namespace string) error {
+	fmt.Println("Performing check on all are pods are running.")
+	client, _ := kubeInit()
+	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list pods to check status %v", err)
+	}
+
+	for _, pod := range pods.Items {
+		for _, c := range pod.Status.ContainerStatuses {
+			if !c.Ready {
+				// If container is not ready some times they be in succeeded state which is fine
+				if pod.Status.Phase != "Succeeded" && pod.Status.Phase != "Running" {
+					return fmt.Errorf("failed to verify all the pods are running, "+
+						"%s pod is not running, current status %s, container %s is not ready", pod.Name, pod.Status.Phase, c.Name)
+				}
+			}
+		}
+	}
+
+	fmt.Println("All pods are in running state.")
+	return nil
+}
+
+func CreateTimescaleDBNodePortService(namespace string) (string, error){
+	client, _ := kubeInit()
+	nodes, err := client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to list nodes %v", err)
+	}
+
+	lb := &v1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "tsdb-lb-svc",
+			Namespace: namespace,
+		},
+		Spec: v1.ServiceSpec{
+			Ports: []v1.ServicePort{
+				{
+					Port: 5432,
+					NodePort: 30007,
+				},
+			},
+			Selector: map[string]string{"app": "external-db-tests-timescaledb", "release": "external-db-tests", "role": "master"},
+			Type:     "NodePort",
+		},
+	}
+
+	_, err = client.CoreV1().Services(namespace).Create(context.Background(), lb, metav1.CreateOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to create load balancer service for timescaledb %v", err)
+	}
+
+	ip := ""
+	if len(nodes.Items) > 0 {
+		for _, t := range nodes.Items[0].Status.Addresses {
+			if t.Type == "InternalIP" {
+				ip = t.Address
+				break
+			}
+		}
+	}
+
+	return ip+":30007", nil
 }

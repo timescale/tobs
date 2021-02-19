@@ -285,7 +285,7 @@ func TestMetrics(t *testing.T) {
 	verifyRetentionPeriod(t, "up", 10*24*time.Hour)
 
 	testRetentionReset(t, "node_load5", "", "")
-	verifyRetentionPeriod(t, "node_load15", 10*24*time.Hour)
+	verifyRetentionPeriod(t, "node_load5", 10*24*time.Hour)
 
 	testRetentionSetDefault(t, 11, "", "postgres")
 	verifyRetentionPeriod(t, "go_info", 11*24*time.Hour)
