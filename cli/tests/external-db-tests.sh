@@ -3,8 +3,9 @@
 kind create cluster --name tobs
 
 clean_up() {
+  ec=$?
   kind delete cluster --name tobs
-  exit
+  exit $ec
 }
 
 trap clean_up SIGHUP SIGINT SIGTERM
