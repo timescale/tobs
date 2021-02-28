@@ -46,6 +46,10 @@ spec:
         - name: PGHOST
           value: {{ $host }}
         command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) (.Values.grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}, '-f', '/add-users.sql' ]
+        {{ if .Values.grafanaDBJob.resources }}
+        resources:
+          {{ toYaml .Values.grafanaDBJob.resources | nindent 14 }}
+        {{ end }}
       restartPolicy: OnFailure
       volumes:
       - name: sql-volume

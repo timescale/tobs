@@ -19,7 +19,7 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: false
-  image: timescale/promscale:0.1.0-alpha.4.1
+  image: timescale/promscale:latest
   # connection options
   connection:
     # the db name in which the metrics will be stored
@@ -121,4 +121,6 @@ grafana:
     adminUser: postgres
     adminPassSecret: *dbPassSecret
 
+grafanaDBJob:
+  resources: {}
 

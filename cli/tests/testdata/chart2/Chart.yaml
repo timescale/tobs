@@ -5,7 +5,7 @@ description: A Helm chart for tobs, The Observability Stack for Kubernetes
 type: application
 
 version: 0.5.8
-appVersion: 0.2.1
+appVersion: 0.2.2
 
 dependencies:
   - name: timescaledb-single
@@ -18,9 +18,9 @@ dependencies:
     repository: https://charts.timescale.com
   - name: prometheus
     condition: prometheus.enabled
-    version: 11.16.7
+    version: 13.3.3
     repository: https://prometheus-community.github.io/helm-charts
   - name: grafana
     condition: grafana.enabled
-    version: 6.1.0
+    version: 6.4.4
     repository: https://grafana.github.io/helm-charts
