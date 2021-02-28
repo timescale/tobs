@@ -147,6 +147,9 @@ grafana:
     adminUser: postgres
     adminPassSecret: *dbPassSecret
 
+grafanaDBJob:
+  resources: {}
+
 #Enable PromLens  https://promlens.com/
 #PromLens is a PromQL query builder, analyzer, and visualizer
 promlens:
