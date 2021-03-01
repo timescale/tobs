@@ -1,5 +1,5 @@
 {{- if .Values.grafana.enabled -}}
-  {{- if .Values.grafana.timescale.database.enabled -}}
+{{- if .Values.grafana.timescale.database.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -12,59 +12,59 @@ metadata:
 spec:
   template:
     spec:
-  {{- $host := "" }}
-  {{- $port := "" }}
-  {{- if .Values.timescaledbExternal.enabled }}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
-  {{- $hostURL := get $values "host" }}
-  {{- $hostDetails := split ":" $hostURL}}
-  {{- $port = $hostDetails._1 | quote }}
-  {{- $host = tpl $hostDetails._0 $ }}
-  {{- else }}
-  {{- with .Values.grafana.timescale }}
-  {{- $port = .database.port | quote }}
-  {{- $host = tpl .database.host $ }}
-  {{- end -}}
-  {{- end }}
-containers:
-  - name: {{ $.Chart.Name }}-grafana-db
-    image: postgres:12-alpine
-    volumeMounts:
+{{- $host := "" }}
+{{- $port := "" }}
+{{- if .Values.timescaledbExternal.enabled }}
+{{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+{{- $hostURL := get $values "host" }}
+{{- $hostDetails := split ":" $hostURL}}
+{{- $port = $hostDetails._1 | quote }}
+{{- $host = tpl $hostDetails._0 $ }}
+{{- else }}
+{{- with .Values.grafana.timescale }}
+{{- $port = .database.port | quote }}
+{{- $host = tpl .database.host $ }}
+{{- end -}}
+{{- end }}
+      containers:
+      - name: {{ $.Chart.Name }}-grafana-db
+        image: postgres:12-alpine
+        volumeMounts:
+        - name: sql-volume
+          mountPath: /add-users.sql
+          subPath: add-users.sql
+        env:
+        - name: PGPORT
+          value: {{ $port }}
+        - name: PGUSER
+          value: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ tpl .Values.grafana.timescale.adminPassSecret $ }}
+              key: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
+        - name: PGHOST
+          value: {{ $host }}
+        command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) (.Values.grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}, '-f', '/add-users.sql' ]
+        {{ if .Values.grafanaDBJob.resources }}
+        resources:
+          {{ toYaml .Values.grafanaDBJob.resources | nindent 14 }}
+        {{ end }}
+      restartPolicy: OnFailure
+      volumes:
       - name: sql-volume
-        mountPath: /add-users.sql
-        subPath: add-users.sql
-    env:
-      - name: PGPORT
-        value: {{ $port }}
-      - name: PGUSER
-        value: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
-      - name: PGPASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: {{ tpl .Values.grafana.timescale.adminPassSecret $ }}
-            key: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
-      - name: PGHOST
-        value: {{ $host }}
-    command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) (.Values.grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}, '-f', '/add-users.sql' ]
-    {{ if .Values.grafanaDBJob.resources }}
-    resources:
-      {{ toYaml .Values.grafanaDBJob.resources | nindent 14 }}
-    {{ end }}
-restartPolicy: OnFailure
-volumes:
-  - name: sql-volume
-    configMap:
-      name: {{ $.Release.Name }}-grafana-db
-initContainers:
-  - name: init-db
-    image: busybox:1.28
-    volumeMounts:
-      - name: sql-volume
-        mountPath: /wait-for-ts.sh
-        subPath: wait-for-ts.sh
-    env:
-      - name: PGHOST
-        value: {{ $host }}
-    command: [ 'sh', '/wait-for-ts.sh' ]
-  {{- end -}}
-  {{- end -}}
+        configMap:
+          name: {{ $.Release.Name }}-grafana-db
+      initContainers:
+      - name: init-db
+        image: busybox:1.28
+        volumeMounts:
+        - name: sql-volume
+          mountPath: /wait-for-ts.sh
+          subPath: wait-for-ts.sh
+        env:
+        - name: PGHOST
+          value: {{ $host }}
+        command: [ 'sh', '/wait-for-ts.sh' ]
+{{- end -}}
+{{- end -}}

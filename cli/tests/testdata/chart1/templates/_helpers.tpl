@@ -71,3 +71,56 @@ CLI release name and namespace
 {{- if ne .Release.Namespace "default" }} --namespace {{ .Release.Namespace }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Extract the username from db uri
+*/}}
+{{- define "tobs.dburi.user" -}}
+  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $userInfo := get $values "userinfo" }}
+  {{- $userDetails :=  split ":" $userInfo }}
+  {{- $user := $userDetails._0 }}
+  {{- printf $user -}}
+{{- end -}}
+
+{{/*
+Extract the password from db uri
+*/}}
+{{- define "tobs.dburi.password" -}}
+  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $userInfo := get $values "userinfo" }}
+  {{- $userDetails :=  split ":" $userInfo }}
+  {{- $pwd := $userDetails._1 }}
+  {{- printf $pwd -}}
+{{- end -}}
+
+{{/*
+Extract the host from db uri
+*/}}
+{{- define "tobs.dburi.host" -}}
+  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $hostURL := get $values "host" }}
+  {{- printf $hostURL -}}
+{{- end -}}
+
+{{/*
+Extract the dbname from db uri
+*/}}
+{{- define "tobs.dburi.dbname" -}}
+  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $dbDetails := get $values "path" }}
+  {{- $dbName := trimPrefix "/" $dbDetails }}
+  {{- printf $dbName -}}
+{{- end -}}
+
+{{/*
+Extract the sslmode from db uri
+*/}}
+{{- define "tobs.dburi.sslmode" -}}
+  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $queryInfo := get $values "query" }}
+  {{- $sslInfo := regexFind "ssl[mM]ode=[^&]+" $queryInfo}}
+  {{- $sslDetails := split "=" $sslInfo }}
+  {{- $sslMode := $sslDetails._1 }}
+  {{- printf $sslMode -}}
+{{- end -}}

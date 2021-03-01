@@ -15,8 +15,20 @@ func TestUpgrade(t *testing.T) {
 		t.Skip("Skipping upgrade tests")
 	}
 
-	out := exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart1/", "-f", "./../testdata/chart1/values.yaml", "--namespace", "ns", "--name", "gg", "-y")
+	out := exec.Command("helm", "dep", "up", "./../testdata/chart1/")
 	_, err := out.CombinedOutput()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	out = exec.Command("helm", "dep", "up", "./../testdata/chart2/")
+	_, err = out.CombinedOutput()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	out = exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart1/", "-f", "./../testdata/chart1/values.yaml", "--namespace", "ns", "--name", "gg", "-y")
+	_, err = out.CombinedOutput()
 	if err != nil {
 		t.Fatal(err)
 	}
