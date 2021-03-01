@@ -124,4 +124,7 @@ grafana:
 grafanaDBJob:
   resources: {}
 
-
+#Enable Promscale to connect to an existing database by providing the db-uri
+timescaledbExternal:
+  enabled: false
+  db_uri: ""
