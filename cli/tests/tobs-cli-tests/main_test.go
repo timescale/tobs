@@ -41,9 +41,14 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}()
 
+	// tests on backEnabled tobs
+	// runs it prior to other tests as
+	// the tobs installation itself is different
+	testBackUpEnabledInstallation(&testing.T{})
+
 	installObs()
 
-	time.Sleep(30 * time.Second)
+	time.Sleep(1 * time.Minute)
 
 	code := m.Run()
 

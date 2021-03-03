@@ -10,9 +10,9 @@ import (
 	"os"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/resource"
-
 	corev1 "k8s.io/api/core/v1"
+	errors2 "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
@@ -48,7 +48,7 @@ func kubeInit() (kubernetes.Interface, *rest.Config) {
 
 func KubeGetPodName(namespace string, labelmap map[string]string) (string, error) {
 	var err error
-
+	var podName string
 	client, _ := kubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
@@ -58,10 +58,14 @@ func KubeGetPodName(namespace string, labelmap map[string]string) (string, error
 
 	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
-		return "", err
+		return podName, err
 	}
 
-	return pods.Items[0].Name, nil
+	if len(pods.Items) > 0 {
+		podName = pods.Items[0].Name
+	}
+
+	return podName, nil
 }
 
 func KubeGetServiceName(namespace string, labelmap map[string]string) (string, error) {
@@ -321,7 +325,8 @@ func KubeDeletePod(namespace string, podName string) error {
 	client, _ := kubeInit()
 
 	fmt.Printf("Deleting pod %v...\n", podName)
-	err = client.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{})
+	gracePeriodSecs := int64(0)
+	err = client.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSecs})
 	if err != nil {
 		return err
 	}
@@ -518,4 +523,68 @@ func DeletePods(namespace string, labels map[string]string) error {
 		}
 	}
 	return nil
+}
+
+func CreateSecret(secret *corev1.Secret) error {
+	client, _ := kubeInit()
+	_, err := client.CoreV1().Secrets(secret.Namespace).Create(context.Background(), secret, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create %s secret %v", secret.Name, err)
+	}
+	return nil
+}
+
+func DeleteSecret(secretName, namespace string) error {
+	client, _ := kubeInit()
+	err := client.CoreV1().Secrets(namespace).Delete(context.Background(), secretName, metav1.DeleteOptions{})
+	if err != nil {
+		ok := errors2.IsNotFound(err)
+		if !ok {
+			return fmt.Errorf("failed to delete %s secret %v", secretName, err)
+		}
+	}
+	return nil
+}
+
+func CreateNamespaceIfNotExists(namespace string) error {
+	client, _ := kubeInit()
+	namespaces, err := client.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list the namespaces to verify namespace existence %v", err)
+	}
+
+	for _, n := range namespaces.Items {
+		if n.Name == namespace {
+			return nil
+		}
+	}
+
+	n := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+	_, err = client.CoreV1().Namespaces().Create(context.Background(), n, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create the namespace %v", err)
+	}
+
+	return nil
+}
+
+func CheckSecretExists(secretName, namespace string) (bool, error) {
+	client, _ := kubeInit()
+	secExists, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	if err != nil {
+		ok := errors2.IsNotFound(err)
+		if !ok {
+			return false, fmt.Errorf("failed to get %s secret present or not %v", secretName, err)
+		}
+	}
+
+	if secExists.Name != "" {
+		return true, nil
+	}
+
+	return false, nil
 }

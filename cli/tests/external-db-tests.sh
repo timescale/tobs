@@ -9,5 +9,5 @@ clean_up() {
 }
 
 trap clean_up SIGHUP SIGINT SIGTERM
-go test -v ./tests/external-db-tests
+go test -v ./tests/external-db-tests --timeout 30m
 clean_up

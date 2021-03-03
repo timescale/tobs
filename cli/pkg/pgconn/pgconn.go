@@ -2,7 +2,6 @@ package pgconn
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -14,7 +13,16 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxpool.Pool, error) {
+type DBDetails struct {
+	Namespace string
+	Name      string
+	DBName    string
+	User      string
+	SecretKey string
+	Remote    int
+}
+
+func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 	var pool *pgxpool.Pool
 	var err error
 
@@ -23,10 +31,16 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 	os.Stdout = nil
 	defer func() { os.Stdout = stdout }()
 
-	tspromPods, err := k8s.KubeGetPods(namespace, map[string]string{"app": name + "-promscale"})
+	tspromPods, err := k8s.KubeGetPods(d.Namespace, map[string]string{"app": d.Name + "-promscale"})
 	if err != nil {
 		return nil, err
 	}
+
+	passBytes, err := utils.GetDBPassword(d.SecretKey, d.Name, d.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	pass := string(passBytes)
 
 	envs := tspromPods[0].Spec.Containers[0].Env
 
@@ -41,30 +55,18 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		}
 	}
 
-	dbURI, err := utils.GetTimescaleDBURI(namespace, name)
+	dbURI, err := utils.GetTimescaleDBURI(d.Namespace, d.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
-	if err != nil {
-		return nil, err
-	}
-
-	var pass string
-	if bytepass, exists := secret.Data[user]; exists {
-		pass = string(bytepass)
-	} else {
-		return nil, errors.New("user not found")
-	}
-
-	tsdbPods, err := k8s.KubeGetPods(namespace, map[string]string{"release": name, "role": "master"})
+	tsdbPods, err := k8s.KubeGetPods(d.Namespace, map[string]string{"release": d.Name, "role": "master"})
 	if err != nil {
 		return nil, err
 	}
 
 	if len(tsdbPods) != 0 {
-		pf, err := k8s.KubePortForwardPod(namespace, tsdbPods[0].Name, 0, remote)
+		pf, err := k8s.KubePortForwardPod(d.Namespace, tsdbPods[0].Name, 0, d.Remote)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +77,7 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		}
 		local := int(ports[0].Local)
 
-		pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@localhost:"+strconv.Itoa(local)+"/"+dbname)
+		pool, err = pgxpool.Connect(context.Background(), fmt.Sprint("postgres://"+d.User+":"+pass+"@localhost:"+strconv.Itoa(local)+"/"+d.DBName))
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +88,7 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 				return nil, err
 			}
 		} else {
-			pool, err = pgxpool.Connect(context.Background(), "postgres://"+user+":"+pass+"@"+host+":"+port+"/"+dbname+"?sslmode="+sslmode)
+			pool, err = pgxpool.Connect(context.Background(), fmt.Sprint("postgres://"+d.User+":"+pass+"@"+host+":"+port+"/"+d.DBName+"?sslmode="+sslmode))
 			if err != nil {
 				return nil, err
 			}
@@ -113,6 +115,15 @@ func UpdatePasswordInDBURI(dburi, newpass string) (string, error) {
 	if db.ConnConfig.ConnectTimeout.String() != "0s" {
 		connectTimeOut = "&connect_timeout=" + fmt.Sprintf("%.f", db.ConnConfig.ConnectTimeout.Seconds())
 	}
-	res := "postgres://" + db.ConnConfig.User + ":" + newpass + "@" + db.ConnConfig.Host + ":" + port + "/" + db.ConnConfig.Database + "?sslmode=" + sslmode + connectTimeOut
+	res := fmt.Sprint("postgres://" + db.ConnConfig.User + ":" + newpass + "@" + db.ConnConfig.Host + ":" + port + "/" + db.ConnConfig.Database + "?sslmode=" + sslmode + connectTimeOut)
 	return res, nil
+}
+
+func ParseDBURI(dbURI string) (*pgxpool.Config, error) {
+	db, err := pgxpool.ParseConfig(dbURI)
+	if err != nil {
+		return db, err
+	}
+
+	return db, nil
 }

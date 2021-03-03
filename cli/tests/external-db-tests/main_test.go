@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"testing"
 	"time"
 
@@ -57,7 +58,7 @@ func installTimescaleDB() {
 	// to deploy only timescaleDB
 	log.Println("Installing TimescaleDB")
 	runTsdb := exec.Command(PATH_TO_TOBS, "install", "-c", PATH_TO_CHART, "-f", "./../testdata/f5.yaml", "--name", "external-db-tests")
-	err := runTsdb.Run()
+	_, err := runTsdb.CombinedOutput()
 	if err != nil {
 		log.Println("Error installing timescaleDB:", err)
 		os.Exit(1)
@@ -75,10 +76,20 @@ func runTobsWithoutTSDB() {
 
 	fmt.Printf("Created nodeport service for timescaleDB, connecting using ip %s\n", ip)
 
-	obsinstall := exec.Command(PATH_TO_TOBS, "install", "--external-timescaledb-uri",
-		"postgres://postgres:tea@"+ip+"/postgres?sslmode=require", "-c", PATH_TO_CHART)
-	err = obsinstall.Run()
+	cmds := []string{"timescaledb", "get-password", "-n", "external-db-tests"}
+	getpass := exec.Command(PATH_TO_TOBS, cmds...)
+
+	out, err := getpass.CombinedOutput()
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	pass := strings.TrimSuffix(string(out), "\n")
+	obsinstall := exec.Command(PATH_TO_TOBS, "install", "--external-timescaledb-uri",
+		"postgres://postgres:"+pass+"@"+ip+"/postgres?sslmode=require", "-c", PATH_TO_CHART)
+	out, err = obsinstall.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(out))
 		log.Println("Error installing The Observability Stack without TimescaleDB:", err)
 		os.Exit(1)
 	}

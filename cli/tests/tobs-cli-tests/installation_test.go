@@ -9,7 +9,7 @@ import (
 	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
-func testInstall(t testing.TB, name, namespace, filename string) {
+func testInstall(t testing.TB, name, namespace, filename string, enableBackUp bool) {
 	cmds := []string{"install", "--chart-reference", PATH_TO_CHART}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
@@ -23,6 +23,10 @@ func testInstall(t testing.TB, name, namespace, filename string) {
 	}
 	if filename != "" {
 		cmds = append(cmds, "-f", filename)
+	}
+
+	if enableBackUp {
+		cmds = append(cmds, "--enable-timescaledb-backup")
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
@@ -173,39 +177,30 @@ func TestInstallation(t *testing.T) {
 
 	testHelmShowValues(t)
 
-	testUninstall(t, "", "", false)
-	testInstall(t, "", "", "")
-	testHelmUninstall(t, "", "", true)
-	testHelmInstall(t, "", "", "")
-	testUninstall(t, "", "", false)
-	testHelmDeleteData(t, "", "")
-	testHelmInstall(t, "", "", "")
-	testHelmUninstall(t, "", "", false)
-	testInstall(t, "", "", "")
-	testUninstall(t, "", "", false)
-	testHelmDeleteData(t, "", "")
+	testUninstall(t, "", "", true)
 
-	testInstall(t, "sd-fo9ods-oe93", "", "")
-	testHelmUninstall(t, "sd-fo9ods-oe93", "", false)
-	testHelmInstall(t, "x98-2cn4-ru2-9cn48u", "nondef", "")
-	testUninstall(t, "x98-2cn4-ru2-9cn48u", "nondef", false)
-	testHelmInstall(t, "as-dn-in234i-n", "", "")
-	testHelmUninstall(t, "as-dn-in234i-n", "", false)
-	testInstall(t, "we-3oiwo3o-s-d", "", "")
-	testUninstall(t, "we-3oiwo3o-s-d", "", false)
+	testInstall(t, "abc", "", "", false)
+	testHelmUninstall(t, "abc", "", false)
 
-	testInstall(t, "f1", "", "./../testdata/f1.yml")
+	testHelmInstall(t, "def", "", "")
+	testUninstall(t, "def", "", false)
+	testHelmDeleteData(t, "def", "")
+
+	testInstall(t, "f1", "", "./../testdata/f1.yml", false)
 	testHelmUninstall(t, "f1", "", false)
+
 	testHelmInstall(t, "f2", "", "./../testdata/f2.yml")
 	testUninstall(t, "f2", "", false)
+
 	testHelmInstall(t, "f3", "nas", "./../testdata/f3.yml")
 	testHelmUninstall(t, "f3", "nas", false)
-	testInstall(t, "f4", "", "./../testdata/f4.yml")
+
+	testInstall(t, "f4", "", "./../testdata/f4.yml", false)
 	testUninstall(t, "f4", "", false)
 
-	testInstall(t, "", "", "")
+	testInstall(t, "", "", "", false)
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(1 * time.Minute)
 
 	t.Logf("Waiting for pods to initialize...")
 	pods, err := k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)

@@ -10,11 +10,11 @@ appVersion: 0.2.2
 dependencies:
   - name: timescaledb-single
     condition: timescaledb-single.enabled
-    version: 0.5.5
+    version: 0.8.2
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
-    version: 0.2.0
+    version: 0.3.0
     repository: https://charts.timescale.com
   - name: prometheus
     condition: prometheus.enabled
@@ -24,3 +24,4 @@ dependencies:
     condition: grafana.enabled
     version: 6.4.4
     repository: https://grafana.github.io/helm-charts
+

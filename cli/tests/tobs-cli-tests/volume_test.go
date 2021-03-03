@@ -30,11 +30,11 @@ func testVolumeExpansion(t testing.TB, timescaleDBStorage, timescaleDBWal, prome
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	 expand := exec.Command(PATH_TO_TOBS, cmds...)
-	 _, err := expand.CombinedOutput()
-	 if err != nil {
-		 t.Fatal(err)
-	 }
+	expand := exec.Command(PATH_TO_TOBS, cmds...)
+	_, err := expand.CombinedOutput()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testVolumeGet(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusStorage bool) string {
@@ -60,7 +60,6 @@ func testVolumeGet(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusS
 
 	return string(out)
 }
-
 
 func TestVolume(t *testing.T) {
 	if testing.Short() {
@@ -108,7 +107,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "151Gi" &&  res["wal-volume-gg-timescaledb-0"] != "21Gi" && res["gg-prometheus-server"] != "9Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "151Gi" && res["wal-volume-gg-timescaledb-0"] != "21Gi" && res["gg-prometheus-server"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-1"))
 	}
 
@@ -117,7 +116,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "152Gi" &&  res["wal-volume-gg-timescaledb-0"] != "22Gi" && res["gg-prometheus-server"] != "9Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "152Gi" && res["wal-volume-gg-timescaledb-0"] != "22Gi" && res["gg-prometheus-server"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-2"))
 	}
 
@@ -126,7 +125,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "153Gi" &&  res["wal-volume-gg-timescaledb-0"] != "22Gi" && res["gg-prometheus-server"] != "9Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "153Gi" && res["wal-volume-gg-timescaledb-0"] != "22Gi" && res["gg-prometheus-server"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-3"))
 	}
 
@@ -135,7 +134,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "153Gi" &&  res["wal-volume-gg-timescaledb-0"] != "23Gi" && res["gg-prometheus-server"] != "9Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "153Gi" && res["wal-volume-gg-timescaledb-0"] != "23Gi" && res["gg-prometheus-server"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-4"))
 	}
 
@@ -144,7 +143,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "153Gi" &&  res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "10Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "153Gi" && res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "10Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-5"))
 	}
 
@@ -153,7 +152,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "153Gi" &&  res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "11Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "153Gi" && res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "11Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
@@ -162,7 +161,7 @@ func TestVolume(t *testing.T) {
 
 	// TESTCASE: Volume expand Prometheus storage and restart the pods
 
-	pods, err := k8s.KubeGetPods("ns",  prometheusLabels)
+	pods, err := k8s.KubeGetPods("ns", prometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +182,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "153Gi" &&  res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "12Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "153Gi" && res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "12Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
@@ -196,7 +195,7 @@ func TestVolume(t *testing.T) {
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
-	pods, err = k8s.KubeGetPods("ns",  prometheusLabels)
+	pods, err = k8s.KubeGetPods("ns", prometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -232,7 +231,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "154Gi" &&  res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "13Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "154Gi" && res["wal-volume-gg-timescaledb-0"] != "24Gi" && res["gg-prometheus-server"] != "13Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
@@ -244,7 +243,6 @@ func TestVolume(t *testing.T) {
 	verifyPodRestart(t, podsSet, labels)
 
 	// TESTCASE: Volume Expand only timescaleDB and restart pods.
-
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
@@ -270,7 +268,7 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-gg-timescaledb-0"] != "155Gi" &&  res["wal-volume-gg-timescaledb-0"] != "25Gi" && res["gg-prometheus-server"] != "13Gi"{
+	if res["storage-volume-gg-timescaledb-0"] != "155Gi" && res["wal-volume-gg-timescaledb-0"] != "25Gi" && res["gg-prometheus-server"] != "13Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
@@ -285,6 +283,11 @@ func TestVolume(t *testing.T) {
 
 func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]string) {
 	var pods []v1.Pod
+
+	// sleep for 2 mins as Prometheus & TimescaleDB termination takes
+	// approx 2 mins for restart to happen.
+	time.Sleep(2 * time.Minute)
+
 	for _, l := range labels {
 		p, err := k8s.KubeGetPods("ns", l)
 		if err != nil {
@@ -308,11 +311,11 @@ func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]st
 
 	// validate number of pods killed are equal to number of pods running i.e expected to be restarted.
 	if len(podsSet) != podsCounter {
-			t.Fatal(errors.New("failed to restart pods after volume expansion"))
+		t.Fatal(errors.New("failed to restart pods after volume expansion"))
 	}
 }
 
 type podDetails struct {
-	name string
+	name                  string
 	oldPodCreateTimestamp string
 }

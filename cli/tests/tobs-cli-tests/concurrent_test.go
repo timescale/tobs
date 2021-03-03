@@ -43,9 +43,9 @@ func TestConcurrent(t *testing.T) {
 	RELEASE_NAME = "test1"
 	NAMESPACE = "test1"
 
-	testInstall(t, "", "", "")
+	testInstall(t, "", "", "", false)
 	changeRelease(t)
-	testInstall(t, "", "", "")
+	testInstall(t, "", "", "", false)
 
 	TestGrafana(t)
 	TestMetrics(t)
@@ -67,7 +67,7 @@ func TestConcurrent(t *testing.T) {
 	RELEASE_NAME = oldname
 	NAMESPACE = oldspace
 
-	testInstall(t, "", "", "")
+	testInstall(t, "", "", "", false)
 
 	time.Sleep(10 * time.Second)
 

@@ -43,7 +43,14 @@ Use "tobs [command] --help" for more information about a command.
 
 This will successfully deploy all the above listed components to your k8s cluster.
 
-You can use `--name` flag to set helm release name default name is `tobs`, `--namespace` flag to deploy observability stack in namespace of your choice default is set to `default` namespace, `--chart-reference` flag to use helm chart of your choice default is set to `timescale/tobs`, `--filename` to use values.yaml file that we usually use with helm chart you can provide values.yaml of your choice by default values.yaml from the chart will be used, `--external-timescaledb-uri`, `-e` to install tobs and to connect an existing database, skip TimescaleDB deployment during tobs install. 
+* `--name` flag to set helm release name default name is `tobs`.
+*`--namespace` flag to deploy observability stack in namespace of your choice default is set to `default` namespace.
+* `--chart-reference` flag to use helm chart of your choice default is set to `timescale/tobs`.
+* `--filename` to use values.yaml file that we usually use with helm chart you can provide values.yaml of your choice by default values.yaml from the chart will be used.
+* `--external-timescaledb-uri`, `-e` to install tobs and to connect an existing database, skip TimescaleDB deployment during tobs install. 
+* `--enable-timescaledb-backup`, `-b` to enable timescaleDB backup, enabling this will prompt user input for s3 details to store backups. 
+* `--tls-timescaledb-cert` to provide your own TLS certificate for TimescaleDB ssl authentication, If not provided a self signed certificate will be generated. 
+* `--tls-timescaledb-key` to provide your own TLS key for TimescaleDB ssl authentication, If not provided a private key will be generated.
 
 ## Actions for Helm:
 

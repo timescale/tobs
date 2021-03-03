@@ -12,8 +12,7 @@ import (
 	"strings"
 
 	"github.com/timescale/tobs/cli/pkg/k8s"
-
-	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/yaml"
 )
 
 const REPO_LOCATION = "https://charts.timescale.com"
@@ -243,10 +242,94 @@ func GetTimescaleDBURI(namespace, name string) (string, error) {
 				return uriData, nil
 			} else {
 				// found the secret but failed to find the value with indexed key.
-				return  "", fmt.Errorf("could not get TimescaleDB URI with secret key index as db-uri from %s", secretName)
+				return "", fmt.Errorf("could not get TimescaleDB URI with secret key index as db-uri from %s", secretName)
 			}
 		}
 	}
 
 	return "", nil
+}
+
+func ExportValuesFieldFromChart(chart string, keys []string) (interface{}, error) {
+	out := exec.Command("helm", "show", "values", chart)
+	res, err := out.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to do helm show values on the helm chart %w", err)
+	}
+
+	r, err := findKeysFromYaml(res, keys)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func ExportValuesFieldFromRelease(releaseName, namespace string, keys []string) (interface{}, error) {
+	out := exec.Command("helm", "get", "values", releaseName, "-a", "--namespace", namespace)
+	res, err := out.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to do helm get values from the helm release %w", err)
+	}
+
+	r, err := findKeysFromYaml(res, keys)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func findKeysFromYaml(res []byte, keys []string) (interface{}, error) {
+	jsonBytes, err := yaml.YAMLToJSON(res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse helm show values from yaml to json %w", err)
+	}
+
+	// Unmarshal using a generic interface
+	var f interface{}
+	err = json.Unmarshal(jsonBytes, &f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse values.yaml to json bytes %v", err)
+	}
+
+	var r interface{}
+	if len(keys) > 0 {
+		r = fetchValue(f, keys)
+		if r == nil {
+			return nil, fmt.Errorf("failed to find the value from the keys in values.yaml %v", keys)
+		}
+	}
+
+	return r, nil
+}
+
+func fetchValue(f interface{}, keys []string) interface{} {
+	// JSON object parses into a map with string keys
+	itemsMap := f.(map[string]interface{})
+	for k, v := range itemsMap {
+		if k == keys[0] {
+			if len(keys[1:]) == 0 {
+				return v
+			}
+			v1 := fetchValue(v, keys[1:])
+			if v1 != nil {
+				return v1
+			}
+		}
+	}
+	return nil
+}
+
+func GetDBPassword(secretKey, name, namespace string) ([]byte, error) {
+	secret, err := k8s.KubeGetSecret(namespace, name+"-credentials")
+	if err != nil {
+		return nil, fmt.Errorf("could not get TimescaleDB password: %w", err)
+	}
+
+	if bytepass, exists := secret.Data[secretKey]; exists {
+		return bytepass, nil
+	}
+
+	return nil, fmt.Errorf("user not found")
 }

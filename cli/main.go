@@ -15,7 +15,18 @@ limitations under the License.
 */
 package main
 
-import "github.com/timescale/tobs/cli/cmd"
+import (
+	"github.com/timescale/tobs/cli/cmd"
+	_ "github.com/timescale/tobs/cli/cmd/grafana"
+	_ "github.com/timescale/tobs/cli/cmd/helm"
+	_ "github.com/timescale/tobs/cli/cmd/metrics"
+	_ "github.com/timescale/tobs/cli/cmd/port-forward"
+	_ "github.com/timescale/tobs/cli/cmd/prometheus"
+	_ "github.com/timescale/tobs/cli/cmd/promlens"
+	_ "github.com/timescale/tobs/cli/cmd/promscale"
+	_ "github.com/timescale/tobs/cli/cmd/timescaledb"
+	_ "github.com/timescale/tobs/cli/cmd/volume"
+)
 
 func main() {
 	cmd.Execute()

@@ -9,5 +9,5 @@ clean_up() {
 }
 
 trap clean_up SIGHUP SIGINT SIGTERM
-go test -v ./tests/tobs-cli-tests --timeout 30m
+go test -v ./tests/tobs-cli-tests --timeout 45m
 clean_up
