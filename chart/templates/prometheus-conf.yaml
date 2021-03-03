@@ -34,6 +34,7 @@ data:
 {{- if $root.Values.prometheus.server.timescaleRemote.read.enabled -}}
 {{ with $root.Values.prometheus.server.timescaleRemote }}
     - url: {{ printf "%s://%s:%s/%s" .protocol (tpl .host $root) .port .read.endpoint }}
+      read_recent: {{ .read.read_recent }}
 {{- end -}}
 {{- end }}
 {{ if $root.Values.prometheus.server.remoteRead -}}

@@ -93,6 +93,7 @@ prometheus:
         enabled: true
         # complete url = {protocol}://{host}:{port}/endpoint
         endpoint: "read"
+        read_recent: true
   #You can add other configs from https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml here
   #For example, adding additional scrape jobs
   #extraScrapeConfigs: |
