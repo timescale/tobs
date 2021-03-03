@@ -106,7 +106,7 @@ func CheckPodsRunning(namespace string) error {
 	return nil
 }
 
-func CreateTimescaleDBNodePortService(namespace string) (string, error){
+func CreateTimescaleDBNodePortService(namespace string) (string, error) {
 	client, _ := kubeInit()
 	nodes, err := client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
@@ -121,7 +121,7 @@ func CreateTimescaleDBNodePortService(namespace string) (string, error){
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{
 				{
-					Port: 5432,
+					Port:     5432,
 					NodePort: 30007,
 				},
 			},
@@ -145,5 +145,14 @@ func CreateTimescaleDBNodePortService(namespace string) (string, error){
 		}
 	}
 
-	return ip+":30007", nil
+	return ip + ":30007", nil
+}
+
+func GetTSDBBackUpSecret(releaseName, namespace string) (*v1.Secret, error) {
+	client, _ := kubeInit()
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), releaseName+"-pgbackrest", metav1.GetOptions{})
+	if err != nil {
+		return &v1.Secret{}, err
+	}
+	return secret, nil
 }

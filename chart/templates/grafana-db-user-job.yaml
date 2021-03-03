@@ -12,20 +12,6 @@ metadata:
 spec:
   template:
     spec:
-{{- $host := "" }}
-{{- $port := "" }}
-{{- if .Values.timescaledbExternal.enabled }}
-{{- $values := urlParse .Values.timescaledbExternal.db_uri }}
-{{- $hostURL := get $values "host" }}
-{{- $hostDetails := split ":" $hostURL}}
-{{- $port = $hostDetails._1 | quote }}
-{{- $host = tpl $hostDetails._0 $ }}
-{{- else }}
-{{- with .Values.grafana.timescale }}
-{{- $port = .database.port | quote }}
-{{- $host = tpl .database.host $ }}
-{{- end -}}
-{{- end }}
       containers:
       - name: {{ $.Chart.Name }}-grafana-db
         image: postgres:12-alpine
@@ -35,16 +21,16 @@ spec:
           subPath: add-users.sql
         env:
         - name: PGPORT
-          value: {{ $port }}
+          value: {{ ternary (include "tobs.dburi.port" . ) (.Values.grafana.timescale.database.port | quote ) (.Values.timescaledbExternal.enabled) }}
         - name: PGUSER
           value: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ tpl .Values.grafana.timescale.adminPassSecret $ }}
-              key: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
+              key: PATRONI_SUPERUSER_PASSWORD
         - name: PGHOST
-          value: {{ $host }}
+          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl .Values.grafana.timescale.database.host $ ) (.Values.timescaledbExternal.enabled) }}
         command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) (.Values.grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}, '-f', '/add-users.sql' ]
         {{ if .Values.grafanaDBJob.resources }}
         resources:
@@ -64,7 +50,7 @@ spec:
           subPath: wait-for-ts.sh
         env:
         - name: PGHOST
-          value: {{ $host }}
+          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl .Values.grafana.timescale.database.host $ ) (.Values.timescaledbExternal.enabled) }}
         command: [ 'sh', '/wait-for-ts.sh' ]
 {{- end -}}
 {{- end -}}

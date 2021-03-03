@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 func TestTimescale(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping TimescaleDB tests")
@@ -19,9 +18,9 @@ func TestTimescale(t *testing.T) {
 	releaseInfo.TestTimescaleGetPassword(t, "")
 	releaseInfo.TestTimescaleChangePassword(t, "", "postgres", "battery")
 	releaseInfo.VerifyTimescalePassword(t, "postgres", "battery")
-	releaseInfo.TestTimescaleGetPassword(t, "admin")
-	releaseInfo.TestTimescaleChangePassword(t, "admin", "", "chips")
-	releaseInfo.VerifyTimescalePassword(t, "admin", "chips")
+	releaseInfo.TestTimescaleGetPassword(t, "")
+	releaseInfo.TestTimescaleChangePassword(t, "", "", "chips")
+	releaseInfo.VerifyTimescalePassword(t, "", "chips")
 
 	releaseInfo.TestTimescalePortForward(t, "")
 	releaseInfo.TestTimescalePortForward(t, "5432")

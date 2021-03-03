@@ -242,20 +242,25 @@ func TestMetrics(t *testing.T) {
 		t.Skip("Skipping metrics tests")
 	}
 
-	secret, err := k8s.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-credentials")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if bytepass, exists := secret.Data["postgres"]; exists {
+	if bytepass, exists := secret.Data["PATRONI_SUPERUSER_PASSWORD"]; exists {
 		PASS = string(bytepass)
 	} else {
 		t.Fatal(errors.New("user not found"))
 	}
 
-	podName, err := k8s.KubeGetPodName(NAMESPACE, map[string]string{"release": RELEASE_NAME, "role": "master"})
+	dbLabelsSet := map[string]string{"release": RELEASE_NAME, "role": "master"}
+	podName, err := k8s.KubeGetPodName(NAMESPACE, dbLabelsSet)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if podName == "" {
+		t.Fatalf("failed to find pod with labels %v", dbLabelsSet)
 	}
 
 	stdout := os.Stdout

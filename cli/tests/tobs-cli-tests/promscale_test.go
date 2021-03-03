@@ -18,4 +18,3 @@ func TestPromscale(t *testing.T) {
 	releaseInfo.TestPromscalePortForward(t, "")
 	releaseInfo.TestPromscalePortForward(t, "3421")
 }
-

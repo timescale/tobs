@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"os"
 
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	homedir "github.com/mitchellh/go-homedir"
 )
 
 var cfgFile string
-var namespace string
-var name string
+var Namespace string
+var HelmReleaseName string
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "tobs",
 	Short: "A CLI tool for The Observablity Stack",
 	Long: `The Observability Stack is a tool that uses TimescaleDB as a 
@@ -26,12 +25,12 @@ components of Observability.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		var err error
 
-		name, err = cmd.Flags().GetString("name")
+		HelmReleaseName, err = cmd.Flags().GetString("name")
 		if err != nil {
 			return fmt.Errorf("could not read global flag: %w", err)
 		}
 
-		namespace, err = cmd.Flags().GetString("namespace")
+		Namespace, err = cmd.Flags().GetString("namespace")
 		if err != nil {
 			return fmt.Errorf("could not read global flag: %w", err)
 		}
@@ -41,18 +40,18 @@ components of Observability.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tobs.yaml)")
-	rootCmd.PersistentFlags().StringP("name", "n", "tobs", "Helm release name")
-	rootCmd.PersistentFlags().StringP("namespace", "", "default", "Kubernetes namespace")
+	RootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tobs.yaml)")
+	RootCmd.PersistentFlags().StringP("name", "n", "tobs", "Helm release name")
+	RootCmd.PersistentFlags().StringP("namespace", "", "default", "Kubernetes namespace")
 }
 
 // initConfig reads in config file and ENV variables if set.

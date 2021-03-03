@@ -12,7 +12,7 @@ import (
 var PATH_TO_TOBS = "./../../bin/tobs"
 
 type ReleaseInfo struct {
-	Release string
+	Release   string
 	Namespace string
 }
 
@@ -122,7 +122,7 @@ func (r *ReleaseInfo) TestTimescaleConnect(t testing.TB, master bool, user strin
 	}
 }
 
-func (r *ReleaseInfo)  TestPromscalePortForward(t testing.TB, portPromscale string) {
+func (r *ReleaseInfo) TestPromscalePortForward(t testing.TB, portPromscale string) {
 	cmds := []string{"promscale", "port-forward", "-n", r.Release, "--namespace", r.Namespace}
 
 	if portPromscale != "" {
@@ -138,7 +138,6 @@ func (r *ReleaseInfo)  TestPromscalePortForward(t testing.TB, portPromscale stri
 	}
 
 	time.Sleep(10 * time.Second)
-
 
 	if portPromscale == "" {
 		portPromscale = "9201"

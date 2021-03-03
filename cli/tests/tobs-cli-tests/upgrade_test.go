@@ -2,12 +2,11 @@ package tobs_cli_tests
 
 import (
 	"errors"
-	"fmt"
-	"github.com/timescale/tobs/cli/tests/test-utils"
 	"os/exec"
 	"testing"
 
 	"github.com/timescale/tobs/cli/pkg/utils"
+	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
 func TestUpgrade(t *testing.T) {
@@ -81,9 +80,8 @@ func TestUpgrade(t *testing.T) {
 	}
 
 	out = exec.Command(PATH_TO_TOBS, "upgrade", "-f", "./../testdata/f6.yaml", "-c", "./../testdata/chart2/", "--namespace", "ns", "--name", "gg", "-y")
-	k, err = out.CombinedOutput()
+	_, err = out.CombinedOutput()
 	if err != nil {
-		fmt.Println(string(k))
 		t.Fatal(err)
 	}
 	size, err := test_utils.GetUpdatedPromscaleMemResource()

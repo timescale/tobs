@@ -124,3 +124,14 @@ Extract the sslmode from db uri
   {{- $sslMode := $sslDetails._1 }}
   {{- printf $sslMode -}}
 {{- end -}}
+
+{{/*
+Extract the port from db uri
+*/}}
+{{- define "tobs.dburi.port" -}}
+  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $hostURL := get $values "host" }}
+  {{- $hostDetails := split ":" $hostURL}}
+  {{- $port := $hostDetails._1 | quote }}
+  {{- printf $port -}}
+{{- end -}}

@@ -29,12 +29,10 @@ func testPromlensPortForward(t testing.TB, portPromlens string) {
 		portPromlens = "8081"
 	}
 
-
 	_, err = net.DialTimeout("tcp", "localhost:"+portPromlens, 2*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 
 	err = portforward.Process.Signal(syscall.SIGINT)
 	if err != nil {
