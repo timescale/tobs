@@ -19,7 +19,7 @@ var timescaledbGetPasswordCmd = &cobra.Command{
 
 func init() {
 	timescaledbCmd.AddCommand(timescaledbGetPasswordCmd)
-	timescaledbGetPasswordCmd.Flags().StringP("user", "U", "postgres", "user whose password to get")
+	timescaledbGetPasswordCmd.Flags().StringP("user", "U", "PATRONI_SUPERUSER_PASSWORD", "user whose password to get")
 }
 
 func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
@@ -31,7 +31,7 @@ func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
-	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}

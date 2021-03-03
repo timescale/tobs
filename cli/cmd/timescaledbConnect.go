@@ -26,7 +26,7 @@ var timescaledbConnectCmd = &cobra.Command{
 
 func init() {
 	timescaledbCmd.AddCommand(timescaledbConnectCmd)
-	timescaledbConnectCmd.Flags().StringP("user", "U", "postgres", "database user name")
+	timescaledbConnectCmd.Flags().StringP("user", "U", "PATRONI_SUPERUSER_PASSWORD", "database user name")
 	timescaledbConnectCmd.Flags().BoolP("master", "m", false, "directly execute session on master node")
 }
 
@@ -46,7 +46,7 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
-	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}

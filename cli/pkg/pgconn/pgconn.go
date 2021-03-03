@@ -46,7 +46,7 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 		return nil, err
 	}
 
-	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-credentials")
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +61,10 @@ func OpenConnectionToDB(namespace, name, user, dbname string, remote int) (*pgxp
 	tsdbPods, err := k8s.KubeGetPods(namespace, map[string]string{"release": name, "role": "master"})
 	if err != nil {
 		return nil, err
+	}
+
+	if user == "PATRONI_SUPERUSER_PASSWORD" {
+		user = "postgres"
 	}
 
 	if len(tsdbPods) != 0 {

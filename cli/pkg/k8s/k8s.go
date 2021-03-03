@@ -1,11 +1,18 @@
 package k8s
 
 import (
+	"bytes"
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"math/big"
+	rand1 "math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -518,4 +525,234 @@ func DeletePods(namespace string, labels map[string]string) error {
 		}
 	}
 	return nil
+}
+
+func CreateTimescaleDBCredentials(name, namespace string) error {
+	secretName := name + "-credentials"
+	exists, err := checkSecretExists(secretName, namespace)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return nil
+	}
+
+	fmt.Printf("Creating TimescaleDB %s secret\n", secretName)
+	sec := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: secretName,
+		},
+		Data: map[string][]byte{"PATRONI_REPLICATION_PASSWORD": randomString(10), "PATRONI_admin_PASSWORD": randomString(10),
+			"PATRONI_SUPERUSER_PASSWORD": randomString(10)},
+		Type: "Opaque",
+	}
+
+	client, _ := kubeInit()
+	_, err = client.CoreV1().Secrets(namespace).Create(context.Background(), sec, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create timescaledb credentials secret %v", err)
+	}
+	return nil
+}
+
+func randomString(n int) []byte {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand1.Intn(len(letters))]
+	}
+	return []byte(string(s))
+}
+
+func VerifyNamespaceIfNotCreate(namespace string) error {
+	client, _ := kubeInit()
+	namespaces, err := client.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list the namespaces to verify namespace existence %v", err)
+	}
+
+	for _, n := range namespaces.Items {
+		if n.Name == namespace {
+			return nil
+		}
+	}
+
+	n := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+	_, err = client.CoreV1().Namespaces().Create(context.Background(), n, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create the namespace %v", err)
+	}
+
+	return nil
+}
+
+func CreateTimescaleDBCertificates(name, namespace string) error {
+	secretName := name + "-certificate"
+	exists, err := checkSecretExists(secretName, namespace)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return nil
+	}
+
+	fmt.Printf("Creating TimescaleDB %s secret\n", secretName)
+	publicKey, privateKey, err := generateCerts()
+	if err != nil {
+		return err
+	}
+
+	sec := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: secretName,
+		},
+		Data: map[string][]byte{"tls.key": privateKey, "tls.crt": publicKey},
+		Type: "Opaque",
+	}
+
+	client, _ := kubeInit()
+	_, err = client.CoreV1().Secrets(namespace).Create(context.Background(), sec, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create timescaledb certificates secret %v", err)
+	}
+	return nil
+}
+
+type S3Details struct {
+	BucketName     string
+	EndpointName   string
+	EndpointRegion string
+	Key            string
+	Secret         string
+}
+
+func CreateTimescaleDBPgBackRest(name, namespace string, s3 S3Details) error {
+	secretName := name + "-pgbackrest"
+	exists, err := checkSecretExists(secretName, namespace)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return nil
+	}
+
+	fmt.Printf("Creating TimescaleDB %s secret\n", secretName)
+	data := map[string][]byte{
+		"PGBACKREST_REPO1_S3_BUCKET":     []byte(s3.BucketName),
+		"PGBACKREST_REPO1_S3_KEY":        []byte(s3.Key),
+		"PGBACKREST_REPO1_S3_KEY_SECRET": []byte(s3.Secret),
+	}
+
+	if s3.EndpointName != "" {
+		data["PGBACKREST_REPO1_S3_ENDPOINT"] = []byte(s3.EndpointName)
+	}
+
+	if s3.EndpointRegion != "" {
+		data["PGBACKREST_REPO1_S3_REGION"] = []byte(s3.EndpointRegion)
+	}
+
+	sec := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: secretName,
+		},
+		Data: data,
+		Type: "Opaque",
+	}
+
+	client, _ := kubeInit()
+	_, err = client.CoreV1().Secrets(namespace).Create(context.Background(), sec, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create timescaledb pgbackrest secret %v", err)
+	}
+	return nil
+}
+
+func generateCerts() ([]byte, []byte, error) {
+	priv, err := rsa.GenerateKey(rand.Reader, 4096)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to generate rsa key: %v", err)
+	}
+
+	keyUsage := x509.KeyUsageKeyEncipherment
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to generate serial number: %v", err)
+	}
+
+	template := x509.Certificate{
+		SerialNumber:          serialNumber,
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(24 * time.Hour),
+		KeyUsage:              keyUsage,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, publicKey(priv), priv)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create certificate: %v", err)
+	}
+
+	certOut := new(bytes.Buffer)
+	if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}); err != nil {
+		return nil, nil, fmt.Errorf("failed to write data to cert.pem: %v", err)
+	}
+
+	privBytes, err := x509.MarshalPKCS8PrivateKey(priv)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to marshal private key: %v", err)
+	}
+
+	keyOut := new(bytes.Buffer)
+	if err := pem.Encode(keyOut, &pem.Block{Type: "PRIVATE KEY", Bytes: privBytes}); err != nil {
+		return nil, nil, fmt.Errorf("failed to encode private key: %v", err)
+	}
+
+	return certOut.Bytes(), keyOut.Bytes(), nil
+}
+
+func publicKey(priv interface{}) interface{} {
+	switch k := priv.(type) {
+	case *rsa.PrivateKey:
+		return &k.PublicKey
+	default:
+		return nil
+	}
+}
+
+func checkSecretExists(secretName, namespace string) (bool, error) {
+	client, _ := kubeInit()
+	secExists, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	e1 := errors.New("secrets \"" + secretName + "\" not found")
+	if err != nil && err.Error() != e1.Error() {
+		return false, fmt.Errorf("failed to get %s secret present or not %v", secretName, err)
+	}
+
+	if secExists.Name != "" {
+		fmt.Printf("using existing %s secret\n", secretName)
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func DeleteTimescaleDBSecrets(releaseName, namespace string) {
+	client, _ := kubeInit()
+	fmt.Println("Deleting TimescaleDB secrets...")
+	credentialsSecret := []string{releaseName + "-credentials", releaseName + "-certificate", releaseName + "-pgbackrest"}
+	for _, s := range credentialsSecret {
+		err := client.CoreV1().Secrets(namespace).Delete(context.Background(), s, metav1.DeleteOptions{})
+		e1 := errors.New("secrets \"" + s + "\" not found")
+		if err != nil && err.Error() != e1.Error() {
+			fmt.Printf("failed to delete %s secret %v\n", s, err)
+		}
+	}
 }

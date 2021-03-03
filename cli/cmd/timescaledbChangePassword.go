@@ -22,7 +22,7 @@ var timescaledbChangePasswordCmd = &cobra.Command{
 
 func init() {
 	timescaledbCmd.AddCommand(timescaledbChangePasswordCmd)
-	timescaledbChangePasswordCmd.Flags().StringP("user", "U", "postgres", "user whose password to change")
+	timescaledbChangePasswordCmd.Flags().StringP("user", "U", "PATRONI_SUPERUSER_PASSWORD", "user whose password to change")
 	timescaledbChangePasswordCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
 }
 
@@ -31,7 +31,6 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 
 	password := args[0]
 
-	var user string
 	user, err = cmd.Flags().GetString("user")
 	if err != nil {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
@@ -60,10 +59,18 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, err = pool.Exec(context.Background(), "ALTER USER "+user+" WITH PASSWORD '"+password+"'")
+	var dbUser string
+	if user == "PATRONI_SUPERUSER_PASSWORD" {
+		dbUser = "postgres"
+	}
+
+	_, err = pool.Exec(context.Background(), "ALTER USER "+dbUser+" WITH PASSWORD '"+password+"'")
 	if err != nil {
-		_ = updateDBPwdSecrets(user, string(oldpassword))
-		return fmt.Errorf("could not change TimescaleDB password: %w", err)
+		err1 := updateDBPwdSecrets(user, string(oldpassword))
+		if err1 != nil {
+			fmt.Printf("failed to revert to the old password on password update failure %v", err1)
+		}
+		return fmt.Errorf("could not change TimescaleDB password: %v", err)
 	}
 
 	uri, err := utils.GetTimescaleDBURI(namespace, name)
@@ -93,17 +100,16 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 }
 
 func getOldPassword() ([]byte, error){
-	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-credentials")
 	if err != nil {
 		return nil, fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
-
 	oldpassword := secret.Data[user]
 	return oldpassword, nil
 }
 
 func updateDBPwdSecrets(user, password string) error {
-	secret, err := k8s.KubeGetSecret(namespace, name+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(namespace, name+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}

@@ -73,6 +73,8 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		fmt.Println(err, ", skipping")
 	}
 
+	k8s.DeleteTimescaleDBSecrets(name, namespace)
+
 	err = k8s.KubeDeleteEndpoint(namespace, name)
 	if err != nil {
 		fmt.Println(err, ", skipping")

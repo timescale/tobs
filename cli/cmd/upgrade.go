@@ -63,6 +63,11 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("couldn't get the reuse-values flag value: %w", err)
 	}
 
+	enableBackUp, err := cmd.Flags().GetBool("enable-timescaledb-backup")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+
 	cmds := []string{"upgrade", name, ref, "--namespace", namespace}
 
 	if file != "" {
@@ -92,7 +97,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		if !confirm {
 			utils.ConfirmAction()
 		}
-		err = installStack(file, ref, "")
+		err = installStack(file, ref, "", enableBackUp)
 		if err != nil {
 			return err
 		}

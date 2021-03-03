@@ -242,7 +242,7 @@ func TestMetrics(t *testing.T) {
 		t.Skip("Skipping metrics tests")
 	}
 
-	secret, err := k8s.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-timescaledb-passwords")
+	secret, err := k8s.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-credentials")
 	if err != nil {
 		t.Fatal(err)
 	}

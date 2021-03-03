@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
+
 	"github.com/timescale/tobs/cli/pkg/utils"
 
 	"github.com/timescale/tobs/cli/pkg/k8s"
@@ -31,6 +33,7 @@ func addHelmInstallFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
 	cmd.Flags().StringP("chart-reference", "c", "timescale/tobs", "Helm chart reference")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
+	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Enable TimescaleDB S3 backup")
 }
 
 func helmInstall(cmd *cobra.Command, args []string) error {
@@ -50,14 +53,19 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	err = installStack(file, ref, dbURI)
+	enableBackUp, err := cmd.Flags().GetBool("enable-timescaledb-backup")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+
+	err = installStack(file, ref, dbURI, enableBackUp)
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 	return nil
 }
 
-func installStack(file, ref, dbURI string) error {
+func installStack(file, ref, dbURI string, enableBackUp bool) error {
 	var err error
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
@@ -90,6 +98,11 @@ func installStack(file, ref, dbURI string) error {
 	}
 	if DEVEL {
 		cmds = append(cmds, "--devel")
+	}
+
+	err = timescaledb_secrets.CreateTimescaleDBSecrets(name, namespace, enableBackUp)
+	if err != nil {
+		return err
 	}
 
 	install := exec.Command("helm", cmds...)
