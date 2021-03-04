@@ -68,6 +68,11 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
+	kp, err := cmd.Flags().GetBool("enable-kube-prometheus")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+
 	cmds := []string{"upgrade", name, ref, "--namespace", namespace}
 
 	if file != "" {
@@ -97,7 +102,8 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		if !confirm {
 			utils.ConfirmAction()
 		}
-		err = installStack(file, ref, "", enableBackUp)
+
+		err = installStack(file, ref, "", enableBackUp, kp)
 		if err != nil {
 			return err
 		}

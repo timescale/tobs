@@ -34,6 +34,7 @@ func addHelmInstallFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("chart-reference", "c", "timescale/tobs", "Helm chart reference")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Enable TimescaleDB S3 backup")
+	cmd.Flags().BoolP("enable-kube-prometheus", "k", false, "Enable Kube-Prometheus")
 }
 
 func helmInstall(cmd *cobra.Command, args []string) error {
@@ -58,14 +59,20 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	err = installStack(file, ref, dbURI, enableBackUp)
+	kp, err := cmd.Flags().GetBool("enable-kube-prometheus")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+
+	err = installStack(file, ref, dbURI, enableBackUp, kp)
+
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 	return nil
 }
 
-func installStack(file, ref, dbURI string, enableBackUp bool) error {
+func installStack(file, ref, dbURI string, enableBackUp, enableKubePrometheus bool) error {
 	var err error
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
@@ -90,6 +97,12 @@ func installStack(file, ref, dbURI string, enableBackUp bool) error {
 	if dbURI != "" {
 		helmValues = appendDBURIValues(dbURI, name, helmValues)
 	}
+
+	if enableKubePrometheus {
+		helmValues = enableKubePrometheusStack(helmValues)
+	}
+
+	cmds = append(cmds, helmValues)
 
 	if namespace != "default" {
 		cmds = append(cmds, "--create-namespace", "--namespace", namespace)
@@ -151,5 +164,10 @@ func installStack(file, ref, dbURI string, enableBackUp bool) error {
 func appendDBURIValues(dbURI, name string, helmValues string) string {
 	helmValues = helmValues + ",timescaledb-single.enabled=false," + "timescaledbExternal.enabled=true," + "timescaledbExternal.db_uri=" + dbURI +
 		",promscale.connection.uri.secretTemplate=" + name + "-timescaledb-uri"
+	return helmValues
+}
+
+func enableKubePrometheusStack(helmValues string) string {
+	helmValues = helmValues+",prometheus.enabled=false,"+"grafana.enabled=false,kube-prometheus-stack.enabled=true"
 	return helmValues
 }

@@ -168,6 +168,22 @@ promlens:
   loadBalancer:
     enabled: false
 
+kube-prometheus-stack:
+  enabled: false
+  prometheus:
+    prometheusSpec:
+      ## The remote_read spec configuration for Prometheus.
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
+      remoteRead:
+      # - {protocol}://{host}:{port}/{endpoint}
+        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/read"
+          readRecent: true
+
+      ## The remote_write spec configuration for Prometheus.
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
+      remoteWrite:
+        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/write"
+
 #Enable Promscale to connect to an existing database by providing the db-uri
 timescaledbExternal:
   enabled: false
