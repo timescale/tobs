@@ -81,8 +81,8 @@ data:
         - source_labels: [__meta_kubernetes_namespace]
           regex: {{ $root.Release.Namespace }}
           action: keep
-        - source_labels: [__meta_kubernetes_pod_label_app]
-          regex: {{ template "prometheus.name" $root }}
+        - source_labels: [__meta_kubernetes_pod_label_release]
+          regex: {{ $root.Release.Name }}
           action: keep
         - source_labels: [__meta_kubernetes_pod_label_component]
           regex: alertmanager
