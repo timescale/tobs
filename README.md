@@ -5,6 +5,9 @@
 
 Tobs is a tool that aims to make it as easy as possible to install a full observability
 stack into a Kubernetes cluster. Currently this stack includes:
+
+<img src="docs/assets/tobs-arch.png" alt="Tobs Architecture Diagram" width="800"/>
+
  * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
  * [Grafana](https://github.com/grafana/grafana) to visualize what's going on
  * [Promscale](https://github.com/timescale/promscale) ([design doc][design-doc]) to store metrics for the long-term and allow analysis with both PromQL and SQL.
