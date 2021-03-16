@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	yaml2 "sigs.k8s.io/yaml"
+
 	"github.com/timescale/tobs/cli/pkg/k8s"
 
 	"gopkg.in/yaml.v3"
@@ -243,10 +245,53 @@ func GetTimescaleDBURI(namespace, name string) (string, error) {
 				return uriData, nil
 			} else {
 				// found the secret but failed to find the value with indexed key.
-				return  "", fmt.Errorf("could not get TimescaleDB URI with secret key index as db-uri from %s", secretName)
+				return "", fmt.Errorf("could not get TimescaleDB URI with secret key index as db-uri from %s", secretName)
 			}
 		}
 	}
 
 	return "", nil
+}
+
+func ExportBackUpEnabledField(chart string) (bool, error) {
+	out := exec.Command("helm", "show", "values", chart)
+	res, err := out.CombinedOutput()
+	if err != nil {
+		return false, fmt.Errorf("failed to do helm show values on the helm chart %w", err)
+	}
+
+	jsonBytes, err := yaml2.YAMLToJSON(res)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse helm show values from yaml to json %w", err)
+	}
+
+	// Unmarshal using a generic interface
+	var f interface{}
+	err = json.Unmarshal(jsonBytes, &f)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse values.yaml to json bytes %v", err)
+	}
+
+	// JSON object parses into a map with string keys
+	itemsMap := f.(map[string]interface{})
+
+	// Loop through the Items; we're not interested in the key, just the values
+	for k, v := range itemsMap {
+		if k == "timescaledb-single" {
+			// Access the values in the JSON object and place them in an Item
+			for itemKey, itemValue := range v.(map[string]interface{}) {
+				if itemKey == "backup" {
+					v := itemValue.(map[string]interface{})
+					r := v["enabled"]
+					res, err := strconv.ParseBool(fmt.Sprintf("%v", r))
+					if err != nil {
+						return false, fmt.Errorf("failed to parse timescaledb-single.backup.enabled: %s to bool value %v", r, err)
+					}
+					return res, nil
+				}
+			}
+		}
+	}
+
+	return false, fmt.Errorf("unable to find 'timescaledb-single.backup.enabled' field from provided values.yaml")
 }

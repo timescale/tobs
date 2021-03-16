@@ -31,6 +31,8 @@ func CreateTimescaleDBSecrets(releaseName, namespace string, enableS3Backup bool
 		if err != nil {
 			return err
 		}
+	} else {
+		fmt.Println("skipping to create TimescaleDB s3 backup secret as backup option is disabled.")
 	}
 
 	return nil

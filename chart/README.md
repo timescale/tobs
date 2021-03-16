@@ -86,6 +86,7 @@ The chart has the following properties in the `values.yaml` file:
 | `timescaledb-single.image.tag`                      | Docker image tag to use for TimescaleDB               | `pg12-ts1.7`|
 | `timescaledb-single.loadBalancer.enabled`           | Create a LB for the DB instead of a ClusterIP         | `false`     |
 | `timescaledb-single.replicaCount`                   | Number of pods for DB, set to 3 for HA                | `1`         |
+| `timescaledb-single.backup.enabled`                 | TimescaleDB backup option by default set to false     | `false`     |
 
 ### Additional configuration for TimescaleDB
 

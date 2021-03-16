@@ -13,6 +13,10 @@ timescaledb-single:
     enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
+  # backup is disabled by default, enable it
+  # if you want to backup timescaleDB to s3
+  backup:
+    enabled: false
 
 # Values for configuring the deployment of the Promscale Connector
 # The charts README is at:

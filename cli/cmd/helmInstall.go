@@ -100,6 +100,20 @@ func installStack(file, ref, dbURI string, enableBackUp bool) error {
 		cmds = append(cmds, "--devel")
 	}
 
+	// If enable backup is disabled by flag check the backup option
+	// from values.yaml as a second option
+	if !enableBackUp {
+		enableBackUp, err = utils.ExportBackUpEnabledField(ref)
+		if err != nil {
+			return err
+		}
+	} else {
+		fmt.Println("")
+		// TODO to self
+		// set timescaledb.single.backup.enabled=true if backup option is enabled from install flag
+		// waiting for other PR on this as it holds changes around this.
+	}
+
 	err = timescaledb_secrets.CreateTimescaleDBSecrets(name, namespace, enableBackUp)
 	if err != nil {
 		return err
