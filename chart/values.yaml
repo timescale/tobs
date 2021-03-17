@@ -168,6 +168,10 @@ promlens:
   loadBalancer:
     enabled: false
 
+
+# Enabling Kube-Prometheus will by default disable
+# Grafana & Prometheus from tobs installation as they
+# are part of Kube-Prometheus already
 kube-prometheus-stack:
   enabled: false
   prometheus:

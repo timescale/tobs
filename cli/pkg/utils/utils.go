@@ -11,11 +11,9 @@ import (
 	"strconv"
 	"strings"
 
-	yaml2 "sigs.k8s.io/yaml"
+	"sigs.k8s.io/yaml"
 
 	"github.com/timescale/tobs/cli/pkg/k8s"
-
-	"gopkg.in/yaml.v3"
 )
 
 const REPO_LOCATION = "https://charts.timescale.com"
@@ -260,7 +258,7 @@ func ExportValuesFieldValue(chart string, keys []string) (interface{}, error) {
 		return false, fmt.Errorf("failed to do helm show values on the helm chart %w", err)
 	}
 
-	jsonBytes, err := yaml2.YAMLToJSON(res)
+	jsonBytes, err := yaml.YAMLToJSON(res)
 	if err != nil {
 		return false, fmt.Errorf("failed to parse helm show values from yaml to json %w", err)
 	}

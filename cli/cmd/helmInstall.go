@@ -98,11 +98,38 @@ func installStack(file, ref, dbURI string, enableBackUp, enableKubePrometheus bo
 		helmValues = appendDBURIValues(dbURI, name, helmValues)
 	}
 
-	if enableKubePrometheus {
+	// If enable Kube-Prometheus is disabled by flag check the backup option
+	// from values.yaml as a second option
+	if !enableKubePrometheus {
+		e, err := utils.ExportValuesFieldValue(ref, []string{"kube-prometheus-stack", "enabled"})
+		enableKubePrometheus = e.(bool)
+		if err != nil {
+			return err
+		}
+
+		// If kubePrometheus is enabled from values.yaml amke sure to
+		// validate default Prometheus & Grafana from tobs are disabled
+		// if not disabled we will end up with duplicate components
+		if enableKubePrometheus {
+			e, err := utils.ExportValuesFieldValue(ref, []string{"prometheus", "enabled"})
+			enablePrometheus := e.(bool)
+			if err != nil {
+				return err
+			}
+
+			e, err = utils.ExportValuesFieldValue(ref, []string{"grafana", "enabled"})
+			enableGrafana := e.(bool)
+			if err != nil {
+				return err
+			}
+
+			if enablePrometheus || enableGrafana {
+				return fmt.Errorf("kube-prometheus-stack is enabled but prometheus or grafana from default tobs are not disabled")
+			}
+		}
+	} else if enableKubePrometheus {
 		helmValues = enableKubePrometheusStack(helmValues)
 	}
-
-	cmds = append(cmds, helmValues)
 
 	if namespace != "default" {
 		cmds = append(cmds, "--create-namespace", "--namespace", namespace)
