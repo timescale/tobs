@@ -82,12 +82,13 @@ func installStack(file, ref, dbURI string, enableBackUp bool) error {
 	}
 
 	cmds := []string{"install", name, ref}
-	cmds = append(cmds, "--set", "cli=true")
+
+	// Note do not change the below order the --set flag is set
+	// in above we are appending more flags to it with below check
+	cmds = append(cmds, "--set")
+	helmValues := "cli=true"
 	if dbURI != "" {
-		cmds, err = appendDBURIValues(dbURI, name, cmds)
-		if err != nil {
-			return err
-		}
+		helmValues = appendDBURIValues(dbURI, name, helmValues)
 	}
 
 	if namespace != "default" {
@@ -103,21 +104,22 @@ func installStack(file, ref, dbURI string, enableBackUp bool) error {
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
 	if !enableBackUp {
-		enableBackUp, err = utils.ExportBackUpEnabledField(ref)
+		e, err := utils.ExportValuesFieldValue(ref, []string{"timescaledb-single", "backup", "enabled"})
+		enableBackUp = e.(bool)
 		if err != nil {
 			return err
 		}
 	} else {
-		fmt.Println("")
-		// TODO to self
-		// set timescaledb.single.backup.enabled=true if backup option is enabled from install flag
-		// waiting for other PR on this as it holds changes around this.
+		// update timescaleDB backup in values.yaml
+		helmValues = helmValues+",timescaledb-single.backup.enabled=true"
 	}
 
 	err = timescaledb_secrets.CreateTimescaleDBSecrets(name, namespace, enableBackUp)
 	if err != nil {
 		return err
 	}
+
+	cmds = append(cmds, helmValues)
 
 	install := exec.Command("helm", cmds...)
 	fmt.Println("Installing The Observability Stack")
@@ -146,11 +148,8 @@ func installStack(file, ref, dbURI string, enableBackUp bool) error {
 	return nil
 }
 
-func appendDBURIValues(dbURI, name string, cmds []string) ([]string, error) {
-	cmds = append(cmds, "--set",
-		"timescaledb-single.enabled=false,"+
-			"timescaledbExternal.enabled=true,"+
-			"timescaledbExternal.db_uri="+dbURI+
-			",promscale.connection.uri.secretTemplate="+name+"-timescaledb-uri,")
-	return cmds, nil
+func appendDBURIValues(dbURI, name string, helmValues string) string {
+	helmValues = helmValues + ",timescaledb-single.enabled=false," + "timescaledbExternal.enabled=true," + "timescaledbExternal.db_uri=" + dbURI +
+		",promscale.connection.uri.secretTemplate=" + name + "-timescaledb-uri"
+	return helmValues
 }

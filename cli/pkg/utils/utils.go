@@ -253,7 +253,7 @@ func GetTimescaleDBURI(namespace, name string) (string, error) {
 	return "", nil
 }
 
-func ExportBackUpEnabledField(chart string) (bool, error) {
+func ExportValuesFieldValue(chart string, keys []string) (interface{}, error) {
 	out := exec.Command("helm", "show", "values", chart)
 	res, err := out.CombinedOutput()
 	if err != nil {
@@ -272,26 +272,29 @@ func ExportBackUpEnabledField(chart string) (bool, error) {
 		return false, fmt.Errorf("failed to parse values.yaml to json bytes %v", err)
 	}
 
+	r := fetchValue(f, keys)
+	if r == nil {
+		return nil, fmt.Errorf("failed to find the value from the keys in values.yaml %v", keys)
+	}
+
+	return r, nil
+}
+
+
+
+func fetchValue(f interface{}, keys []string) interface{} {
 	// JSON object parses into a map with string keys
 	itemsMap := f.(map[string]interface{})
-
-	// Loop through the Items; we're not interested in the key, just the values
 	for k, v := range itemsMap {
-		if k == "timescaledb-single" {
-			// Access the values in the JSON object and place them in an Item
-			for itemKey, itemValue := range v.(map[string]interface{}) {
-				if itemKey == "backup" {
-					v := itemValue.(map[string]interface{})
-					r := v["enabled"]
-					res, err := strconv.ParseBool(fmt.Sprintf("%v", r))
-					if err != nil {
-						return false, fmt.Errorf("failed to parse timescaledb-single.backup.enabled: %s to bool value %v", r, err)
-					}
-					return res, nil
-				}
+		if k == keys[0] {
+			if len(keys[1:]) == 0 {
+				return v
+			}
+			v1 := fetchValue(v, keys[1:])
+			if v1 != nil {
+				return v1
 			}
 		}
 	}
-
-	return false, fmt.Errorf("unable to find 'timescaledb-single.backup.enabled' field from provided values.yaml")
+	return nil
 }
