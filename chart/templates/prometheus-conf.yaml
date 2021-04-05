@@ -20,7 +20,7 @@ data:
 {{- if $root.Values.prometheus.server.timescaleRemote.write.enabled -}}
 {{ with $root.Values.prometheus.server.timescaleRemote }}
     - url: {{ printf "%s://%s:%s/%s" .protocol (tpl .host $root) .port .write.endpoint }}
-      queue_config: 
+      queue_config:
 {{ toYaml .write.queue | indent 8 }}
 {{- end -}}
 {{- end }}
@@ -91,8 +91,8 @@ data:
           regex: {{ index $root.Values.prometheus.alertmanager.podAnnotations "prometheus.io/probe" | default ".*" }}
           action: keep
         - source_labels: [__meta_kubernetes_pod_container_port_number]
-          regex:
-          action: drop
+          regex: "9093"
+          action: keep
 {{- end -}}
 {{- end -}}
 {{- end -}}
