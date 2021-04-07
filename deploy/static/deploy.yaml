@@ -15,10 +15,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
   annotations:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default,runtime/default'
@@ -70,10 +70,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   allowPrivilegeEscalation: true
@@ -102,10 +102,10 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana
   namespace: tobs
@@ -115,10 +115,10 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana-test
   namespace: tobs
@@ -129,7 +129,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app.kubernetes.io/name: kube-state-metrics
-    helm.sh/chart: kube-state-metrics-2.8.14
+    helm.sh/chart: kube-state-metrics-2.9.8
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: tobs
   name: tobs-kube-state-metrics
@@ -145,7 +145,7 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-node-exporter
   namespace: tobs
@@ -160,7 +160,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-server
   namespace: tobs
@@ -176,7 +176,7 @@ metadata:
   name: tobs-timescaledb
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
 ---
@@ -187,52 +187,16 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 type: Opaque
 data:
   admin-user: "YWRtaW4="
-  admin-password: "V1lWbGE3RHY4QWtCbkluS1dhSmtOM3ZucnFpclVhTWZveXI1d05YeA=="
+  admin-password: "d1paTm85emg3N2QycTBGYkVpSU5Rb3d6ejZtcFd2bWFlN284T1VDcQ=="
   ldap-toml: ""
----
-# Source: tobs/charts/timescaledb-single/templates/sec-certificate.yaml
-# This file and its contents are licensed under the Apache License 2.0.
-# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
-apiVersion: v1
-kind: Secret
-type: kubernetes.io/tls
-metadata:
-  name: tobs-timescaledb-certificate
-  labels:
-    app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
-    release: tobs
-    heritage: Helm
-    cluster-name: tobs
-data:
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM2ekNDQWRPZ0F3SUJBZ0lSQU4rbHcwclpLUGNYNzBaTVlGeFdBQ2t3RFFZSktvWklodmNOQVFFTEJRQXcKRHpFTk1Bc0dBMVVFQXhNRWRHOWljekFlRncweU1UQXlNakl5TXpNMk5EZGFGdzB5TmpBeU1qSXlNek0yTkRkYQpNQTh4RFRBTEJnTlZCQU1UQkhSdlluTXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCCkFRQ1lRVnlWKzFtRllJZkNkT1U1aitJNGVSTkQzdGNtREdsaWdUc1owejdpVUl2eFVNS3JFdVpqQTZ3V0FHdTAKK054eldoMlpxdjJsMFBYb211SDNYekljOVpUSUlLK045SEl4K2FmY3N2Y0VEQzQvN1E4SkplajRzMGhoRnVUZQpHRHhmVm5CRzFlZ0tkT1ZVTEFqZTdKTG9KNU13dy96MklMUXN5Vm9iblVNUUdGT1YxVmROdVJEUStjSFAweWRjClNSbTdTZ2t1eTFDSFppbG00RE5FTncxbXNPZjJQQVRpdUJvTUlHaVFodmJvcGxFMndMSzBLWEZaUWs5ZFI3cjkKVnJ6cjJDSXRoNEc0ZENDNnI3T2lna09JM1FQcUs4d3RGYVpyVmVMYy9HZys4cEpOOGNYcEtYSzJPZ2MzbkV6NApYK1VKVEw4cVM2R3FIV0hFRk5SVVpHWjdBZ01CQUFHalFqQkFNQTRHQTFVZER3RUIvd1FFQXdJQ3BEQWRCZ05WCkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3EKaGtpRzl3MEJBUXNGQUFPQ0FRRUFNSFNtaTB1Q3BiOWttUCtQZWE1N1J6dVZodnhDenVFOENzMU5iOU8rZGRnVgpYS2RUQlFWMm43RXkrUndCSFR2YlBkQVZtbCtXRVljemthdzMwTWZtZVY2UVZYckdMVjR4SmFzZ1BQNmNyYkhtCjBqdGVYQUF5MzlhRUxZRC9YSXhXZitqVERqMXROeHJKZHBZek9XcjVYOGRzYVpEMERna2pBZWh0Vnc1bExocXQKM0haOGtmZEk3bWNJM1BQRTcvaTBndExrRVBEamlvdkpFNW5KU3hza3M5ei96SXNSelQ0aXhvaFp4QjBpTk92LwpZMDZrMjRycjlwUUIyTkJkdUs0SWh2UEZnUUdHT0VZOFhGcmlPb3daQ2JxZlR6WkV6RCtnVGswK1dLNTc0RzFECjJkMWZSRjgvNE02dWV4OFRxczFIL0wzYXN1Q1ErNG5mY3k1WkNYY1FLdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBbUVGY2xmdFpoV0NId25UbE9ZL2lPSGtUUTk3WEpneHBZb0U3R2RNKzRsQ0w4VkRDCnF4TG1Zd09zRmdCcnRQamNjMW9kbWFyOXBkRDE2SnJoOTE4eUhQV1V5Q0N2amZSeU1mbW4zTEwzQkF3dVArMFAKQ1NYbytMTklZUmJrM2hnOFgxWndSdFhvQ25UbFZDd0kzdXlTNkNlVE1NUDg5aUMwTE1sYUc1MURFQmhUbGRWWApUYmtRMFBuQno5TW5YRWtadTBvSkxzdFFoMllwWnVBelJEY05ackRuOWp3RTRyZ2FEQ0Jva0liMjZLWlJOc0N5CnRDbHhXVUpQWFVlNi9WYTg2OWdpTFllQnVIUWd1cSt6b29KRGlOMEQ2aXZNTFJXbWExWGkzUHhvUHZLU1RmSEYKNlNseXRqb0hONXhNK0YvbENVeS9La3VocWgxaHhCVFVWR1JtZXdJREFRQUJBb0lCQUVzUWxvd2ZZdkIrT2hDbQpQMGxVNWV4L3pQNitSQWF2UWRuZDZ2eDlpTmhkYTlGcXhyOC9UelRyMzVEdFhpellNUi95QXZ2N01KanE0QUp4Ck1nMGE4d01TRk90aUtndHJ4RTFkVCtSZ202WjBOdTB2ZkNVL2VvLzdIQ2s1OTFhRVRtZVduejVkUWN5OSt6NjMKZ3h3ZE9RU2FWbGhKbUZMa3B0QVo2WUlKMDhGLzZqRlRXNnk3N285QWRJNW9wK0ZGdDIyZzUvQXhwaStQZExpNwp3VmlybkRYVTNKTFJLLzR5bzhpSXgwdnRTUjRHcEJYM1c2QThrMU5MNU9jQmZUd01OMHgwUlJvd1RibWVHVExICmdlTUhxUHNsWkZheExXVWJaK2tETlVhUTZrVGYzTWw1MkV2MXUxaCtJYytCRlBWZmZLN3JVbk1QMGZNQ0Nhd24KYlFHY3BSRUNnWUVBeFJ1dkZzb0lFM2RscnJ3Yk00c28vWnNNalZ3bG54aUtuMkJIa0hqZUpUV3lqbVoxTU5XbgovdHU2bEI5OUhaV0NKdndyNzFhK0lNMTVzZEFKYWJUZFZDSzVRc0kxSkNWTS91Y3V4TEZpeFdYT1JYTlFRVHVxCjhkK2FLQ3JxZVIrM1I1alExa01ub0Y3WWhlUkVEYnpkamxFYlpycTd1YmZnQWRtSVg4dHBFZmtDZ1lFQXhiNysKOURVUkQ4VDVlNFRoamNUdFhZMGpubGV4aVBQcFRKYmV5UmM1NTc2RGVnNXZqTklCL3RqY0swbXlPRi9nSFFwSApiQXg3OHM5ZmZkUXV6Mi9POFhuT2o1RlBMbUROdVBsa3pTdDR1TEIrK2pQNXVJT00yR2JxQ1hPMDVVWi9OK2RRCjJ6RmRVR0x6M1VSVTNEY1RuMUNSWElGU3g2OW14RmEwYU4wODJSTUNnWUJxTWVFaWFSVHl6L2dqclVzR2VTcEwKZ0hiQnpteWlpOGxiMXJhWDJ0YnN1MEtKUUNCUmdEc3pyMVNWcTJWd1EvWE1aVDZTZzJ5S0pjbzBCNzZhaWd4WQo0U0JwSEZNZk4wMkZaQzZwWUZ5enQ0YnJtaFlhSHppWmVmd0hPaC83eEIrdDNtSmRuZTdDazNjYXBBSWFXTEFSCmxoY3FRTjhWVDBETUhsUkFNRXBhbVFLQmdFMFpPcTVjUWxxem9kSFc3Vm9vL2FNTDlHYzRLYkFMNlZwRE9IbU8KNUxUR1F0ekQ1Qm96aHpPbHViSG0rZVdnKy9CV29hSXUrK1NmbGN1cGZ0YkI4UjJWTUVRcGs0V3htSVFXT0ljRgorL3VHVlB1WWFEVFlsWUdLSHBXdzEwYk5SYXkyTTRCQ3J1ODRwWHdQdUVaajh2S2FweEk2R2R4aE51QTJMZ0QwCndWU2hBb0dBQVlNRlJmVno5aXIrTHlCK3ZjQWxmWW1sdEFrU0diQmdydUJodjBaUzJmdHJvU0dadUREdi8wU28KNi83bmpXcjlzdzhoOU5DN29BYmVlMUJ5cDVlUHFtQnBUTE5HVGF2dWx0K1FoVHBpS0M5elliWFBtOHpFQVN3ZgprdHJvcThsTEt1a09FSlZFZ1o0SEUyS3JYa0Fwc1p3T2hQeXdFUm00a1l0RENVazh6Qkk9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
-...
----
-# Source: tobs/charts/timescaledb-single/templates/sec-passwords.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: tobs-timescaledb-passwords
-  labels:
-    app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
-    release: tobs
-    heritage: Helm
-type: Opaque
-data:
-  "admin": Y29sYQ==
-  "postgres": dGVh
-  "standby": cGluYWNvbGFkYQ==
-...
 ---
 # Source: tobs/templates/grafana-datasources-sec.yaml
 apiVersion: v1
@@ -242,7 +206,7 @@ metadata:
   labels:
     grafana_datasource: "1"
     app: tobs
-    chart: tobs-0.2.2
+    chart: tobs-0.3.0
     release: tobs
 type: Opaque
 stringData:
@@ -279,7 +243,7 @@ metadata:
   name: tobs-grafana-db
   labels:
     app: tobs
-    chart: tobs-0.2.2
+    chart: tobs-0.3.0
     release: tobs
 type: Opaque
 data:
@@ -297,10 +261,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana-config-dashboards
   namespace: tobs
@@ -314,6 +278,7 @@ data:
       type: file
       disableDeletion: false
       allowUiUpdates: false
+      updateIntervalSeconds: 30
       options:
         foldersFromFilesStructure: false
         path: /tmp/dashboards
@@ -325,10 +290,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 data:
   grafana.ini: |
@@ -351,10 +316,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 data:
   run.sh: |-
@@ -365,30 +330,6 @@ data:
       [ "$code" == "200" ]
     }
 ---
-# Source: tobs/charts/promscale/templates/config-maintenance.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tobs-promscale-maintenance
-  labels:
-    app: tobs-promscale
-    chart: promscale-0.2.0
-    release: tobs
-    heritage: Helm
-data:
-  execute_maintenance.sh: |-
-    #!/bin/sh
-    psql $PROMSCALE_DB_URI \
-    -e -q -c "CALL prom_api.execute_maintenance();"
-    if [ $? -eq 0 ]
-    then
-      echo "Maintenance completed successfully."
-      echo "Retention policies executed."
-    else
-      echo "Maintenance job failed!"
-      exit 1
-    fi
----
 # Source: tobs/charts/timescaledb-single/templates/configmap-patroni.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.---
@@ -398,7 +339,7 @@ metadata:
   name: tobs-timescaledb-patroni
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
     cluster-name: tobs
@@ -415,9 +356,11 @@ data:
             archive_timeout: 1800s
             autovacuum_analyze_scale_factor: 0.02
             autovacuum_max_workers: 10
+            autovacuum_naptime: 5s
+            autovacuum_vacuum_cost_limit: 500
             autovacuum_vacuum_scale_factor: 0.05
             hot_standby: "on"
-            log_autovacuum_min_duration: 0
+            log_autovacuum_min_duration: 1min
             log_checkpoints: "on"
             log_connections: "on"
             log_disconnections: "on"
@@ -450,10 +393,6 @@ data:
           /etc/timescaledb/scripts/restore_or_initdb.sh --encoding=UTF8 --locale=C.UTF-8
         keep_existing_recovery_conf: true
     kubernetes:
-      ports:
-      - name: postgresql
-        port: 5432
-        targetPort: 5432
       role_label: role
       scope_label: cluster-name
       use_endpoints: true
@@ -478,8 +417,9 @@ data:
       - basebackup
       listen: 0.0.0.0:5432
       pg_hba:
+      - local     all             postgres                              peer
+      - local     all             all                                   md5
       - hostnossl all,replication all                all                reject
-      - local     all             all                                   peer
       - hostssl   all             all                127.0.0.1/32       md5
       - hostssl   all             all                ::1/128            md5
       - hostssl   replication     standby            all                md5
@@ -487,13 +427,52 @@ data:
       pgbackrest:
         command: /etc/timescaledb/scripts/pgbackrest_restore.sh
         keep_data: true
-        no_master: 1
+        no_master: true
         no_params: true
       recovery_conf:
         restore_command: /etc/timescaledb/scripts/pgbackrest_archive_get.sh %f "%p"
       use_unix_socket: true
     restapi:
       listen: 0.0.0.0:8008
+...
+---
+# Source: tobs/charts/timescaledb-single/templates/configmap-pgbackrest.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tobs-timescaledb-pgbackrest
+  labels:
+    app: tobs-timescaledb
+    chart: timescaledb-single-0.8.2
+    release: tobs
+    heritage: Helm
+data:
+  pgbackrest.conf: |
+    [global]
+    compress-level=3
+    compress-type=lz4
+    process-max=4
+    repo1-cipher-type=none
+    repo1-path=/tobs/tobs/
+    repo1-retention-diff=2
+    repo1-retention-full=2
+    repo1-s3-endpoint=s3.amazonaws.com
+    repo1-s3-region=us-east-2
+    repo1-type=s3
+    spool-path=/var/run/postgresql
+    start-fast=y
+
+    [poddb]
+    pg1-port=5432
+    pg1-host-user=postgres
+    pg1-path=/var/lib/postgresql/data
+    pg1-socket-path=/var/run/postgresql
+
+    link-all=y
+
+    [global:archive-push]
+
+    [global:archive-get]
 ...
 ---
 # Source: tobs/charts/timescaledb-single/templates/configmap-scripts.yaml
@@ -505,7 +484,7 @@ metadata:
   name: tobs-timescaledb-scripts
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
     cluster-name: tobs
@@ -515,48 +494,70 @@ data:
   #
   # Therefore, if the backup is disabled, we always return exitcode 0 when archiving
   pgbackrest_archive.sh: |
-    #!/bin/bash
-    PGBACKREST_BACKUP_ENABLED=0
-    [ "${PGBACKREST_BACKUP_ENABLED}" == "0" ] && exit 0
+    #!/bin/sh
 
-    source "${HOME}/.pgbackrest_environment"
-    exec pgbackrest --stanza=poddb archive-push $1
+    log() {
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - archive - $1"
+    }
+
+    [ -z "$1" ] && log "Usage: $0 <WALFILE or DIRECTORY>" && exit 1
+
+    PGBACKREST_BACKUP_ENABLED=0
+    [ ${PGBACKREST_BACKUP_ENABLED} -ne 0 ] || exit 0
+
+    . "${HOME}/.pgbackrest_environment"
+    exec pgbackrest --stanza=poddb archive-push "$@"
   pgbackrest_archive_get.sh: |
-    #!/bin/bash
+    #!/bin/sh
     PGBACKREST_BACKUP_ENABLED=0
-    [ "${PGBACKREST_BACKUP_ENABLED}" == "0" ] && exit 1
+    [ ${PGBACKREST_BACKUP_ENABLED} -ne 0 ] || exit 0
 
-    source "${HOME}/.pgbackrest_environment"
-    exec pgbackrest --stanza=poddb archive-get ${1} "${2}"
+    . "${HOME}/.pgbackrest_environment"
+    exec pgbackrest --stanza=poddb archive-get "${1}" "${2}"
   pgbackrest_bootstrap.sh: |
-    #!/bin/bash
+    #!/bin/sh
     set -e
 
-    function log {
+    log() {
         echo "$(date '+%Y-%m-%d %H:%M:%S') - bootstrap - $1"
     }
+
+    terminate() {
+        log "Stopping"
+        exit 1
+    }
+    # If we don't catch these signals, and we're still waiting for PostgreSQL
+    # to be ready, we will not respond at all to a regular shutdown request,
+    # therefore, we explicitly terminate if we receive these signals.
+    trap terminate TERM QUIT
 
     while ! pg_isready -q; do
         log "Waiting for PostgreSQL to become available"
         sleep 3
     done
 
+    # We'll be lazy; we wait for another while to allow the database to promote
+    # to primary if it's the only one running
+    sleep 10
+
     # If we are the primary, we want to create/validate the backup stanza
-    if [ "$(psql -c "SELECT pg_is_in_recovery()::text" -AtXq)" == "false" ]; then
+    if [ "$(psql -c "SELECT pg_is_in_recovery()::text" -AtXq)" = "false" ]; then
         pgbackrest check || {
             log "Creating pgBackrest stanza"
             pgbackrest --stanza=poddb stanza-create --log-level-stderr=info || exit 1
+            log "Creating initial backup"
+            pgbackrest --type=full backup || exit 1
         }
     fi
 
     log "Starting pgBackrest api to listen for backup requests"
     exec python3 /scripts/pgbackrest-rest.py --stanza=poddb --loglevel=debug
   pgbackrest_restore.sh: |
-    #!/bin/bash
+    #!/bin/sh
     PGBACKREST_BACKUP_ENABLED=0
-    [ "${PGBACKREST_BACKUP_ENABLED}" == "0" ] && exit 1
+    [ ${PGBACKREST_BACKUP_ENABLED} -ne 0 ] || exit 1
 
-    source "${HOME}/.pod_environment"
+    . "${HOME}/.pod_environment"
 
     PGDATA="/var/lib/postgresql/data"
     WALDIR="/var/lib/postgresql/wal/pg_wal"
@@ -567,38 +568,127 @@ data:
     [ -d "${PGDATA}" ] || install -o postgres -g postgres -d -m 0700 "${PGDATA}"
     [ -d "${WALDIR}" ] || install -o postgres -g postgres -d -m 0700 "${WALDIR}"
 
-    pgbackrest --stanza=poddb --force --delta --log-level-console=detail restore
+    exec pgbackrest --force --delta --log-level-console=detail restore
   restore_or_initdb.sh: |
-    #!/bin/bash
+    #!/bin/sh
 
-    source "${HOME}/.pod_environment"
+    . "${HOME}/.pod_environment"
 
-    function log {
-      echo "$(date '+%Y-%m-%d %H:%M:%S') - restore_or_initdb - $1"
+    log() {
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - restore_or_initdb - $1"
     }
 
     PGDATA="/var/lib/postgresql/data"
     WALDIR="/var/lib/postgresql/wal/pg_wal"
+    # A missing PGDATA points to Patroni removing a botched PGDATA, or manual
+    # intervention. In this scenario, we need to recreate the DATA and WALDIRs
+    # to keep pgBackRest happy
+    [ -d "${PGDATA}" ] || install -o postgres -g postgres -d -m 0700 "${PGDATA}"
+    [ -d "${WALDIR}" ] || install -o postgres -g postgres -d -m 0700 "${WALDIR}"
 
-    # Patroni attaches --scope and --datadir to the arguments, we need to strip them off as
-    # initdb has no business with these parameters
-    initdb_args=""
-    for value in "$@"
-    do
-      [[ $value == --scope* ]] || [[ $value == --datadir* ]] || initdb_args="${initdb_args} $value"
-    done
+    if [ "${BOOTSTRAP_FROM_BACKUP}" = "1" ]; then
+        log "Attempting restore from backup"
+        # we want to override the environment with the environment
+        # shellcheck disable=SC2046
+        export $(env -i envdir /etc/pgbackrest/bootstrap env) > /dev/null
+        export PGBACKREST_REPO1_PATH=
 
-    log "Invoking initdb"
-    initdb --auth-local=peer --auth-host=md5 --pgdata="${PGDATA}" --waldir="${WALDIR}" ${initdb_args}
+        if [ -z "${PGBACKREST_REPO1_PATH}" ]; then
+            log "Unconfigured repository path"
+            cat << "__EOT__"
+
+    TimescaleDB Single Helm Chart error:
+
+    You should configure the bootstrapFromBackup in your Helm Chart section by explicitly setting
+    the repo1-path to point to the backups.
+
+    For example, if you want to do a disaster recovery, and you want to reuse
+    the backup, you could configure the path as follows:
+
+    ```yaml
+    bootstrapFromBackup:
+      enabled: true
+      repo1-path: "/tobs/tobs/"
+    ```
+
+    For more information, consult the admin guide:
+    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#bootstrap-from-backup
+
+
+    __EOT__
+
+            exit 1
+        fi
+
+        log "Listing available backup information"
+        pgbackrest info
+        EXITCODE=$?
+        if [ ${EXITCODE} -ne 0 ]; then
+            exit $EXITCODE
+        fi
+
+        pgbackrest --log-level-console=detail restore
+        EXITCODE=$?
+        if [ ${EXITCODE} -eq 0 ]; then
+            log "pgBackRest restore finished succesfully, starting instance in recovery"
+            # We want to ensure we do not overwrite a current backup repository with archives, therefore
+            # we block archiving from succeeding until Patroni can takeover
+            touch "${PGDATA}/recovery.signal"
+            pg_ctl -D "${PGDATA}" start -o '--archive-command=/bin/false'
+
+            while ! pg_isready -q; do
+                log "Waiting for PostgreSQL to become available"
+                sleep 3
+            done
+
+            # It is not trivial to figure out to what point we should restore, pgBackRest
+            # should be fetching WAL segments until the WAL is exhausted. We'll ask pgBackRest
+            # what the Maximum Wal is that it currently has; as soon as we see that, we can consider
+            # the restore to be done
+            while true; do
+              MAX_BACKUP_WAL="$(pgbackrest info --output=json | python3 -c "import json,sys;obj=json.load(sys.stdin); print(obj[0]['archive'][0]['max']);")"
+              log "Testing whether WAL file ${MAX_BACKUP_WAL} has been restored ..."
+              [ -f "${PGDATA}/pg_wal/${MAX_BACKUP_WAL}" ] && break
+              sleep 30;
+            done
+
+            # At this point we know the final WAL archive has been restored, we should be done.
+            log "The WAL file ${MAX_BACKUP_WAL} has been successully restored, shutting down instance"
+            pg_ctl -D "${PGDATA}" promote
+            pg_ctl -D "${PGDATA}" stop -m fast
+            log "Handing over control to Patroni ..."
+        else
+            log "Bootstrap from backup failed"
+            exit 1
+        fi
+    else
+        # Patroni attaches --scope and --datadir to the arguments, we need to strip them off as
+        # initdb has no business with these parameters
+        initdb_args=""
+        for value in "$@"
+        do
+            case $value in
+                "--scope"*)
+                    ;;
+                "--datadir"*)
+                    ;;
+                *)
+                    initdb_args="${initdb_args} $value"
+                    ;;
+            esac
+        done
+
+        log "Invoking initdb"
+        # shellcheck disable=SC2086
+        initdb --auth-local=peer --auth-host=md5 --pgdata="${PGDATA}" --waldir="${WALDIR}" ${initdb_args}
+    fi
+
     echo "include_if_exists = '/var/run/postgresql/timescaledb.conf'" >> "${PGDATA}/postgresql.conf"
-
   post_init.sh: |
-    #!/bin/bash
-    PGBACKREST_BACKUP_ENABLED=0
+    #!/bin/sh
+    . "${HOME}/.pod_environment"
 
-    source "${HOME}/.pod_environment"
-
-    function log {
+    log() {
         echo "$(date '+%Y-%m-%d %H:%M:%S') - post_init - $1"
     }
 
@@ -625,34 +715,62 @@ data:
     __SQL__
     done
 
-    if [ "${PGBACKREST_BACKUP_ENABLED}" == "1" ]; then
-      log "Waiting for pgBackRest API to become responsive"
-      while sleep 1; do
-          if [ $SECONDS -gt 10 ]; then
-              log "pgBackRest API did not respond within $SECONDS seconds, will not trigger a backup"
-              exit 0
+    # This directory may contain user defined post init steps
+    for file in /etc/timescaledb/post_init.d/*
+    do
+      [ -d "$file" ] && continue
+      [ ! -r "$file" ] && continue
+
+      case "$file" in
+        *.sh)
+          if [ -x "$file" ]; then
+            log "Call post init script [ $file ]"
+            "$file" "$@"
+            EXITCODE=$?
+          else
+            log "Source post init script [ $file ]"
+            . "$file"
+            EXITCODE=$?
           fi
-          timeout 1 bash -c "echo > /dev/tcp/localhost/8081" 2>/dev/null && break
-      done
+          ;;
+        *.sql)
+          log "Apply post init sql [ $file ]"
+          # Disable synchronous_commit since we're initializing
+          PGOPTIONS="-c synchronous_commit=local" psql -d "$URL" -f "$file"
+          EXITCODE=$?
+          ;;
+        *.sql.gz)
+          log "Decompress and apply post init sql [ $file ]"
+          gunzip -c "$file" | PGOPTIONS="-c synchronous_commit=local" psql -d "$URL"
+          EXITCODE=$?
+          ;;
+        *)
+          log "Ignore unknown post init file type [ $file ]"
+          EXITCODE=0
+          ;;
+      esac
+        EXITCODE=$?
+        if [ "$EXITCODE" != "0" ]
+        then
+            log "ERROR: post init script $file exited with exitcode $EXITCODE"
+            exit $EXITCODE
+        fi
+    done
 
-      log "Triggering pgBackRest backup"
-      curl -i -X POST http://localhost:8081/backups
-    fi
-
-    # We always exit 0 this script, otherwise the database initialization fails.
+    # We exit 0 this script, otherwise the database initialization fails.
     exit 0
   patroni_callback.sh: |
-    #!/bin/bash
+    #!/bin/sh
     set -e
 
-    source "${HOME}/.pod_environment"
+    . "${HOME}/.pod_environment"
 
     for suffix in "$1" all
     do
       CALLBACK="/etc/timescaledb/callbacks/${suffix}"
       if [ -f "${CALLBACK}" ]
       then
-        "${CALLBACK}" $@
+        "${CALLBACK}" "$@"
       fi
     done
 
@@ -702,7 +820,7 @@ metadata:
   labels:
    grafana_dashboard: "1"
    app: tobs
-   chart: tobs-0.2.2
+   chart: tobs-0.3.0
    release: tobs
 data:
 
@@ -4346,7 +4464,7 @@ metadata:
   name: tobs-grafana-db
   labels:
    app: tobs
-   chart: tobs-0.2.2
+   chart: tobs-0.3.0
    release: tobs
 data:
    add-users.sql: |-
@@ -4401,7 +4519,7 @@ metadata:
     component: "server"
     app: tobs
     release: tobs
-    chart: tobs-0.2.2
+    chart: tobs-0.3.0
     heritage: Helm
   name: tobs-prometheus-config
 data:
@@ -4416,11 +4534,12 @@ data:
       scrape_timeout: 10s
     remote_write:
     - url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201/write
-      queue_config: 
+      queue_config:
         max_shards: 30
 
     remote_read:
     - url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201/read
+      read_recent: true
 
     rule_files:
     - /etc/config/recording_rules.yml
@@ -4609,6 +4728,11 @@ data:
         source_labels:
         - __meta_kubernetes_pod_annotation_prometheus_io_scrape
       - action: replace
+        regex: (https?)
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_scheme
+        target_label: __scheme__
+      - action: replace
         regex: (.+)
         source_labels:
         - __meta_kubernetes_pod_annotation_prometheus_io_path
@@ -4642,6 +4766,11 @@ data:
         regex: true
         source_labels:
         - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow
+      - action: replace
+        regex: (https?)
+        source_labels:
+        - __meta_kubernetes_pod_annotation_prometheus_io_scheme
+        target_label: __scheme__
       - action: replace
         regex: (.+)
         source_labels:
@@ -4683,7 +4812,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-server
   namespace: tobs
@@ -4699,10 +4828,10 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
   name: tobs-grafana-clusterrole
 rules:
@@ -4711,12 +4840,12 @@ rules:
   verbs: ["get", "watch", "list"]
 ---
 # Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/clusterrole.yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: kube-state-metrics
-    helm.sh/chart: kube-state-metrics-2.8.14
+    helm.sh/chart: kube-state-metrics-2.9.8
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: tobs
   name: tobs-kube-state-metrics
@@ -4865,7 +4994,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-server
 rules:
@@ -4905,10 +5034,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: tobs-grafana-clusterrolebinding
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 subjects:
   - kind: ServiceAccount
@@ -4920,12 +5049,12 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 # Source: tobs/charts/prometheus/charts/kube-state-metrics/templates/clusterrolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/name: kube-state-metrics
-    helm.sh/chart: kube-state-metrics-2.8.14
+    helm.sh/chart: kube-state-metrics-2.9.8
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: tobs
   name: tobs-kube-state-metrics
@@ -4946,7 +5075,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-server
 subjects:
@@ -4959,16 +5088,16 @@ roleRef:
   name: tobs-prometheus-server
 ---
 # Source: tobs/charts/grafana/templates/role.yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:      ['extensions']
@@ -4983,10 +5112,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:      ['policy']
@@ -5003,7 +5132,7 @@ metadata:
   name: tobs-timescaledb
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
 rules:
@@ -5046,16 +5175,16 @@ rules:
   - watch
 ---
 # Source: tobs/charts/grafana/templates/rolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -5073,10 +5202,10 @@ metadata:
   name: tobs-grafana-test
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -5096,7 +5225,7 @@ metadata:
   name: tobs-timescaledb
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
 subjects:
@@ -5114,10 +5243,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -5139,7 +5268,7 @@ metadata:
   namespace: tobs
   labels:
     app.kubernetes.io/name: kube-state-metrics
-    helm.sh/chart: "kube-state-metrics-2.8.14"
+    helm.sh/chart: "kube-state-metrics-2.9.8"
     app.kubernetes.io/instance: "tobs"
     app.kubernetes.io/managed-by: "Helm"
   annotations:
@@ -5165,7 +5294,7 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-node-exporter
   namespace: tobs
@@ -5190,7 +5319,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-server
   namespace: tobs
@@ -5214,7 +5343,7 @@ metadata:
   name: tobs-promscale-connector
   labels:
     app: tobs-promscale
-    chart: promscale-0.2.0
+    chart: promscale-0.3.0
     release: tobs
     heritage: Helm
   annotations:
@@ -5238,10 +5367,11 @@ metadata:
   name: tobs-config
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
     cluster-name: tobs
+    component: patroni
 spec:
   selector:
     app: tobs-timescaledb
@@ -5263,10 +5393,11 @@ metadata:
   name: tobs-replica
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
     cluster-name: tobs
+    component: postgres
     role: replica
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
@@ -5280,6 +5411,7 @@ spec:
   - name: postgresql
     # This always defaults to 5432, even if `!replicaLoadBalancer.enabled`.
     port: 5432
+    targetPort: postgresql
     protocol: TCP
 ---
 # Source: tobs/charts/timescaledb-single/templates/svc-timescaledb.yaml
@@ -5292,7 +5424,7 @@ metadata:
   name: tobs
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
     cluster-name: tobs
@@ -5315,7 +5447,7 @@ metadata:
   name: tobs-promlens
   labels:
     app: tobs
-    chart: tobs-0.2.2
+    chart: tobs-0.3.0
     release: tobs
     component: promlens
   annotations:
@@ -5339,7 +5471,7 @@ metadata:
     component: "node-exporter"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-node-exporter
   namespace: tobs
@@ -5357,17 +5489,18 @@ spec:
         component: "node-exporter"
         app: prometheus
         release: tobs
-        chart: prometheus-11.16.7
+        chart: prometheus-13.3.3
         heritage: Helm
     spec:
       serviceAccountName: tobs-prometheus-node-exporter
       containers:
         - name: prometheus-node-exporter
-          image: "prom/node-exporter:v1.0.1"
+          image: "quay.io/prometheus/node-exporter:v1.0.1"
           imagePullPolicy: "IfNotPresent"
           args:
             - --path.procfs=/host/proc
             - --path.sysfs=/host/sys
+            - --path.rootfs=/host/root
             - --web.listen-address=:9100
           ports:
             - name: metrics
@@ -5382,8 +5515,17 @@ spec:
             - name: sys
               mountPath: /host/sys
               readOnly: true
+            - name: root
+              mountPath: /host/root
+              mountPropagation: HostToContainer
+              readOnly: true
       hostNetwork: true
       hostPID: true
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
       volumes:
         - name: proc
           hostPath:
@@ -5391,6 +5533,9 @@ spec:
         - name: sys
           hostPath:
             path: /sys
+        - name: root
+          hostPath:
+            path: /
 ---
 # Source: tobs/charts/grafana/templates/deployment.yaml
 apiVersion: apps/v1
@@ -5399,10 +5544,10 @@ metadata:
   name: tobs-grafana
   namespace: tobs
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -5419,10 +5564,10 @@ spec:
         app.kubernetes.io/name: grafana
         app.kubernetes.io/instance: tobs
       annotations:
-        checksum/config: 33e6971e93f0ab5f523ace3bf23c89c50b860eef3325be20de2f998076f1b6d6
+        checksum/config: 10fa81bbe80c4471eb89feca0d828ce5d4b785e44436ae51bf74d089ab14f8bf
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/sc-dashboard-provider-config: b512baccf98a03404ffc2c62e6b1d5f812e1e8de3278aadc86c99d8955efbf89
-        checksum/secret: 11cc5852699fd140af98c91daae14cf7a2ae288283fe02ebbe859c259284160d
+        checksum/sc-dashboard-provider-config: 48d33eaf892ca6cfbf3c2758d18ca3a87867e8aa8ac310e895344ebc48ad514c
+        checksum/secret: 3588a62d2cd86132be17509cdabaed70f4145a91f3d86eb3239e66c9ddaaaf60
     spec:
       
       serviceAccountName: tobs-grafana
@@ -5432,7 +5577,7 @@ spec:
         runAsUser: 472
       initContainers:
         - name: grafana-sc-datasources
-          image: "kiwigrid/k8s-sidecar:1.1.0"
+          image: "quay.io/kiwigrid/k8s-sidecar:1.10.6"
           imagePullPolicy: IfNotPresent
           env:
             - name: METHOD
@@ -5450,7 +5595,7 @@ spec:
               mountPath: "/etc/grafana/provisioning/datasources"
       containers:
         - name: grafana-sc-dashboard
-          image: "kiwigrid/k8s-sidecar:1.1.0"
+          image: "quay.io/kiwigrid/k8s-sidecar:1.10.6"
           imagePullPolicy: IfNotPresent
           env:
             - name: METHOD
@@ -5467,7 +5612,7 @@ spec:
             - name: sc-dashboard-volume
               mountPath: "/tmp/dashboards"
         - name: grafana
-          image: "grafana/grafana:7.3.1"
+          image: "grafana/grafana:7.4.2"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: config
@@ -5540,7 +5685,7 @@ metadata:
   namespace: tobs
   labels:
     app.kubernetes.io/name: kube-state-metrics
-    helm.sh/chart: "kube-state-metrics-2.8.14"
+    helm.sh/chart: "kube-state-metrics-2.9.8"
     app.kubernetes.io/instance: "tobs"
     app.kubernetes.io/managed-by: "Helm"
 spec:
@@ -5647,6 +5792,7 @@ spec:
 
 
 
+
         imagePullPolicy: IfNotPresent
         image: "quay.io/coreos/kube-state-metrics:v1.9.7"
         ports:
@@ -5672,7 +5818,7 @@ metadata:
     component: "server"
     app: prometheus
     release: tobs
-    chart: prometheus-11.16.7
+    chart: prometheus-13.3.3
     heritage: Helm
   name: tobs-prometheus-server
   namespace: tobs
@@ -5689,13 +5835,13 @@ spec:
         component: "server"
         app: prometheus
         release: tobs
-        chart: prometheus-11.16.7
+        chart: prometheus-13.3.3
         heritage: Helm
     spec:
       serviceAccountName: tobs-prometheus-server
       containers:
         - name: prometheus-server-configmap-reload
-          image: "jimmidyson/configmap-reload:v0.4.0"
+          image: "jimmidyson/configmap-reload:v0.5.0"
           imagePullPolicy: "IfNotPresent"
           args:
             - --volume-dir=/etc/config
@@ -5708,7 +5854,7 @@ spec:
               readOnly: true
 
         - name: prometheus-server
-          image: "prom/prometheus:v2.21.0"
+          image: "quay.io/prometheus/prometheus:v2.24.0"
           imagePullPolicy: "IfNotPresent"
           args:
             - --storage.tsdb.retention.time=15d
@@ -5725,7 +5871,7 @@ spec:
               port: 9090
             initialDelaySeconds: 30
             periodSeconds: 5
-            timeoutSeconds: 30
+            timeoutSeconds: 4
             failureThreshold: 3
             successThreshold: 1
           livenessProbe:
@@ -5734,7 +5880,7 @@ spec:
               port: 9090
             initialDelaySeconds: 30
             periodSeconds: 15
-            timeoutSeconds: 30
+            timeoutSeconds: 10
             failureThreshold: 3
             successThreshold: 1
           resources:
@@ -5766,11 +5912,13 @@ metadata:
   name: tobs-promscale
   labels:
     app: tobs-promscale
-    chart: promscale-0.2.0
+    chart: promscale-0.3.0
     release: tobs
     heritage: Helm
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: tobs-promscale
@@ -5786,7 +5934,7 @@ spec:
       
     spec:
       containers:
-        - image: timescale/promscale:0.2.0
+        - image: timescale/promscale:0.3.0
           imagePullPolicy: IfNotPresent
           name: promscale-connector
           resources:
@@ -5804,8 +5952,8 @@ spec:
             - name: PROMSCALE_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: tobs-timescaledb-passwords
-                  key: postgres
+                  name: tobs-credentials
+                  key: PATRONI_SUPERUSER_PASSWORD
             - name: PROMSCALE_DB_HOST
               value: tobs.tobs.svc.cluster.local
             - name: PROMSCALE_DB_NAME
@@ -5820,7 +5968,7 @@ metadata:
   name: tobs-promlens
   labels:
     app: tobs
-    chart: tobs-0.2.2
+    chart: tobs-0.3.0
     release: tobs
     component: promlens
 spec:
@@ -5854,13 +6002,14 @@ metadata:
   name: tobs-timescaledb
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
     cluster-name: tobs
 spec:
   serviceName: tobs-timescaledb
   replicas: 1
+  podManagementPolicy: OrderedReady
   updateStrategy:
     type: RollingUpdate
   selector:
@@ -5880,7 +6029,87 @@ spec:
         # The postgres user inside the TimescaleDB image has uid=1000.
         # This configuration ensures the permissions of the mounts are suitable
         fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       initContainers:
+      - name: tstune
+        securityContext:
+          allowPrivilegeEscalation: false
+        image: "timescaledev/timescaledb-ha:pg12-ts2.1-latest"
+        env:
+        - name: TSTUNE_FILE
+          value: /var/run/postgresql/timescaledb.conf
+        - name: RESOURCES_WAL_VOLUME
+          value: 20Gi
+        - name: RESOURCES_DATA_VOLUME
+          value: 150Gi
+        - name: INCLUDE_DIRECTIVE
+          value: include_if_exists = '/var/run/postgresql/timescaledb.conf'
+        - name: CPUS
+          valueFrom:
+            resourceFieldRef:
+              containerName: timescaledb
+              resource: requests.cpu
+              divisor: "1"
+        - name: MEMORY
+          valueFrom:
+            resourceFieldRef:
+              containerName: timescaledb
+              resource: requests.memory
+              divisor: 1Mi
+        - name: RESOURCES_CPU_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: timescaledb
+              resource: limits.cpu
+              divisor: "1"
+        - name: RESOURCES_MEMORY_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: timescaledb
+              resource: limits.memory
+              divisor: 1Mi
+        command:
+          - sh
+          - "-c"
+          - |
+              set -e
+              [ $CPUS -eq 0 ]   && CPUS="${RESOURCES_CPU_LIMIT}"
+              [ $MEMORY -eq 0 ] && MEMORY="${RESOURCES_MEMORY_LIMIT}"
+
+              if [ -f "${PGDATA}/postgresql.base.conf" ] && ! grep "${INCLUDE_DIRECTIVE}" postgresql.base.conf -qxF; then
+                echo "${INCLUDE_DIRECTIVE}" >> "${PGDATA}/postgresql.base.conf"
+              fi
+
+              touch "${TSTUNE_FILE}"
+              timescaledb-tune -quiet -pg-version 11 -conf-path "${TSTUNE_FILE}" -cpus "${CPUS}" -memory "${MEMORY}MB" \
+                 -yes
+
+              # If there is a dedicated WAL Volume, we want to set max_wal_size to 60% of that volume
+              # If there isn't a dedicated WAL Volume, we set it to 20% of the data volume
+              if [ "${RESOURCES_WAL_VOLUME}" = "0" ]; then
+                WALMAX="${RESOURCES_DATA_VOLUME}"
+                WALPERCENT=20
+              else
+                WALMAX="${RESOURCES_WAL_VOLUME}"
+                WALPERCENT=60
+              fi
+
+              WALMAX=$(numfmt --from=auto ${WALMAX})
+
+              # Wal segments are 16MB in size, in this way we get a "nice" number of the nearest
+              # 16MB
+              WALMAX=$(( $WALMAX / 100 * $WALPERCENT / 16777216 * 16 ))
+              WALMIN=$(( $WALMAX / 2 ))
+
+              echo "max_wal_size=${WALMAX}MB" >> "${TSTUNE_FILE}"
+              echo "min_wal_size=${WALMIN}MB" >> "${TSTUNE_FILE}"
+        volumeMounts:
+        - name: socket-directory
+          mountPath: /var/run/postgresql
+        resources:
+          {}
       # Issuing the final checkpoints on a busy database may take considerable time.
       # Unfinished checkpoints will require more time during startup, so the tradeoff
       # here is time spent in shutdown/time spent in startup.
@@ -5889,8 +6118,10 @@ spec:
       terminationGracePeriodSeconds: 600
       containers:
       - name: timescaledb
-        image: "timescaledev/timescaledb-ha:pg12-ts1.7-latest"
-        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+        image: "timescaledev/timescaledb-ha:pg12-ts2.1-latest"
+        imagePullPolicy: Always
         lifecycle:
           preStop:
             exec:
@@ -5943,6 +6174,9 @@ spec:
                 unset "${UNKNOWNVAR}"
             done
 
+            touch /var/run/postgresql/timescaledb.conf
+            touch /var/run/postgresql/wal_status
+
             echo "*:*:*:postgres:${PATRONI_SUPERUSER_PASSWORD}" >> ${HOME}/.pgpass
             chmod 0600 ${HOME}/.pgpass
 
@@ -5957,31 +6191,6 @@ spec:
         # https://patroni.readthedocs.io/en/latest/ENVIRONMENT.html#bootstrap-configuration
         - name: PATRONI_admin_OPTIONS
           value: createrole,createdb
-        - name: PATRONI_admin_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: "admin"
-        - name: PATRONI_postgres_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: "postgres"
-        - name: PATRONI_standby_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: "standby"
-        - name: PATRONI_REPLICATION_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: standby
-        - name: PATRONI_SUPERUSER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: postgres
         - name: PATRONI_REPLICATION_USERNAME
           value: standby
         # To specify the PostgreSQL and Rest API connect addresses we need
@@ -5995,6 +6204,8 @@ spec:
           value: "$(PATRONI_KUBERNETES_POD_IP):5432"
         - name: PATRONI_RESTAPI_CONNECT_ADDRESS
           value: "$(PATRONI_KUBERNETES_POD_IP):8008"
+        - name: PATRONI_KUBERNETES_PORTS
+          value: '[{"name": "postgresql", "port": 5432}]'
         - name: PATRONI_NAME
           valueFrom:
             fieldRef:
@@ -6015,13 +6226,24 @@ spec:
           value: "$(PATRONI_POSTGRESQL_DATA_DIR)"
         - name: PGHOST
           value: "/var/run/postgresql"
+        - name: BOOTSTRAP_FROM_BACKUP
+          value: "0"
           # pgBackRest is also called using the archive_command if the backup is enabled.
           # this script will also need access to the environment variables specified for
           # the backup. This can be removed once we do not directly invoke pgBackRest
           # from inside the TimescaleDB container anymore
+        envFrom:
+        - secretRef:
+            name: tobs-credentials
+            optional: false
+        - secretRef:
+            name: tobs-pgbackrest
+            optional: true
         ports:
         - containerPort: 8008
+          name: patroni
         - containerPort: 5432
+          name: postgresql
         readinessProbe:
           exec:
             command:
@@ -6047,12 +6269,21 @@ spec:
         - mountPath: /etc/timescaledb/scripts
           name: timescaledb-scripts
           readOnly: true
+        - mountPath: /etc/timescaledb/post_init.d
+          name: post-init
+          readOnly: true
         - mountPath: /etc/certificate
           name: certificate
           readOnly: true
         - name: socket-directory
           mountPath: /var/run/postgresql
         
+        - mountPath: /etc/pgbackrest
+          name: pgbackrest
+          readOnly: true
+        - mountPath: /etc/pgbackrest/bootstrap
+          name: pgbackrest-bootstrap
+          readOnly: true
         resources:
           {}
       affinity:
@@ -6086,10 +6317,34 @@ spec:
           name: tobs-timescaledb-scripts
           defaultMode: 488 # 0750 permissions
       
+      - name: post-init
+        projected:
+          defaultMode: 0750
+          sources:
+            - configMap:
+                name: custom-init-scripts
+                optional: true
+            - secret:
+                name: custom-secret-scripts
+                optional: true
+      - name: pgbouncer
+        configMap:
+          name: tobs-timescaledb-pgbouncer
+          defaultMode: 416 # 0640 permissions
+          optional: true
+      - name: pgbackrest
+        configMap:
+          name: tobs-timescaledb-pgbackrest
+          defaultMode: 416 # 0640 permissions
+          optional: true
       - name: certificate
         secret:
-          secretName: tobs-timescaledb-certificate
+          secretName:  tobs-certificate
           defaultMode: 416 # 0640 permissions
+      - name: pgbackrest-bootstrap
+        secret:
+          secretName: pgbackrest-bootstrap
+          optional: True
   volumeClaimTemplates:
     - metadata:
         name: storage-volume
@@ -6129,7 +6384,7 @@ metadata:
   name: tobs-grafana-db
   labels:
     app: tobs
-    chart: tobs-0.2.2
+    chart: tobs-0.3.0
     release: tobs
     heritage: Helm
 spec:
@@ -6150,11 +6405,12 @@ spec:
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              name: tobs-timescaledb-passwords
-              key: postgres
+              name: tobs-credentials
+              key: PATRONI_SUPERUSER_PASSWORD
         - name: PGHOST
           value: tobs.tobs.svc.cluster.local
         command: [ 'psql', '-d', postgres, '-f', '/add-users.sql' ]
+        
       restartPolicy: OnFailure
       volumes:
       - name: sql-volume
@@ -6172,64 +6428,15 @@ spec:
           value: tobs.tobs.svc.cluster.local
         command: [ 'sh', '/wait-for-ts.sh' ]
 ---
-# Source: tobs/charts/promscale/templates/cronjob-maintenance.yaml
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: tobs-promscale-maintenance
-  labels:
-    app: tobs-promscale
-    chart: promscale-0.2.0
-    release: tobs
-    heritage: Helm
-spec:
-  schedule: 0,30 * * * *
-  startingDeadlineSeconds: 200
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 1
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-          - name: promscale-maintenance
-            image: postgres:12-alpine
-            args:
-            - sh
-            - ./execute_maintenance.sh
-            env:
-              - name: PGPORT
-                value: "5432"
-              - name: PGUSER
-                value: postgres
-              - name: PGPASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: tobs-timescaledb-passwords
-                    key: postgres
-              - name: PGHOST
-                value: tobs.tobs.svc.cluster.local
-              - name:  PGDATABASE
-                value: postgres
-            volumeMounts:
-              - name: script-volume
-                mountPath: /execute_maintenance.sh
-                subPath: execute_maintenance.sh
-          volumes:
-            - name: script-volume
-              configMap:
-                name: tobs-promscale-maintenance
-          restartPolicy: OnFailure
+# Source: tobs/charts/timescaledb-single/templates/configmap-pgbackrest.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+---
+# Source: tobs/charts/timescaledb-single/templates/configmap-pgbouncer.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 ---
 # Source: tobs/charts/timescaledb-single/templates/pgbackrest.yaml
-# This file and its contents are licensed under the Apache License 2.0.
-# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
----
-# Source: tobs/charts/timescaledb-single/templates/sec-passwords.yaml
-# This file and its contents are licensed under the Apache License 2.0.
-# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
----
-# Source: tobs/charts/timescaledb-single/templates/sec-pgbackrest.yaml
 # This file and its contents are licensed under the Apache License 2.0.
 # Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 ---
@@ -6239,16 +6446,20 @@ spec:
 #
 # This service is only created if Prometheus is enabled.
 ---
+# Source: tobs/charts/timescaledb-single/templates/unsafe_credentials.yaml
+# This file and its contents are licensed under the Apache License 2.0.
+# Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
+---
 # Source: tobs/charts/grafana/templates/tests/test.yaml
 apiVersion: v1
 kind: Pod
 metadata:
   name: tobs-grafana-test
   labels:
-    helm.sh/chart: grafana-6.1.0
+    helm.sh/chart: grafana-6.4.4
     app.kubernetes.io/name: grafana
     app.kubernetes.io/instance: tobs
-    app.kubernetes.io/version: "7.3.1"
+    app.kubernetes.io/version: "7.4.2"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test-success
@@ -6277,10 +6488,10 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "tobs-patroni-8e"
+  name: "tobs-patroni-9z"
   labels:
     app: tobs-timescaledb
-    chart: timescaledb-single-0.5.5
+    chart: timescaledb-single-0.8.2
     release: tobs
     heritage: Helm
     cluster-name: tobs
@@ -6288,12 +6499,12 @@ metadata:
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
-  activeDeadlineSeconds: 60
+  activeDeadlineSeconds: 120
   template:
     metadata:
       labels:
         app: tobs-timescaledb
-        chart: timescaledb-single-0.5.5
+        chart: timescaledb-single-0.8.2
         release: tobs
         heritage: Helm
     spec:
@@ -6301,16 +6512,13 @@ spec:
       containers:
       - name: tobs-timescaledb-patch-patroni-config
         image: curlimages/curl
-        command: ["/usr/bin/curl"]
+        command: ["/bin/sh"]
+        # Patching the Patroni configuration is good, however it should not block an upgrade from going through
+        # Therefore we ensure we always exit with an exitcode 0, so that Helm is satisfied with this upgrade job
         args:
-        - --connect-timeout
-        - '10'
-        - --include
-        - --silent
-        - --show-error
-        - --fail
-        - --request
-        - PATCH
-        - --data
-        - "{\"loop_wait\":10,\"maximum_lag_on_failover\":33554432,\"postgresql\":{\"parameters\":{\"archive_command\":\"/etc/timescaledb/scripts/pgbackrest_archive.sh %p\",\"archive_mode\":\"on\",\"archive_timeout\":\"1800s\",\"autovacuum_analyze_scale_factor\":0.02,\"autovacuum_max_workers\":10,\"autovacuum_vacuum_scale_factor\":0.05,\"hot_standby\":\"on\",\"log_autovacuum_min_duration\":0,\"log_checkpoints\":\"on\",\"log_connections\":\"on\",\"log_disconnections\":\"on\",\"log_line_prefix\":\"%t [%p]: [%c-%l] %u@%d,app=%a [%e] \",\"log_lock_waits\":\"on\",\"log_min_duration_statement\":\"1s\",\"log_statement\":\"ddl\",\"max_connections\":100,\"max_prepared_transactions\":150,\"shared_preload_libraries\":\"timescaledb,pg_stat_statements\",\"ssl\":\"on\",\"ssl_cert_file\":\"/etc/certificate/tls.crt\",\"ssl_key_file\":\"/etc/certificate/tls.key\",\"tcp_keepalives_idle\":900,\"tcp_keepalives_interval\":100,\"temp_file_limit\":\"1GB\",\"timescaledb.passfile\":\"../.pgpass\",\"unix_socket_directories\":\"/var/run/postgresql\",\"unix_socket_permissions\":\"0750\",\"wal_level\":\"hot_standby\",\"wal_log_hints\":\"on\"},\"use_pg_rewind\":true,\"use_slots\":true},\"retry_timeout\":10,\"ttl\":30}"
-        - "http://tobs-config:8008/config"
+        - '-c'
+        - |
+          /usr/bin/curl --connect-timeout 30 --include --request PATCH --data \
+          "{\"loop_wait\":10,\"maximum_lag_on_failover\":33554432,\"postgresql\":{\"parameters\":{\"archive_command\":\"/etc/timescaledb/scripts/pgbackrest_archive.sh %p\",\"archive_mode\":\"on\",\"archive_timeout\":\"1800s\",\"autovacuum_analyze_scale_factor\":0.02,\"autovacuum_max_workers\":10,\"autovacuum_naptime\":\"5s\",\"autovacuum_vacuum_cost_limit\":500,\"autovacuum_vacuum_scale_factor\":0.05,\"hot_standby\":\"on\",\"log_autovacuum_min_duration\":\"1min\",\"log_checkpoints\":\"on\",\"log_connections\":\"on\",\"log_disconnections\":\"on\",\"log_line_prefix\":\"%t [%p]: [%c-%l] %u@%d,app=%a [%e] \",\"log_lock_waits\":\"on\",\"log_min_duration_statement\":\"1s\",\"log_statement\":\"ddl\",\"max_connections\":100,\"max_prepared_transactions\":150,\"shared_preload_libraries\":\"timescaledb,pg_stat_statements\",\"ssl\":\"on\",\"ssl_cert_file\":\"/etc/certificate/tls.crt\",\"ssl_key_file\":\"/etc/certificate/tls.key\",\"tcp_keepalives_idle\":900,\"tcp_keepalives_interval\":100,\"temp_file_limit\":\"1GB\",\"timescaledb.passfile\":\"../.pgpass\",\"unix_socket_directories\":\"/var/run/postgresql\",\"unix_socket_permissions\":\"0750\",\"wal_level\":\"hot_standby\",\"wal_log_hints\":\"on\"},\"use_pg_rewind\":true,\"use_slots\":true},\"retry_timeout\":10,\"ttl\":30}" \
+          "http://tobs-config:8008/config"
+          exit 0
