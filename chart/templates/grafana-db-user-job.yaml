@@ -21,7 +21,7 @@ spec:
           subPath: add-users.sql
         env:
         - name: PGPORT
-          value: {{ ternary (include "tobs.dburi.port" . ) (.Values.grafana.timescale.database.port | quote ) (.Values.timescaledbExternal.enabled) }}
+          value: {{ ternary (include "tobs.dburi.port" . | quote ) (.Values.grafana.timescale.database.port | quote ) (.Values.timescaledbExternal.enabled) }}
         - name: PGUSER
           value: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
         - name: PGPASSWORD

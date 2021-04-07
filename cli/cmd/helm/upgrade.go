@@ -9,7 +9,11 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/utils"
+	v1 "k8s.io/api/core/v1"
+	errors2 "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // upgradeCmd represents the upgrade command
@@ -130,8 +134,8 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse latest helm chart version %w", err)
 	}
 
-	s := strings.Split(deployedChart.Chart, "-")
-	dVersion, err := utils.ParseVersion(s[1], 3)
+	deployedVersion := strings.Split(deployedChart.Chart, "-")[1]
+	dVersion, err := utils.ParseVersion(deployedVersion, 3)
 	if err != nil {
 		return fmt.Errorf("failed to parse deployed helm chart version %w", err)
 	}
@@ -170,6 +174,11 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		utils.ConfirmAction()
 	}
 
+	err = UpgradePathBasedOnVersion(deployedVersion, latestChart.Version)
+	if err != nil {
+		return err
+	}
+
 	out := exec.Command("helm", cmds...)
 	k, err := out.CombinedOutput()
 	if err != nil {
@@ -178,4 +187,219 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Successfully upgraded %s.\n", root.HelmReleaseName)
 	return nil
+}
+
+func UpgradePathBasedOnVersion(deployedChartVersion, newChartVersion string) error {
+	nVersion, err := utils.ParseVersion(newChartVersion, 3)
+	if err != nil {
+		return fmt.Errorf("failed to parse latest helm chart version %w", err)
+	}
+
+	dVersion, err := utils.ParseVersion(deployedChartVersion, 3)
+	if err != nil {
+		return fmt.Errorf("failed to parse deployed helm chart version %w", err)
+	}
+
+	version0_2_2, err := utils.ParseVersion("0.2.2", 3)
+	if err != nil {
+		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
+	}
+
+	switch {
+	// The below case if for upgrade from any versions <= 0.2.2 to greater versions
+	case dVersion <= version0_2_2 && nVersion > version0_2_2:
+		err = copyOldSecretsToNewSecrets()
+		if err != nil {
+			return fmt.Errorf("failed to perform copying of old secrets to new secrets %v", err)
+		}
+
+		// in this release of tobs the grafana-db-job has been updated with spec
+		// the upgrade fails to patch the spec so we are deleting & the upgrade will re-create it.
+		err := k8s.DeleteJob(root.HelmReleaseName+"-grafana-db", root.Namespace)
+		if err != nil {
+			return err
+		}
+	default:
+		// if the upgrade doesn't match the above condition
+		// that means we do not have an upgrade path for the base version to new version
+		// Note: This is helpful when someone wants to upgrade with just values.yaml (not between versions)
+		return nil
+	}
+
+	return nil
+}
+
+func copyOldSecretsToNewSecrets() error {
+	err := copyDBSecret()
+	if err != nil {
+		return err
+	}
+
+	err = copyDBCertificate()
+	if err != nil {
+		return err
+	}
+
+	err = copyDBBackup()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func copyDBSecret() error {
+	fmt.Println("Migrating the credentials")
+	existingDBSecret := root.HelmReleaseName + "-timescaledb-passwords"
+	newDBsecret := root.HelmReleaseName + "-credentials"
+
+	s, err := k8s.KubeGetSecret(root.Namespace, existingDBSecret)
+	if err != nil {
+		return fmt.Errorf("failed to get the secret existing secret during the upgrade %s: %v", existingDBSecret, err)
+	}
+
+	var admin, postgres, standby []byte
+
+	if bytepass, exists := s.Data["admin"]; exists {
+		admin = bytepass
+	} else {
+		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
+	}
+
+	if bytepass, exists := s.Data["postgres"]; exists {
+		postgres = bytepass
+	} else {
+		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
+	}
+
+	if bytepass, exists := s.Data["standby"]; exists {
+		standby = bytepass
+	} else {
+		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
+	}
+
+	sec := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      newDBsecret,
+			Namespace: root.Namespace,
+			Labels:    utils.GetTimescaleDBsecretLabels(),
+		},
+		Data: map[string][]byte{
+			"PATRONI_REPLICATION_PASSWORD": standby,
+			"PATRONI_admin_PASSWORD":       admin,
+			"PATRONI_SUPERUSER_PASSWORD":   postgres,
+		},
+		Type: "Opaque",
+	}
+
+	err = k8s.CreateSecret(sec)
+	if err != nil {
+		return fmt.Errorf("failed to create secret during the upgrade %s: %v", sec.Name, err)
+	}
+
+	fmt.Printf("secret/%s created\n\n", newDBsecret)
+
+	return nil
+}
+
+func copyDBCertificate() error {
+	fmt.Println("Migrating the certificate")
+	existingDBCertificate := root.HelmReleaseName + "-timescaledb-certificate"
+	newDBCertificate := root.HelmReleaseName + "-certificate"
+
+	s, err := k8s.KubeGetSecret(root.Namespace, existingDBCertificate)
+	if err != nil {
+		return fmt.Errorf("failed to get the secret existing secret during the upgrade %s: %v", existingDBCertificate, err)
+	}
+
+	sec := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      newDBCertificate,
+			Namespace: root.Namespace,
+			Labels:    utils.GetTimescaleDBsecretLabels(),
+		},
+		Data: s.Data,
+		Type: "Opaque",
+	}
+
+	err = k8s.CreateSecret(sec)
+	if err != nil {
+		return fmt.Errorf("failed to create secret during the upgrade %s: %v", sec.Name, err)
+	}
+
+	fmt.Printf("secret/%s created\n\n", newDBCertificate)
+
+	return nil
+}
+
+func copyDBBackup() error {
+	existingDBBackup := root.HelmReleaseName + "-timescaledb-pgbackrest"
+	newDBBackUp := root.HelmReleaseName + "-pgbackrest"
+
+	s, err := k8s.KubeGetSecret(root.Namespace, existingDBBackup)
+	if err != nil {
+		// backup is optional is disabled skip backup secret copying
+		ok := errors2.IsNotFound(err)
+		if !ok {
+			return fmt.Errorf("failed to get the secret existing secret during the upgrade %s: %v", existingDBBackup, err)
+		}
+		return nil
+	}
+
+	fmt.Println("Migrating backup configuration")
+
+	var pgBackRestConf string
+	if bytepass, exists := s.Data["pgbackrest.conf"]; exists {
+		pgBackRestConf = string(bytepass)
+	} else {
+		return fmt.Errorf("could not get TimescaleDB pgbackrest.conf in secret %s as backup is enabled", existingDBBackup)
+	}
+
+	s3Dataset := parsePgBackRestConf(pgBackRestConf)
+	newData := make(map[string][]byte)
+	for key, value := range s3Dataset {
+		newKey := strings.Replace(key, "-", "_", -1)
+		newKey = strings.ToUpper(newKey)
+		newKey = "PGBACKREST_" + newKey
+		newData[newKey] = []byte(value)
+	}
+
+	sec := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      newDBBackUp,
+			Namespace: root.Namespace,
+			Labels:    utils.GetTimescaleDBsecretLabels(),
+		},
+		Data: newData,
+		Type: "Opaque",
+	}
+
+	err = k8s.CreateSecret(sec)
+	if err != nil {
+		return fmt.Errorf("failed to create secret during the upgrade %s: %v", sec.Name, err)
+	}
+
+	fmt.Printf("secret/%s created\n\n", newDBBackUp)
+
+	return nil
+}
+
+
+// in older version of timescaleDB pgbackrest conf is set
+// in string we need to break the string into key/value only
+// *-s3-* keys
+func parsePgBackRestConf(data string) map[string]string {
+	newData := make(map[string]string)
+	dataSets := strings.Split(data, "\n")
+	for _, s := range dataSets {
+		if strings.Contains(s, "-s3-") {
+			d := strings.Split(s, "=")
+			// we only care key/value pairs
+			if len(d) == 2 {
+				newData[d[0]] = d[1]
+			}
+		}
+	}
+
+	return newData
 }

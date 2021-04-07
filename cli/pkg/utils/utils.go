@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"sigs.k8s.io/yaml"
 )
@@ -332,4 +333,11 @@ func GetDBPassword(secretKey, name, namespace string) ([]byte, error) {
 	}
 
 	return nil, fmt.Errorf("user not found")
+}
+
+func GetTimescaleDBsecretLabels() map[string]string {
+	return map[string]string{
+		"app":          root.HelmReleaseName + "-timescaledb",
+		"cluster-name": root.HelmReleaseName,
+	}
 }

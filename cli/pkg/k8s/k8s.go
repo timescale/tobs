@@ -588,3 +588,13 @@ func CheckSecretExists(secretName, namespace string) (bool, error) {
 
 	return false, nil
 }
+
+
+func DeleteJob(name, namespace string) error {
+	client, _ := kubeInit()
+	err := client.BatchV1().Jobs(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
+	if err != nil {
+		return fmt.Errorf("failed delete the job %s: %v", name, err)
+	}
+	return nil
+}
