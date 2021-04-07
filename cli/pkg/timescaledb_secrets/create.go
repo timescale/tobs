@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/timescale/tobs/cli/pkg/k8s"
+	"github.com/timescale/tobs/cli/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -71,7 +72,7 @@ func randomPassword(n int) ([]byte, error) {
 		return b, fmt.Errorf("failed to generate random password %v", err)
 	}
 	for i := 0; i < n; i++ {
-		b[i] = passwordChars[b[i] % uint8(len(passwordChars))]
+		b[i] = passwordChars[b[i]%uint8(len(passwordChars))]
 	}
 	return b, nil
 }
@@ -105,6 +106,7 @@ func (t *TSDBSecretsInfo) createTimescaleDBCredentials() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: t.Namespace,
+			Labels:    utils.GetTimescaleDBsecretLabels(),
 		},
 		Data: map[string][]byte{
 			"PATRONI_REPLICATION_PASSWORD": repPass,
@@ -130,9 +132,9 @@ func generateCerts() ([]byte, []byte, error) {
 	}
 
 	template := x509.Certificate{
-		SerialNumber:          serialNumber,
+		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			CommonName: "Tobs TimescaleDB Fake Certificate",
+			CommonName:   "Tobs TimescaleDB Fake Certificate",
 			Organization: []string{"Acme Co"},
 		},
 		NotBefore:             time.Now(),
@@ -197,6 +199,7 @@ WARNING: Using a generated self-signed certificate for TLS access to TimescaleDB
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: t.Namespace,
+			Labels:    utils.GetTimescaleDBsecretLabels(),
 		},
 		Data: map[string][]byte{"tls.key": privateKey, "tls.crt": publicKey},
 		Type: "Opaque",
@@ -306,6 +309,7 @@ func createTimescaleDBPgBackRest(name, namespace string, s3 s3Details) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: namespace,
+			Labels:    utils.GetTimescaleDBsecretLabels(),
 		},
 		Data: data,
 		Type: "Opaque",

@@ -81,6 +81,11 @@ prometheus:
   pushgateway:
     enabled: false
   server:
+    # during the upgrades rollingUpdate is creating chaos
+    # as both old & new pod try to mount same PVC. So we use
+    # Prometheus upgrade strategy as Recreate
+    strategy:
+      type: Recreate
     # we provide a config map which will have the
     # promscale connector already configured as
     # a remote endpoint for read/write (if enabled)
