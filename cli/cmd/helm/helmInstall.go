@@ -37,13 +37,19 @@ func addHelmInstallFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Enable TimescaleDB S3 backup")
 	cmd.Flags().StringP("timescaledb-tls-cert", "", "", "Option to provide your own tls certificate for TimescaleDB")
 	cmd.Flags().StringP("timescaledb-tls-key", "", "", "Option to provide your own tls key for TimescaleDB")
+	cmd.Flags().StringP("version", "", "", "Option to provide your tobs helm chart version, if not provided will install the latest tobs chart available")
+	cmd.Flags().BoolP("only-secrets", "", false, "Option to create only TimescaleDB secrets")
+	cmd.Flags().BoolP("skip-wait", "", false, "Option to do not wait for pods to get into running state (useful for faster tobs installation)")
 }
 
 type installSpec struct {
 	configFile   string
 	ref          string
 	dbURI        string
+	version      string
 	enableBackUp bool
+	onlySecrets  bool
+	skipWait     bool
 	tsDBTlsCert  []byte
 	tsDBTlsKey   []byte
 }
@@ -65,6 +71,18 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 	i.enableBackUp, err = cmd.Flags().GetBool("enable-timescaledb-backup")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+	i.version, err = cmd.Flags().GetString("version")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+	i.onlySecrets, err = cmd.Flags().GetBool("only-secrets")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+	i.skipWait, err = cmd.Flags().GetBool("skip-wait")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -104,6 +122,24 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 
 func (c *installSpec) installStack() error {
 	var err error
+	helmValues := "cli=true"
+
+	if c.dbURI != "" {
+		helmValues = appendDBURIValues(c.dbURI, cmd.HelmReleaseName, helmValues)
+	} else {
+		// if db-uri is provided we do not need
+		// to create DB level secrets
+		err = c.createSecrets()
+		if err != nil {
+			return fmt.Errorf("failed to create secrets %v", err)
+		}
+		if c.onlySecrets {
+			fmt.Println("Skipping tobs installation because of only-secrets flag.")
+			fmt.Println("Successfully created secrets for TimescaleDB.")
+			return nil
+		}
+	}
+
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
 	if c.ref == utils.DEFAULT_CHART {
@@ -119,10 +155,6 @@ func (c *installSpec) installStack() error {
 	}
 
 	cmds := []string{"install", cmd.HelmReleaseName, c.ref}
-
-	// Note do not change the below order the --set flag is set
-	// in above we are appending more flags to it with below check
-	helmValues := "cli=true"
 
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
@@ -141,27 +173,11 @@ func (c *installSpec) installStack() error {
 		helmValues = helmValues + ",timescaledb-single.backup.enabled=true"
 	}
 
-	t := timescaledb_secrets.TSDBSecretsInfo{
-		ReleaseName:    cmd.HelmReleaseName,
-		Namespace:      cmd.Namespace,
-		EnableS3Backup: c.enableBackUp,
-		TlsCert:        c.tsDBTlsCert,
-		TlsKey:         c.tsDBTlsKey,
-	}
-
-	if c.dbURI != "" {
-		helmValues = appendDBURIValues(c.dbURI, cmd.HelmReleaseName, helmValues)
-	} else {
-		// if db-uri is provided we do not need
-		// to create DB level secrets
-		err = t.CreateTimescaleDBSecrets()
-		if err != nil {
-			return err
-		}
-	}
-
 	if cmd.Namespace != "default" {
 		cmds = append(cmds, "--create-namespace", "--namespace", cmd.Namespace)
+	}
+	if c.version != "" {
+		cmds = append(cmds, "--version", c.version)
 	}
 	if c.configFile != "" {
 		cmds = append(cmds, "--values", c.configFile)
@@ -176,6 +192,11 @@ func (c *installSpec) installStack() error {
 	out, err := install.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w \nOutput: %v", err, string(out))
+	}
+
+	if c.skipWait {
+		fmt.Println("skipping the wait for pods to come to a running state because --skip-wait is enabled.")
+		return nil
 	}
 
 	fmt.Println("Waiting for helm install to complete...")
@@ -205,3 +226,36 @@ func appendDBURIValues(dbURI, name string, helmValues string) string {
 		",promscale.connection.uri.secretTemplate=" + name + "-timescaledb-uri"
 	return helmValues
 }
+
+func (c *installSpec) createSecrets() error {
+	var i int64
+	var err error
+	if c.version != "" {
+		i, err = utils.ParseVersion(c.version, 3)
+		if err != nil {
+			return fmt.Errorf("failed to parse version %s %v", c.version, err)
+		}
+	}
+
+	// here 3000 represent version
+	// equal to or greater than 0.3.0
+	// if version isn't provided new
+	// installations needs secrets
+	if i > 3000 || c.version == "" {
+		t := timescaledb_secrets.TSDBSecretsInfo{
+			ReleaseName:    cmd.HelmReleaseName,
+			Namespace:      cmd.Namespace,
+			EnableS3Backup: c.enableBackUp,
+			TlsCert:        c.tsDBTlsCert,
+			TlsKey:         c.tsDBTlsKey,
+		}
+
+		err := t.CreateTimescaleDBSecrets()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+

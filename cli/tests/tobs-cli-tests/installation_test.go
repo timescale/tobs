@@ -1,15 +1,17 @@
 package tobs_cli_tests
 
 import (
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/timescale/tobs/cli/pkg/k8s"
+	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-func testInstall(t testing.TB, name, namespace, filename string, enableBackUp bool) {
+func testInstall(t testing.TB, name, namespace, filename string, enableBackUp, skipWait, onlySecrets bool) {
 	cmds := []string{"install", "--chart-reference", PATH_TO_CHART}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
@@ -24,9 +26,14 @@ func testInstall(t testing.TB, name, namespace, filename string, enableBackUp bo
 	if filename != "" {
 		cmds = append(cmds, "-f", filename)
 	}
-
 	if enableBackUp {
 		cmds = append(cmds, "--enable-timescaledb-backup")
+	}
+	if skipWait {
+		cmds = append(cmds, "--skip-wait")
+	}
+	if onlySecrets {
+		cmds = append(cmds, "--only-secrets")
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
@@ -171,7 +178,9 @@ func testHelmShowValues(t testing.TB) {
 }
 
 func TestInstallation(t *testing.T) {
-	if testing.Short() {
+	v := os.Getenv("SKIP_INSTALL_TESTS")
+
+	if testing.Short() || v == "TRUE" {
 		t.Skip("Skipping installation tests")
 	}
 
@@ -179,31 +188,41 @@ func TestInstallation(t *testing.T) {
 
 	testUninstall(t, "", "", true)
 
-	testInstall(t, "abc", "", "", false)
+	testInstall(t, "abc", "", "", false, true, false)
 	testHelmUninstall(t, "abc", "", false)
 
 	testHelmInstall(t, "def", "", "")
 	testUninstall(t, "def", "", false)
 	testHelmDeleteData(t, "def", "")
 
-	testInstall(t, "f1", "", "./../testdata/f1.yml", false)
+	testInstall(t, "f1", "", "./../testdata/f1.yml", false, true, false)
 	testHelmUninstall(t, "f1", "", false)
 
 	testHelmInstall(t, "f2", "", "./../testdata/f2.yml")
 	testUninstall(t, "f2", "", false)
 
-	testHelmInstall(t, "f3", "nas", "./../testdata/f3.yml")
-	testHelmUninstall(t, "f3", "nas", false)
+	// install --only-secrets
+	testInstall(t, "f5", "secrets", "", false, false, true)
+	pods, err := k8s.KubeGetAllPods("secrets", "f5")
+	if err != nil {
+		t.Log("failed to get all tobs pods")
+		t.Fatal(err)
+	}
+	if len(pods) != 0 {
+		t.Fatal("failed to install tobs with --only-secrets. We see other pods by tobs install")
+	}
+	err = test_utils.DeleteNamespace("secrets")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	testInstall(t, "f4", "", "./../testdata/f4.yml", false)
-	testUninstall(t, "f4", "", false)
-
-	testInstall(t, "", "", "", false)
+	// This installation is used to run all tests in tobs-cli-tests
+	testInstall(t, "", "", "", false, true, false)
 
 	time.Sleep(1 * time.Minute)
 
 	t.Logf("Waiting for pods to initialize...")
-	pods, err := k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
+	pods, err = k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
 	if err != nil {
 		t.Logf("Error getting all pods")
 		t.Fatal(err)

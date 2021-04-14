@@ -3,6 +3,7 @@ package volume
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
@@ -23,6 +24,13 @@ func init() {
 	volumeExpandCmd.Flags().StringP("timescaleDB-storage", "s", "", "Expand volume of timescaleDB storage")
 	volumeExpandCmd.Flags().StringP("prometheus-storage", "p", "", "Expand volume of prometheus storage")
 	volumeExpandCmd.Flags().BoolP("restart-pods", "r", false, "Restarts the pods bound to a PVC on PVC expansion")
+	volumeExpandCmd.Flags().BoolP("force-kill", "", false, "On enabling restart-pods this option kills the pods immediately")
+	// This flag is hidden as it's only used
+	//in tests to force kill pods on restart option
+	err := volumeExpandCmd.Flags().MarkHidden("force-kill")
+	if err != nil {
+		log.Fatal("failed to mark --force-kill flag hidden", err)
+	}
 }
 
 func volumeExpand(cmd *cobra.Command, args []string) error {
@@ -44,6 +52,11 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 	restartsPods, err := cmd.Flags().GetBool("restart-pods")
 	if err != nil {
 		return fmt.Errorf("could not get restart-pods flag %w", err)
+	}
+
+	forceKill, err := cmd.Flags().GetBool("force-kill")
+	if err != nil {
+		return fmt.Errorf("could not get force-kill flag %w", err)
 	}
 
 	var timescaleDBPodLabels = map[string]string{
@@ -71,7 +84,7 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcPrefix, results)
 
 		if restartsPods {
-			err = restartPods(timescaleDBPodLabels)
+			err = restartPods(timescaleDBPodLabels, forceKill)
 			if err != nil {
 				return err
 			}
@@ -88,7 +101,7 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcPrefix, results)
 
 		if restartsPods {
-			err = restartPods(timescaleDBPodLabels)
+			err = restartPods(timescaleDBPodLabels, forceKill)
 			if err != nil {
 				return err
 			}
@@ -104,7 +117,7 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcPrefix, map[string]string{pvcPrefix: promStorage})
 
 		if restartsPods {
-			err = restartPods(prometheusPodLabels)
+			err = restartPods(prometheusPodLabels, forceKill)
 			if err != nil {
 				return err
 			}
@@ -126,8 +139,8 @@ func expandSuccessPrint(pvcPrefix string, results map[string]string) {
 	fmt.Println()
 }
 
-func restartPods(labels map[string]string) error {
-	err := k8s.DeletePods(root.Namespace, labels)
+func restartPods(labels map[string]string, forceKill bool) error {
+	err := k8s.DeletePods(root.Namespace, labels, forceKill)
 	if err != nil {
 		return fmt.Errorf("failed to restart pods after PVC expansion: %w", err)
 	}

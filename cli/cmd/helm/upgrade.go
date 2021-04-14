@@ -180,9 +180,9 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 	}
 
 	out := exec.Command("helm", cmds...)
-	k, err := out.CombinedOutput()
+	output, err := out.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to upgrade %v", string(k))
+		return fmt.Errorf("failed to upgrade %s: %w", output, err)
 	}
 
 	fmt.Printf("Successfully upgraded %s.\n", root.HelmReleaseName)
@@ -383,7 +383,6 @@ func copyDBBackup() error {
 
 	return nil
 }
-
 
 // in older version of timescaleDB pgbackrest conf is set
 // in string we need to break the string into key/value only
