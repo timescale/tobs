@@ -2,13 +2,14 @@ package tobs_cli_tests
 
 import (
 	"errors"
-	"github.com/timescale/tobs/cli/pkg/k8s"
-	"github.com/timescale/tobs/cli/tests/test-utils"
-	v1 "k8s.io/api/core/v1"
 	"os/exec"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/timescale/tobs/cli/pkg/k8s"
+	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
+	v1 "k8s.io/api/core/v1"
 )
 
 func testVolumeExpansion(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusStorage string, restartPods bool) {
@@ -26,7 +27,7 @@ func testVolumeExpansion(t testing.TB, timescaleDBStorage, timescaleDBWal, prome
 	}
 
 	if restartPods {
-		cmds = append(cmds, "--restart-pods")
+		cmds = append(cmds, "--restart-pods", "--force-kill")
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
@@ -186,7 +187,6 @@ func TestVolume(t *testing.T) {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
-	time.Sleep(8 * time.Second)
 	var labels []map[string]string
 	labels = append(labels, timescaleDBLabels)
 	verifyPodRestart(t, podsSet, labels)
@@ -235,11 +235,9 @@ func TestVolume(t *testing.T) {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
-	// As timescaleDB pod is an statefulset bounded to a PVC
-	// it takes some time to move to terminating state
-	time.Sleep(1 * time.Minute)
-
 	labels = append(labels, timescaleDBLabels, prometheusLabels)
+	// pod restart takes sometime for TimescaleDB to start & to move to running state.
+	time.Sleep(1 * time.Minute)
 	verifyPodRestart(t, podsSet, labels)
 
 	// TESTCASE: Volume Expand only timescaleDB and restart pods.
@@ -272,21 +270,14 @@ func TestVolume(t *testing.T) {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
-	// As timescaleDB pod is an statefulset bounded to a PVC
-	// it takes some time to move to terminating state
-	time.Sleep(1 * time.Minute)
-
 	labels = append(labels, timescaleDBLabels)
+	// pod restart takes sometime for TimescaleDB to start & to move to running state.
+	time.Sleep(1 * time.Minute)
 	verifyPodRestart(t, podsSet, labels)
-
 }
 
 func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]string) {
 	var pods []v1.Pod
-
-	// sleep for 2 mins as Prometheus & TimescaleDB termination takes
-	// approx 2 mins for restart to happen.
-	time.Sleep(2 * time.Minute)
 
 	for _, l := range labels {
 		p, err := k8s.KubeGetPods("ns", l)

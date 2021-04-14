@@ -47,6 +47,4 @@ func TestPrometheus(t *testing.T) {
 	testPrometheusPortForward(t, "")
 	testPrometheusPortForward(t, "2398")
 	testPrometheusPortForward(t, "3920")
-	testPrometheusPortForward(t, "7489")
-	testPrometheusPortForward(t, "2238")
 }

@@ -1,11 +1,17 @@
 build:
 		go build -o bin/tobs .
 
+unit-tests:
+		go test ./pkg/...
+
 e2e-tests:
 		./tests/e2e-tests.sh
 
 external-db-tests:
 		./tests/external-db-tests.sh
+
+upgrade-tests:
+		./tests/upgrade-tests.sh
 
 go-vet:
 		go vet ./...

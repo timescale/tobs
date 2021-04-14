@@ -48,7 +48,7 @@ func TestMain(m *testing.M) {
 
 	installObs()
 
-	time.Sleep(1 * time.Minute)
+	time.Sleep(2 * time.Minute)
 
 	code := m.Run()
 

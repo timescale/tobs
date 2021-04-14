@@ -1,10 +1,10 @@
-name: Static deploy generation
+name: Daily scheduled extended Go tests
 
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    branches: [force_test, release-*]
+  schedule:
+    - cron: "6 0 * * *"
 
 jobs:
   build:
@@ -59,4 +59,14 @@ jobs:
       - name: E2E-Tests
         working-directory: ${{env.working-directory}}
         run: |
-          SKIP_INSTALL_TESTS=TRUE make e2e-tests
+          make e2e-tests
+
+      - name: External-DB-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make external-db-tests
+
+      - name: Upgrade-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make upgrade-tests

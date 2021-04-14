@@ -45,7 +45,7 @@ func testBackUpEnabledInstallation(t *testing.T) {
 	os.Setenv(region.key, region.value)
 	os.Setenv(key.key, key.value)
 	os.Setenv(secret.key, secret.value)
-	testInstall(t, releaseName, namespace, "", true)
+	testInstall(t, releaseName, namespace, "", true, true, false)
 	sec, err := test_utils.GetTSDBBackUpSecret(releaseName, namespace)
 	if err != nil {
 		t.Logf("Error while finding timescaleDB backup secret. After installting tobs with backup enabled.")

@@ -87,15 +87,15 @@ func TestGrafana(t *testing.T) {
 	testGrafanaPortForward(t, "")
 	testGrafanaPortForward(t, "1235")
 	testGrafanaPortForward(t, "2348")
-	testGrafanaPortForward(t, "7390")
 
 	testGrafanaGetPass(t)
 	testGrafanaChangePass(t, "kraken", false)
-	testGrafanaGetPass(t)
 	verifyGrafanaPass(t, "kraken")
+
 	testGrafanaChangePass(t, "cereal", false)
-	testGrafanaGetPass(t)
 	verifyGrafanaPass(t, "cereal")
+
+
 	testGrafanaChangePass(t, "23498MSDF(*9389m*(@#M24309mDj", false)
 
 	// failure case due to pwd is short

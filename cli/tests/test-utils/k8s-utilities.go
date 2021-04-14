@@ -156,3 +156,12 @@ func GetTSDBBackUpSecret(releaseName, namespace string) (*v1.Secret, error) {
 	}
 	return secret, nil
 }
+
+func DeleteNamespace(namespace string) error {
+	client, _ := kubeInit()
+	err := client.CoreV1().Namespaces().Delete(context.Background(), namespace, metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
+}

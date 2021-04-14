@@ -25,8 +25,6 @@ func TestTimescale(t *testing.T) {
 	releaseInfo.TestTimescalePortForward(t, "")
 	releaseInfo.TestTimescalePortForward(t, "5432")
 	releaseInfo.TestTimescalePortForward(t, "1789")
-	releaseInfo.TestTimescalePortForward(t, "1030")
-	releaseInfo.TestTimescalePortForward(t, "2389")
 
 	releaseInfo.TestTimescaleConnect(t, true, "")
 	releaseInfo.TestTimescaleConnect(t, false, "")

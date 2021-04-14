@@ -509,15 +509,21 @@ func ExpandPVC(namespace, pvcName, value string) error {
 	return nil
 }
 
-func DeletePods(namespace string, labels map[string]string) error {
+func DeletePods(namespace string, labels map[string]string, forceKill bool) error {
 	pods, err := KubeGetPods(namespace, labels)
 	if err != nil {
 		return fmt.Errorf("failed to get the pods using labels %w", err)
 	}
 
+	var deleteOptions metav1.DeleteOptions
+	if forceKill {
+		gracePeriodSecs := int64(0)
+		deleteOptions = metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSecs}
+	}
+
 	client, _ := kubeInit()
 	for _, pod := range pods {
-		err = client.CoreV1().Pods(namespace).Delete(context.Background(), pod.Name, metav1.DeleteOptions{})
+		err = client.CoreV1().Pods(namespace).Delete(context.Background(), pod.Name, deleteOptions)
 		if err != nil {
 			return fmt.Errorf("failed to delete the pod: %s %v\n", pod.Name, err)
 		}
