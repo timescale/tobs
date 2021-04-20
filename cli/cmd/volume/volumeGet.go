@@ -16,6 +16,12 @@ var volumeGetCmd = &cobra.Command{
 	RunE:  volumeGet,
 }
 
+var (
+	pvcStorage = "storage-volume"
+	pvcWAL = "wal-volume"
+	pvcPrometheus = "prometheus-tobs-kube-prometheus-prometheus-db"
+)
+
 func init() {
 	volumeCmd.AddCommand(volumeGetCmd)
 	volumeGetCmd.Flags().BoolP("timescaleDB-wal", "w", false, "Get volume of timescaleDB wal")
@@ -44,30 +50,27 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if tsDBStorage {
-		pvcPrefix := "storage-volume"
-		results, err := k8s.GetPVCSizes(root.Namespace, pvcPrefix, map[string]string{"app": root.HelmReleaseName + "-timescaledb"})
+		results, err := k8s.GetPVCSizes(root.Namespace, pvcStorage, getTimescaleDBLabels())
 		if err != nil {
 			return fmt.Errorf("could not get timescaleDB-storage: %w", err)
 		}
-		volumeGetPrint(pvcPrefix, results)
+		volumeGetPrint(pvcStorage, results)
 	}
 
 	if tsDBWal {
-		pvcPrefix := "wal-volume"
-		results, err := k8s.GetPVCSizes(root.Namespace, pvcPrefix, map[string]string{"app": root.HelmReleaseName + "-timescaledb"})
+		results, err := k8s.GetPVCSizes(root.Namespace, pvcWAL, getTimescaleDBLabels())
 		if err != nil {
 			return fmt.Errorf("could not get timescaleDB-wal: %w", err)
 		}
-		volumeGetPrint(pvcPrefix, results)
+		volumeGetPrint(pvcWAL, results)
 	}
 
 	if promStorage {
-		pvcPrefix := root.HelmReleaseName + "-prometheus-server"
-		results, err := k8s.GetPVCSizes(root.Namespace, pvcPrefix, nil)
+		results, err := k8s.GetPVCSizes(root.Namespace, pvcPrometheus, getPrometheusLabels())
 		if err != nil {
 			return fmt.Errorf("could not get prometheus-storage: %w", err)
 		}
-		volumeGetPrint(pvcPrefix, results)
+		volumeGetPrint(pvcPrometheus, results)
 	}
 
 	return nil
@@ -87,4 +90,19 @@ func volumeGetPrint(pvcPrefix string, results []*k8s.PVCData) {
 		}
 	}
 	fmt.Println()
+}
+
+
+func getTimescaleDBLabels() map[string]string{
+	return map[string]string{
+		"app":     root.HelmReleaseName + "-timescaledb",
+		"release": root.HelmReleaseName,
+	}
+}
+
+func getPrometheusLabels() map[string]string{
+	return map[string]string{
+		"app":       "prometheus",
+		"prometheus": "tobs-kube-prometheus-prometheus",
+	}
 }

@@ -59,32 +59,20 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get force-kill flag %w", err)
 	}
 
-	var timescaleDBPodLabels = map[string]string{
-		"app":     root.HelmReleaseName + "-timescaledb",
-		"release": root.HelmReleaseName,
-	}
-
-	var prometheusPodLabels = map[string]string{
-		"app":       "prometheus",
-		"component": "server",
-		"release":   root.HelmReleaseName,
-	}
-
 	if promStorage == "" && tsDBStorage == "" && tsDBWal == "" {
 		return errors.New("use resource specific flag and provide the desired size for pvc expansion")
 	}
 
 	if tsDBStorage != "" {
-		pvcPrefix := "storage-volume"
-		results, err := k8s.ExpandTimescaleDBPVC(root.Namespace, tsDBStorage, pvcPrefix, timescaleDBPodLabels)
+		results, err := k8s.ExpandPVCsForAllPods(root.Namespace, tsDBStorage, pvcStorage, getTimescaleDBLabels())
 		if err != nil {
 			return fmt.Errorf("could not expand timescaleDB-storage: %w", err)
 		}
 
-		expandSuccessPrint(pvcPrefix, results)
+		expandSuccessPrint(pvcStorage, results)
 
 		if restartsPods {
-			err = restartPods(timescaleDBPodLabels, forceKill)
+			err = restartPods(getTimescaleDBLabels(), forceKill)
 			if err != nil {
 				return err
 			}
@@ -92,16 +80,15 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 	}
 
 	if tsDBWal != "" {
-		pvcPrefix := "wal-volume"
-		results, err := k8s.ExpandTimescaleDBPVC(root.Namespace, tsDBWal, pvcPrefix, timescaleDBPodLabels)
+		results, err := k8s.ExpandPVCsForAllPods(root.Namespace, tsDBWal, pvcWAL, getTimescaleDBLabels())
 		if err != nil {
 			return fmt.Errorf("could not expand timescaleDB-wal: %w", err)
 		}
 
-		expandSuccessPrint(pvcPrefix, results)
+		expandSuccessPrint(pvcWAL, results)
 
 		if restartsPods {
-			err = restartPods(timescaleDBPodLabels, forceKill)
+			err = restartPods(getTimescaleDBLabels(), forceKill)
 			if err != nil {
 				return err
 			}
@@ -109,15 +96,14 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 	}
 
 	if promStorage != "" {
-		pvcPrefix := root.HelmReleaseName + "-prometheus-server"
-		err := k8s.ExpandPVC(root.Namespace, pvcPrefix, promStorage)
+		results, err := k8s.ExpandPVCsForAllPods(root.Namespace, promStorage, pvcPrometheus, getPrometheusLabels())
 		if err != nil {
 			return fmt.Errorf("could not expand prometheus-storage: %w", err)
 		}
-		expandSuccessPrint(pvcPrefix, map[string]string{pvcPrefix: promStorage})
+		expandSuccessPrint(pvcPrometheus, results)
 
 		if restartsPods {
-			err = restartPods(prometheusPodLabels, forceKill)
+			err = restartPods(getPrometheusLabels(), forceKill)
 			if err != nil {
 				return err
 			}

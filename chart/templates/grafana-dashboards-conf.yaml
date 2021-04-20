@@ -1,6 +1,5 @@
-{{ if  .Values.prometheus.server.enabled -}}
-{{ if .Values.grafana.enabled -}}
-{{ if .Values.grafana.sidecar.dashboards.enabled -}}
+{{- $kubePrometheus := index .Values "kube-prometheus-stack" -}}
+{{ if and $kubePrometheus.enabled $kubePrometheus.grafana.enabled $kubePrometheus.grafana.sidecar.dashboards.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,10 +10,8 @@ metadata:
    chart: {{ template "tobs.chart" . }}
    release: {{ .Release.Name }}
 data:
-{{ range $dash := .Values.grafana.sidecar.dashboards.files }}
+{{ range $dash := $kubePrometheus.grafana.sidecar.dashboards.files }}
   {{ base $dash -}}: |-
 {{ $.Files.Get $dash | indent 4 }}
 {{- end }}
-{{- end -}}
-{{- end -}}
 {{- end -}}

@@ -13,6 +13,7 @@ import (
 
 var PATH_TO_TOBS = "./../../bin/tobs"
 var PATH_TO_CHART = "./../../../chart/"
+var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
 var NAMESPACE = "ns"
 var RELEASE_NAME = "gg"
 
@@ -56,7 +57,7 @@ func upgradeTobsLatest() {
 	// Note: The below tobs cmd only deploys TimescaleDB as the test values.yaml is configured
 	// to deploy only timescaleDB
 	log.Println("Upgrade to Tobs latest")
-	runTsdb := exec.Command(PATH_TO_TOBS, "upgrade", "-c", PATH_TO_CHART, "--name", RELEASE_NAME, "--namespace", NAMESPACE, "-y")
+	runTsdb := exec.Command(PATH_TO_TOBS, "upgrade", "-c", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--name", RELEASE_NAME, "--namespace", NAMESPACE, "-y")
 	output, err := runTsdb.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error upgrading tobs to latest version: %s %v", output, err)

@@ -31,7 +31,7 @@ func prometheusPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
-	serviceName, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "prometheus", "component": "server"})
+	serviceName, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "kube-prometheus-stack-prometheus"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}

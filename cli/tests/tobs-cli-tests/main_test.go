@@ -15,13 +15,20 @@ var RELEASE_NAME = "gg"
 var NAMESPACE = "ns"
 var PATH_TO_TOBS = "./../../bin/tobs"
 var PATH_TO_CHART = "./../../../chart/"
+var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
 
 func installObs() {
 	var err error
 
 	log.Println("Installing The Observability Stack")
 
-	obsinstall := exec.Command(PATH_TO_TOBS, "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART)
+	out := exec.Command("helm", "dep", "up", PATH_TO_CHART)
+	_, err = out.CombinedOutput()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	obsinstall := exec.Command(PATH_TO_TOBS, "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES)
 	err = obsinstall.Run()
 	if err != nil {
 		log.Println("Error installing The Observability Stack:", err)
