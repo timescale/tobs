@@ -54,98 +54,90 @@ promscale:
     # will get created
     loadBalancer:
       enabled: false
-  resources:
-    requests:
-      # By default this should be enough for a cluster
-      # with only a few pods
-      memory: 2Gi
-      cpu: 1
-# Values for configuring the deployment of Prometheus
-# The Prometheus chart from the prometheus-community is used
-# the guide for it can be found at:
-#   https://artifacthub.io/packages/helm/prometheus-community/prometheus
-# with the default values documented at:
-#   https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
-prometheus:
-  enabled: false
-  alertmanager:
-    enabled: false
-  pushgateway:
-    enabled: false
-  server:
-    # we provide a config map which will have the
-    # promscale connector already configured as
-    # a remote endpoint for read/write (if enabled)
-    # this overrides the config map the prometheus chart
-    # creates
-    configMapOverrideName: "prometheus-config"
-    # values to be used in the override config map
-    # for a Promscale remote_write and remote_read config
-    timescaleRemote:
-      # templated
-      host: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local"
-      protocol: http
-      port: "9201"
-      write:
-        enabled: true
-        # complete url = {protocol}://{host}:{port}/{endpoint}
-        endpoint: "write"
-        # write queue config
-        # see: https://prometheus.io/docs/practices/remote_write/
-        queue:
-          max_shards: 30
-      read:
-        enabled: true
-        # complete url = {protocol}://{host}:{port}/endpoint
-        endpoint: "read"
-  #You can add other configs from https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml here
-  #For example, adding additional scrape jobs
-  #extraScrapeConfigs:
+#  resources:
+#    requests:
+#      # By default this should be enough for a cluster
+#      # with only a few pods
+#      memory: 2Gi
+#      cpu: 1
 
-# Values for configuring the deployment of Grafana
-# The Grafana Community chart is used and the guide for it
-# can be found at:
-#   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
-grafana:
-  enabled: false
-  sidecar:
-    datasources:
-      enabled: true
-    dashboards:
-      enabled: true
-      files:
-        - dashboards/k8s-cluster.json
-        - dashboards/k8s-hardware.json
-  envFromSecret: "{{ .Release.Name }}-grafana-db"
+# Enabling Kube-Prometheus will install
+# Grafana & Prometheus into tobs as they
+# are part of Kube-Prometheus already
+kube-prometheus-stack:
+  enabled: true
   prometheus:
-    datasource:
-      enabled: true
-      # By default url of data source is set to ts-prom connector instance
-      # deployed with this chart. If a connector isn't used this should be
-      # set to the prometheus-server.
-      url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201"
-  timescale:
-    database:
-      enabled: true
-      host:  *dbHost
-      port: 5432
-      user: grafanadb
-      pass: grafanadb
-      dbName: *metricDB
-      schema: grafanadb
-      sslMode: require
-    datasource:
-      enabled: true
-      user: grafana
-      pass: grafana
-      dbName: *metricDB
-      sslMode: require
-      # By default the url/host is set to the db instance deployed
-      # with this chart
-      host: *dbHost
-      port: 5432
-    adminUser: postgres
-    adminPassSecret: *dbPassSecret
+    prometheusSpec:
+      scrapeInterval: "1m"
+      scrapeTimeout: "10s"
+      evaluationInterval: "1m"
+      ## The remote_read spec configuration for Prometheus.
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
+      remoteRead:
+        # - {protocol}://{host}:{port}/{endpoint}
+        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/read"
+          readRecent: true
+
+      ## The remote_write spec configuration for Prometheus.
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
+      remoteWrite:
+        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/write"
+
+      ## Prometheus pod storage spec
+      storageSpec:
+        ## Using PersistentVolumeClaim
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 8Gi
+
+  # Values for configuring the deployment of Grafana
+  # The Grafana Community chart is used and the guide for it
+  # can be found at:
+  #   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
+  grafana:
+    enabled: true
+    sidecar:
+      datasources:
+        enabled: true
+      dashboards:
+        enabled: true
+        files:
+          - dashboards/k8s-cluster.json
+          - dashboards/k8s-hardware.json
+    envFromSecret: "{{ .Release.Name }}-grafana-db"
+    prometheus:
+      datasource:
+        enabled: true
+        # By default url of data source is set to ts-prom connector instance
+        # deployed with this chart. If a connector isn't used this should be
+        # set to the prometheus-server.
+        url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201"
+    timescale:
+      database:
+        enabled: true
+        host: *dbHost
+        port: 5432
+        user: grafanadb
+        pass: grafanadb
+        dbName: *metricDB
+        schema: grafanadb
+        sslMode: require
+      datasource:
+        enabled: true
+        user: grafana
+        pass: grafana
+        dbName: *metricDB
+        sslMode: require
+        # By default the url/host is set to the db instance deployed
+        # with this chart
+        host: *dbHost
+        port: 5432
+      adminUser: postgres
+      adminPassSecret: *dbPassSecret
 
 grafanaDBJob:
   resources: {}

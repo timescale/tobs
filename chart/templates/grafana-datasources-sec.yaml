@@ -1,7 +1,7 @@
-{{ if .Values.grafana.enabled -}}
-{{ if .Values.grafana.sidecar.datasources.enabled }}
-{{- $tsEnabled := .Values.grafana.timescale.datasource.enabled -}}
-{{- $promEnabled := .Values.grafana.prometheus.datasource.enabled -}}
+{{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
+{{ if and $grafana.enabled $grafana.sidecar.datasources.enabled -}}
+{{- $tsEnabled := $grafana.timescale.datasource.enabled -}}
+{{- $promEnabled := $grafana.prometheus.datasource.enabled -}}
 {{- $anyDataSources := or $tsEnabled $promEnabled -}}
 {{ if $anyDataSources -}}
 apiVersion: v1
@@ -9,7 +9,7 @@ kind: Secret
 metadata:
   name: {{ .Release.Name }}-grafana-datasources
   labels:
-    grafana_datasource: "1"
+    tobs_datasource: "true"
     app: {{ template "tobs.fullname" . }}
     chart: {{ template "tobs.chart" . }}
     release: {{ .Release.Name }}
@@ -23,7 +23,7 @@ stringData:
 {{- if $promEnabled }}
       - name: Prometheus
         type: prometheus
-        url: {{ tpl .Values.grafana.prometheus.datasource.url . }}
+        url: {{ tpl $grafana.prometheus.datasource.url . }}
         isDefault: true
         editable: true
         access: proxy
@@ -34,8 +34,8 @@ stringData:
 {{ if .Values.timescaledbExternal.enabled -}}
   {{- $hostURL = include "tobs.dburi.host" . -}}
 {{ else -}}
-  {{- $host := tpl .Values.grafana.timescale.database.host $ -}}
-  {{- $port := .Values.grafana.timescale.database.port | int -}}
+  {{- $host := tpl $grafana.timescale.database.host $ -}}
+  {{- $port := $grafana.timescale.database.port | int -}}
   {{- $hostURL = printf "%s:%d" $host $port -}}
 {{ end }}
       - name: TimescaleDB
@@ -43,16 +43,15 @@ stringData:
         type: postgres
         isDefault: {{ $isDefault }}
         access: proxy
-        user: {{ ternary (include "tobs.dburi.user" . ) (.Values.grafana.timescale.database.user ) (.Values.timescaledbExternal.enabled) }}
-        database: {{ ternary (include "tobs.dburi.dbname" . ) (.Values.grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}
+        user: {{ ternary (include "tobs.dburi.user" . ) ($grafana.timescale.database.user ) (.Values.timescaledbExternal.enabled) }}
+        database: {{ ternary (include "tobs.dburi.dbname" . ) ($grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}
         editable: true
         secureJsonData:
-          password: {{ ternary (include "tobs.dburi.password" . ) (.Values.grafana.timescale.database.pass ) (.Values.timescaledbExternal.enabled) }}
+          password: {{ ternary (include "tobs.dburi.password" . ) ($grafana.timescale.database.pass ) (.Values.timescaledbExternal.enabled) }}
         jsonData:
-          sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) (.Values.grafana.timescale.database.sslMode ) (.Values.timescaledbExternal.enabled) }}
+          sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) ($grafana.timescale.database.sslMode ) (.Values.timescaledbExternal.enabled) }}
           postgresVersion: 1000
           timescaledb: true
-{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

@@ -12,7 +12,7 @@ import (
 )
 
 func testInstall(t testing.TB, name, namespace, filename string, enableBackUp, skipWait, onlySecrets bool) {
-	cmds := []string{"install", "--chart-reference", PATH_TO_CHART}
+	cmds := []string{"install", "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
 	} else {
@@ -47,7 +47,7 @@ func testInstall(t testing.TB, name, namespace, filename string, enableBackUp, s
 }
 
 func testHelmInstall(t testing.TB, name, namespace, filename string) {
-	cmds := []string{"helm", "install", "--chart-reference", PATH_TO_CHART}
+	cmds := []string{"helm", "install", "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
 	} else {
@@ -217,7 +217,7 @@ func TestInstallation(t *testing.T) {
 	}
 
 	// This installation is used to run all tests in tobs-cli-tests
-	testInstall(t, "", "", "", false, true, false)
+	testInstall(t, "", "", "", false, false, false)
 
 	time.Sleep(1 * time.Minute)
 

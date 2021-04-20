@@ -17,6 +17,7 @@ var RELEASE_NAME = "tobs"
 var NAMESPACE = "default"
 var PATH_TO_TOBS = "./../../bin/tobs"
 var PATH_TO_CHART = "./../../../chart/"
+var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
 
 func TestMain(m *testing.M) {
 	// Signal handling
@@ -86,7 +87,7 @@ func runTobsWithoutTSDB() {
 
 	pass := strings.TrimSuffix(string(out), "\n")
 	obsinstall := exec.Command(PATH_TO_TOBS, "install", "--external-timescaledb-uri",
-		"postgres://postgres:"+pass+"@"+ip+"/postgres?sslmode=require", "-c", PATH_TO_CHART)
+		"postgres://postgres:"+pass+"@"+ip+"/postgres?sslmode=require", "-c", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES)
 	out, err = obsinstall.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(out))

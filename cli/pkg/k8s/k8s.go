@@ -2,12 +2,12 @@ package k8s
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -435,7 +435,7 @@ func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCD
 			return nil, fmt.Errorf("failed to get the pods using labels %w", err)
 		}
 		if len(pods) == 0 {
-			return nil, errors.New("failed to get the pod's for timescaledb")
+			return nil, fmt.Errorf("failed to get the pod's for pvc %s with labelSet: %v", pvcPrefix, labels)
 		}
 		pvcs = buildPVCNames(pvcPrefix, pods)
 	} else {
@@ -464,7 +464,7 @@ func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCD
 	return pvcData, nil
 }
 
-func ExpandTimescaleDBPVC(namespace, value, pvcPrefix string, labels map[string]string) (map[string]string, error) {
+func ExpandPVCsForAllPods(namespace, value, pvcPrefix string, labels map[string]string) (map[string]string, error) {
 	pvcResults := make(map[string]string)
 	pods, err := KubeGetPods(namespace, labels)
 	if err != nil {
@@ -601,6 +601,27 @@ func DeleteJob(name, namespace string) error {
 	err := client.BatchV1().Jobs(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 	if err != nil {
 		return fmt.Errorf("failed delete the job %s: %v", name, err)
+	}
+	return nil
+}
+
+func DeleteDaemonset(name, namespace string) error {
+	client, _ := kubeInit()
+	fmt.Printf("Deleting daemonset %v...\n", name)
+	err := client.AppsV1().DaemonSets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
+	if err != nil {
+		return fmt.Errorf("failed delete the daemonset %s: %v", name, err)
+	}
+	return nil
+}
+
+func CreateCRDS(crds []string) error {
+	for _, crd := range crds {
+		out := exec.Command("kubectl", "apply", "-f", crd)
+		output, err := out.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("failed to create CRD %s %s: %w", crd, output, err)
+		}
 	}
 	return nil
 }

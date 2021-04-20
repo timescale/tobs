@@ -66,7 +66,7 @@ promscale:
 #    requests:
 #      # By default this should be enough for a cluster
 #      # with only a few pods
-#      memory: 4Gi
+#      memory: 2Gi
 #      cpu: 1
 
 # Enabling Kube-Prometheus will install
@@ -74,6 +74,10 @@ promscale:
 # are part of Kube-Prometheus already
 kube-prometheus-stack:
   enabled: true
+  fullnameOverride: "tobs-kube-prometheus"
+  prometheusOperator:
+    configReloaderCpu: "25m"
+    #configReloaderMemory: "50Mi"
   prometheus:
     prometheusSpec:
       scrapeInterval: "1m"
@@ -83,13 +87,13 @@ kube-prometheus-stack:
       ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
         # - {protocol}://{host}:{port}/{endpoint}
-        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/read"
+        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/read"
           readRecent: true
 
       ## The remote_write spec configuration for Prometheus.
       ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
-        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/write"
+        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/write"
 
       ## Prometheus pod storage spec
       storageSpec:
@@ -111,11 +115,15 @@ kube-prometheus-stack:
     sidecar:
       datasources:
         enabled: true
+        label: tobs_datasource
+        labelValue: "true"
+        defaultDatasourceEnabled: false
       dashboards:
         enabled: true
         files:
           - dashboards/k8s-cluster.json
           - dashboards/k8s-hardware.json
+    adminPassword: ""
     envFromSecret: "{{ .Release.Name }}-grafana-db"
     prometheus:
       datasource:

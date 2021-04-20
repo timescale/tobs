@@ -31,10 +31,17 @@ func init() {
 	upgradeCmd.Flags().BoolP("reuse-values", "", false, "Reuse the last release's values and merge in any overrides from the command line via --set and -f. If '--reset-values' is specified, this is ignored.\nThis is same flag that exists in helm upgrade ")
 	upgradeCmd.Flags().BoolP("same-chart", "", false, "Use the same helm chart do not upgrade helm chart but upgrade the existing chart with new values")
 	upgradeCmd.Flags().BoolP("confirm", "y", false, "Confirmation flag for upgrading")
+	upgradeCmd.Flags().BoolP("skip-crds", "", false, "Option to skip CRDs on upgrade")
 }
 
 func upgrade(cmd *cobra.Command, args []string) error {
 	return upgradeTobs(cmd, args)
+}
+
+type upgradeSpec struct {
+	deployedChartVersion string
+	newChartVersion      string
+	skipCrds             bool
 }
 
 func upgradeTobs(cmd *cobra.Command, args []string) error {
@@ -69,6 +76,11 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 	}
 
 	enableBackUp, err := cmd.Flags().GetBool("enable-timescaledb-backup")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+
+	skipCrds, err := cmd.Flags().GetBool("skip-crds")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -174,7 +186,13 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		utils.ConfirmAction()
 	}
 
-	err = UpgradePathBasedOnVersion(deployedVersion, latestChart.Version)
+	upgradeDetails := &upgradeSpec{
+		deployedChartVersion: deployedVersion,
+		newChartVersion:      latestChart.Version,
+		skipCrds:             skipCrds,
+	}
+
+	err = upgradeDetails.UpgradePathBasedOnVersion()
 	if err != nil {
 		return err
 	}
@@ -185,17 +203,17 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to upgrade %s: %w", output, err)
 	}
 
-	fmt.Printf("Successfully upgraded %s.\n", root.HelmReleaseName)
+	fmt.Printf("Successfully upgraded %s to version: %s\n", root.HelmReleaseName, latestChart.Version)
 	return nil
 }
 
-func UpgradePathBasedOnVersion(deployedChartVersion, newChartVersion string) error {
-	nVersion, err := utils.ParseVersion(newChartVersion, 3)
+func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
+	nVersion, err := utils.ParseVersion(c.newChartVersion, 3)
 	if err != nil {
 		return fmt.Errorf("failed to parse latest helm chart version %w", err)
 	}
 
-	dVersion, err := utils.ParseVersion(deployedChartVersion, 3)
+	dVersion, err := utils.ParseVersion(c.deployedChartVersion, 3)
 	if err != nil {
 		return fmt.Errorf("failed to parse deployed helm chart version %w", err)
 	}
@@ -203,6 +221,30 @@ func UpgradePathBasedOnVersion(deployedChartVersion, newChartVersion string) err
 	version0_2_2, err := utils.ParseVersion("0.2.2", 3)
 	if err != nil {
 		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
+	}
+
+	version0_4_0, err := utils.ParseVersion("0.4.0", 3)
+	if err != nil {
+		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
+	}
+
+	if nVersion >= version0_4_0 && dVersion < version0_4_0  {
+		if !c.skipCrds {
+			err = createCRDS()
+			if err != nil {
+				return err
+			}
+		}
+
+		prometheusNodeExporter := "-prometheus-node-exporter"
+		err = k8s.DeleteDaemonset(root.HelmReleaseName+prometheusNodeExporter, root.Namespace)
+		if err != nil {
+			return err
+		}
+		err = k8s.KubeDeleteService(root.Namespace, root.HelmReleaseName+prometheusNodeExporter)
+		if err != nil {
+			return err
+		}
 	}
 
 	switch {
@@ -401,4 +443,35 @@ func parsePgBackRestConf(data string) map[string]string {
 	}
 
 	return newData
+}
+
+var crdURLs = []string{
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
+"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
+}
+
+var crdNames = []string{
+	"alertmanagerconfigs.monitoring.coreos.com",
+	"alertmanagers.monitoring.coreos.com",
+	"podmonitors.monitoring.coreos.com",
+	"probes.monitoring.coreos.com",
+	"prometheuses.monitoring.coreos.com",
+	"prometheusrules.monitoring.coreos.com",
+	"servicemonitors.monitoring.coreos.com",
+	"thanosrulers.monitoring.coreos.com",
+}
+
+func createCRDS() error {
+	err := k8s.CreateCRDS(crdURLs)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Successfully created CRDs: ", crdNames)
+	return nil
 }
