@@ -23,7 +23,7 @@
 {{- $kubePrometheus := index .Values "kube-prometheus-stack" }}
 {{ if $prometheus.enabled }}
 ###############################################################################
-🔥 KUBE-PROMETHEUS NOTES:
+🔥 PROMETHEUS NOTES:
 ###############################################################################
 {{ if $prometheus.enabled }}
 Prometheus can be accessed via port {{ $prometheus.service.port }} on the following DNS name from within your cluster:

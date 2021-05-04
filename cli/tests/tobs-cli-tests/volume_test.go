@@ -2,8 +2,6 @@ package tobs_cli_tests
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"os/exec"
 	"strings"
 	"testing"
@@ -34,8 +32,9 @@ func testVolumeExpansion(t testing.TB, timescaleDBStorage, timescaleDBWal, prome
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	expand := exec.Command(PATH_TO_TOBS, cmds...)
-	_, err := expand.CombinedOutput()
+	output, err := expand.CombinedOutput()
 	if err != nil {
+		t.Log(string(output))
 		t.Fatal(err)
 	}
 }
@@ -58,15 +57,15 @@ func testVolumeGet(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusS
 	expand := exec.Command(PATH_TO_TOBS, cmds...)
 	out, err := expand.CombinedOutput()
 	if err != nil {
-		fmt.Println(string(out))
+		t.Log(string(out))
 		// kubectl get pods -A
 		out := exec.Command("kubectl", "get", "pods", "-A")
 		output, err := out.CombinedOutput()
 		if err != nil {
-			fmt.Println(string(output))
-			log.Fatal(err)
+			t.Log(string(output))
+			t.Log(err)
 		}
-		fmt.Println(string(output))
+		t.Log(string(output))
 		t.Fatal(err)
 	}
 
@@ -81,44 +80,44 @@ func TestVolume(t *testing.T) {
 	test1 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-"+RELEASE_NAME+"-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-"+RELEASE_NAME+"-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
 	outputString := testVolumeGet(t, true, true, true)
 	if outputString != test1 {
-		fmt.Println("expected: ", test1)
-		fmt.Println("result: ",outputString)
+		t.Log("expected: ", test1)
+		t.Log("result: ",outputString)
 
 		// kubectl get pods -A
 		out := exec.Command("kubectl", "get", "pods", "-A")
 		output, err := out.CombinedOutput()
 		if err != nil {
-			fmt.Println(string(output))
-			log.Fatal(err)
+			t.Log(string(output))
+			t.Fatal(err)
 		}
-		fmt.Println(string(output))
+		t.Log(string(output))
 
 		// kubectl get pvc -A
 		out = exec.Command("kubectl", "get", "pvc", "-A")
 		output, err = out.CombinedOutput()
 		if err != nil {
-			fmt.Println(string(output))
-			log.Fatal(err)
+			t.Log(string(output))
+			t.Fatal(err)
 		}
-		fmt.Println(string(output))
+		t.Log(string(output))
 
 		// kubectl describe prometheus-pod
 		out = exec.Command("kubectl", "describe", "pod/prometheus-tobs-kube-prometheus-prometheus-0", "-n", "ns")
 		output, err = out.CombinedOutput()
 		if err != nil {
-			fmt.Println(string(output))
-			log.Fatal(err)
+			t.Log(string(output))
+			t.Fatal(err)
 		}
-		fmt.Println(string(output))
+		t.Log(string(output))
 
 		// kubectl describe prometheus pvc
 		out = exec.Command("kubectl", "describe", "pvc/prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0", "-n", "ns")
 		output, err = out.CombinedOutput()
 		if err != nil {
-			fmt.Println(string(output))
-			log.Fatal(err)
+			t.Log(string(output))
+			t.Fatal(err)
 		}
-		fmt.Println(string(output))
+		t.Log(string(output))
 
 
 		t.Fatal(errors.New("failed to verify volume get test-1"))
@@ -127,32 +126,32 @@ func TestVolume(t *testing.T) {
 	test2 := "PVC's of wal-volume\nExisting size of PVC: wal-volume-"+RELEASE_NAME+"-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
 	outputString = testVolumeGet(t, false, true, true)
 	if outputString != test2 {
-		fmt.Println("expected: ", test2)
-		fmt.Println("result: ",outputString)
+		t.Log("expected: ", test2)
+		t.Log("result: ",outputString)
 		t.Fatal(errors.New("failed to verify volume get test-2"))
 	}
 
 	test3 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-"+RELEASE_NAME+"-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-"+RELEASE_NAME+"-timescaledb-0 is 20Gi\n\n"
 	outputString = testVolumeGet(t, true, true, false)
 	if outputString != test3 {
-		fmt.Println("expected: ", test3)
-		fmt.Println("result: ",outputString)
+		t.Log("expected: ", test3)
+		t.Log("result: ",outputString)
 		t.Fatal(errors.New("failed to verify volume get test-3"))
 	}
 
 	test4 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-"+RELEASE_NAME+"-timescaledb-0 is 150Gi\n\n"
 	outputString = testVolumeGet(t, true, false, false)
 	if outputString != test4 {
-		fmt.Println("expected: ", test4)
-		fmt.Println("result: ",outputString)
+		t.Log("expected: ", test4)
+		t.Log("result: ",outputString)
 		t.Fatal(errors.New("failed to verify volume get test-4"))
 	}
 
 	test5 := "PVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
 	outputString = testVolumeGet(t, false, false, true)
 	if outputString != test5 {
-		fmt.Println("expected: ", test5)
-		fmt.Println("result: ",outputString)
+		t.Log("expected: ", test5)
+		t.Log("result: ",outputString)
 		t.Fatal(errors.New("failed to verify volume get test-5"))
 	}
 
@@ -355,14 +354,14 @@ func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]st
 			for _, v := range podsSet {
 				// compare names & timestamp as statefulsets will have same name then compare create timestamp
 				if v.name == p.Name && v.oldPodCreateTimestamp == p.CreationTimestamp.String() {
-					fmt.Println(p)
+					t.Log(p)
 					out := exec.Command("kubectl", "get", "pods", "-A")
 					output, err := out.CombinedOutput()
 					if err != nil {
-						fmt.Println(string(output))
-						log.Fatal(err)
+						t.Log(string(output))
+						t.Fatal(err)
 					}
-					fmt.Println(string(output))
+					t.Log(string(output))
 					t.Fatal(errors.New("failed to restart the pod after volume expansion " + v.name))
 				}
 			}

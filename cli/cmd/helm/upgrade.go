@@ -31,7 +31,7 @@ func init() {
 	upgradeCmd.Flags().BoolP("reuse-values", "", false, "Reuse the last release's values and merge in any overrides from the command line via --set and -f. If '--reset-values' is specified, this is ignored.\nThis is same flag that exists in helm upgrade ")
 	upgradeCmd.Flags().BoolP("same-chart", "", false, "Use the same helm chart do not upgrade helm chart but upgrade the existing chart with new values")
 	upgradeCmd.Flags().BoolP("confirm", "y", false, "Confirmation flag for upgrading")
-	upgradeCmd.Flags().BoolP("skip-crds", "", false, "Option to skip CRDs on upgrade")
+	upgradeCmd.Flags().BoolP("skip-crds", "", false, "Option to skip creating CRDs on upgrade")
 }
 
 func upgrade(cmd *cobra.Command, args []string) error {
