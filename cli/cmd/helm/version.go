@@ -6,7 +6,7 @@ import (
 	"github.com/timescale/tobs/cli/cmd"
 )
 
-// uninstallCmd represents the uninstall command
+// versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Version of tobs",
