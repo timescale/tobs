@@ -74,7 +74,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 
 	sameChart, err := cmd.Flags().GetBool("same-chart")
 	if err != nil {
-		return fmt.Errorf("couldn't get the reuse-values flag value: %w", err)
+		return fmt.Errorf("couldn't get the same-chart flag value: %w", err)
 	}
 
 	enableBackUp, err := cmd.Flags().GetBool("enable-timescaledb-backup")
@@ -224,7 +224,7 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
 	}
 
-	if nVersion >= version0_4_0 && dVersion < version0_4_0 {
+	if nVersion >= version0_4_0 {
 		if !c.skipCrds {
 			err = createCRDS()
 			if err != nil {
@@ -249,9 +249,11 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 			}
 		}
 
-		err = persistPrometheusDataDuringUpgrade()
-		if err != nil {
-			return err
+		if dVersion < version0_4_0 {
+			err = persistPrometheusDataDuringUpgrade()
+			if err != nil {
+				return err
+			}
 		}
 	}
 

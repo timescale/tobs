@@ -175,7 +175,7 @@ To connect to your database, chose one of these options:
    Then you can point your browser to http://127.0.0.1:8081/.
 
 {{- end -}}
-{{ if $kubePrometheus.grafana.enabled }}
+{{ if and $kubePrometheus.enabled $kubePrometheus.grafana.enabled }}
 ###############################################################################
 📈 GRAFANA NOTES:
 ###############################################################################

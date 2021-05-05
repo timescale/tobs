@@ -12,7 +12,7 @@ import (
 )
 
 func testInstall(t testing.TB, name, namespace, filename string, enableBackUp, skipWait, onlySecrets bool) {
-	cmds := []string{"install", "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES}
+	cmds := []string{"install", "--chart-reference", PATH_TO_CHART}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
 	} else {
@@ -35,6 +35,10 @@ func testInstall(t testing.TB, name, namespace, filename string, enableBackUp, s
 	if onlySecrets {
 		cmds = append(cmds, "--only-secrets")
 	}
+	if filename == "" {
+		filename = PATH_TO_TEST_VALUES
+	}
+	cmds = append(cmds, "-f", filename)
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	install := exec.Command(PATH_TO_TOBS, cmds...)
@@ -47,7 +51,7 @@ func testInstall(t testing.TB, name, namespace, filename string, enableBackUp, s
 }
 
 func testHelmInstall(t testing.TB, name, namespace, filename string) {
-	cmds := []string{"helm", "install", "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES}
+	cmds := []string{"helm", "install", "--chart-reference", PATH_TO_CHART}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
 	} else {
@@ -58,9 +62,10 @@ func testHelmInstall(t testing.TB, name, namespace, filename string) {
 	} else {
 		cmds = append(cmds, "--namespace", NAMESPACE)
 	}
-	if filename != "" {
-		cmds = append(cmds, "-f", filename)
+	if filename == "" {
+		filename = PATH_TO_TEST_VALUES
 	}
+	cmds = append(cmds, "-f", filename)
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	install := exec.Command(PATH_TO_TOBS, cmds...)
@@ -219,7 +224,7 @@ func TestInstallation(t *testing.T) {
 	// This installation is used to run all tests in tobs-cli-tests
 	testInstall(t, "", "", "", false, false, false)
 
-	time.Sleep(1 * time.Minute)
+	time.Sleep(2 * time.Minute)
 
 	t.Logf("Waiting for pods to initialize...")
 	pods, err = k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)

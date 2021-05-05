@@ -7,7 +7,7 @@ timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
   enabled: false
   image:
-    tag: pg12-ts2.0-latest
+    tag: pg12-ts2.1-latest
   # create only a ClusterIP service
   loadBalancer:
     enabled: false
@@ -62,13 +62,13 @@ kube-prometheus-stack:
       ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
         # - {protocol}://{host}:{port}/{endpoint}
-        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/read"
+        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/read"
           readRecent: true
 
       ## The remote_write spec configuration for Prometheus.
       ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
-        - url: "http://tobs-promscale-connector.default.svc.cluster.local:9201/write"
+        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/write"
 
       ## Prometheus pod storage spec
       storageSpec:
@@ -87,15 +87,19 @@ kube-prometheus-stack:
   # can be found at:
   #   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
   grafana:
-    enabled: true
+    enabled: false
     sidecar:
       datasources:
         enabled: true
+        label: tobs_datasource
+        labelValue: "true"
+        defaultDatasourceEnabled: false
       dashboards:
         enabled: true
         files:
           - dashboards/k8s-cluster.json
           - dashboards/k8s-hardware.json
+    adminPassword: ""
     envFromSecret: "{{ .Release.Name }}-grafana-db"
     prometheus:
       datasource:

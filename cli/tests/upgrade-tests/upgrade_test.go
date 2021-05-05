@@ -96,11 +96,11 @@ func TestUpgrade(t *testing.T) {
 		fmt.Println(string(output))
 		t.Fatal(err)
 	}
-	size, err := test_utils.GetUpdatedPromscaleMemResource()
+	size, err := test_utils.GetUpdatedPromscaleMemResource(RELEASE_NAME, NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if size != "4Gi" {
+	if size != "1Gi" {
 		t.Fatal("failed to validate expected promscale memory size from tobs upgrade")
 	}
 }

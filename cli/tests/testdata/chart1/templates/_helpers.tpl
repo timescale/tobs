@@ -135,3 +135,14 @@ Extract the port from db uri
   {{- $port := $hostDetails._1 | quote }}
   {{- printf $port -}}
 {{- end -}}
+
+{{/*
+Extract the port from db uri
+*/}}
+{{- define "tobs.dburi.hostwithoutport" -}}
+  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $hostURL := get $values "host" }}
+  {{- $hostDetails := split ":" $hostURL}}
+  {{- $host := $hostDetails._0 | quote }}
+  {{- printf $host -}}
+{{- end -}}
