@@ -70,3 +70,13 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           make upgrade-tests
+
+      - name: HA-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make ha-tests
+
+      - name: Install-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make install-tests

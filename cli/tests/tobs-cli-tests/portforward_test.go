@@ -7,6 +7,8 @@ import (
 	"syscall"
 	"testing"
 	"time"
+
+	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
 func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens string) {
@@ -27,18 +29,14 @@ func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens st
 		cmds = append(cmds, "-l", promlens)
 	}
 
-	// kubectl get pvc -A
-	out := exec.Command("kubectl", "get", "pods", "-A")
-	output, err := out.CombinedOutput()
-	t.Log(string(output))
-	if err != nil {
-		t.Fatal(err)
-	}
+	// kubectl get pods -A
+	test_utils.ShowAllPods(t)
+
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	portforward := exec.Command(PATH_TO_TOBS, cmds...)
 
-	err = portforward.Start()
+	err := portforward.Start()
 	if err != nil {
 		t.Fatal(err)
 	}

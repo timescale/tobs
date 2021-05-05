@@ -232,20 +232,19 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 			}
 		}
 
-		prometheusNEDaemonset := "-prometheus-node-exporter"
-		prometheusNEService := root.HelmReleaseName + prometheusNEDaemonset
-		err = k8s.DeleteDaemonset(root.HelmReleaseName+prometheusNEDaemonset, root.Namespace)
+		prometheusNodeExporter := root.HelmReleaseName+"-prometheus-node-exporter"
+		err = k8s.DeleteDaemonset(prometheusNodeExporter, root.Namespace)
 		if err != nil {
 			ok := errors2.IsNotFound(err)
 			if !ok {
-				return fmt.Errorf("failed to delete %s daemonset %v", prometheusNEDaemonset, err)
+				return fmt.Errorf("failed to delete %s daemonset %v", prometheusNodeExporter, err)
 			}
 		}
-		err = k8s.KubeDeleteService(root.Namespace, prometheusNEService)
+		err = k8s.KubeDeleteService(root.Namespace, prometheusNodeExporter)
 		if err != nil {
 			ok := errors2.IsNotFound(err)
 			if !ok {
-				return fmt.Errorf("failed to delete %s service %v", prometheusNEService, err)
+				return fmt.Errorf("failed to delete %s service %v", prometheusNodeExporter, err)
 			}
 		}
 
@@ -548,7 +547,7 @@ func getJobForPrometheusDataPermissionChange(pvcName string) *batchv1.Job {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      utils.UpgradeJob_040,
 			Namespace: root.Namespace,
-			Labels:    map[string]string{"app": "tobs-upgrade", "heritage": "helm", "release": root.HelmReleaseName},
+			Labels:    map[string]string{"app": "tobs-upgrade", "release": root.HelmReleaseName},
 		},
 		Spec: batchv1.JobSpec{
 			BackoffLimit: &backoff,

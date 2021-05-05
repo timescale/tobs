@@ -13,6 +13,7 @@ type backupDetails struct {
 }
 
 func testBackUpEnabledInstallation(t *testing.T) {
+	t.Log("performing backup enabled tests....")
 	releaseName := "testbackup"
 	namespace := "testbackup"
 	bucket := backupDetails{
@@ -45,7 +46,16 @@ func testBackUpEnabledInstallation(t *testing.T) {
 	os.Setenv(region.key, region.value)
 	os.Setenv(key.key, key.value)
 	os.Setenv(secret.key, secret.value)
-	testInstall(t, releaseName, namespace, "", true, true, false)
+	i := test_utils.TestInstallSpec{
+		PathToChart:  PATH_TO_CHART,
+		ReleaseName:  releaseName,
+		Namespace:    namespace,
+		PathToValues: PATH_TO_TEST_VALUES,
+		EnableBackUp: true,
+		SkipWait:     true,
+		OnlySecrets:  false,
+	}
+	i.TestInstall(t)
 	sec, err := test_utils.GetTSDBBackUpSecret(releaseName, namespace)
 	if err != nil {
 		t.Logf("Error while finding timescaleDB backup secret. After installting tobs with backup enabled.")
@@ -58,7 +68,12 @@ func testBackUpEnabledInstallation(t *testing.T) {
 		t.Fatal("Error while evaluating secret data in pgbackrest secret the data provided in envs is not matching with data in secret.")
 	}
 
-	testUninstall(t, releaseName, namespace, true)
+	u := test_utils.TestUnInstallSpec{
+		ReleaseName: releaseName,
+		Namespace:   namespace,
+		DeleteData:  true,
+	}
+	u.TestUninstall(t)
 
 	_, err = test_utils.GetTSDBBackUpSecret(releaseName, namespace)
 	// here we expect an error after uninstalling the pgbackrest secret shouldn't be found

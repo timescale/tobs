@@ -83,3 +83,17 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 	// the default super-user password is mapped to "PATRONI_SUPERUSER_PASSWORD" secret key
 	return "PATRONI_SUPERUSER_PASSWORD", fmt.Sprint(userName), nil
 }
+
+func GetTimescaleDBLabels() map[string]string {
+	return map[string]string{
+		"app":     cmd.HelmReleaseName + "-timescaledb",
+		"release": cmd.HelmReleaseName,
+	}
+}
+
+func GetPrometheusLabels() map[string]string {
+	return map[string]string{
+		"app":        "prometheus",
+		"prometheus": "tobs-kube-prometheus-prometheus",
+	}
+}

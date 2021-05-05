@@ -13,6 +13,12 @@ external-db-tests:
 upgrade-tests:
 		./tests/upgrade-tests.sh
 
+ha-tests:
+		./tests/ha-tests.sh
+
+install-tests:
+		./tests/install-tests.sh
+
 go-vet:
 		go vet ./...
 

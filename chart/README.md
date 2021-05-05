@@ -4,6 +4,7 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
 
 ### Table of contents
 * **[Installing](#installing)**
+  * **[Prometheus, Promscale High-Availability](./docs/ha-setup.md)**
   * **[Cleanup](#cleanup)**
     * [TimescaleDB PVCs and Backup](#timescaledb-pvcs-and-backup)
     * [TimescaleDB config service](#timescaledb-config-service)
@@ -17,6 +18,7 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
     * [Additional configuration for Prometheus](#additional-configuration-for-prometheus)
   * **[Grafana related values](#grafana-related-values)**
     * [Additional configuration for Grafana](#additional-configuration-for-grafana)
+* **[Upgrading Helm Chart](./docs/upgrades.md)**
 
 # Installing
 
