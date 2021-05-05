@@ -72,9 +72,9 @@ func GetAllPVCSizes() (map[string]string, error) {
 	return results, nil
 }
 
-func GetUpdatedPromscaleMemResource() (string, error) {
+func GetUpdatedPromscaleMemResource(releaseName, namespace string) (string, error) {
 	client, _ := kubeInit()
-	promscale, err := client.AppsV1().Deployments("ns").Get(context.Background(), "gg-promscale", metav1.GetOptions{})
+	promscale, err := client.AppsV1().Deployments(namespace).Get(context.Background(), releaseName+"-promscale", metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}

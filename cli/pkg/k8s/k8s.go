@@ -649,7 +649,6 @@ func CreateCRDS(crds []string) error {
 func GetDeployment(name, namespace string) (*appsv1.Deployment, error) {
 	client, _ := kubeInit()
 	return client.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
-
 }
 
 func UpdateDeployment(deployment *appsv1.Deployment) error {
