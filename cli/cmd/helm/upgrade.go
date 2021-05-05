@@ -6,11 +6,13 @@ import (
 	"os/exec"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/utils"
+	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,38 +108,33 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 
 	deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName, root.Namespace)
 	if err != nil {
-		return err
-	}
-
-	if deployedChart.Name == "" {
-		fmt.Println("couldn't find the existing tobs deployment. Deploying tobs...")
-		if !confirm {
-			utils.ConfirmAction()
-		}
-		s := installSpec{
-			configFile:   file,
-			ref:          ref,
-			dbURI:        "",
-			enableBackUp: enableBackUp,
-		}
-		err = s.installStack()
-		if err != nil {
+		if err.Error() != utils.ErrorTobsDeploymentNotFound().Error() {
 			return err
+		} else {
+			fmt.Println("couldn't find the existing tobs deployment. Deploying tobs...")
+			if !confirm {
+				utils.ConfirmAction()
+			}
+			s := installSpec{
+				configFile:   file,
+				ref:          ref,
+				dbURI:        "",
+				enableBackUp: enableBackUp,
+			}
+			err = s.installStack()
+			if err != nil {
+				return err
+			}
+			return nil
 		}
-		return nil
 	}
 
 	// add & update helm chart only if it's default chart
 	// if same-chart upgrade is disabled
 	if ref == utils.DEFAULT_CHART && !sameChart {
-		err = utils.AddTobsHelmChart()
+		err = utils.AddUpdateTobsChart(false)
 		if err != nil {
-			return err
-		}
-
-		err = utils.UpdateTobsHelmChart(true)
-		if err != nil {
-			return err
+			return fmt.Errorf("failed to add & update tobs helm chart %v", err)
 		}
 	}
 
@@ -146,8 +143,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse latest helm chart version %w", err)
 	}
 
-	deployedVersion := strings.Split(deployedChart.Chart, "-")[1]
-	dVersion, err := utils.ParseVersion(deployedVersion, 3)
+	dVersion, err := utils.ParseVersion(deployedChart.Version, 3)
 	if err != nil {
 		return fmt.Errorf("failed to parse deployed helm chart version %w", err)
 	}
@@ -187,7 +183,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 	}
 
 	upgradeDetails := &upgradeSpec{
-		deployedChartVersion: deployedVersion,
+		deployedChartVersion: deployedChart.Version,
 		newChartVersion:      latestChart.Version,
 		skipCrds:             skipCrds,
 	}
@@ -223,12 +219,12 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
 	}
 
-	version0_4_0, err := utils.ParseVersion("0.4.0", 3)
+	version0_4_0, err := utils.ParseVersion(utils.Version_040, 3)
 	if err != nil {
 		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
 	}
 
-	if nVersion >= version0_4_0 && dVersion < version0_4_0  {
+	if nVersion >= version0_4_0 && dVersion < version0_4_0 {
 		if !c.skipCrds {
 			err = createCRDS()
 			if err != nil {
@@ -236,12 +232,24 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 			}
 		}
 
-		prometheusNodeExporter := "-prometheus-node-exporter"
-		err = k8s.DeleteDaemonset(root.HelmReleaseName+prometheusNodeExporter, root.Namespace)
+		prometheusNEDaemonset := "-prometheus-node-exporter"
+		prometheusNEService := root.HelmReleaseName + prometheusNEDaemonset
+		err = k8s.DeleteDaemonset(root.HelmReleaseName+prometheusNEDaemonset, root.Namespace)
 		if err != nil {
-			return err
+			ok := errors2.IsNotFound(err)
+			if !ok {
+				return fmt.Errorf("failed to delete %s daemonset %v", prometheusNEDaemonset, err)
+			}
 		}
-		err = k8s.KubeDeleteService(root.Namespace, root.HelmReleaseName+prometheusNodeExporter)
+		err = k8s.KubeDeleteService(root.Namespace, prometheusNEService)
+		if err != nil {
+			ok := errors2.IsNotFound(err)
+			if !ok {
+				return fmt.Errorf("failed to delete %s service %v", prometheusNEService, err)
+			}
+		}
+
+		err = persistPrometheusDataDuringUpgrade()
 		if err != nil {
 			return err
 		}
@@ -257,9 +265,13 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 
 		// in this release of tobs the grafana-db-job has been updated with spec
 		// the upgrade fails to patch the spec so we are deleting & the upgrade will re-create it.
-		err := k8s.DeleteJob(root.HelmReleaseName+"-grafana-db", root.Namespace)
+		grafanaJob := root.HelmReleaseName + "-grafana-db"
+		err := k8s.DeleteJob(grafanaJob, root.Namespace)
 		if err != nil {
-			return err
+			ok := errors2.IsNotFound(err)
+			if !ok {
+				return fmt.Errorf("failed to delete %s job %v", grafanaJob, err)
+			}
 		}
 	default:
 		// if the upgrade doesn't match the above condition
@@ -446,14 +458,14 @@ func parsePgBackRestConf(data string) map[string]string {
 }
 
 var crdURLs = []string{
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
-"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
 }
 
 var crdNames = []string{
@@ -474,4 +486,107 @@ func createCRDS() error {
 	}
 	fmt.Println("Successfully created CRDs: ", crdNames)
 	return nil
+}
+
+func persistPrometheusDataDuringUpgrade() error {
+	// scale down prometheus replicas to 0
+	fmt.Println("Migrating the underlying prometheus persistent volume to new prometheus instance...")
+	prometheus := root.HelmReleaseName + "-prometheus-server"
+	prometheusDeployment, err := k8s.GetDeployment(prometheus, root.Namespace)
+	if err != nil {
+		return fmt.Errorf("failed to get %s %v", prometheus, err)
+	}
+
+	fmt.Println("Scaling down prometheus instances to 0 replicas...")
+	var r int32 = 0
+	prometheusDeployment.Spec.Replicas = &r
+	err = k8s.UpdateDeployment(prometheusDeployment)
+	if err != nil {
+		return fmt.Errorf("failed to update %s %v", prometheus, err)
+	}
+
+	c := 0
+	for {
+		pods, err := k8s.KubeGetPods(root.Namespace, map[string]string{"app": "prometheus", "component": "server", "release": root.HelmReleaseName})
+		if err != nil {
+			return fmt.Errorf("unable to get pods from prometheus deployment %v", err)
+		}
+		if len(pods) == 0 {
+			break
+		}
+
+		if c == 3 {
+			return fmt.Errorf("prometheus pod shutdown saves all in memory data to persistent volume, prometheus pod is taking too long to shut down... ")
+		}
+		c++
+		time.Sleep(time.Duration(c*10) * time.Second)
+	}
+
+	// update existing prometheus PV to persist data and create a new PVC so the
+	// new prometheus mounts to the created PVC which binds to older prometheus PV.
+	err = k8s.UpdatePrometheusPV(prometheus, utils.PrometheusPVCName, root.Namespace)
+	if err != nil {
+		return fmt.Errorf("failed to update prometheus persistent volume %v", err)
+	}
+
+	// create job to update prometheus data directory permissions as the
+	// new prometheus expects the data dir to be owned by userid 1000.
+	fmt.Println("Create job to update prometheus data directory permissions...")
+	err = k8s.CreateJob(getJobForPrometheusDataPermissionChange(utils.PrometheusPVCName))
+	if err != nil {
+		return fmt.Errorf("failed to create job for prometheus data migration %v", err)
+	}
+
+	return nil
+}
+
+func getJobForPrometheusDataPermissionChange(pvcName string) *batchv1.Job {
+	var backoff int32 = 3
+	return &batchv1.Job{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      utils.UpgradeJob_040,
+			Namespace: root.Namespace,
+			Labels:    map[string]string{"app": "tobs-upgrade", "heritage": "helm", "release": root.HelmReleaseName},
+		},
+		Spec: batchv1.JobSpec{
+			BackoffLimit: &backoff,
+			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{},
+				Spec: v1.PodSpec{
+					RestartPolicy: "OnFailure",
+					Containers: []v1.Container{
+						{
+							Name:            "upgrade-tobs",
+							Image:           "alpine",
+							ImagePullPolicy: v1.PullIfNotPresent,
+							Stdin:           true,
+							TTY:             true,
+							Command: []string{
+								"chown",
+								"1000:1000",
+								"-R",
+								"/data/",
+							},
+							VolumeMounts: []v1.VolumeMount{
+								{
+									Name:      "prometheus",
+									MountPath: "/data",
+								},
+							},
+						},
+					},
+					Volumes: []v1.Volume{
+						{
+							Name: "prometheus",
+							VolumeSource: v1.VolumeSource{
+								PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+									ClaimName: pvcName,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 }

@@ -95,7 +95,6 @@ func TestGrafana(t *testing.T) {
 	testGrafanaChangePass(t, "cereal", false)
 	verifyGrafanaPass(t, "cereal")
 
-
 	testGrafanaChangePass(t, "23498MSDF(*9389m*(@#M24309mDj", false)
 
 	// failure case due to pwd is short

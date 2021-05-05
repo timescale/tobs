@@ -143,14 +143,9 @@ func (c *installSpec) installStack() error {
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
 	if c.ref == utils.DEFAULT_CHART {
-		err = utils.AddTobsHelmChart()
+		err = utils.AddUpdateTobsChart(true)
 		if err != nil {
-			return err
-		}
-
-		err = utils.UpdateTobsHelmChart(false)
-		if err != nil {
-			return err
+			return fmt.Errorf("failed to add & update tobs helm chart: %w", err)
 		}
 	}
 
@@ -196,6 +191,7 @@ func (c *installSpec) installStack() error {
 
 	if c.skipWait {
 		fmt.Println("skipping the wait for pods to come to a running state because --skip-wait is enabled.")
+		fmt.Println("The Observability Stack has been installed successfully")
 		return nil
 	}
 
@@ -258,4 +254,3 @@ func (c *installSpec) createSecrets() error {
 
 	return nil
 }
-

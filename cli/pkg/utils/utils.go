@@ -16,15 +16,22 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-const REPO_LOCATION = "https://charts.timescale.com"
-const DEFAULT_CHART = "timescale/tobs"
+const (
+	REPO_LOCATION     = "https://charts.timescale.com"
+	DEFAULT_CHART     = "timescale/tobs"
+	UpgradeJob_040    = "tobs-prometheus-permission-change"
+	PrometheusPVCName = "prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"
+	Version_040       = "0.4.0"
+)
 
-func AddTobsHelmChart() error {
-	w := io.Writer(os.Stdout)
+func addTobsHelmChart(printOutput bool) error {
 	addchart := exec.Command("helm", "repo", "add", "timescale", REPO_LOCATION)
-	addchart.Stdout = w
-	addchart.Stderr = w
-	fmt.Println("Adding Timescale Helm Repository")
+	if printOutput {
+		w := io.Writer(os.Stdout)
+		addchart.Stdout = w
+		addchart.Stderr = w
+		fmt.Println("Adding Timescale Helm Repository")
+	}
 	err := addchart.Run()
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
@@ -32,18 +39,14 @@ func AddTobsHelmChart() error {
 	return err
 }
 
-func UpdateTobsHelmChart(upgrade bool) error {
+func updateTobsHelmChart(printOut bool) error {
 	update := exec.Command("helm", "repo", "update")
-
-	// if upgrade flow hide the
-	// stdout of helm repo update
-	if !upgrade {
+	if printOut {
 		w := io.Writer(os.Stdout)
 		update.Stdout = w
 		update.Stderr = w
+		fmt.Println("Fetching updates from repository")
 	}
-
-	fmt.Println("Fetching updates from repository")
 	err := update.Run()
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
@@ -74,6 +77,7 @@ type DeployedChartMetadata struct {
 	Status     string `json:"status"`
 	Chart      string `json:"chart"`
 	AppVersion string `json:"app_version"`
+	Version    string
 }
 
 func GetTobsChartMetadata(chart string) (*ChartMetadata, error) {
@@ -93,25 +97,31 @@ func GetTobsChartMetadata(chart string) (*ChartMetadata, error) {
 }
 
 func GetDeployedChartMetadata(releaseName, namespace string) (*DeployedChartMetadata, error) {
-	chartDetails := &DeployedChartMetadata{}
 	out := exec.Command("helm", "list", "--namespace", namespace, "-o", "json")
 	res, err := out.CombinedOutput()
 	if err != nil {
-		return chartDetails, fmt.Errorf("failed to list helm releases %w", err)
+		return nil, fmt.Errorf("failed to list helm releases %w", err)
 	}
-
 	charts := &[]DeployedChartMetadata{}
 	err = json.Unmarshal(res, charts)
 	if err != nil {
-		return chartDetails, fmt.Errorf("failed to unmarshal deployed helm chart metadata %w", err)
+		return nil, fmt.Errorf("failed to unmarshal deployed helm chart metadata %w", err)
 	}
 	for _, c := range *charts {
 		if c.Name == releaseName {
+			v := strings.Split(c.Chart, "-")
+			if  len(v) > 1 {
+				c.Version = v[1]
+			}
 			return &c, nil
 		}
 	}
 
-	return chartDetails, nil
+	return nil, ErrorTobsDeploymentNotFound()
+}
+
+func ErrorTobsDeploymentNotFound() error {
+	return fmt.Errorf("unable to find the tobs deployment with name %s in namespace %s", root.HelmReleaseName, root.Namespace)
 }
 
 func ParseVersion(s string, width int) (int64, error) {
@@ -340,4 +350,13 @@ func GetTimescaleDBsecretLabels() map[string]string {
 		"app":          root.HelmReleaseName + "-timescaledb",
 		"cluster-name": root.HelmReleaseName,
 	}
+}
+
+func AddUpdateTobsChart(printOut bool) error {
+	err := addTobsHelmChart(printOut)
+	if err != nil {
+		return err
+	}
+
+	return updateTobsHelmChart(printOut)
 }

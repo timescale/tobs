@@ -77,11 +77,11 @@ func TestVolume(t *testing.T) {
 		t.Skip("Skipping Volume tests")
 	}
 
-	test1 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-"+RELEASE_NAME+"-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-"+RELEASE_NAME+"-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
+	test1 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-" + RELEASE_NAME + "-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-" + RELEASE_NAME + "-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
 	outputString := testVolumeGet(t, true, true, true)
 	if outputString != test1 {
 		t.Log("expected: ", test1)
-		t.Log("result: ",outputString)
+		t.Log("result: ", outputString)
 
 		// kubectl get pods -A
 		out := exec.Command("kubectl", "get", "pods", "-A")
@@ -119,31 +119,30 @@ func TestVolume(t *testing.T) {
 		}
 		t.Log(string(output))
 
-
 		t.Fatal(errors.New("failed to verify volume get test-1"))
 	}
 
-	test2 := "PVC's of wal-volume\nExisting size of PVC: wal-volume-"+RELEASE_NAME+"-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
+	test2 := "PVC's of wal-volume\nExisting size of PVC: wal-volume-" + RELEASE_NAME + "-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
 	outputString = testVolumeGet(t, false, true, true)
 	if outputString != test2 {
 		t.Log("expected: ", test2)
-		t.Log("result: ",outputString)
+		t.Log("result: ", outputString)
 		t.Fatal(errors.New("failed to verify volume get test-2"))
 	}
 
-	test3 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-"+RELEASE_NAME+"-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-"+RELEASE_NAME+"-timescaledb-0 is 20Gi\n\n"
+	test3 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-" + RELEASE_NAME + "-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-" + RELEASE_NAME + "-timescaledb-0 is 20Gi\n\n"
 	outputString = testVolumeGet(t, true, true, false)
 	if outputString != test3 {
 		t.Log("expected: ", test3)
-		t.Log("result: ",outputString)
+		t.Log("result: ", outputString)
 		t.Fatal(errors.New("failed to verify volume get test-3"))
 	}
 
-	test4 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-"+RELEASE_NAME+"-timescaledb-0 is 150Gi\n\n"
+	test4 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-" + RELEASE_NAME + "-timescaledb-0 is 150Gi\n\n"
 	outputString = testVolumeGet(t, true, false, false)
 	if outputString != test4 {
 		t.Log("expected: ", test4)
-		t.Log("result: ",outputString)
+		t.Log("result: ", outputString)
 		t.Fatal(errors.New("failed to verify volume get test-4"))
 	}
 
@@ -151,7 +150,7 @@ func TestVolume(t *testing.T) {
 	outputString = testVolumeGet(t, false, false, true)
 	if outputString != test5 {
 		t.Log("expected: ", test5)
-		t.Log("result: ",outputString)
+		t.Log("result: ", outputString)
 		t.Fatal(errors.New("failed to verify volume get test-5"))
 	}
 
@@ -215,7 +214,7 @@ func TestVolume(t *testing.T) {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
-	timescaleDBLabels := map[string]string{"app": RELEASE_NAME+"-timescaledb", "release": RELEASE_NAME}
+	timescaleDBLabels := map[string]string{"app": RELEASE_NAME + "-timescaledb", "release": RELEASE_NAME}
 	prometheusLabels := map[string]string{"app": "prometheus", "prometheus": "tobs-kube-prometheus-prometheus"}
 
 	// TESTCASE: Volume expand Prometheus storage and restart the pods

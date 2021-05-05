@@ -1,5 +1,7 @@
 # Upgrading tobs using helm (without tobs CLI)
 
+The following steps are necessary if using helm without the tobs CLI. The tobs CLI will handle these upgrade tasks automatically for you.
+
 Firstly upgrade the helm repo to pull the latest available tobs helm chart.  We always recommend to upgrading latest tobs stack available. 
 ```
 helm repo update
