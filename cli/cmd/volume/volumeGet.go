@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
@@ -50,7 +51,7 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if tsDBStorage {
-		results, err := k8s.GetPVCSizes(root.Namespace, pvcStorage, getTimescaleDBLabels())
+		results, err := k8s.GetPVCSizes(root.Namespace, pvcStorage, common.GetTimescaleDBLabels())
 		if err != nil {
 			return fmt.Errorf("could not get timescaleDB-storage: %w", err)
 		}
@@ -58,7 +59,7 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if tsDBWal {
-		results, err := k8s.GetPVCSizes(root.Namespace, pvcWAL, getTimescaleDBLabels())
+		results, err := k8s.GetPVCSizes(root.Namespace, pvcWAL, common.GetTimescaleDBLabels())
 		if err != nil {
 			return fmt.Errorf("could not get timescaleDB-wal: %w", err)
 		}
@@ -66,7 +67,7 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if promStorage {
-		results, err := k8s.GetPVCSizes(root.Namespace, pvcPrometheus, getPrometheusLabels())
+		results, err := k8s.GetPVCSizes(root.Namespace, pvcPrometheus, common.GetPrometheusLabels())
 		if err != nil {
 			return fmt.Errorf("could not get prometheus-storage: %w", err)
 		}
@@ -90,18 +91,4 @@ func volumeGetPrint(pvcPrefix string, results []*k8s.PVCData) {
 		}
 	}
 	fmt.Println()
-}
-
-func getTimescaleDBLabels() map[string]string {
-	return map[string]string{
-		"app":     root.HelmReleaseName + "-timescaledb",
-		"release": root.HelmReleaseName,
-	}
-}
-
-func getPrometheusLabels() map[string]string {
-	return map[string]string{
-		"app":        "prometheus",
-		"prometheus": "tobs-kube-prometheus-prometheus",
-	}
 }

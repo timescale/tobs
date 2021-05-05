@@ -165,3 +165,9 @@ func DeleteNamespace(namespace string) error {
 	}
 	return nil
 }
+
+func DeletePod(pod, namespace string) error {
+	client, _ := kubeInit()
+	gracePeriod := int64(0)
+	return client.CoreV1().Pods(namespace).Delete(context.Background(), pod, metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod})
+}

@@ -40,18 +40,20 @@ func addHelmInstallFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("version", "", "", "Option to provide your tobs helm chart version, if not provided will install the latest tobs chart available")
 	cmd.Flags().BoolP("only-secrets", "", false, "Option to create only TimescaleDB secrets")
 	cmd.Flags().BoolP("skip-wait", "", false, "Option to do not wait for pods to get into running state (useful for faster tobs installation)")
+	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 3 replicas")
 }
 
 type installSpec struct {
-	configFile   string
-	ref          string
-	dbURI        string
-	version      string
-	enableBackUp bool
-	onlySecrets  bool
-	skipWait     bool
-	tsDBTlsCert  []byte
-	tsDBTlsKey   []byte
+	configFile         string
+	ref                string
+	dbURI              string
+	version            string
+	enableBackUp       bool
+	onlySecrets        bool
+	enablePrometheusHA bool
+	skipWait           bool
+	tsDBTlsCert        []byte
+	tsDBTlsKey         []byte
 }
 
 func helmInstall(cmd *cobra.Command, args []string) error {
@@ -83,6 +85,10 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 	i.skipWait, err = cmd.Flags().GetBool("skip-wait")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+	i.enablePrometheusHA, err = cmd.Flags().GetBool("enable-prometheus-ha")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -168,6 +174,10 @@ func (c *installSpec) installStack() error {
 		helmValues = helmValues + ",timescaledb-single.backup.enabled=true"
 	}
 
+	if c.enablePrometheusHA {
+		helmValues = appendPrometheusHAValues(helmValues)
+	}
+
 	if cmd.Namespace != "default" {
 		cmds = append(cmds, "--create-namespace", "--namespace", cmd.Namespace)
 	}
@@ -220,6 +230,15 @@ func (c *installSpec) installStack() error {
 func appendDBURIValues(dbURI, name string, helmValues string) string {
 	helmValues = helmValues + ",timescaledb-single.enabled=false," + "timescaledbExternal.enabled=true," + "timescaledbExternal.db_uri=" + dbURI +
 		",promscale.connection.uri.secretTemplate=" + name + "-timescaledb-uri"
+	return helmValues
+}
+
+func appendPrometheusHAValues(helmValues string) string {
+	helmValues = helmValues + ",timescaledb-single.patroni.bootstrap.dcs.postgresql.parameters.max_connections=400," +
+		"promscale.replicaCount=3," + "promscale.args={--high-availability}," +
+		"kube-prometheus-stack.prometheus.prometheusSpec.replicaExternalLabelName=__replica__," +
+		"kube-prometheus-stack.prometheus.prometheusSpec.prometheusExternalLabelName=cluster," +
+		"kube-prometheus-stack.prometheus.prometheusSpec.replicas=3"
 	return helmValues
 }
 

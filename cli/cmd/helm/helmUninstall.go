@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
@@ -106,6 +107,13 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
+
+		// Prometheus PVC's doesn't hold the release labelSet
+		prometheusPvcNames, err := k8s.KubeGetPVCNames(root.Namespace, common.GetPrometheusLabels())
+		if err != nil {
+			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
+		}
+		pvcnames = append(pvcnames, prometheusPvcNames...)
 
 		fmt.Println("Removing Persistent Volume Claims")
 		for _, s := range pvcnames {

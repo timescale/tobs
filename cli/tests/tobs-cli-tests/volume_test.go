@@ -77,52 +77,22 @@ func TestVolume(t *testing.T) {
 		t.Skip("Skipping Volume tests")
 	}
 
-	test1 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-" + RELEASE_NAME + "-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-" + RELEASE_NAME + "-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
+	test1 := "PVC's of storage-volume\nExisting size of PVC: storage-volume-" + RELEASE_NAME + "-timescaledb-0 is 150Gi\n\nPVC's of wal-volume\nExisting size of PVC: wal-volume-" + RELEASE_NAME + "-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1 is 8Gi\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2 is 8Gi\n\n"
 	outputString := testVolumeGet(t, true, true, true)
 	if outputString != test1 {
 		t.Log("expected: ", test1)
 		t.Log("result: ", outputString)
 
 		// kubectl get pods -A
-		out := exec.Command("kubectl", "get", "pods", "-A")
-		output, err := out.CombinedOutput()
-		if err != nil {
-			t.Log(string(output))
-			t.Fatal(err)
-		}
-		t.Log(string(output))
+		test_utils.ShowAllPods(t)
 
 		// kubectl get pvc -A
-		out = exec.Command("kubectl", "get", "pvc", "-A")
-		output, err = out.CombinedOutput()
-		if err != nil {
-			t.Log(string(output))
-			t.Fatal(err)
-		}
-		t.Log(string(output))
-
-		// kubectl describe prometheus-pod
-		out = exec.Command("kubectl", "describe", "pod/prometheus-tobs-kube-prometheus-prometheus-0", "-n", "ns")
-		output, err = out.CombinedOutput()
-		if err != nil {
-			t.Log(string(output))
-			t.Fatal(err)
-		}
-		t.Log(string(output))
-
-		// kubectl describe prometheus pvc
-		out = exec.Command("kubectl", "describe", "pvc/prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0", "-n", "ns")
-		output, err = out.CombinedOutput()
-		if err != nil {
-			t.Log(string(output))
-			t.Fatal(err)
-		}
-		t.Log(string(output))
+		test_utils.ShowAllPVCs(t)
 
 		t.Fatal(errors.New("failed to verify volume get test-1"))
 	}
 
-	test2 := "PVC's of wal-volume\nExisting size of PVC: wal-volume-" + RELEASE_NAME + "-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
+	test2 := "PVC's of wal-volume\nExisting size of PVC: wal-volume-" + RELEASE_NAME + "-timescaledb-0 is 20Gi\n\nPVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1 is 8Gi\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2 is 8Gi\n\n"
 	outputString = testVolumeGet(t, false, true, true)
 	if outputString != test2 {
 		t.Log("expected: ", test2)
@@ -146,7 +116,7 @@ func TestVolume(t *testing.T) {
 		t.Fatal(errors.New("failed to verify volume get test-4"))
 	}
 
-	test5 := "PVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\n\n"
+	test5 := "PVC's of prometheus-tobs-kube-prometheus-prometheus-db\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0 is 8Gi\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1 is 8Gi\nExisting size of PVC: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2 is 8Gi\n\n"
 	outputString = testVolumeGet(t, false, false, true)
 	if outputString != test5 {
 		t.Log("expected: ", test5)
@@ -165,7 +135,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "151Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "21Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "151Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "21Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-1"))
 	}
 
@@ -174,7 +147,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "152Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "22Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "152Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "22Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-2"))
 	}
 
@@ -183,7 +159,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "22Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "22Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-3"))
 	}
 
@@ -192,7 +171,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "23Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "23Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "9Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "9Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-4"))
 	}
 
@@ -201,7 +183,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "10Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "10Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "10Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "10Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-5"))
 	}
 
@@ -210,7 +195,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "11Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "11Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "11Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "11Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
@@ -240,13 +228,16 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" && res["prometheus-tobs-kube-prometheus-tobs-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "12Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "153Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" &&
+		res["prometheus-tobs-kube-prometheus-tobs-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "12Gi" &&
+		res["prometheus-tobs-kube-prometheus-tobs-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "12Gi" &&
+		res["prometheus-tobs-kube-prometheus-tobs-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "12Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
 	var labels []map[string]string
-	labels = append(labels, timescaleDBLabels)
-	// pod restart takes sometime for TimescaleDB to start & to move to running state.
+	labels = append(labels, prometheusLabels)
+	// pod restart takes sometime for Prometheus to start & to move to running state.
 	time.Sleep(1 * time.Minute)
 	verifyPodRestart(t, podsSet, labels)
 
@@ -290,7 +281,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "154Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "13Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "154Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "24Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "13Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "13Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "13Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
@@ -303,7 +297,7 @@ func TestVolume(t *testing.T) {
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
-	pods, err = k8s.KubeGetPods("ns", timescaleDBLabels)
+	pods, err = k8s.KubeGetPods(NAMESPACE, timescaleDBLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -325,7 +319,10 @@ func TestVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "155Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "25Gi" && res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "13Gi" {
+	if res["storage-volume-"+RELEASE_NAME+"-timescaledb-0"] != "155Gi" && res["wal-volume-"+RELEASE_NAME+"-timescaledb-0"] != "25Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"] != "13Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-1"] != "13Gi" &&
+		res["prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-2"] != "13Gi" {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
@@ -354,13 +351,7 @@ func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]st
 				// compare names & timestamp as statefulsets will have same name then compare create timestamp
 				if v.name == p.Name && v.oldPodCreateTimestamp == p.CreationTimestamp.String() {
 					t.Log(p)
-					out := exec.Command("kubectl", "get", "pods", "-A")
-					output, err := out.CombinedOutput()
-					if err != nil {
-						t.Log(string(output))
-						t.Fatal(err)
-					}
-					t.Log(string(output))
+					test_utils.ShowAllPods(t)
 					t.Fatal(errors.New("failed to restart the pod after volume expansion " + v.name))
 				}
 			}
@@ -369,6 +360,8 @@ func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]st
 
 	// validate number of pods killed are equal to number of pods running i.e expected to be restarted.
 	if len(podsSet) != podsCounter {
+		test_utils.ShowAllPods(t)
+		t.Logf("Number of Pods %v, PodsCounter %v", len(podsSet), podsCounter)
 		t.Fatal(errors.New("failed to restart pods after volume expansion"))
 	}
 }

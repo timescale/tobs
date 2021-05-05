@@ -59,4 +59,4 @@ jobs:
       - name: E2E-Tests
         working-directory: ${{env.working-directory}}
         run: |
-          SKIP_INSTALL_TESTS=TRUE make e2e-tests
+          make e2e-tests

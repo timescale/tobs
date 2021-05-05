@@ -1,6 +1,7 @@
 package tobs_cli_tests
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -28,7 +29,7 @@ func installObs() {
 		log.Fatal(err)
 	}
 
-	obsinstall := exec.Command(PATH_TO_TOBS, "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES)
+	obsinstall := exec.Command(PATH_TO_TOBS, "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--enable-prometheus-ha")
 	err = obsinstall.Run()
 	if err != nil {
 		log.Println("Error installing The Observability Stack:", err)
@@ -55,8 +56,9 @@ func TestMain(m *testing.M) {
 
 	installObs()
 
-	time.Sleep(2 * time.Minute)
+	time.Sleep(3 * time.Minute)
 
+	fmt.Println("starting e2e tests post tobs deployment....")
 	code := m.Run()
 
 	err := test_utils.CheckPodsRunning(NAMESPACE)

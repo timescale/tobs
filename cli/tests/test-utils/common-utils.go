@@ -7,6 +7,8 @@ import (
 	"syscall"
 	"testing"
 	"time"
+
+	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 var PATH_TO_TOBS = "./../../bin/tobs"
@@ -149,6 +151,151 @@ func (r *ReleaseInfo) TestPromscalePortForward(t testing.TB, portPromscale strin
 	}
 
 	err = portforward.Process.Signal(syscall.SIGINT)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func PortForwardPromscale(t testing.TB, releaseName, namespace string) {
+	cmds := []string{"promscale", "port-forward", "-n", releaseName, "--namespace", namespace, "-p", "9201"}
+
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	portforward := exec.Command(PATH_TO_TOBS, cmds...)
+
+	err := portforward.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(10 * time.Second)
+
+	_, err = net.DialTimeout("tcp", "localhost:9201", 2*time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func (c *TestUnInstallSpec) TestUninstall(t testing.TB) {
+	cmds := []string{"uninstall", "-n", c.ReleaseName, "--namespace", c.Namespace}
+	if c.DeleteData {
+		cmds = append(cmds, "--delete-data")
+	}
+
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	uninstall := exec.Command(PATH_TO_TOBS, cmds...)
+
+	out, err := uninstall.CombinedOutput()
+	if err != nil {
+		t.Logf(string(out))
+		t.Fatal(err)
+	}
+}
+
+type TestInstallSpec struct {
+	PathToChart  string
+	ReleaseName  string
+	Namespace    string
+	PathToValues string
+	EnableBackUp bool
+	SkipWait     bool
+	OnlySecrets  bool
+}
+
+type TestUnInstallSpec struct {
+	ReleaseName string
+	Namespace   string
+	DeleteData  bool
+}
+
+func (c *TestInstallSpec) TestInstall(t testing.TB) {
+	cmds := []string{"install", "--chart-reference", c.PathToChart, "-n", c.ReleaseName, "--namespace", c.Namespace}
+	if c.EnableBackUp {
+		cmds = append(cmds, "--enable-timescaledb-backup")
+	}
+	if c.SkipWait {
+		cmds = append(cmds, "--skip-wait")
+	}
+	if c.OnlySecrets {
+		cmds = append(cmds, "--only-secrets")
+	}
+	if c.PathToValues != "" {
+		cmds = append(cmds, "-f", c.PathToValues)
+	}
+
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	install := exec.Command(PATH_TO_TOBS, cmds...)
+
+	out, err := install.CombinedOutput()
+	if err != nil {
+		t.Logf(string(out))
+		t.Fatal(err)
+	}
+}
+
+func (c *TestInstallSpec) TestHelmInstall(t testing.TB) {
+	cmds := []string{"helm", "install", "--chart-reference", c.PathToChart, "-n", c.ReleaseName, "--namespace", c.Namespace}
+	if c.SkipWait {
+		cmds = append(cmds, "--skip-wait")
+	}
+	if c.PathToValues != "" {
+		cmds = append(cmds, "-f", c.PathToValues)
+	}
+
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	install := exec.Command(PATH_TO_TOBS, cmds...)
+
+	out, err := install.CombinedOutput()
+	if err != nil {
+		t.Logf(string(out))
+		// kubectl get pods -A
+		out := exec.Command("kubectl", "get", "pods", "-A")
+		output, err := out.CombinedOutput()
+		t.Log(string(output))
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Fatal(err)
+	}
+}
+
+func (c *TestUnInstallSpec) TestHelmUninstall(t testing.TB) {
+	cmds := []string{"helm", "uninstall", "-n", c.ReleaseName, "--namespace", c.Namespace}
+	if c.DeleteData {
+		cmds = append(cmds, "--delete-data")
+	}
+
+	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
+	uninstall := exec.Command(PATH_TO_TOBS, cmds...)
+
+	out, err := uninstall.CombinedOutput()
+	if err != nil {
+		t.Logf(string(out))
+		t.Fatal(err)
+	}
+
+	pods, err := k8s.KubeGetAllPods("tobs", "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pods) != 0 {
+		t.Fatal("Pod remaining after uninstall")
+	}
+
+}
+
+func ShowAllPods(t testing.TB) {
+	out := exec.Command("kubectl", "get", "pods", "-A")
+	output, err := out.CombinedOutput()
+	t.Log(string(output))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func ShowAllPVCs(t testing.TB) {
+	out := exec.Command("kubectl", "get", "pvc", "-A")
+	output, err := out.CombinedOutput()
+	t.Log(string(output))
 	if err != nil {
 		t.Fatal(err)
 	}
