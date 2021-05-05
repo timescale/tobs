@@ -195,10 +195,10 @@ func TestInstallation(t *testing.T) {
 	testUninstall(t, "def", "", false)
 	testHelmDeleteData(t, "def", "")
 
-	testInstall(t, "f1", "", "./../testdata/f1.yml", false, true, false)
+	testInstall(t, "f1", "", "./../testdata/f1.yaml", false, true, false)
 	testHelmUninstall(t, "f1", "", false)
 
-	testHelmInstall(t, "f2", "", "./../testdata/f2.yml")
+	testHelmInstall(t, "f2", "", "./../testdata/f2.yaml")
 	testUninstall(t, "f2", "", false)
 
 	// install --only-secrets

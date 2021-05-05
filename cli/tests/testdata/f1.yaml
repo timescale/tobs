@@ -73,6 +73,7 @@ kube-prometheus-stack:
       ## Prometheus pod storage spec
       storageSpec:
         ## Using PersistentVolumeClaim
+        disableMountSubPath: true
         volumeClaimTemplate:
           spec:
             accessModes:

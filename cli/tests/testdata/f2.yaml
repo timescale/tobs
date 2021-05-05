@@ -3,12 +3,11 @@
 #    https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 # Check out the various configuration options (administration guide) at:
 #    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
-cli: false
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
-  enabled: true
+  enabled: false
   image:
-    tag: pg12-ts2.1-latest
+    tag: pg12-ts2.0-latest
   # create only a ClusterIP service
   loadBalancer:
     enabled: false
@@ -16,28 +15,15 @@ timescaledb-single:
   replicaCount: 1
   # backup is disabled by default, enable it
   # if you want to backup timescaleDB to s3
-  # you can provide the s3 details on tobs install
-  # in the user prompt or you can set s3 details in the
-  # env variables for the following keys:
-  # PGBACKREST_REPO1_S3_BUCKET
-  # PGBACKREST_REPO1_S3_ENDPOINT
-  # PGBACKREST_REPO1_S3_REGION
-  # PGBACKREST_REPO1_S3_KEY
-  # PGBACKREST_REPO1_S3_KEY_SECRET
   backup:
     enabled: false
-  persistentVolumes:
-    data:
-      size: 150Gi
-    wal:
-      size: 20Gi
 
 # Values for configuring the deployment of the Promscale Connector
 # The charts README is at:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
-  enabled: true
-  image: timescale/promscale:0.3.0
+  enabled: false
+  image: timescale/promscale:latest
   # connection options
   connection:
     # the db name in which the metrics will be stored
@@ -54,7 +40,6 @@ promscale:
       # Host name (templated) of the database instance, default
       # to service created in timescaledb-single
       nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
-    port: 5432
 
   # configuration options for the service exposed by promscale
   service:
@@ -62,12 +47,6 @@ promscale:
     # will get created
     loadBalancer:
       enabled: false
-#  resources:
-#    requests:
-#      # By default this should be enough for a cluster
-#      # with only a few pods
-#      memory: 4Gi
-#      cpu: 1
 
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
@@ -94,6 +73,7 @@ kube-prometheus-stack:
       ## Prometheus pod storage spec
       storageSpec:
         ## Using PersistentVolumeClaim
+        disableMountSubPath: true
         volumeClaimTemplate:
           spec:
             accessModes:
@@ -149,18 +129,6 @@ kube-prometheus-stack:
 
 grafanaDBJob:
   resources: {}
-
-#Enable PromLens  https://promlens.com/
-#PromLens is a PromQL query builder, analyzer, and visualizer
-promlens:
-  enabled: true
-  image: "promlabs/promlens:latest"
-  # This default URL assumes access via port-forwarding to the connector. If using
-  # a load balancer for the connector, change as appropriate
-  # NOTE: the internal cluster address does not work here as requests are made by the browser.
-  defaultPrometheusUrl:  "http://localhost:9201"
-  loadBalancer:
-    enabled: false
 
 #Enable Promscale to connect to an existing database by providing the db-uri
 timescaledbExternal:

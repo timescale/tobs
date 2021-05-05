@@ -17,8 +17,8 @@ var volumeGetCmd = &cobra.Command{
 }
 
 var (
-	pvcStorage = "storage-volume"
-	pvcWAL = "wal-volume"
+	pvcStorage    = "storage-volume"
+	pvcWAL        = "wal-volume"
 	pvcPrometheus = "prometheus-tobs-kube-prometheus-prometheus-db"
 )
 
@@ -92,17 +92,16 @@ func volumeGetPrint(pvcPrefix string, results []*k8s.PVCData) {
 	fmt.Println()
 }
 
-
-func getTimescaleDBLabels() map[string]string{
+func getTimescaleDBLabels() map[string]string {
 	return map[string]string{
 		"app":     root.HelmReleaseName + "-timescaledb",
 		"release": root.HelmReleaseName,
 	}
 }
 
-func getPrometheusLabels() map[string]string{
+func getPrometheusLabels() map[string]string {
 	return map[string]string{
-		"app":       "prometheus",
+		"app":        "prometheus",
 		"prometheus": "tobs-kube-prometheus-prometheus",
 	}
 }

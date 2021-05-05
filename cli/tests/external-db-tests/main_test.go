@@ -58,7 +58,7 @@ func installTimescaleDB() {
 	// Note: The below tobs cmd only deploys TimescaleDB as the test values.yaml is configured
 	// to deploy only timescaleDB
 	log.Println("Installing TimescaleDB")
-	runTsdb := exec.Command(PATH_TO_TOBS, "install", "-c", PATH_TO_CHART, "-f", "./../testdata/f5.yaml", "--name", "external-db-tests")
+	runTsdb := exec.Command(PATH_TO_TOBS, "install", "-c", PATH_TO_CHART, "-f", "./../testdata/f3.yaml", "--name", "external-db-tests")
 	_, err := runTsdb.CombinedOutput()
 	if err != nil {
 		log.Println("Error installing timescaleDB:", err)

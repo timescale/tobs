@@ -90,7 +90,7 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal("failed to verify expected chart version after upgrade", chartDetails.Chart)
 	}
 
-	out = exec.Command(PATH_TO_TOBS, "upgrade", "-f", "./../testdata/f6.yaml", "-c", "./../testdata/chart2/", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
+	out = exec.Command(PATH_TO_TOBS, "upgrade", "-f", "./../testdata/f4.yaml", "-c", "./../testdata/chart2/", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
 	output, err = out.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(output))

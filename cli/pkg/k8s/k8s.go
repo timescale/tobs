@@ -10,6 +10,9 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/timescale/tobs/cli/cmd"
+	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -595,12 +598,15 @@ func CheckSecretExists(secretName, namespace string) (bool, error) {
 	return false, nil
 }
 
-
 func DeleteJob(name, namespace string) error {
 	client, _ := kubeInit()
-	err := client.BatchV1().Jobs(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
+	// deleting the job leaves the completed pods
+	// this might cause pvc to be in terminating state forever
+	// so delete the job with propagation as background
+	propagation := metav1.DeletePropagationBackground
+	err := client.BatchV1().Jobs(namespace).Delete(context.Background(), name, metav1.DeleteOptions{PropagationPolicy: &propagation})
 	if err != nil {
-		return fmt.Errorf("failed delete the job %s: %v", name, err)
+		return err
 	}
 	return nil
 }
@@ -610,9 +616,23 @@ func DeleteDaemonset(name, namespace string) error {
 	fmt.Printf("Deleting daemonset %v...\n", name)
 	err := client.AppsV1().DaemonSets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 	if err != nil {
-		return fmt.Errorf("failed delete the daemonset %s: %v", name, err)
+		return err
 	}
 	return nil
+}
+
+func CreateJob(job *batchv1.Job) error {
+	client, _ := kubeInit()
+	_, err := client.BatchV1().Jobs(job.Namespace).Create(context.Background(), job, metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func GetJob(jobName, namespace string) (*batchv1.Job, error) {
+	client, _ := kubeInit()
+	return client.BatchV1().Jobs(namespace).Get(context.Background(), jobName, metav1.GetOptions{})
 }
 
 func CreateCRDS(crds []string) error {
@@ -623,5 +643,63 @@ func CreateCRDS(crds []string) error {
 			return fmt.Errorf("failed to create CRD %s %s: %w", crd, output, err)
 		}
 	}
+	return nil
+}
+
+func GetDeployment(name, namespace string) (*appsv1.Deployment, error) {
+	client, _ := kubeInit()
+	return client.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
+
+}
+
+func UpdateDeployment(deployment *appsv1.Deployment) error {
+	client, _ := kubeInit()
+	_, err := client.AppsV1().Deployments(deployment.Namespace).Update(context.Background(), deployment, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func UpdatePrometheusPV(pvcName, newPVCName, namespace string) error {
+	client, _ := kubeInit()
+	pvc, err := client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get persistent volume claim %s: %v", pvcName, err)
+	}
+
+	pvName := pvc.Spec.VolumeName
+	pv, err := client.CoreV1().PersistentVolumes().Get(context.Background(), pvName, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get the persistent volume %s: %v", pvName, err)
+	}
+
+	pv.Spec.ClaimRef = nil
+	pv, err = client.CoreV1().PersistentVolumes().Update(context.Background(), pv, metav1.UpdateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to update persistent volume %s: %v", pv.Name, err)
+	}
+
+	newPVC := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      newPVCName,
+			Namespace: namespace,
+			Labels:    map[string]string{"app": "prometheus", "prometheus": "tobs-kube-prometheus", "release": cmd.HelmReleaseName},
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes: []corev1.PersistentVolumeAccessMode{"ReadWriteOnce"},
+			Resources: corev1.ResourceRequirements{
+				Requests: map[corev1.ResourceName]resource.Quantity{"storage": resource.MustParse("8Gi")},
+			},
+			VolumeName: pv.Name,
+			VolumeMode: pvc.Spec.VolumeMode,
+		},
+	}
+
+	_, err = client.CoreV1().PersistentVolumeClaims(namespace).Create(context.Background(), newPVC, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get persistent volume claim %s: %v", pvcName, err)
+	}
+
 	return nil
 }
