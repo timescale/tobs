@@ -22,6 +22,116 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
 kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
 ```
 
+The tobs `0.4.x` installation uses the node-exporter daemonset & node-exporter service from Kube-Prometheus stack. This requires manual deletion of these resources. The upgrade flow will re-create these resources. 
+
+Delete `tobs-node-exporter` daemonset:
+
+```
+kubectl delete daemonset <RELEASE_NAME>-prometheus-node-exporter -n <NAMESPACE>
+``` 
+
+Delete `tobs-node-exporter` service:
+
+```
+kubectl delete svc <RELEASE_NAME>-prometheus-node-exporter -n <NAMESPACE>
+```
+
+To migrate data from old Prometheus instance to new Prometheus instance follow the below steps:
+
+Scale down the existing Prometheus replicas to 0. So that all the in-memory data is stored in Prometheus persistent volume. 
+
+```
+kubectl scale --replicas=0 deploy/tobs-prometheus-server 
+```
+**Note**: Wait for the Prometheus pod to gracefully shut down.
+
+Find Persistent Volume name that is claimed by the Persistent Volume Claim:
+
+```
+kubectl get pvc/<RELEASE_NAME>-prometheus-server
+```
+
+Patch the Persistent Volume claim reference to null. So that new Persistent Volume Claim created for Kube-Prometheus stack will mount to the Persistent Volume owned by the previous Prometheus pod.
+
+```
+kubectl edit pv/<PERSISTENT_VOLUME>
+```
+
+Now update the pv claim reference field to `null` i.e. `spec.claimRef: null`. So that new PVC will mount to this PV. 
+
+Create a new Persistent Volume Claim and mount its volumeName to the Persistent Volume released in the previous step:
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: prometheus
+    prometheus: tobs-kube-prometheus
+    release: tobs
+  name: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0
+  namespace: <NAMESPACE>
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  volumeMode: Filesystem
+  volumeName: <PERSISTENT_VOLUME>
+```
+
+Create the Persistent Volume Claim defined in the above code snippet:
+
+```
+kubectl create -f pvc-file-name.yaml
+```
+
+Change the permissions of Prometheus data directory as new Kube-Prometheus instance by default comes with security context.
+
+```
+apiVersion: batch/v1
+kind: Job
+metadata:
+  creationTimestamp: "2021-05-16T16:37:21Z"
+  labels:
+    app: tobs-upgrade
+    heritage: helm
+    release: tobs
+  name: tobs-prometheus-permission-change
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        job-name: tobs-prometheus-permission-change
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - command:
+        - chown
+        - 1000:1000
+        - -R
+        - /data/
+        image: alpine
+        imagePullPolicy: IfNotPresent
+        name: upgrade-tobs
+        volumeMounts:
+        - mountPath: /data
+          name: prometheus
+      volumes:
+      - name: prometheus
+        persistentVolumeClaim:
+          claimName: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0
+```
+
+Create the job from the above defined code snippet:
+
+```
+kubectl create -f job-file-name.yaml
+```
+
+
 Now upgrade the tobs by running:
 ```
 helm upgrade <release_name> timescale/tobs
@@ -30,6 +140,12 @@ helm upgrade <release_name> timescale/tobs
 ## Upgrading to 0.3.x:
 
 In tobs `0.3.x` TimescaleDB doesn't create the secrets by default. During the upgrade you need to copy the existing timescaledb passwords to new secrets. This can be done by running this [script](https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/upgrade-guide.md#migrate-the-secrets).
+
+Delete the `grafana-db` job as the upgrade re-creates the same job for the upgraded tobs deployment
+
+```
+kubectl delete job/<RELEASE_NAME>-grafana-db -n <NAMESPACE>
+``` 
 
 Now upgrade the tobs by running:
 ```
