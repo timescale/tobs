@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,6 +23,7 @@ const (
 	UpgradeJob_040    = "tobs-prometheus-permission-change"
 	PrometheusPVCName = "prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"
 	Version_040       = "0.4.0"
+	helmCmd           = "helm"
 )
 
 func addTobsHelmChart(printOutput bool) error {
@@ -82,8 +84,7 @@ type DeployedChartMetadata struct {
 
 func GetTobsChartMetadata(chart string) (*ChartMetadata, error) {
 	chartDetails := &ChartMetadata{}
-	out := exec.Command("helm", "inspect", "chart", chart)
-	res, err := out.CombinedOutput()
+	res, err := runCmdReturnOutput(helmCmd, []string{"inspect", "chart", chart})
 	if err != nil {
 		return chartDetails, fmt.Errorf("failed to search helm chart %s %w", chart, err)
 	}
@@ -97,8 +98,7 @@ func GetTobsChartMetadata(chart string) (*ChartMetadata, error) {
 }
 
 func GetDeployedChartMetadata(releaseName, namespace string) (*DeployedChartMetadata, error) {
-	out := exec.Command("helm", "list", "--namespace", namespace, "-o", "json")
-	res, err := out.CombinedOutput()
+	res, err := runCmdReturnOutput(helmCmd, []string{"list", "--namespace", namespace, "-o", "json"})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list helm releases %w", err)
 	}
@@ -118,6 +118,22 @@ func GetDeployedChartMetadata(releaseName, namespace string) (*DeployedChartMeta
 	}
 
 	return nil, ErrorTobsDeploymentNotFound()
+}
+
+func runCmdReturnOutput(cmd string, args []string) ([]byte, error) {
+	out := exec.Command(cmd, args...)
+	var stdout, stderr bytes.Buffer
+	out.Stdout = &stdout
+	out.Stderr = &stderr
+	err := out.Run()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run cmd: %s with args: %v %w", cmd, args, err)
+	}
+	// if there are any warnings log them
+	if stderr.Len() != 0 {
+		fmt.Println(stderr.String())
+	}
+	return stdout.Bytes(), err
 }
 
 func ErrorTobsDeploymentNotFound() error {
@@ -140,8 +156,7 @@ func ParseVersion(s string, width int) (int64, error) {
 }
 
 func DeployedValuesYaml(chart, releaseName, namespace string) (interface{}, error) {
-	out := exec.Command("helm", "get", "values", releaseName, "--namespace", namespace, "-o", "yaml")
-	k, err := out.CombinedOutput()
+	k, err := runCmdReturnOutput(helmCmd, []string{"get", "values", releaseName, "--namespace", namespace, "-o", "yaml"})
 	if err != nil {
 		return nil, fmt.Errorf("failed to do helm get values on the helm release %w", err)
 	}
@@ -165,8 +180,7 @@ func NewValuesYaml(chart, file string) (interface{}, error) {
 			return nil, fmt.Errorf("unable to read values from provided file %w", err)
 		}
 	} else {
-		out := exec.Command("helm", "show", "values", chart)
-		res, err = out.CombinedOutput()
+		res, err = runCmdReturnOutput(helmCmd, []string{"show", "values", chart})
 		if err != nil {
 			return nil, fmt.Errorf("failed to do helm show values on the helm chart %w", err)
 		}
@@ -262,8 +276,7 @@ func GetTimescaleDBURI(namespace, name string) (string, error) {
 }
 
 func ExportValuesFieldFromChart(chart string, keys []string) (interface{}, error) {
-	out := exec.Command("helm", "show", "values", chart)
-	res, err := out.CombinedOutput()
+	res, err := runCmdReturnOutput(helmCmd, []string{"show", "values", chart})
 	if err != nil {
 		return nil, fmt.Errorf("failed to do helm show values on the helm chart %w", err)
 	}
@@ -277,8 +290,7 @@ func ExportValuesFieldFromChart(chart string, keys []string) (interface{}, error
 }
 
 func ExportValuesFieldFromRelease(releaseName, namespace string, keys []string) (interface{}, error) {
-	out := exec.Command("helm", "get", "values", releaseName, "-a", "--namespace", namespace)
-	res, err := out.CombinedOutput()
+	res, err := runCmdReturnOutput(helmCmd, []string{"get", "values", releaseName, "-a", "--namespace", namespace})
 	if err != nil {
 		return nil, fmt.Errorf("failed to do helm get values from the helm release %w", err)
 	}
