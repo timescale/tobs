@@ -49,9 +49,10 @@ The following are the commands possible with the CLI.
 
 | Command             | Description                                                      | Flags                                                |
 |---------------------|------------------------------------------------------------------|------------------------------------------------------|
-| `tobs install`      | Alias for `tobs helm install`.                                   | `--filename`, `-f` : file to load configuration from <br> `--external-timescaledb-uri`, `-e`: external database URI, TimescaleDB installation will be skipped & Promscale connects to the provided database  |
-| `tobs uninstall`    | Alias for `tobs helm unintall`.                                  | None                                                 |
-| `tobs port-forward` | Port-forwards TimescaleDB, Grafana, and Prometheus to localhost. | `--timescaledb`, `-t` : port for TimescaleDB <br> `--grafana`, `-g` : port for Grafana <br> `--prometheus`, `-p` : port for Prometheus |
+| `tobs install`      | Alias for `tobs helm install`.                                   | `--filename`, `-f` : file to load configuration from <br> `--chart-reference`, `-c` : helm chart reference (default "timescale/tobs") <br>  `--external-timescaledb-uri`, `-e`: external database URI, TimescaleDB installation will be skipped & Promscale connects to the provided database <br> `--enable-prometheus-ha` : option to enable prometheus and promscale high-availability, by default scales to 3 replicas <br> `--enable-timescaledb-backup`, `-b` : option to enable TimescaleDB S3 backup <br> `--only-secrets` :  option to create only TimescaleDB secrets <br> `--skip-wait` : option to do not wait for pods to get into running state (useful for faster tobs installation) <br> `--timescaledb-tls-cert` : option to provide your own tls certificate for TimescaleDB <br> `--timescaledb-tls-key` : option to provide your own tls key for TimescaleDB <br> `--version` : option to provide tobs helm chart version, if not provided will install the latest tobs chart available   |
+| `tobs uninstall`    | Alias for `tobs helm unintall`.                                  | `--delete-data`: option to delete persistent volume claims |
+| `tobs port-forward` | Port-forwards TimescaleDB, Grafana, and Prometheus to localhost. | `--timescaledb`, `-t` : port for TimescaleDB <br> `--grafana`, `-g` : port for Grafana <br> `--prometheus`, `-p` : port for Prometheus <br> `--promscale`, `-c` : port for Promscale <br> `--promlens`, `-l` : port for Promlens |
+| `tobs version`      | Shows the version of tobs CLI and latest helm chart              | `--deployed-chart`, `-d` : option to show the deployed helm chart version alongside tobs CLI version   |
 
 ### Helm Commands
 
@@ -59,8 +60,8 @@ Documentation about Helm configuration can be found in the [Helm chart directory
 
 | Command                 | Description                                                                  | Flags                                                |
 |-------------------------|------------------------------------------------------------------------------|------------------------------------------------------|
-| `tobs helm install`     | Installs Helm chart for The Observability Stack.                             | `--filename`, `-f` : file to load configuration from |
-| `tobs helm uninstall`   | Uninstalls Helm chart for The Observability Stack.                           | None                                                 |
+| `tobs helm install`     | Installs Helm chart for The Observability Stack.                             | `--filename`, `-f` : file to load configuration from <br> `--chart-reference`, `-c` : helm chart reference (default "timescale/tobs") <br>  `--external-timescaledb-uri`, `-e`: external database URI, TimescaleDB installation will be skipped & Promscale connects to the provided database <br> `--enable-prometheus-ha` : option to enable prometheus and promscale high-availability, by default scales to 3 replicas <br> `--enable-timescaledb-backup`, `-b` : Option to enable TimescaleDB S3 backup <br> `--only-secrets` :  Option to create only TimescaleDB secrets <br> `--skip-wait` : Option to do not wait for pods to get into running state (useful for faster tobs installation) <br> `--timescaledb-tls-cert` : Option to provide your own tls certificate for TimescaleDB <br> `--timescaledb-tls-key` : Option to provide your own tls key for TimescaleDB <br> `--version` : Option to provide tobs helm chart version, if not provided will install the latest tobs chart available  |
+| `tobs helm uninstall`   | Uninstalls Helm chart for The Observability Stack.                           | `--delete-data`: Delete persistent volume claims     |
 | `tobs helm show-values` | Prints the YAML configuration of the Helm chart for The Observability Stack. | None                                                 |
 | `tobs helm delete-data` | Deletes persistent volume claims associated with The Observability Stack.    | None                                                 |
 
@@ -78,7 +79,7 @@ Documentation about Helm configuration can be found in the [Helm chart directory
 | Command                             | Description                                    | Flags                                |
 |-------------------------------------|------------------------------------------------|--------------------------------------|
 | `tobs grafana port-forward`         | Port-forwards the Grafana server to localhost. | `--port`, `-p` : port to listen from |
-| `tobs grafana get-initial-password` | Gets the initial admin password for Grafana.   | None                                 |
+| `tobs grafana get-password`         | Gets the admin password for Grafana.           | None                                 |
 | `tobs grafana change-password`      | Changes the admin password for Grafana.        | None                                 |
 
 ### Prometheus Commands
@@ -118,7 +119,7 @@ You can also upgrade your existing tobs deployment to latest `values.yaml` confi
 
 | Command                        | Description                                       | Flags                                |
 |--------------------------------|---------------------------------------------------|--------------------------------------|
-| `tobs upgrade`     | Upgrades the tobs deployment if new helm chart is available. Also, upgrades tobs if updated `values.yaml` is provided. | `--filename`, `-f`, `--chart-reference`, `-c`, `--reuse-values` native helm upgrade flag to use existing values from release, `--reset-values` native helm flag to reset values to default helm chart values, `--confirm`, `-y` to approve upgrade action, `--same-chart` this helps you to upgrade the helm release with latest values.yaml but the chart remains the same.  |
+| `tobs upgrade`     | Upgrades the tobs deployment if new helm chart is available. Also, upgrades tobs if updated `values.yaml` is provided. | `--filename`, `-f` : file to load configuration from <br> `--chart-reference`, `-c` : helm chart reference (default "timescale/tobs") <br> `--reuse-values` : native helm upgrade flag to use existing values from release <br> `--reset-values` : native helm flag to reset values to default helm chart values <br> `--confirm`, `-y` : approve upgrade action <br> `--same-chart` : option to upgrade the helm release with latest values.yaml but the chart remains the same. <br> `--skip-crds` : option to skip creating CRDs on upgrade  |
 
 ## Global Flags
 
@@ -128,6 +129,7 @@ The following are global flags that can be used with any of the above commands:
 |----------------|----------------------|
 | `--name`, `-n` | Helm release name    |
 | `--namespace`  | Kubernetes namespace |
+| `--config`     | Tobs config file (default is $HOME/.tobs.yaml) |
 
 ## Advanced configuration
 

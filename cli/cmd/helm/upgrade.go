@@ -28,7 +28,7 @@ var upgradeCmd = &cobra.Command{
 
 func init() {
 	root.RootCmd.AddCommand(upgradeCmd)
-	addHelmInstallFlags(upgradeCmd)
+	addChartDetailsFlags(upgradeCmd)
 	upgradeCmd.Flags().BoolP("reset-values", "", false, "Reset helm chart to default values of the helm chart. This is same flag that exists in helm upgrade")
 	upgradeCmd.Flags().BoolP("reuse-values", "", false, "Reuse the last release's values and merge in any overrides from the command line via --set and -f. If '--reset-values' is specified, this is ignored.\nThis is same flag that exists in helm upgrade ")
 	upgradeCmd.Flags().BoolP("same-chart", "", false, "Use the same helm chart do not upgrade helm chart but upgrade the existing chart with new values")
@@ -77,11 +77,6 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("couldn't get the same-chart flag value: %w", err)
 	}
 
-	enableBackUp, err := cmd.Flags().GetBool("enable-timescaledb-backup")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-
 	skipCrds, err := cmd.Flags().GetBool("skip-crds")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
@@ -119,7 +114,6 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 				configFile:   file,
 				ref:          ref,
 				dbURI:        "",
-				enableBackUp: enableBackUp,
 			}
 			err = s.installStack()
 			if err != nil {

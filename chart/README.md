@@ -85,7 +85,7 @@ The chart has the following properties in the `values.yaml` file:
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
 | `timescaledb-single.enabled`                        | If false TimescaleDB will not be created              | `true`      |
-| `timescaledb-single.image.tag`                      | Docker image tag to use for TimescaleDB               | `pg12-ts1.7`|
+| `timescaledb-single.image.tag`                      | Docker image tag to use for TimescaleDB               | `pg12-ts2.1-latest`|
 | `timescaledb-single.loadBalancer.enabled`           | Create a LB for the DB instead of a ClusterIP         | `false`     |
 | `timescaledb-single.replicaCount`                   | Number of pods for DB, set to 3 for HA                | `1`         |
 | `timescaledb-single.backup.enabled`                 | TimescaleDB backup option by default set to false     | `false`     |
@@ -113,7 +113,7 @@ promscale.connection.uri.secretTemplate=<release-name>-timescaledb-uri
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
 | `promscale.enabled`                      | If false Promscale Connector will not be created| `true` |
-| `promscale.image`                        | Docker image to use for the Connector                 | `timescale/promscale:0.1.0-alpha.2` |
+| `promscale.image`                        | Docker image to use for the Connector                 | `timescale/promscale:0.4.0` |
 | `promscale.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
 | `promscale.connection.user`              | User used for connection to db | `postgres` |
 | `promscale.connection.dbURI.secretTemplate` | The template for generating the name of a secret object which will hold the db URI | `` |
@@ -130,89 +130,90 @@ But it can be configured to connect to any TimescaleDB host, and expose whicheve
 For more details about how to configure the Promscale connector please see the
 [Helm chart directory][promscale-helm] of the [Promscale][promscale-repo] repo.
 
-## Prometheus related values
+## Kube-Prometheus 
+
+### Prometheus related values
 
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
-| `prometheus.enabled`                                | If false, none of the Prometheus resources will be created | `true` |
-| `prometheus.alertmanager.enabled`                   | If true will create the Prometheus Alert Manager       | `false`    |
-| `prometheus.pushgateway.enabled`                    | If true will create the Prometheus Push Gateway        | `false`    |
-| `prometheus.server.configMapOverrideName`           | The name of the ConfigMap that provides the Prometheus config. Resolves to `{{ .Release.Name }}-{{ .Values.prometheus.server.configMapOverrideName }}` | `prometheus-config` |
-| `prometheus.server.timescaleRemote.host` | Templated hostname of Promscale connector to be used as Long Term Storage | `{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc.cluster.local` |
-| `prometheus.server.timescaleRemote.protocol` | Protocol to use to send the metrics to Promscale | `http` |
-| `prometheus.server.timescaleRemote.port` | Listening Port of Promscale Connector | `9201` |
-| `prometheus.server.timescaleRemote.write.enabled` | If false, Promscale Connector will not be set up as remote_write| `true` |
-| `prometheus.server.timescaleRemote.write.endpoint` | Write endpoint of Promscale. Used to generate url of remote_write as {protocol}://{host}:{port}/{endpoint} | `write` |
-| `prometheus.server.timescaleRemote.write.queue` | remote_write queue config | `{max_shards: 30}`
-| `prometheus.server.timescaleRemote.read.enabled` | If false Promscale Connector will not be set up as remote_read | `true` |
-| `prometheus.server.timescaleRemote.write.endpoint` | Read endpoint of Promscale. Used to generate url of remote_read as {protocol}://{host}:{port}/{endpoint} | `read` |
+| `kube-prometheus-stack.enabled`                     | If false, none of the Kube-Prometheus resources will be created | `true` |
+| `kube-prometheus-stack.alertManager.enabled` | Enable AlertManager  |      `true` |
+| `kube-prometheus-stack.alertManager.config` | AlertManager config, By default the alert manager config is from Kube-Prometheus |      `` |
+| `kube-prometheus-stack.fullnameOverride`            | If false, none of the Kube-Prometheus resources will be created | `true` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.scrapeInterval` | Prometheus scrape interval |      `1m` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.scrapeTimeout` | Prometheus scrape timeout |      `10s` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.evaluationInterval` | Prometheus evaluation interval |    `1m` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.remoteRead` | Prometheus remote read config |  `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/read` and `readRecent: true` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote write config |  `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/write` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage` | Prometheus persistent volume storage |  `8Gi` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.additionalScrapeConfigs` | Prometheus additional scrape config, By default additional scrape config is set scrape all pods, services and endpoint with prometheus annotations  |   |
 
-### Additional configuration for Prometheus
+#### Additional configuration for Prometheus
 
-The Prometheus Community chart is used as a dependency for deploying Prometheus. We specify
-a ConfigMap override where the Promscale Connector is already configured as a `remote_write`
-and `remote_read` endpoint. We create a ConfigMap that is still compatible and respects all the configuration
-properties for the prometheus chart, so no functionality is lost.
+The Kube-Prometheus Community chart is used as a dependency for deploying Prometheus. We specify
+the Promscale Connector as a `remote_write` and `remote_read` endpoint in the `values.yaml` that is still compatible and respects all the configuration
+properties for the kube-prometheus chart, so no functionality is lost.
 
-The Promscale connection is set using the values in `prometheus.server.timescaleRemote`.
-This doesn't change the way the `prometheus.server.remoteWrite` configuration is handled. The configuration
+The Promscale connection is set using the values in `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite`.
+This doesn't change the way the `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` configuration is handled. The configuration
 is separate so we can use templating and set the endpoint properly when deploying Promscale and
 Prometheus in the same release. If you specify more endpoints in `prometheus.server.remoteWrite` (or `remoteRead`)
 They will be added additionally.
 
 For all the properties that can be configured and more details on how to set up the Prometheus
-deployment see the [Prometheus Community Chart Repo][prometheus-helm-hub].
+deployment see the [Kube Prometheus Community Chart Repo][kube-prometheus-helm-hub].
 
 For more information about the `remote_write` configuration that can be set with
-`promscale.remote.queue` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
+`kube-prometheus-stack.prometheus.prometheusSpec.` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
 
-## Grafana related values
+### Grafana related values
 
-| Parameter                                           | Description                                           | Default     |
-|-----------------------------------------------------|-------------------------------------------------------|-------------|
-| `grafana.enabled`                                   | If false, Grafana will not be created                 | `true`      |
-| `grafana.sidecar.datasources.enabled`               | If false, no data sources will be provisioned         | `true`      |
-| `grafana.sidecar.dashboards.enabled`                | If false, no dashboards will be provisioned by default | `true`     |
-| `grafana.sidecar.dashboards.files`                  | Files with dashboard definitions (in JSON) to be provisioned | `['dashboards/k8s-cluster.json','dashboards/k8s-hardware.json']` |
-| `grafana.prometheus.datasource.enabled` | If false, a Prometheus data source will not be provisioned | true |
-| `grafana.prometheus.datasource.url` | Template parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart  | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc.cluster.local` |
-| `grafana.timescale.database.enabled` | If false, TimescaleDB will not be configured as a database, default sqllite will be used | `true` |
-| `grafana.timescale.database.host` | Hostname (templated) of database, defaults to db deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
-| `grafana.timescale.database.user`                     | User to connect to the db with (will be created ) | `grafanadb` |
-| `grafana.timescale.database.pass`                     | Password for the user | `grafanadb` |
-| `grafana.timescale.database.dbName`                   | Database where to store the data | `postgres` |
-| `grafana.timescale.database.schema`                   | Schema to use (will be created) | `grafanadb` |
-| `grafana.timescale.database.sslMode`                  | SSL mode for connection | `require` |
-| `grafana.timescale.datasource.host` | Hostname (templated) of database, defaults to host deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
-| `grafana.timescale.datasource.enabled` |  If false a TimescaleDB data source will not be provisioned | `true` |
-| `grafana.timescale.datasource.user` | User to connect with | `grafana` |
-| `grafana.timescale.datasource.pass` | Pass for user | `grafana` |
-| `grafana.timescale.datasource.dbName` | Database storing the metrics (Should be same with `promscale.connection.dbName`) | `postgres` |
-| `grafana.timescale.datasource.sslMode` | SSL mode for connection | `require` |
-| `grafana.timescale.adminUser`                | Admin user to create the users and schemas with | `postgres` |
-| `grafana.timescale.adminPassSecret`      | Name (templated) of secret containing password for admin user | `"{{ .Release.Name }}-credentials"` |
+| Parameter                                                           | Description                                           | Default     |
+|---------------------------------------------------------------------|-------------------------------------------------------|-------------|
+| `kube-prometheus-stack.grafana.enabled`                             | If false, Grafana will not be created                 | `true`      |
+| `kube-prometheus-stack.grafana.sidecar.datasources.enabled`         | If false, no data sources will be provisioned         | `true`      |
+| `kube-prometheus-stack.grafana.sidecar.dashboards.enabled`          | If false, no dashboards will be provisioned by default | `true`     |
+| `kube-prometheus-stack.grafana.sidecar.dashboards.files`            | Files with dashboard definitions (in JSON) to be provisioned | `['dashboards/k8s-cluster.json','dashboards/k8s-hardware.json']` |
+| `kube-prometheus-stack.grafana.prometheus.datasource.enabled`       | If false, a Prometheus data source will not be provisioned | true |
+| `kube-prometheus-stack.grafana.prometheus.datasource.url`           | Template parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart  | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc.cluster.local` |
+| `kube-prometheus-stack.grafana.timescale.database.enabled`          | If false, TimescaleDB will not be configured as a database, default sqllite will be used | `true` |
+| `kube-prometheus-stack.grafana.timescale.database.host`             | Hostname (templated) of database, defaults to db deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
+| `kube-prometheus-stack.grafana.timescale.database.user`             | User to connect to the db with (will be created ) | `grafanadb` |
+| `kube-prometheus-stack.grafana.timescale.database.pass`             | Password for the user | `grafanadb` |
+| `kube-prometheus-stack.grafana.timescale.database.dbName`           | Database where to store the data | `postgres` |
+| `kube-prometheus-stack.grafana.timescale.database.schema`           | Schema to use (will be created) | `grafanadb` |
+| `kube-prometheus-stack.grafana.timescale.database.sslMode`          | SSL mode for connection | `require` |
+| `kube-prometheus-stack.grafana.timescale.datasource.host`           | Hostname (templated) of database, defaults to host deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc.cluster.local` |
+| `kube-prometheus-stack.grafana.timescale.datasource.enabled`        | If false a TimescaleDB data source will not be provisioned | `true` |
+| `kube-prometheus-stack.grafana.timescale.datasource.user`           | User to connect with | `grafana` |
+| `kube-prometheus-stack.grafana.timescale.datasource.pass`           | Pass for user | `grafana` |
+| `kube-prometheus-stack.grafana.timescale.datasource.dbName`         | Database storing the metrics (Should be same with `promscale.connection.dbName`) | `postgres` |
+| `kube-prometheus-stack.grafana.timescale.datasource.sslMode`        | SSL mode for connection | `require` |
+| `kube-prometheus-stack.grafana.timescale.adminUser`                 | Admin user to create the users and schemas with | `postgres` |
+| `kube-prometheus-stack.grafana.timescale.adminPassSecret`           | Name (templated) of secret containing password for admin user | `"{{ .Release.Name }}-credentials"` |
+| `kube-prometheus-stack.grafana.adminPassword`                       | Grafana admin password, By default generates a random password | `` |
 
-### TimescaleDB user for the Grafana Database
+#### TimescaleDB user for the Grafana Database
 
 This chart is configured to deploy Grafana so that it uses a TimescaleDB/PostgreSQL instance for it's database.
-This is controlled with the `grafana.timescale.database.enabled` value. If enabled it will run a Job that creates
-a user (as specified with `grafana.timescale.database.user`) and a separate schema (`grafana.timescale.database.schema`).
+This is controlled with the `kube-prometheus-stack.grafana.timescale.database.enabled` value. If enabled it will run a Job that creates
+a user (as specified with `kube-prometheus-stack.grafana.timescale.database.user`) and a separate schema (`kube-prometheus-stack.grafana.timescale.database.schema`).
 This user is created as the owner of the schema, and will not have access to any other schemas/tables in the specified
-database (`grafana.timescale.database.dbName`). In order for the user and schema to be created, the `grafana.timescale.adminUser`
-must be set to a db user with the ability to do so (e.g. postgres), and `grafana.timescale.adminPassSecret` must be
+database (`kube-prometheus-stack.grafana.timescale.database.dbName`). In order for the user and schema to be created, the `kube-prometheus-stack.grafana.timescale.adminUser`
+must be set to a db user with the ability to do so (e.g. postgres), and `kube-prometheus-stack.grafana.timescale.adminPassSecret` must be
 the name of a secret that contains the password for this user.
 
-### TimescaleDB user for a provisioned Data Source in Grafana
+#### TimescaleDB user for a provisioned Data Source in Grafana
 
 The chart is configured to provision a TimescaleDB data source. This is controlled with the `grafana.timescale.datasource.enabled`
-If enabled it will run a Job that creates a user (as specified with `grafana.timescale.datasource.user`) and grant read-only
-access to the promscale schemas. In order for the user and schema to be created, the `grafana.timescale.adminUser`
-must be set to a db user with the ability to do so (e.g. postgres), and `grafana.timescale.adminPassSecret` must be
+If enabled it will run a Job that creates a user (as specified with `kube-prometheus-stack.grafana.timescale.datasource.user`) and grant read-only
+access to the promscale schemas. In order for the user and schema to be created, the `kube-prometheus-stack.grafana.timescale.adminUser`
+must be set to a db user with the ability to do so (e.g. postgres), and `kube-prometheus-stack.grafana.timescale.adminPassSecret` must be
 the name of a secret that contains the password for this user.
 
-### Additional configuration for Grafana
+#### Additional configuration for Grafana
 
-The Grafana Community chart is used as a dependency for deploying Grafana. We specify a Secret that
+The Kube-Prometheus Community chart is used as a dependency for deploying Grafana. We specify a Secret that
 sets up the Prometheus Server and TimescaleDB as provisioned data sources (if they are enabled).
 
 To get the initial password for the `admin` user after deployment execute
@@ -236,6 +237,6 @@ For all the properties that can be configured and more details on how to set up 
 [timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 [promscale-repo]: https://github.com/timescale/promscale
 [promscale-helm]: https://github.com/timescale/promscale/tree/master/helm-chart
-[prometheus-helm-hub]: https://prometheus-community.github.io/helm-charts
+[kube-prometheus-helm-hub]: https://prometheus-community.github.io/helm-charts
 [prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
 [grafana-helm-hub]: https://grafana.github.io/helm-charts

@@ -8,13 +8,16 @@ stack into a Kubernetes cluster. Currently this stack includes:
 
 <img src="docs/assets/tobs-arch.png" alt="Tobs Architecture Diagram" width="800"/>
 
- * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
- * [Grafana](https://github.com/grafana/grafana) to visualize what's going on
+ * [Kube-Prometheus](https://github.com/prometheus-operator/kube-prometheus#kube-prometheus) the Kubernetes monitoring stack
+    * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
+    * [AlertManager](https://github.com/prometheus/alertmanager#alertmanager-) to fire the alerts
+    * [Grafana](https://github.com/grafana/grafana) to visualize what's going on
+    * [Node-Exporter](https://github.com/prometheus/node_exporter) to export metrics from the nodes
+    * [Kube-State-Metrics](https://github.com/kubernetes/kube-state-metrics) to get metrics from kubernetes api-server
+    * [Prometheus-Operator](https://github.com/prometheus-operator/prometheus-operator#prometheus-operator) to manage the life-cycle of Prometheus and AlertManager custom resource definitions (CRDs)
  * [Promscale](https://github.com/timescale/promscale) ([design doc][design-doc]) to store metrics for the long-term and allow analysis with both PromQL and SQL.
- * [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL.
- * [Kube-State-Metrics](https://github.com/kubernetes/kube-state-metrics) to get metrics from kubernetes api-server. 
- * [Promlens](https://promlens.com/) tool to build and analyse promql queries with ease. 
- * [Node-Exporter](https://github.com/prometheus/node_exporter) to export metrics from the nodes.
+ * [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL. 
+ * [Promlens](https://promlens.com/) tool to build and analyse promql queries with ease.
  
 We plan to expand this stack over time and welcome contributions.
 

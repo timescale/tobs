@@ -18,7 +18,7 @@ var helmShowValuesCmd = &cobra.Command{
 
 func init() {
 	helmCmd.AddCommand(helmShowValuesCmd)
-	addHelmInstallFlags(helmShowValuesCmd)
+	addChartDetailsFlags(helmShowValuesCmd)
 }
 
 func helmShowValues(cmd *cobra.Command, args []string) error {
