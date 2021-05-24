@@ -15,7 +15,8 @@ var installCmd = &cobra.Command{
 
 func init() {
 	cmd.RootCmd.AddCommand(installCmd)
-	addHelmInstallFlags(installCmd)
+	addChartDetailsFlags(installCmd)
+	addInstallUtilitiesFlags(installCmd)
 }
 
 func install(cmd *cobra.Command, args []string) error {

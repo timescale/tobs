@@ -27,21 +27,27 @@ var helmInstallCmd = &cobra.Command{
 
 func init() {
 	helmCmd.AddCommand(helmInstallCmd)
-	addHelmInstallFlags(helmInstallCmd)
+	addChartDetailsFlags(helmInstallCmd)
+	addInstallUtilitiesFlags(helmInstallCmd)
+
 }
 
-func addHelmInstallFlags(cmd *cobra.Command) {
+func addChartDetailsFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
 	cmd.Flags().StringP("chart-reference", "c", "timescale/tobs", "Helm chart reference")
-	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
-	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Enable TimescaleDB S3 backup")
+}
+
+func addInstallUtilitiesFlags(cmd *cobra.Command) {
+	cmd.Flags().BoolP("only-secrets", "", false, "Option to create only TimescaleDB secrets")
+	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Option to enable TimescaleDB S3 backup")
 	cmd.Flags().StringP("timescaledb-tls-cert", "", "", "Option to provide your own tls certificate for TimescaleDB")
 	cmd.Flags().StringP("timescaledb-tls-key", "", "", "Option to provide your own tls key for TimescaleDB")
-	cmd.Flags().StringP("version", "", "", "Option to provide your tobs helm chart version, if not provided will install the latest tobs chart available")
-	cmd.Flags().BoolP("only-secrets", "", false, "Option to create only TimescaleDB secrets")
+	cmd.Flags().StringP("version", "", "", "Option to provide tobs helm chart version, if not provided will install the latest tobs chart available")
 	cmd.Flags().BoolP("skip-wait", "", false, "Option to do not wait for pods to get into running state (useful for faster tobs installation)")
 	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 3 replicas")
+	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 }
+
 
 type installSpec struct {
 	configFile         string

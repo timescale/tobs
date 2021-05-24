@@ -95,6 +95,7 @@ kube-prometheus-stack:
       ## Prometheus pod storage spec
       storageSpec:
         ## Using PersistentVolumeClaim
+        ## disable mount sub path, use the root directory of pvc
         disableMountSubPath: true
         volumeClaimTemplate:
           spec:
@@ -310,6 +311,8 @@ kube-prometheus-stack:
         enabled: true
         label: tobs_datasource
         labelValue: "true"
+        # Disable Prometheus datasource by default as
+        # Promscale is the default datasource
         defaultDatasourceEnabled: false
       dashboards:
         enabled: true
