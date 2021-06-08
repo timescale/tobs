@@ -21,15 +21,8 @@ func TestUpgrade(t *testing.T) {
 
 	fmt.Println("Successfully upgraded tobs to latest version")
 
-	out := exec.Command("helm", "dep", "up", "./../testdata/chart1/")
+	out := exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart1/", "-f", "./../testdata/chart1/values.yaml", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
 	output, err := out.CombinedOutput()
-	if err != nil {
-		fmt.Println(string(output))
-		t.Fatal(err)
-	}
-
-	out = exec.Command("helm", "dep", "up", "./../testdata/chart2/")
-	output, err = out.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(output))
 		t.Fatal(err)
@@ -37,13 +30,6 @@ func TestUpgrade(t *testing.T) {
 
 	err = test_utils.DeleteWebhooks()
 	if err != nil {
-		t.Fatal(err)
-	}
-
-	out = exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart1/", "-f", "./../testdata/chart1/values.yaml", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
-	output, err = out.CombinedOutput()
-	if err != nil {
-		fmt.Println(string(output))
 		t.Fatal(err)
 	}
 
@@ -92,11 +78,11 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chartDetails, err := utils.GetDeployedChartMetadata(RELEASE_NAME, NAMESPACE)
+	chartDetails, err := utils.GetDeployedChartMetadata(RELEASE_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if chartDetails.Chart != "tobs-0.5.8" {
+	if chartDetails.Chart != "tobs" && chartDetails.Version == "0.5.8" {
 		t.Fatal("failed to verify expected chart version after upgrade", chartDetails.Chart)
 	}
 

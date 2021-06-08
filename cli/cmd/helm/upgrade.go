@@ -3,13 +3,13 @@ package helm
 import (
 	"errors"
 	"fmt"
-	"os/exec"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/utils"
 	batchv1 "k8s.io/api/batch/v1"
@@ -82,18 +82,17 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	cmds := []string{"upgrade", root.HelmReleaseName, ref, "--namespace", root.Namespace}
+	upgradeHelmSpec := &helm.ChartSpec{
+		ReleaseName:      root.HelmReleaseName,
+		ChartName:        ref,
+		Namespace:        root.Namespace,
+		ResetValues:      reset,
+		ReuseValues:      reuse,
+		DependencyUpdate: true,
+	}
 
 	if file != "" {
-		cmds = append(cmds, "--values", file)
-	}
-
-	if reset {
-		cmds = append(cmds, "--reset-values")
-	}
-
-	if reuse {
-		cmds = append(cmds, "--reuse-values")
+		upgradeHelmSpec.ValuesFiles = []string{file}
 	}
 
 	latestChart, err := utils.GetTobsChartMetadata(ref)
@@ -101,7 +100,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName, root.Namespace)
+	deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName)
 	if err != nil {
 		if err.Error() != utils.ErrorTobsDeploymentNotFound().Error() {
 			return err
@@ -111,9 +110,8 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 				utils.ConfirmAction()
 			}
 			s := installSpec{
-				configFile:   file,
-				ref:          ref,
-				dbURI:        "",
+				configFile: file,
+				ref:        ref,
 			}
 			err = s.installStack()
 			if err != nil {
@@ -126,7 +124,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 	// add & update helm chart only if it's default chart
 	// if same-chart upgrade is disabled
 	if ref == utils.DEFAULT_CHART && !sameChart {
-		err = utils.AddUpdateTobsChart(false)
+		err = utils.AddUpdateTobsChart()
 		if err != nil {
 			return fmt.Errorf("failed to add & update tobs helm chart %v", err)
 		}
@@ -144,12 +142,12 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 
 	var foundNewChart bool
 	if lVersion <= dVersion {
-		dValues, err := utils.DeployedValuesYaml(ref, root.HelmReleaseName, root.Namespace)
+		dValues, err := utils.GetValuesYamlFromRelease(root.HelmReleaseName, false)
 		if err != nil {
 			return err
 		}
 
-		nValues, err := utils.NewValuesYaml(ref, file)
+		nValues, err := utils.GetValuesYamlFromChart(ref, file)
 		if err != nil {
 			return err
 		}
@@ -187,10 +185,9 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	out := exec.Command("helm", cmds...)
-	output, err := out.CombinedOutput()
+	_, err = helm.InstallUpgradeChart(upgradeHelmSpec)
 	if err != nil {
-		return fmt.Errorf("failed to upgrade %s: %w", output, err)
+		return fmt.Errorf("failed to upgrade %w", err)
 	}
 
 	fmt.Printf("Successfully upgraded %s to version: %s\n", root.HelmReleaseName, latestChart.Version)
@@ -226,7 +223,7 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 			}
 		}
 
-		prometheusNodeExporter := root.HelmReleaseName+"-prometheus-node-exporter"
+		prometheusNodeExporter := root.HelmReleaseName + "-prometheus-node-exporter"
 		err = k8s.DeleteDaemonset(prometheusNodeExporter, root.Namespace)
 		if err != nil {
 			ok := errors2.IsNotFound(err)

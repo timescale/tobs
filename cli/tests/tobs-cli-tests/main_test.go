@@ -23,12 +23,6 @@ func installObs() {
 
 	log.Println("Installing The Observability Stack")
 
-	out := exec.Command("helm", "dep", "up", PATH_TO_CHART)
-	_, err = out.CombinedOutput()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	obsinstall := exec.Command(PATH_TO_TOBS, "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--enable-prometheus-ha")
 	err = obsinstall.Run()
 	if err != nil {

@@ -2,10 +2,8 @@ package helm
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/spf13/cobra"
+	"github.com/timescale/tobs/cli/pkg/helm"
 )
 
 // helmShowValuesCmd represents the helm show-values command
@@ -29,21 +27,12 @@ func helmShowValues(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	var showvalues *exec.Cmd
-	if DEVEL {
-		showvalues = exec.Command("helm", "show", "values", chart, "--devel")
-	} else {
-		showvalues = exec.Command("helm", "show", "values", chart)
-	}
-	showvalues.Stderr = os.Stderr
-
-	var out []byte
-	out, err = showvalues.Output()
+	res, err := helm.GetValuesFromChart(chart)
 	if err != nil {
-		return fmt.Errorf("could not get Helm values: %w", err)
+		return fmt.Errorf("failed to get helm values: %w", err)
 	}
 
-	fmt.Print(string(out))
+	fmt.Println(string(res))
 
 	return nil
 }

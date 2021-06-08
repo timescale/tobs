@@ -31,14 +31,14 @@ func version(cmd *cobra.Command, args []string) error {
 
 	var chartVersion string
 	if d {
-		deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName, root.Namespace)
+		deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName)
 		if err != nil {
 			chartVersion = fmt.Errorf("failed to get the deployed chart version: %v", err).Error()
 		} else {
 			chartVersion = fmt.Sprintf("deployed tobs helm chart version: %s", deployedChart.Version)
 		}
 	} else {
-		err = utils.AddUpdateTobsChart(false)
+		err = utils.AddUpdateTobsChart()
 		if err != nil {
 			return fmt.Errorf("failed to add and update the tobs helm chart version %v", err)
 		}

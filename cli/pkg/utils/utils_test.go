@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestExportValuesFieldValue(t *testing.T) {
+func TestExportValuesFieldFromChart(t *testing.T) {
 	type args struct {
 		chart string
 		keys  []string
@@ -52,7 +52,7 @@ func TestExportValuesFieldValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ExportValuesFieldFromChart(tt.args.chart, tt.args.keys)
+			got, err := ExportValuesFieldFromChart(tt.args.chart, "", tt.args.keys)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ExportValuesFieldValue() error = %v, wantErr %v", err, tt.wantErr)
 				return

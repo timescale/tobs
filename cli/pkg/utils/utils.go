@@ -1,60 +1,26 @@
 package utils
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"sigs.k8s.io/yaml"
 )
 
 const (
-	REPO_LOCATION     = "https://charts.timescale.com"
-	DEFAULT_CHART     = "timescale/tobs"
-	UpgradeJob_040    = "tobs-prometheus-permission-change"
-	PrometheusPVCName = "prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"
-	Version_040       = "0.4.0"
-	helmCmd           = "helm"
+	REPO_LOCATION         = "https://charts.timescale.com"
+	DEFAULT_CHART         = "timescale/tobs"
+	DEFAULT_REGISTRY_NAME = "timescale"
+	UpgradeJob_040        = "tobs-prometheus-permission-change"
+	PrometheusPVCName     = "prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0"
+	Version_040           = "0.4.0"
 )
-
-func addTobsHelmChart(printOutput bool) error {
-	addchart := exec.Command("helm", "repo", "add", "timescale", REPO_LOCATION)
-	if printOutput {
-		w := io.Writer(os.Stdout)
-		addchart.Stdout = w
-		addchart.Stderr = w
-		fmt.Println("Adding Timescale Helm Repository")
-	}
-	err := addchart.Run()
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-	return err
-}
-
-func updateTobsHelmChart(printOut bool) error {
-	update := exec.Command("helm", "repo", "update")
-	if printOut {
-		w := io.Writer(os.Stdout)
-		update.Stdout = w
-		update.Stderr = w
-		fmt.Println("Fetching updates from repository")
-	}
-	err := update.Run()
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-	return err
-}
 
 type ChartMetadata struct {
 	APIVersion   string `yaml:"apiVersion"`
@@ -84,9 +50,9 @@ type DeployedChartMetadata struct {
 
 func GetTobsChartMetadata(chart string) (*ChartMetadata, error) {
 	chartDetails := &ChartMetadata{}
-	res, err := runCmdReturnOutput(helmCmd, []string{"inspect", "chart", chart})
+	res, err := helm.InspectChartYaml(chart)
 	if err != nil {
-		return chartDetails, fmt.Errorf("failed to search helm chart %s %w", chart, err)
+		return chartDetails, fmt.Errorf("failed to inspect chart %w", err)
 	}
 
 	err = yaml.Unmarshal(res, chartDetails)
@@ -97,43 +63,32 @@ func GetTobsChartMetadata(chart string) (*ChartMetadata, error) {
 	return chartDetails, nil
 }
 
-func GetDeployedChartMetadata(releaseName, namespace string) (*DeployedChartMetadata, error) {
-	res, err := runCmdReturnOutput(helmCmd, []string{"list", "--namespace", namespace, "-o", "json"})
+func GetDeployedChartMetadata(releaseName string) (*DeployedChartMetadata, error) {
+	var charts []DeployedChartMetadata
+	l, err := helm.ListReleases()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list helm releases %w", err)
+		return nil, err
 	}
-	charts := &[]DeployedChartMetadata{}
-	err = json.Unmarshal(res, charts)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal deployed helm chart metadata %w", err)
+	for _, k := range l {
+		d := DeployedChartMetadata{
+			Name:       k.Name,
+			Namespace:  k.Namespace,
+			Updated:    k.Info.LastDeployed.String(),
+			Status:     k.Info.Status.String(),
+			Chart:      k.Chart.Name(),
+			AppVersion: k.Chart.Metadata.AppVersion,
+			Version:    k.Chart.Metadata.Version,
+		}
+		charts = append(charts, d)
 	}
-	for _, c := range *charts {
+
+	for _, c := range charts {
 		if c.Name == releaseName {
-			v := strings.Split(c.Chart, "-")
-			if  len(v) > 1 {
-				c.Version = v[1]
-			}
 			return &c, nil
 		}
 	}
 
 	return nil, ErrorTobsDeploymentNotFound()
-}
-
-func runCmdReturnOutput(cmd string, args []string) ([]byte, error) {
-	out := exec.Command(cmd, args...)
-	var stdout, stderr bytes.Buffer
-	out.Stdout = &stdout
-	out.Stderr = &stderr
-	err := out.Run()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run cmd: %s with args: %v %w", cmd, args, err)
-	}
-	// if there are any warnings log them
-	if stderr.Len() != 0 {
-		fmt.Println(stderr.String())
-	}
-	return stdout.Bytes(), err
 }
 
 func ErrorTobsDeploymentNotFound() error {
@@ -155,23 +110,15 @@ func ParseVersion(s string, width int) (int64, error) {
 	return result, nil
 }
 
-func DeployedValuesYaml(chart, releaseName, namespace string) (interface{}, error) {
-	k, err := runCmdReturnOutput(helmCmd, []string{"get", "values", releaseName, "--namespace", namespace, "-o", "yaml"})
+func GetValuesYamlFromRelease(releaseName string, allValues bool) (interface{}, error) {
+	res, err := helm.GetValuesFromRelease(releaseName, allValues)
 	if err != nil {
-		return nil, fmt.Errorf("failed to do helm get values on the helm release %w", err)
+		return nil, fmt.Errorf("failed to do helm get values from the helm release %w", err)
 	}
-
-	var i interface{}
-	err = yaml.Unmarshal(k, &i)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal existing values.yaml file %w", err)
-	}
-
-	values := ConvertMapI2MapS(i)
-	return values, nil
+	return res, nil
 }
 
-func NewValuesYaml(chart, file string) (interface{}, error) {
+func GetValuesYamlFromChart(chart, file string) (interface{}, error) {
 	var res []byte
 	var err error
 	if file != "" {
@@ -180,9 +127,9 @@ func NewValuesYaml(chart, file string) (interface{}, error) {
 			return nil, fmt.Errorf("unable to read values from provided file %w", err)
 		}
 	} else {
-		res, err = runCmdReturnOutput(helmCmd, []string{"show", "values", chart})
+		res, err = helm.GetValuesFromChart(chart)
 		if err != nil {
-			return nil, fmt.Errorf("failed to do helm show values on the helm chart %w", err)
+			return nil, err
 		}
 	}
 
@@ -275,73 +222,41 @@ func GetTimescaleDBURI(namespace, name string) (string, error) {
 	return "", nil
 }
 
-func ExportValuesFieldFromChart(chart string, keys []string) (interface{}, error) {
-	res, err := runCmdReturnOutput(helmCmd, []string{"show", "values", chart})
+func ExportValuesFieldFromChart(chart string, customValuesFile string, keys []string) (interface{}, error) {
+	res, err := GetValuesYamlFromChart(chart, customValuesFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to do helm show values on the helm chart %w", err)
 	}
-
-	r, err := findKeysFromYaml(res, keys)
-	if err != nil {
-		return nil, err
-	}
-
-	return r, nil
+	return FetchValue(res, keys)
 }
 
-func ExportValuesFieldFromRelease(releaseName, namespace string, keys []string) (interface{}, error) {
-	res, err := runCmdReturnOutput(helmCmd, []string{"get", "values", releaseName, "-a", "--namespace", namespace})
+func ExportValuesFieldFromRelease(releaseName string, keys []string, allValues bool) (interface{}, error) {
+	res, err := GetValuesYamlFromRelease(releaseName, allValues)
 	if err != nil {
 		return nil, fmt.Errorf("failed to do helm get values from the helm release %w", err)
 	}
-
-	r, err := findKeysFromYaml(res, keys)
-	if err != nil {
-		return nil, err
-	}
-
-	return r, nil
+	return FetchValue(res, keys)
 }
 
-func findKeysFromYaml(res []byte, keys []string) (interface{}, error) {
-	jsonBytes, err := yaml.YAMLToJSON(res)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse helm show values from yaml to json %w", err)
+// Fetches the value from provided keys
+func FetchValue(f interface{}, keys []string) (interface{}, error) {
+	if keys == nil {
+		return nil, nil
 	}
 
-	// Unmarshal using a generic interface
-	var f interface{}
-	err = json.Unmarshal(jsonBytes, &f)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse values.yaml to json bytes %v", err)
-	}
-
-	var r interface{}
-	if len(keys) > 0 {
-		r = fetchValue(f, keys)
-		if r == nil {
-			return nil, fmt.Errorf("failed to find the value from the keys in values.yaml %v", keys)
-		}
-	}
-
-	return r, nil
-}
-
-func fetchValue(f interface{}, keys []string) interface{} {
-	// JSON object parses into a map with string keys
 	itemsMap := f.(map[string]interface{})
 	for k, v := range itemsMap {
-		if k == keys[0] {
+		if keys != nil && k == keys[0] {
 			if len(keys[1:]) == 0 {
-				return v
+				return v, nil
 			}
-			v1 := fetchValue(v, keys[1:])
+			v1, _ := FetchValue(v, keys[1:])
 			if v1 != nil {
-				return v1
+				return v1, nil
 			}
 		}
 	}
-	return nil
+	return nil, fmt.Errorf("failed to find the value from the keys in values.yaml %v", keys)
 }
 
 func GetDBPassword(secretKey, name, namespace string) ([]byte, error) {
@@ -364,11 +279,6 @@ func GetTimescaleDBsecretLabels() map[string]string {
 	}
 }
 
-func AddUpdateTobsChart(printOut bool) error {
-	err := addTobsHelmChart(printOut)
-	if err != nil {
-		return err
-	}
-
-	return updateTobsHelmChart(printOut)
+func AddUpdateTobsChart() error {
+	return helm.AddUpdateChart(DEFAULT_REGISTRY_NAME, REPO_LOCATION)
 }

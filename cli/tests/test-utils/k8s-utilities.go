@@ -150,11 +150,7 @@ func CreateTimescaleDBNodePortService(namespace string) (string, error) {
 
 func GetTSDBBackUpSecret(releaseName, namespace string) (*v1.Secret, error) {
 	client, _ := kubeInit()
-	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), releaseName+"-pgbackrest", metav1.GetOptions{})
-	if err != nil {
-		return &v1.Secret{}, err
-	}
-	return secret, nil
+	return client.CoreV1().Secrets(namespace).Get(context.Background(), releaseName+"-pgbackrest", metav1.GetOptions{})
 }
 
 func DeleteNamespace(namespace string) error {
