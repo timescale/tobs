@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/timescale/tobs/cli/pkg/utils"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
@@ -92,11 +92,13 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chartDetails, err := utils.GetDeployedChartMetadata(RELEASE_NAME, NAMESPACE)
+	helmClient = helm.NewClient(NAMESPACE)
+	defer helmClient.Close()
+	chartDetails, err := helmClient.GetDeployedChartMetadata(RELEASE_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if chartDetails.Chart != "tobs-0.5.8" {
+	if chartDetails.Chart != "tobs" && chartDetails.Version == "0.5.8" {
 		t.Fatal("failed to verify expected chart version after upgrade", chartDetails.Chart)
 	}
 
