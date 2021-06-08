@@ -50,13 +50,14 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
-	secretKey, user, err := common.GetDBSecretKeyAndDBUser(root.HelmReleaseName, root.Namespace, user)
+	dbDetails, err := common.FormDBDetails(user, dbname)
 	if err != nil {
 		return fmt.Errorf("could not get DB secret key from helm release: %w", err)
 	}
 
+	user = dbDetails.User
 	var pass string
-	if bytepass, exists := secret.Data[secretKey]; exists {
+	if bytepass, exists := secret.Data[dbDetails.SecretKey]; exists {
 		pass = string(bytepass)
 	} else {
 		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))

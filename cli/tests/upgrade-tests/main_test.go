@@ -8,14 +8,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/helm"
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-var PATH_TO_TOBS = "./../../bin/tobs"
-var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
-var NAMESPACE = "ns"
-var RELEASE_NAME = "gg"
+var (
+	PATH_TO_TOBS        = "./../../bin/tobs"
+	PATH_TO_CHART       = "./../../../chart/"
+	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+	NAMESPACE           = "ns"
+	RELEASE_NAME        = "gg"
+	helmClient          helm.Client
+)
 
 const upgradeFromVersion = "0.2.2"
 

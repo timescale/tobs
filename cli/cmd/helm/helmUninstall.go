@@ -1,16 +1,13 @@
 package helm
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"os"
-	"os/exec"
 	"time"
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
@@ -39,12 +36,16 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
 
-	var stdbuf bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdbuf)
-
-	e, err := utils.ExportValuesFieldFromRelease(root.HelmReleaseName, root.Namespace, TimescaleDBBackUpKeyForValuesYaml)
+	helmClient := helm.NewClient(root.Namespace)
+	defer helmClient.Close()
+	r, err := helmClient.GetAllReleaseValues(root.HelmReleaseName)
 	if err != nil {
 		return err
+	}
+
+	e, err := helm.FetchValue(r, TimescaleDBBackUpKeyForValuesYaml)
+	if err != nil {
+		return fmt.Errorf("failed to get timescaledb backup field value from values.yaml: %w", err)
 	}
 
 	enableBackUp, ok := e.(bool)
@@ -52,25 +53,22 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("enable Backup was not a bool")
 	}
 
-	var uninstall *exec.Cmd
-	helmArgs := []string{"uninstall", root.HelmReleaseName}
-	if root.Namespace != "default" {
-		helmArgs = append(helmArgs, "--namespace", root.Namespace)
-	}
-	uninstall = exec.Command("helm", helmArgs...)
-
-	uninstall.Stdout = mw
-	uninstall.Stderr = mw
 	fmt.Println("Uninstalling The Observability Stack")
 
 	// If chart is upgraded to 0.4.0 & performing uninstall
 	// we should manually delete the 0.4.0 upgrade job
-	err = delete040UpgradeJob()
+	err = delete040UpgradeJob(helmClient)
 	if err != nil {
 		return err
 	}
 
-	err = uninstall.Run()
+	spec := &helm.ChartSpec{
+		ReleaseName: root.HelmReleaseName,
+		Namespace:   root.Namespace,
+	}
+
+	helmClient = helm.NewClient(root.Namespace)
+	err = helmClient.UninstallRelease(spec)
 	if err != nil {
 		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
@@ -130,8 +128,8 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func delete040UpgradeJob() error {
-	deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName, root.Namespace)
+func delete040UpgradeJob(helmClient helm.Client) error {
+	deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

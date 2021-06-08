@@ -19,6 +19,9 @@ ha-tests:
 install-tests:
 		./tests/install-tests.sh
 
+helm-tests:
+		./tests/helm-tests.sh
+
 go-vet:
 		go vet ./...
 

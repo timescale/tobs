@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/pgconn"
-	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
 const (
@@ -22,7 +22,9 @@ const (
 )
 
 func FormDBDetails(user, dbName string) (pgconn.DBDetails, error) {
-	secretKey, user, err := GetDBSecretKeyAndDBUser(cmd.HelmReleaseName, cmd.Namespace, user)
+	helmClient := helm.NewClient(cmd.Namespace)
+	defer helmClient.Close()
+	secretKey, user, err := getDBSecretKeyAndDBUser(helmClient, cmd.HelmReleaseName, user)
 	if err != nil {
 		return pgconn.DBDetails{}, fmt.Errorf("could not get DB secret key from helm release: %w", err)
 	}
@@ -39,9 +41,9 @@ func FormDBDetails(user, dbName string) (pgconn.DBDetails, error) {
 	return d, nil
 }
 
-func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, string, error) {
+func getDBSecretKeyAndDBUser(client helm.Client, releaseName, dbUser string) (string, string, error) {
 	var userName string
-	e, err := utils.ExportValuesFieldFromRelease(releaseName, namespace, []string{"timescaledb-single", "enabled"})
+	e, err := client.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "enabled"})
 	if err != nil {
 		return "", "", err
 	}
@@ -51,7 +53,7 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 	}
 
 	if !enableTimescaleDB {
-		dbURI, err := utils.ExportValuesFieldFromRelease(releaseName, namespace, []string{"timescaledbExternal", "db_uri"})
+		dbURI, err := client.ExportValuesFieldFromRelease(releaseName, []string{"timescaledbExternal", "db_uri"})
 		if err != nil {
 			return "", "", err
 		}
@@ -64,7 +66,7 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 		return "PATRONI_SUPERUSER_PASSWORD", userName, nil
 	}
 
-	data, err := utils.ExportValuesFieldFromRelease(releaseName, namespace, []string{"timescaledb-single", "patroni", "postgresql", "authentication", "superuser", "username"})
+	data, err := client.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "patroni", "postgresql", "authentication", "superuser", "username"})
 	if err != nil {
 		return "", "", err
 	}

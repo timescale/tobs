@@ -1,13 +1,14 @@
 package helm
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
-	"os/exec"
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/timescale/tobs/cli/cmd"
+	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
@@ -47,7 +48,6 @@ func addInstallUtilitiesFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 3 replicas")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 }
-
 
 type installSpec struct {
 	configFile         string
@@ -134,10 +134,11 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 
 func (c *installSpec) installStack() error {
 	var err error
-	helmValues := "cli=true"
+	helmValues := `
+cli: true`
 
 	if c.dbURI != "" {
-		helmValues = appendDBURIValues(c.dbURI, cmd.HelmReleaseName, helmValues)
+		helmValues = appendDBURIValues(c.dbURI, root.HelmReleaseName, helmValues)
 	} else {
 		// if db-uri is provided we do not need
 		// to create DB level secrets
@@ -152,21 +153,39 @@ func (c *installSpec) installStack() error {
 		}
 	}
 
+	helmValuesSpec := helm.ChartSpec{
+		ReleaseName:      root.HelmReleaseName,
+		ChartName:        c.ref,
+		Namespace:        root.Namespace,
+		// by default prior to helm install
+		// we create namespace using kubeClient to
+		// create TimescaleDB secrets prior to the
+		// actual installation, the below CreateNamespace
+		// option is useful for backward compatibility
+		// i.e. if a user wants to install tobs helm chart < 0.3.0
+		// this option creates the namespace.
+		CreateNamespace:  true,
+	}
+
+	helmClient := helm.NewClient(root.Namespace)
+	defer helmClient.Close()
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
 	if c.ref == utils.DEFAULT_CHART {
-		err = utils.AddUpdateTobsChart(true)
+		err = helmClient.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
 		if err != nil {
 			return fmt.Errorf("failed to add & update tobs helm chart: %w", err)
 		}
 	}
 
-	cmds := []string{"install", cmd.HelmReleaseName, c.ref}
+	if c.configFile != "" {
+		helmValuesSpec.ValuesFiles = []string{c.configFile}
+	}
 
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
 	if !c.enableBackUp {
-		e, err := utils.ExportValuesFieldFromChart(c.ref, TimescaleDBBackUpKeyForValuesYaml)
+		e, err := helmClient.ExportValuesFieldFromChart(c.ref, c.configFile, TimescaleDBBackUpKeyForValuesYaml)
 		if err != nil {
 			return err
 		}
@@ -177,74 +196,90 @@ func (c *installSpec) installStack() error {
 		}
 	} else {
 		// update timescaleDB backup in values.yaml
-		helmValues = helmValues + ",timescaledb-single.backup.enabled=true"
+		helmValues = helmValues + `
+timescaledb-single:
+  backup:
+    enabled: true`
 	}
 
 	if c.enablePrometheusHA {
 		helmValues = appendPrometheusHAValues(helmValues)
 	}
 
-	if cmd.Namespace != "default" {
-		cmds = append(cmds, "--create-namespace", "--namespace", cmd.Namespace)
-	}
 	if c.version != "" {
-		cmds = append(cmds, "--version", c.version)
-	}
-	if c.configFile != "" {
-		cmds = append(cmds, "--values", c.configFile)
-	}
-	if DEVEL {
-		cmds = append(cmds, "--devel")
+		helmValuesSpec.Version = c.version
 	}
 
-	cmds = append(cmds, "--set", helmValues)
-	install := exec.Command("helm", cmds...)
+	helmValuesSpec.ValuesYaml = helmValues
+
 	fmt.Println("Installing The Observability Stack")
-	out, err := install.CombinedOutput()
+	release, err := helmClient.InstallOrUpgradeChart(context.Background(), &helmValuesSpec)
 	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w \nOutput: %v", err, string(out))
-	}
-
-	if c.skipWait {
-		fmt.Println("skipping the wait for pods to come to a running state because --skip-wait is enabled.")
-		fmt.Println("The Observability Stack has been installed successfully")
-		return nil
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
 	fmt.Println("Waiting for helm install to complete...")
 
 	time.Sleep(10 * time.Second)
 
-	fmt.Println("Waiting for pods to initialize...")
-	pods, err := k8s.KubeGetAllPods(cmd.Namespace, cmd.HelmReleaseName)
-	if err != nil {
-		return err
-	}
-
-	for _, pod := range pods {
-		err = k8s.KubeWaitOnPod(cmd.Namespace, pod.Name)
+	if !c.skipWait {
+		fmt.Println("Waiting for pods to initialize...")
+		pods, err := k8s.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
 		if err != nil {
 			return err
 		}
+
+		for _, pod := range pods {
+			err = k8s.KubeWaitOnPod(root.Namespace, pod.Name)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		fmt.Println("skipping the wait for pods to come to a running state because --skip-wait is enabled.")
 	}
 
 	fmt.Println("The Observability Stack has been installed successfully")
-	fmt.Println(string(out))
+	fmt.Println(release.Info.Notes)
 	return nil
 }
 
 func appendDBURIValues(dbURI, name string, helmValues string) string {
-	helmValues = helmValues + ",timescaledb-single.enabled=false," + "timescaledbExternal.enabled=true," + "timescaledbExternal.db_uri=" + dbURI +
-		",promscale.connection.uri.secretTemplate=" + name + "-timescaledb-uri"
+	helmValues = helmValues + fmt.Sprintf(`
+timescaledb-single:
+  enabled: false
+timescaledbExternal:
+  enabled: true
+  db_uri: %s
+promscale:
+  connection:
+    uri: 
+      secretTemplate: %s-timescaledb-uri`, dbURI, name)
 	return helmValues
 }
 
 func appendPrometheusHAValues(helmValues string) string {
-	helmValues = helmValues + ",timescaledb-single.patroni.bootstrap.dcs.postgresql.parameters.max_connections=400," +
-		"promscale.replicaCount=3," + "promscale.args={--high-availability}," +
-		"kube-prometheus-stack.prometheus.prometheusSpec.replicaExternalLabelName=__replica__," +
-		"kube-prometheus-stack.prometheus.prometheusSpec.prometheusExternalLabelName=cluster," +
-		"kube-prometheus-stack.prometheus.prometheusSpec.replicas=3"
+	helmValues = helmValues + `
+timescaledb-single:
+  patroni:
+    bootstrap:
+      dcs:
+        postgresql:
+          parameters:
+            max_connections: 400
+
+promscale:
+  replicaCount: 3
+  args:
+  - --high-availability
+
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      replicas: 3
+      prometheusExternalLabelName: cluster
+      replicaExternalLabelName: __replica__
+`
 	return helmValues
 }
 
@@ -264,13 +299,12 @@ func (c *installSpec) createSecrets() error {
 	// installations needs secrets
 	if i > 3000 || c.version == "" {
 		t := timescaledb_secrets.TSDBSecretsInfo{
-			ReleaseName:    cmd.HelmReleaseName,
-			Namespace:      cmd.Namespace,
+			ReleaseName:    root.HelmReleaseName,
+			Namespace:      root.Namespace,
 			EnableS3Backup: c.enableBackUp,
 			TlsCert:        c.tsDBTlsCert,
 			TlsKey:         c.tsDBTlsKey,
 		}
-
 		err := t.CreateTimescaleDBSecrets()
 		if err != nil {
 			return err
