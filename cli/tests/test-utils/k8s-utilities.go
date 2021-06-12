@@ -171,3 +171,18 @@ func DeletePod(pod, namespace string) error {
 	gracePeriod := int64(0)
 	return client.CoreV1().Pods(namespace).Delete(context.Background(), pod, metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod})
 }
+
+func DeleteWebhooks() error {
+	client, _ := kubeInit()
+	err := client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Delete(context.Background(), "tobs-kube-prometheus-admission", metav1.DeleteOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to delete validatingwebhook %v", err)
+	}
+
+	err = client.AdmissionregistrationV1().MutatingWebhookConfigurations().Delete(context.Background(), "tobs-kube-prometheus-admission", metav1.DeleteOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to delete mutatingwebhook %v", err)
+	}
+
+	return nil
+}
