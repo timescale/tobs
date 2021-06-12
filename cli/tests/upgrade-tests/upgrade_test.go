@@ -35,6 +35,11 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	err = test_utils.DeleteWebhooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	out = exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart1/", "-f", "./../testdata/chart1/values.yaml", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
 	output, err = out.CombinedOutput()
 	if err != nil {
@@ -75,6 +80,11 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	err = test_utils.DeleteWebhooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	out = exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart2/", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
 	output, err = out.CombinedOutput()
 	if err != nil {
@@ -88,6 +98,11 @@ func TestUpgrade(t *testing.T) {
 	}
 	if chartDetails.Chart != "tobs-0.5.8" {
 		t.Fatal("failed to verify expected chart version after upgrade", chartDetails.Chart)
+	}
+
+	err = test_utils.DeleteWebhooks()
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	out = exec.Command(PATH_TO_TOBS, "upgrade", "-f", "./../testdata/f4.yaml", "-c", "./../testdata/chart2/", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
