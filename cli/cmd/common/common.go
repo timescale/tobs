@@ -41,7 +41,7 @@ func FormDBDetails(user, dbName string) (pgconn.DBDetails, error) {
 
 func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, string, error) {
 	var userName string
-	e, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "enabled"}, true)
+	e, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "enabled"})
 	if err != nil {
 		return "", "", err
 	}
@@ -51,7 +51,7 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 	}
 
 	if !enableTimescaleDB {
-		dbURI, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledbExternal", "db_uri"}, true)
+		dbURI, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledbExternal", "db_uri"})
 		if err != nil {
 			return "", "", err
 		}
@@ -64,7 +64,7 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 		return "PATRONI_SUPERUSER_PASSWORD", userName, nil
 	}
 
-	data, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "patroni", "postgresql", "authentication", "superuser", "username"}, true)
+	data, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "patroni", "postgresql", "authentication", "superuser", "username"})
 	if err != nil {
 		return "", "", err
 	}

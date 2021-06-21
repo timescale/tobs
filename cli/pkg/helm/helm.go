@@ -45,7 +45,7 @@ func InstallUpgradeChart(chartSpec *ChartSpec) (*release.Release, error) {
 	return release, nil
 }
 
-func UnInstallChart(chartSpec *ChartSpec) error {
+func UninstallChart(chartSpec *ChartSpec) error {
 	c := getClient()
 	if err := c.UninstallRelease(chartSpec); err != nil {
 		return fmt.Errorf("failed to uninstall chart %w", err)
@@ -58,9 +58,18 @@ func ListReleases() ([]*release.Release, error) {
 	return c.ListDeployedReleases()
 }
 
-func GetValuesFromRelease(releaseName string, allValues bool) (map[string]interface{}, error) {
+func GetAllValuesFromRelease(releaseName string) (map[string]interface{}, error) {
 	c := getClient()
-	values, err := c.GetReleaseValues(releaseName, allValues)
+	values, err := c.GetAllReleaseValues(releaseName)
+	if err != nil {
+		return values, fmt.Errorf("failed to get the values from the release %w", err)
+	}
+	return values, err
+}
+
+func GetValuesFromRelease(releaseName string) (map[string]interface{}, error) {
+	c := getClient()
+	values, err := c.GetReleaseValues(releaseName)
 	if err != nil {
 		return values, fmt.Errorf("failed to get the values from the release %w", err)
 	}

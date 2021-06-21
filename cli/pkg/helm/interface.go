@@ -14,7 +14,8 @@ type Client interface {
 	UpdateChartRepos() error
 	InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error)
 	ListDeployedReleases() ([]*release.Release, error)
-	GetReleaseValues(name string, allValues bool) (map[string]interface{}, error)
+	GetAllReleaseValues(name string) (map[string]interface{}, error)
+	GetReleaseValues(name string) (map[string]interface{}, error)
 	GetChartValues(name string) ([]byte, error)
 	InspectChartYaml(name string) ([]byte, error)
 	UninstallRelease(spec *ChartSpec) error

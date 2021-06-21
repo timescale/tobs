@@ -142,7 +142,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 
 	var foundNewChart bool
 	if lVersion <= dVersion {
-		dValues, err := utils.GetValuesYamlFromRelease(root.HelmReleaseName, false)
+		dValues, err := utils.GetValuesYamlFromRelease(root.HelmReleaseName)
 		if err != nil {
 			return err
 		}

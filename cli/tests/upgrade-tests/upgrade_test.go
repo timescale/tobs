@@ -21,15 +21,15 @@ func TestUpgrade(t *testing.T) {
 
 	fmt.Println("Successfully upgraded tobs to latest version")
 
+	err := test_utils.DeleteWebhooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	out := exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart1/", "-f", "./../testdata/chart1/values.yaml", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
 	output, err := out.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(output))
-		t.Fatal(err)
-	}
-
-	err = test_utils.DeleteWebhooks()
-	if err != nil {
 		t.Fatal(err)
 	}
 

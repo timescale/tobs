@@ -110,8 +110,16 @@ func ParseVersion(s string, width int) (int64, error) {
 	return result, nil
 }
 
-func GetValuesYamlFromRelease(releaseName string, allValues bool) (interface{}, error) {
-	res, err := helm.GetValuesFromRelease(releaseName, allValues)
+func GetAllValuesYamlFromRelease(releaseName string) (interface{}, error) {
+	res, err := helm.GetAllValuesFromRelease(releaseName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to do helm get values from the helm release %w", err)
+	}
+	return res, nil
+}
+
+func GetValuesYamlFromRelease(releaseName string) (interface{}, error) {
+	res, err := helm.GetValuesFromRelease(releaseName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to do helm get values from the helm release %w", err)
 	}
@@ -230,8 +238,8 @@ func ExportValuesFieldFromChart(chart string, customValuesFile string, keys []st
 	return FetchValue(res, keys)
 }
 
-func ExportValuesFieldFromRelease(releaseName string, keys []string, allValues bool) (interface{}, error) {
-	res, err := GetValuesYamlFromRelease(releaseName, allValues)
+func ExportValuesFieldFromRelease(releaseName string, keys []string) (interface{}, error) {
+	res, err := GetAllValuesYamlFromRelease(releaseName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to do helm get values from the helm release %w", err)
 	}

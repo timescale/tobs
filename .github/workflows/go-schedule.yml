@@ -56,6 +56,11 @@ jobs:
         with:
           version: "v0.7.0"
 
+      - name: Helm-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make helm-tests
+
       - name: E2E-Tests
         working-directory: ${{env.working-directory}}
         run: |

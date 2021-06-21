@@ -36,7 +36,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
 
-	r, err := helm.GetValuesFromRelease(root.HelmReleaseName, true)
+	r, err := helm.GetAllValuesFromRelease(root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		Namespace:   root.Namespace,
 	}
 
-	err = helm.UnInstallChart(spec)
+	err = helm.UninstallChart(spec)
 	if err != nil {
 		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}

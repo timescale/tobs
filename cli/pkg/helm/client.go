@@ -46,9 +46,9 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 		return nil, err
 	}
 
-	debugLog := options.DebugLog
-	if debugLog == nil {
-		debugLog = func(_ string, _ ...interface{}) {}
+	debugLog := func(_ string, _ ...interface{}) {}
+	if options.DebugLog != nil {
+		debugLog = options.DebugLog
 	}
 
 	actionConfig := new(action.Configuration)
@@ -90,8 +90,6 @@ func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
 
 	return nil
 }
-
-var helmClient *HelmClient
 
 // AddOrUpdateChartRepo adds or updates the provided helm chart repository
 func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
@@ -162,9 +160,14 @@ func (c *HelmClient) ListDeployedReleases() ([]*release.Release, error) {
 	return c.listDeployedReleases()
 }
 
-// GetReleaseValues returns the (optionally, all computed) values for the specified release.
-func (c *HelmClient) GetReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
-	return c.getReleaseValues(name, allValues)
+// GetReleaseValues returns the all computed values for the specified release.
+func (c *HelmClient) GetAllReleaseValues(name string) (map[string]interface{}, error) {
+	return c.getAllReleaseValues(name)
+}
+
+// GetReleaseValues returns the values for the specified release.
+func (c *HelmClient) GetReleaseValues(name string) (map[string]interface{}, error) {
+	return c.getReleaseValues(name)
 }
 
 // GetChartValues returns the values from chart.
@@ -251,7 +254,9 @@ type updateDeps struct {
 func (c *HelmClient) updateDependencies(details *updateDeps) error {
 	if req := details.helmChart.Metadata.Dependencies; req != nil {
 		if err := action.CheckDependencies(details.helmChart, req); err != nil {
-			if details.spec.DependencyUpdate {
+			if !details.spec.DependencyUpdate {
+				return err
+			} else {
 				man := &downloader.Manager{
 					ChartPath:        *details.chartPath,
 					Keyring:          details.chartPathOptions.Keyring,
@@ -270,8 +275,6 @@ func (c *HelmClient) updateDependencies(details *updateDeps) error {
 				if err != nil {
 					return err
 				}
-			} else {
-				return err
 			}
 		}
 	}
@@ -457,9 +460,10 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
 	histClient := action.NewHistory(c.ActionConfig)
 	histClient.Max = 1
-	if _, err := histClient.Run(release); err == driver.ErrReleaseNotFound {
-		return false, nil
-	} else if err != nil {
+	if _, err := histClient.Run(release); err != nil {
+		if err == driver.ErrReleaseNotFound {
+			err = nil
+		}
 		return false, err
 	}
 
@@ -476,9 +480,14 @@ func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
 	return listClient.Run()
 }
 
-func (c *HelmClient) getReleaseValues(name string, allValues bool) (map[string]interface{}, error) {
+func (c *HelmClient) getAllReleaseValues(name string) (map[string]interface{}, error) {
 	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
-	getReleaseValuesClient.AllValues = allValues
+	getReleaseValuesClient.AllValues = true
+	return getReleaseValuesClient.Run(name)
+}
+
+func (c *HelmClient) getReleaseValues(name string) (map[string]interface{}, error) {
+	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
 	return getReleaseValuesClient.Run(name)
 }
 
