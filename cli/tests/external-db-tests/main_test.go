@@ -2,6 +2,7 @@ package external_db_tests
 
 import (
 	"fmt"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 	"log"
 	"os"
 	"os/exec"
@@ -13,11 +14,14 @@ import (
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-var RELEASE_NAME = "tobs"
-var NAMESPACE = "default"
-var PATH_TO_TOBS = "./../../bin/tobs"
-var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+var (
+	RELEASE_NAME        = "tobs"
+	NAMESPACE           = "default"
+	PATH_TO_TOBS        = "./../../bin/tobs"
+	PATH_TO_CHART       = "./../../../chart/"
+	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+	kubeClient          = &test_utils.TestClient{}
+)
 
 func TestMain(m *testing.M) {
 	// Signal handling
@@ -29,6 +33,7 @@ func TestMain(m *testing.M) {
 		done <- true
 		os.Exit(1)
 	}()
+	kubeClient.K8s, _ = k8s.NewClient()
 
 	installTimescaleDB()
 
@@ -46,7 +51,7 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	err := test_utils.CheckPodsRunning(NAMESPACE)
+	err := kubeClient.CheckPodsRunning(NAMESPACE)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,7 +75,7 @@ func runTobsWithoutTSDB() {
 	var err error
 	log.Println("Installing The Observability Stack")
 
-	ip, err := test_utils.CreateTimescaleDBNodePortService(NAMESPACE)
+	ip, err := kubeClient.CreateTimescaleDBNodePortService(NAMESPACE)
 	if err != nil {
 		log.Fatal(err)
 	}

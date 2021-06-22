@@ -2,7 +2,8 @@ package grafana
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/timescale/tobs/cli/cmd"
+	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // grafanaCmd represents the grafana command
@@ -11,6 +12,11 @@ var grafanaCmd = &cobra.Command{
 	Short: "Subcommand for Grafana operations",
 }
 
+var (
+	kubeClient      *k8s.Client
+)
+
 func init() {
-	cmd.RootCmd.AddCommand(grafanaCmd)
+	root.RootCmd.AddCommand(grafanaCmd)
+	kubeClient, _ = k8s.NewClient()
 }

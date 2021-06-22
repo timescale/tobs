@@ -9,9 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-var Namespace string
-var HelmReleaseName string
+var (
+	cfgFile         string
+	Namespace       string
+	HelmReleaseName string
+)
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{

@@ -2,9 +2,9 @@ package timescaledb
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 var user string
@@ -30,7 +30,12 @@ var timescaledbCmd = &cobra.Command{
 	},
 }
 
+var (
+	kubeClient      *k8s.Client
+)
+
 func init() {
 	root.RootCmd.AddCommand(timescaledbCmd)
 	timescaledbCmd.PersistentFlags().StringP("user", "U", "", "database user name, if not provided super-user will be used from deployment")
+    kubeClient, _ = k8s.NewClient()
 }

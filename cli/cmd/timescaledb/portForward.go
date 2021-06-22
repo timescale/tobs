@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // timescaledbPortForwardCmd represents the timescaledb port-forward command
@@ -31,12 +30,12 @@ func timescaledbPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}
 
-	podName, err := k8s.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
+	podName, err := kubeClient.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardPod(root.Namespace, podName, port, common.FORWARD_PORT_TSDB)
+	_, err = kubeClient.KubePortForwardPod(root.Namespace, podName, port, common.FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}

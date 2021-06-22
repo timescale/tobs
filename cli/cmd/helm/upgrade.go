@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -44,6 +45,7 @@ type upgradeSpec struct {
 	deployedChartVersion string
 	newChartVersion      string
 	skipCrds             bool
+	kubeClient           *k8s.Client
 }
 
 func upgradeTobs(cmd *cobra.Command, args []string) error {
@@ -89,20 +91,22 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		ResetValues:      reset,
 		ReuseValues:      reuse,
 		DependencyUpdate: true,
+		CreateNamespace:  true,
 	}
 
 	if file != "" {
 		upgradeHelmSpec.ValuesFiles = []string{file}
 	}
 
-	latestChart, err := utils.GetTobsChartMetadata(ref)
+	helmClient = helm.NewClient(root.Namespace)
+	latestChart, err := helmClient.GetTobsChartMetadata(ref)
 	if err != nil {
 		return err
 	}
 
-	deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName)
+	deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName)
 	if err != nil {
-		if err.Error() != utils.ErrorTobsDeploymentNotFound().Error() {
+		if err.Error() != utils.ErrorTobsDeploymentNotFound(root.HelmReleaseName).Error() {
 			return err
 		} else {
 			fmt.Println("couldn't find the existing tobs deployment. Deploying tobs...")
@@ -124,7 +128,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 	// add & update helm chart only if it's default chart
 	// if same-chart upgrade is disabled
 	if ref == utils.DEFAULT_CHART && !sameChart {
-		err = utils.AddUpdateTobsChart()
+		err = helmClient.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
 		if err != nil {
 			return fmt.Errorf("failed to add & update tobs helm chart %v", err)
 		}
@@ -142,12 +146,12 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 
 	var foundNewChart bool
 	if lVersion <= dVersion {
-		dValues, err := utils.GetValuesYamlFromRelease(root.HelmReleaseName)
+		dValues, err := helmClient.GetReleaseValues(root.HelmReleaseName)
 		if err != nil {
 			return err
 		}
 
-		nValues, err := utils.GetValuesYamlFromChart(ref, file)
+		nValues, err := helmClient.GetValuesYamlFromChart(ref, file)
 		if err != nil {
 			return err
 		}
@@ -178,6 +182,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		deployedChartVersion: deployedChart.Version,
 		newChartVersion:      latestChart.Version,
 		skipCrds:             skipCrds,
+		kubeClient:           kubeClient,
 	}
 
 	err = upgradeDetails.UpgradePathBasedOnVersion()
@@ -185,7 +190,8 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, err = helm.InstallUpgradeChart(upgradeHelmSpec)
+	helmClient = helm.NewClient(root.Namespace)
+	_, err = helmClient.InstallOrUpgradeChart(context.Background(), upgradeHelmSpec)
 	if err != nil {
 		return fmt.Errorf("failed to upgrade %w", err)
 	}
@@ -224,14 +230,14 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 		}
 
 		prometheusNodeExporter := root.HelmReleaseName + "-prometheus-node-exporter"
-		err = k8s.DeleteDaemonset(prometheusNodeExporter, root.Namespace)
+		err = c.kubeClient.DeleteDaemonset(prometheusNodeExporter, root.Namespace)
 		if err != nil {
 			ok := errors2.IsNotFound(err)
 			if !ok {
 				return fmt.Errorf("failed to delete %s daemonset %v", prometheusNodeExporter, err)
 			}
 		}
-		err = k8s.KubeDeleteService(root.Namespace, prometheusNodeExporter)
+		err = c.kubeClient.KubeDeleteService(root.Namespace, prometheusNodeExporter)
 		if err != nil {
 			ok := errors2.IsNotFound(err)
 			if !ok {
@@ -240,7 +246,7 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 		}
 
 		if dVersion < version0_4_0 {
-			err = persistPrometheusDataDuringUpgrade()
+			err = c.persistPrometheusDataDuringUpgrade()
 			if err != nil {
 				return err
 			}
@@ -250,7 +256,7 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 	switch {
 	// The below case if for upgrade from any versions <= 0.2.2 to greater versions
 	case dVersion <= version0_2_2 && nVersion > version0_2_2:
-		err = copyOldSecretsToNewSecrets()
+		err = c.copyOldSecretsToNewSecrets()
 		if err != nil {
 			return fmt.Errorf("failed to perform copying of old secrets to new secrets %v", err)
 		}
@@ -258,7 +264,7 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 		// in this release of tobs the grafana-db-job has been updated with spec
 		// the upgrade fails to patch the spec so we are deleting & the upgrade will re-create it.
 		grafanaJob := root.HelmReleaseName + "-grafana-db"
-		err := k8s.DeleteJob(grafanaJob, root.Namespace)
+		err := c.kubeClient.DeleteJob(grafanaJob, root.Namespace)
 		if err != nil {
 			ok := errors2.IsNotFound(err)
 			if !ok {
@@ -275,18 +281,18 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 	return nil
 }
 
-func copyOldSecretsToNewSecrets() error {
-	err := copyDBSecret()
+func (c *upgradeSpec) copyOldSecretsToNewSecrets() error {
+	err := c.copyDBSecret()
 	if err != nil {
 		return err
 	}
 
-	err = copyDBCertificate()
+	err = c.copyDBCertificate()
 	if err != nil {
 		return err
 	}
 
-	err = copyDBBackup()
+	err = c.copyDBBackup()
 	if err != nil {
 		return err
 	}
@@ -294,12 +300,12 @@ func copyOldSecretsToNewSecrets() error {
 	return nil
 }
 
-func copyDBSecret() error {
+func (c * upgradeSpec) copyDBSecret() error {
 	fmt.Println("Migrating the credentials")
 	existingDBSecret := root.HelmReleaseName + "-timescaledb-passwords"
 	newDBsecret := root.HelmReleaseName + "-credentials"
 
-	s, err := k8s.KubeGetSecret(root.Namespace, existingDBSecret)
+	s, err := c.kubeClient.KubeGetSecret(root.Namespace, existingDBSecret)
 	if err != nil {
 		return fmt.Errorf("failed to get the secret existing secret during the upgrade %s: %v", existingDBSecret, err)
 	}
@@ -328,7 +334,7 @@ func copyDBSecret() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newDBsecret,
 			Namespace: root.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: map[string][]byte{
 			"PATRONI_REPLICATION_PASSWORD": standby,
@@ -338,7 +344,7 @@ func copyDBSecret() error {
 		Type: "Opaque",
 	}
 
-	err = k8s.CreateSecret(sec)
+	err = c.kubeClient.CreateSecret(sec)
 	if err != nil {
 		return fmt.Errorf("failed to create secret during the upgrade %s: %v", sec.Name, err)
 	}
@@ -348,12 +354,12 @@ func copyDBSecret() error {
 	return nil
 }
 
-func copyDBCertificate() error {
+func (c * upgradeSpec) copyDBCertificate() error {
 	fmt.Println("Migrating the certificate")
 	existingDBCertificate := root.HelmReleaseName + "-timescaledb-certificate"
 	newDBCertificate := root.HelmReleaseName + "-certificate"
 
-	s, err := k8s.KubeGetSecret(root.Namespace, existingDBCertificate)
+	s, err := c.kubeClient.KubeGetSecret(root.Namespace, existingDBCertificate)
 	if err != nil {
 		return fmt.Errorf("failed to get the secret existing secret during the upgrade %s: %v", existingDBCertificate, err)
 	}
@@ -362,13 +368,13 @@ func copyDBCertificate() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newDBCertificate,
 			Namespace: root.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: s.Data,
 		Type: "Opaque",
 	}
 
-	err = k8s.CreateSecret(sec)
+	err = c.kubeClient.CreateSecret(sec)
 	if err != nil {
 		return fmt.Errorf("failed to create secret during the upgrade %s: %v", sec.Name, err)
 	}
@@ -378,11 +384,11 @@ func copyDBCertificate() error {
 	return nil
 }
 
-func copyDBBackup() error {
+func (c *upgradeSpec) copyDBBackup() error {
 	existingDBBackup := root.HelmReleaseName + "-timescaledb-pgbackrest"
 	newDBBackUp := root.HelmReleaseName + "-pgbackrest"
 
-	s, err := k8s.KubeGetSecret(root.Namespace, existingDBBackup)
+	s, err := c.kubeClient.KubeGetSecret(root.Namespace, existingDBBackup)
 	if err != nil {
 		// backup is optional is disabled skip backup secret copying
 		ok := errors2.IsNotFound(err)
@@ -414,13 +420,13 @@ func copyDBBackup() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newDBBackUp,
 			Namespace: root.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: newData,
 		Type: "Opaque",
 	}
 
-	err = k8s.CreateSecret(sec)
+	err = c.kubeClient.CreateSecret(sec)
 	if err != nil {
 		return fmt.Errorf("failed to create secret during the upgrade %s: %v", sec.Name, err)
 	}
@@ -480,11 +486,11 @@ func createCRDS() error {
 	return nil
 }
 
-func persistPrometheusDataDuringUpgrade() error {
+func (c * upgradeSpec) persistPrometheusDataDuringUpgrade() error {
 	// scale down prometheus replicas to 0
 	fmt.Println("Migrating the underlying prometheus persistent volume to new prometheus instance...")
 	prometheus := root.HelmReleaseName + "-prometheus-server"
-	prometheusDeployment, err := k8s.GetDeployment(prometheus, root.Namespace)
+	prometheusDeployment, err := c.kubeClient.GetDeployment(prometheus, root.Namespace)
 	if err != nil {
 		return fmt.Errorf("failed to get %s %v", prometheus, err)
 	}
@@ -492,14 +498,14 @@ func persistPrometheusDataDuringUpgrade() error {
 	fmt.Println("Scaling down prometheus instances to 0 replicas...")
 	var r int32 = 0
 	prometheusDeployment.Spec.Replicas = &r
-	err = k8s.UpdateDeployment(prometheusDeployment)
+	err = c.kubeClient.UpdateDeployment(prometheusDeployment)
 	if err != nil {
 		return fmt.Errorf("failed to update %s %v", prometheus, err)
 	}
 
-	c := 0
+	count := 0
 	for {
-		pods, err := k8s.KubeGetPods(root.Namespace, map[string]string{"app": "prometheus", "component": "server", "release": root.HelmReleaseName})
+		pods, err := c.kubeClient.KubeGetPods(root.Namespace, map[string]string{"app": "prometheus", "component": "server", "release": root.HelmReleaseName})
 		if err != nil {
 			return fmt.Errorf("unable to get pods from prometheus deployment %v", err)
 		}
@@ -507,16 +513,16 @@ func persistPrometheusDataDuringUpgrade() error {
 			break
 		}
 
-		if c == 3 {
+		if count == 3 {
 			return fmt.Errorf("prometheus pod shutdown saves all in memory data to persistent volume, prometheus pod is taking too long to shut down... ")
 		}
-		c++
-		time.Sleep(time.Duration(c*10) * time.Second)
+		count++
+		time.Sleep(time.Duration(count*10) * time.Second)
 	}
 
 	// update existing prometheus PV to persist data and create a new PVC so the
 	// new prometheus mounts to the created PVC which binds to older prometheus PV.
-	err = k8s.UpdatePrometheusPV(prometheus, utils.PrometheusPVCName, root.Namespace)
+	err = c.kubeClient.UpdatePrometheusPV(prometheus, utils.PrometheusPVCName, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return fmt.Errorf("failed to update prometheus persistent volume %v", err)
 	}
@@ -524,7 +530,7 @@ func persistPrometheusDataDuringUpgrade() error {
 	// create job to update prometheus data directory permissions as the
 	// new prometheus expects the data dir to be owned by userid 1000.
 	fmt.Println("Create job to update prometheus data directory permissions...")
-	err = k8s.CreateJob(getJobForPrometheusDataPermissionChange(utils.PrometheusPVCName))
+	err = c.kubeClient.CreateJob(getJobForPrometheusDataPermissionChange(utils.PrometheusPVCName))
 	if err != nil {
 		return fmt.Errorf("failed to create job for prometheus data migration %v", err)
 	}

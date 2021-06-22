@@ -1,6 +1,7 @@
 package installation_tests
 
 import (
+	"github.com/timescale/tobs/cli/pkg/k8s"
 	"log"
 	"os"
 	"os/signal"
@@ -9,11 +10,14 @@ import (
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-var RELEASE_NAME = "gg"
-var NAMESPACE = "ns"
-var PATH_TO_TOBS = "./../../bin/tobs"
-var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+var (
+	RELEASE_NAME        = "gg"
+	NAMESPACE           = "ns"
+	PATH_TO_TOBS        = "./../../bin/tobs"
+	PATH_TO_CHART       = "./../../../chart/"
+	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+	kubeClient          = &test_utils.TestClient{}
+)
 
 func TestMain(m *testing.M) {
 
@@ -27,9 +31,10 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}()
 
+	kubeClient.K8s, _ = k8s.NewClient()
 	code := m.Run()
 
-	err := test_utils.CheckPodsRunning(NAMESPACE)
+	err := kubeClient.CheckPodsRunning(NAMESPACE)
 	if err != nil {
 		log.Fatal(err)
 	}

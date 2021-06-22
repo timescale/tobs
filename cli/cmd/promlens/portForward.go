@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // promlensPortForwardCmd represents the PromLens port-forward command
@@ -23,12 +22,12 @@ func init() {
 }
 
 func PortForwardPromlens(listenPort int) error {
-	serviceNamePromlens, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "component": "promlens"})
+	serviceNamePromlens, err := kubeClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "component": "promlens"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceNamePromlens, listenPort, common.FORWARD_PORT_PROMLENS)
+	_, err = kubeClient.KubePortForwardService(root.Namespace, serviceNamePromlens, listenPort, common.FORWARD_PORT_PROMLENS)
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}

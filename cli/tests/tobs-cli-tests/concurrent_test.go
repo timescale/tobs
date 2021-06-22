@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/timescale/tobs/cli/pkg/k8s"
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
@@ -116,14 +115,14 @@ func TestConcurrent(t *testing.T) {
 	time.Sleep(10 * time.Second)
 
 	t.Logf("Waiting for pods to initialize...")
-	pods, err := k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
+	pods, err := kubeClient.K8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
 	if err != nil {
 		t.Logf("Error getting all pods")
 		t.Fatal(err)
 	}
 
 	for _, pod := range pods {
-		err = k8s.KubeWaitOnPod(NAMESPACE, pod.Name)
+		err = kubeClient.K8s.KubeWaitOnPod(NAMESPACE, pod.Name)
 		if err != nil {
 			t.Logf("Error while waiting on pod")
 			t.Fatal(err)

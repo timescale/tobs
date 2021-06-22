@@ -9,6 +9,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
+	root "github.com/timescale/tobs/cli/cmd"
 	"math/big"
 	"os"
 	"time"
@@ -25,13 +26,14 @@ type TSDBSecretsInfo struct {
 	EnableS3Backup bool
 	TlsCert        []byte
 	TlsKey         []byte
+	KubeClient     *k8s.Client
 }
 
 func (t *TSDBSecretsInfo) CreateTimescaleDBSecrets() error {
 	// Previous helm install used to create namespace if it doesn't exist
 	// but as we are creating secrets prior to deploying tobs. We are verifying
 	// namespace if doesn't create one.
-	err := k8s.CreateNamespaceIfNotExists(t.Namespace)
+	err := t.KubeClient.CreateNamespaceIfNotExists(t.Namespace)
 	if err != nil {
 		return err
 	}
@@ -79,7 +81,7 @@ func randomPassword(n int) ([]byte, error) {
 
 func (t *TSDBSecretsInfo) createTimescaleDBCredentials() error {
 	secretName := t.ReleaseName + "-credentials"
-	exists, err := k8s.CheckSecretExists(secretName, t.Namespace)
+	exists, err := t.KubeClient.CheckSecretExists(secretName, t.Namespace)
 	if err != nil {
 		return err
 	}
@@ -106,7 +108,7 @@ func (t *TSDBSecretsInfo) createTimescaleDBCredentials() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: t.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: map[string][]byte{
 			"PATRONI_REPLICATION_PASSWORD": repPass,
@@ -116,7 +118,7 @@ func (t *TSDBSecretsInfo) createTimescaleDBCredentials() error {
 		Type: "Opaque",
 	}
 
-	return k8s.CreateSecret(sec)
+	return t.KubeClient.CreateSecret(sec)
 }
 
 func generateCerts() ([]byte, []byte, error) {
@@ -179,7 +181,7 @@ WARNING: Using a generated self-signed certificate for TLS access to TimescaleDB
 
 `)
 	secretName := t.ReleaseName + "-certificate"
-	exists, err := k8s.CheckSecretExists(secretName, t.Namespace)
+	exists, err := t.KubeClient.CheckSecretExists(secretName, t.Namespace)
 	if err != nil {
 		return err
 	}
@@ -199,13 +201,13 @@ WARNING: Using a generated self-signed certificate for TLS access to TimescaleDB
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: t.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: map[string][]byte{"tls.key": privateKey, "tls.crt": publicKey},
 		Type: "Opaque",
 	}
 
-	return k8s.CreateSecret(sec)
+	return t.KubeClient.CreateSecret(sec)
 }
 
 func (t *TSDBSecretsInfo) createS3BackupForTimescaleDB() error {
@@ -270,7 +272,7 @@ Google Cloud:
 	}
 
 	fmt.Println()
-	err := createTimescaleDBPgBackRest(t.ReleaseName, t.Namespace, s3)
+	err := t.createTimescaleDBPgBackRest(t.ReleaseName, t.Namespace, s3)
 	if err != nil {
 		return err
 	}
@@ -278,9 +280,9 @@ Google Cloud:
 	return nil
 }
 
-func createTimescaleDBPgBackRest(name, namespace string, s3 s3Details) error {
+func (t *TSDBSecretsInfo) createTimescaleDBPgBackRest(name, namespace string, s3 s3Details) error {
 	secretName := name + "-pgbackrest"
-	exists, err := k8s.CheckSecretExists(secretName, namespace)
+	exists, err := t.KubeClient.CheckSecretExists(secretName, namespace)
 	if err != nil {
 		return err
 	}
@@ -309,13 +311,13 @@ func createTimescaleDBPgBackRest(name, namespace string, s3 s3Details) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: data,
 		Type: "Opaque",
 	}
 
-	return k8s.CreateSecret(sec)
+	return t.KubeClient.CreateSecret(sec)
 }
 
 func pemEncodeCert(certDerBytes []byte) ([]byte, error) {

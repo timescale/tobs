@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // prometheusPortForwardCmd represents the prometheus port-forward command
@@ -31,12 +30,12 @@ func prometheusPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
-	serviceName, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "kube-prometheus-stack-prometheus"})
+	serviceName, err := kubeClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "kube-prometheus-stack-prometheus"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceName, port, common.FORWARD_PORT_PROM)
+	_, err = kubeClient.KubePortForwardService(root.Namespace, serviceName, port, common.FORWARD_PORT_PROM)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Prometheus: %w", err)
 	}

@@ -7,8 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/timescale/tobs/cli/pkg/k8s"
-
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
@@ -19,7 +17,7 @@ func TestPromscale(t *testing.T) {
 	fmt.Println("Running Promscale tests for external db setup...")
 
 	// Tests based on pod status & restarts
-	promscalePod, err := k8s.KubeGetPods(NAMESPACE, map[string]string{"app": "tobs-promscale"})
+	promscalePod, err := kubeClient.K8s.KubeGetPods(NAMESPACE, map[string]string{"app": "tobs-promscale"})
 	if err != nil {
 		log.Println("failed to get promscale pod")
 		os.Exit(1)

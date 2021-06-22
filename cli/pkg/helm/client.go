@@ -27,20 +27,46 @@ import (
 
 var storage = repo.File{}
 
-// New returns a new Helm client with the provided options
-func New(options *Options) (Client, error) {
-	settings := cli.New()
-
-	err := setEnvSettings(options, settings)
-	if err != nil {
-		return nil, err
+func NewClient(namespace string) *ClientInfo {
+	opt := &ClientOptions{
+		Namespace: namespace,
+		Linting:   true,
 	}
 
+	helmClient, err := New(opt)
+	if err != nil {
+		log.Fatalf("failed to create helm client: %v", err)
+	}
+	return helmClient
+}
+
+// Client defines the values of a helm client
+type ClientInfo struct {
+	settings     *cli.EnvSettings
+	providers    getter.Providers
+	storage      *repo.File
+	actionConfig *action.Configuration
+	linting      bool
+}
+
+// ClientOptions defines the options of a client
+type ClientOptions struct {
+	Namespace        string
+	RepositoryConfig string
+	RepositoryCache  string
+	Debug            bool
+	Linting          bool
+	DebugLog         action.DebugLog
+}
+
+// New returns a new Helm client with the provided options
+func New(options *ClientOptions) (*ClientInfo, error) {
+	settings := cli.New()
 	return newClient(options, settings.RESTClientGetter(), settings)
 }
 
 // newClient returns a new Helm client via the provided options and REST config
-func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (Client, error) {
+func newClient(options *ClientOptions, clientGetter genericclioptions.RESTClientGetter, settings *cli.EnvSettings) (*ClientInfo, error) {
 	err := setEnvSettings(options, settings)
 	if err != nil {
 		return nil, err
@@ -61,20 +87,19 @@ func newClient(options *Options, clientGetter genericclioptions.RESTClientGetter
 	if err != nil {
 		return nil, err
 	}
-
-	return &HelmClient{
-		Settings:     settings,
-		Providers:    getter.All(settings),
+	return &ClientInfo{
+		settings:     settings,
+		providers:    getter.All(settings),
 		storage:      &storage,
-		ActionConfig: actionConfig,
+		actionConfig: actionConfig,
 		linting:      options.Linting,
 	}, nil
 }
 
 // setEnvSettings sets the client's environment settings based on the provided client configuration
-func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
+func setEnvSettings(options *ClientOptions, settings *cli.EnvSettings) error {
 	if options == nil {
-		options = &Options{}
+		options = &ClientOptions{}
 	}
 
 	// set the namespace with this ugly workaround because cli.EnvSettings.namespace is private
@@ -92,13 +117,17 @@ func setEnvSettings(options *Options, settings *cli.EnvSettings) error {
 }
 
 // AddOrUpdateChartRepo adds or updates the provided helm chart repository
-func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
-	chartRepo, err := repo.NewChartRepository(&entry, c.Providers)
+func (c *ClientInfo) AddOrUpdateChartRepo(registryName, repoURL string) error {
+	entry := repo.Entry{
+		Name:                  registryName,
+		URL:                   repoURL,
+	}
+	chartRepo, err := repo.NewChartRepository(&entry, c.providers)
 	if err != nil {
 		return err
 	}
 
-	chartRepo.CachePath = c.Settings.RepositoryCache
+	chartRepo.CachePath = c.settings.RepositoryCache
 
 	_, err = chartRepo.DownloadIndexFile()
 	if err != nil {
@@ -106,12 +135,13 @@ func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
 	}
 
 	if c.storage.Has(entry.Name) {
+		fmt.Println("hello")
 		log.Printf("WARNING: repository name %q already exists", entry.Name)
 		return nil
 	}
 
 	c.storage.Update(&entry)
-	err = c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
+	err = c.storage.WriteFile(c.settings.RepositoryConfig, 0o644)
 	if err != nil {
 		return err
 	}
@@ -120,14 +150,14 @@ func (c *HelmClient) AddOrUpdateChartRepo(entry repo.Entry) error {
 }
 
 // UpdateChartRepos updates the list of chart repositories stored in the client's cache
-func (c *HelmClient) UpdateChartRepos() error {
+func (c *ClientInfo) UpdateChartRepos() error {
 	for _, entry := range c.storage.Repositories {
-		chartRepo, err := repo.NewChartRepository(entry, c.Providers)
+		chartRepo, err := repo.NewChartRepository(entry, c.providers)
 		if err != nil {
 			return err
 		}
 
-		chartRepo.CachePath = c.Settings.RepositoryCache
+		chartRepo.CachePath = c.settings.RepositoryCache
 		_, err = chartRepo.DownloadIndexFile()
 		if err != nil {
 			return err
@@ -136,12 +166,12 @@ func (c *HelmClient) UpdateChartRepos() error {
 		c.storage.Update(entry)
 	}
 
-	return c.storage.WriteFile(c.Settings.RepositoryConfig, 0o644)
+	return c.storage.WriteFile(c.settings.RepositoryConfig, 0o644)
 }
 
 // InstallOrUpgradeChart triggers the installation of the provided chart.
 // If the chart is already installed, trigger an upgrade instead
-func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
+func (c *ClientInfo) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec) (*release.Release, error) {
 	release := &release.Release{}
 	installed, err := c.chartIsInstalled(spec.ReleaseName)
 	if err != nil {
@@ -154,41 +184,10 @@ func (c *HelmClient) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec)
 	return c.install(spec)
 }
 
-// ListDeployedReleases lists all deployed releases.
-// Namespace and other context is provided via the Options struct when instantiating a client.
-func (c *HelmClient) ListDeployedReleases() ([]*release.Release, error) {
-	return c.listDeployedReleases()
-}
-
-// GetReleaseValues returns the all computed values for the specified release.
-func (c *HelmClient) GetAllReleaseValues(name string) (map[string]interface{}, error) {
-	return c.getAllReleaseValues(name)
-}
-
-// GetReleaseValues returns the values for the specified release.
-func (c *HelmClient) GetReleaseValues(name string) (map[string]interface{}, error) {
-	return c.getReleaseValues(name)
-}
-
-// GetChartValues returns the values from chart.
-func (c *HelmClient) GetChartValues(name string) ([]byte, error) {
-	return c.getChartValues(name)
-}
-
-// Get chart metadata
-func (c *HelmClient) InspectChartYaml(name string) ([]byte, error) {
-	return c.getChartYaml(name)
-}
-
-// UninstallRelease uninstalls the provided release
-func (c *HelmClient) UninstallRelease(spec *ChartSpec) error {
-	return c.uninstallRelease(spec)
-}
-
 // install lints and installs the provided chart
-func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
+func (c *ClientInfo) install(spec *ChartSpec) (*release.Release, error) {
 	release := &release.Release{}
-	client := action.NewInstall(c.ActionConfig)
+	client := action.NewInstall(c.actionConfig)
 	mergeInstallOptions(spec, client)
 
 	if client.Version == "" {
@@ -231,9 +230,9 @@ func (c *HelmClient) install(spec *ChartSpec) (*release.Release, error) {
 		}
 	}
 
-	client.Namespace = c.Settings.Namespace()
+	client.Namespace = c.settings.Namespace()
 	// create namespace if it doesn't exist
-	client.CreateNamespace = true
+	client.CreateNamespace = spec.CreateNamespace
 	release, err = client.Run(helmChart, values)
 	if err != nil {
 		return release, err
@@ -251,7 +250,7 @@ type updateDeps struct {
 	chartPathOptions *action.ChartPathOptions
 }
 
-func (c *HelmClient) updateDependencies(details *updateDeps) error {
+func (c *ClientInfo) updateDependencies(details *updateDeps) error {
 	if req := details.helmChart.Metadata.Dependencies; req != nil {
 		if err := action.CheckDependencies(details.helmChart, req); err != nil {
 			if !details.spec.DependencyUpdate {
@@ -261,9 +260,9 @@ func (c *HelmClient) updateDependencies(details *updateDeps) error {
 					ChartPath:        *details.chartPath,
 					Keyring:          details.chartPathOptions.Keyring,
 					SkipUpdate:       false,
-					Getters:          c.Providers,
-					RepositoryConfig: c.Settings.RepositoryConfig,
-					RepositoryCache:  c.Settings.RepositoryCache,
+					Getters:          c.providers,
+					RepositoryConfig: c.settings.RepositoryConfig,
+					RepositoryCache:  c.settings.RepositoryCache,
 					Out:              os.Stdout,
 				}
 				if err := man.Update(); err != nil {
@@ -282,11 +281,12 @@ func (c *HelmClient) updateDependencies(details *updateDeps) error {
 }
 
 // upgrade upgrades a chart and CRDs
-func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
-	client := action.NewUpgrade(c.ActionConfig)
+func (c *ClientInfo) upgrade(ctx context.Context, spec *ChartSpec) error {
+	client := action.NewUpgrade(c.actionConfig)
 	mergeUpgradeOptions(spec, client)
 
 	if client.Version == "" {
+		fmt.Println("hii-hello....")
 		client.Version = ">0.0.0-0"
 	}
 
@@ -337,23 +337,21 @@ func (c *HelmClient) upgrade(ctx context.Context, spec *ChartSpec) error {
 }
 
 // uninstallRelease uninstalls the provided release
-func (c *HelmClient) uninstallRelease(spec *ChartSpec) error {
-	client := action.NewUninstall(c.ActionConfig)
+func (c *ClientInfo) UninstallRelease(spec *ChartSpec) error {
+	client := action.NewUninstall(c.actionConfig)
 
 	mergeUninstallReleaseOptions(spec, client)
 
-	resp, err := client.Run(spec.ReleaseName)
+	_, err := client.Run(spec.ReleaseName)
 	if err != nil {
 		return err
 	}
-
-	log.Printf("release removed, response: %v", resp)
 
 	return nil
 }
 
 // lint lints a chart's values
-func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error {
+func (c *ClientInfo) lint(chartPath string, values map[string]interface{}) error {
 	client := action.NewLint()
 
 	result := client.Run([]string{chartPath}, values)
@@ -370,8 +368,8 @@ func (c *HelmClient) lint(chartPath string, values map[string]interface{}) error
 }
 
 // upgradeCRDs upgrades the CRDs of the provided chart
-func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart) error {
-	cfg, err := c.Settings.RESTClientGetter().ToRESTConfig()
+func (c *ClientInfo) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart) error {
+	cfg, err := c.settings.RESTClientGetter().ToRESTConfig()
 	if err != nil {
 		return err
 	}
@@ -429,6 +427,22 @@ func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart
 				return err
 			}
 
+		case "apiextensions.k8s.io/v1":
+			var crdObj apiextensionsV1.CustomResourceDefinition
+			err = json.Unmarshal(jsonCRD, &crdObj)
+			if err != nil {
+				return err
+			}
+			existingCRDObj, err := k8sClient.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, crdObj.Name, metaV1.GetOptions{})
+			if err != nil {
+				return err
+			}
+			crdObj.ResourceVersion = existingCRDObj.ResourceVersion
+			_, err = k8sClient.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, &crdObj, metaV1.UpdateOptions{})
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("failed to update crd %q: unsupported api-version %q", crd.Name, meta.APIVersion)
 		}
@@ -438,8 +452,8 @@ func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart
 }
 
 // getChart returns a chart matching the provided chart name and options
-func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
-	chartPath, err := chartPathOptions.LocateChart(chartName, c.Settings)
+func (c *ClientInfo) getChart(chartName string, chartPathOptions *action.ChartPathOptions) (*chart.Chart, string, error) {
+	chartPath, err := chartPathOptions.LocateChart(chartName, c.settings)
 	if err != nil {
 		return nil, "", err
 	}
@@ -457,8 +471,8 @@ func (c *HelmClient) getChart(chartName string, chartPathOptions *action.ChartPa
 }
 
 // chartIsInstalled checks whether a chart is already installed or not by the provided release name
-func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
-	histClient := action.NewHistory(c.ActionConfig)
+func (c *ClientInfo) chartIsInstalled(release string) (bool, error) {
+	histClient := action.NewHistory(c.actionConfig)
 	histClient.Max = 1
 	if _, err := histClient.Run(release); err != nil {
 		if err == driver.ErrReleaseNotFound {
@@ -470,29 +484,34 @@ func (c *HelmClient) chartIsInstalled(release string) (bool, error) {
 	return true, nil
 }
 
-func (c *HelmClient) listDeployedReleases() ([]*release.Release, error) {
-	err := c.ActionConfig.Init(c.Settings.RESTClientGetter(), "", "", func(_ string, _ ...interface{}) {})
+// ListDeployedReleases lists all deployed releases.
+// Namespace and other context is provided via the ClientOptions struct when instantiating a client.
+func (c *ClientInfo) ListDeployedReleases() ([]*release.Release, error) {
+	err := c.actionConfig.Init(c.settings.RESTClientGetter(), "", "", func(_ string, _ ...interface{}) {})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list deployed releases %v", err)
 	}
-	listClient := action.NewList(c.ActionConfig)
+	listClient := action.NewList(c.actionConfig)
 	listClient.StateMask = action.ListDeployed
 	return listClient.Run()
 }
 
-func (c *HelmClient) getAllReleaseValues(name string) (map[string]interface{}, error) {
-	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
+// GetReleaseValues returns the all computed values for the specified release.
+func (c *ClientInfo) GetAllReleaseValues(name string) (map[string]interface{}, error) {
+	getReleaseValuesClient := action.NewGetValues(c.actionConfig)
 	getReleaseValuesClient.AllValues = true
 	return getReleaseValuesClient.Run(name)
 }
 
-func (c *HelmClient) getReleaseValues(name string) (map[string]interface{}, error) {
-	getReleaseValuesClient := action.NewGetValues(c.ActionConfig)
+// GetReleaseValues returns the values for the specified release.
+func (c *ClientInfo) GetReleaseValues(name string) (map[string]interface{}, error) {
+	getReleaseValuesClient := action.NewGetValues(c.actionConfig)
 	return getReleaseValuesClient.Run(name)
 }
 
-func (c *HelmClient) getChartValues(name string) ([]byte, error) {
-	client := action.NewInstall(c.ActionConfig)
+// GetChartValues returns the values from chart.
+func (c *ClientInfo) GetChartValues(name string) ([]byte, error) {
+	client := action.NewInstall(c.actionConfig)
 	helmChart, _, err := c.getChart(name, &client.ChartPathOptions)
 	if err != nil {
 		return nil, err
@@ -507,8 +526,8 @@ func (c *HelmClient) getChartValues(name string) ([]byte, error) {
 	return nil, fmt.Errorf("failed to get values from the provided chart")
 }
 
-func (c *HelmClient) getChartYaml(name string) ([]byte, error) {
-	client := action.NewInstall(c.ActionConfig)
+func (c *ClientInfo) InspectChartYaml(name string) ([]byte, error) {
+	client := action.NewInstall(c.actionConfig)
 	helmChart, _, err := c.getChart(name, &client.ChartPathOptions)
 	if err != nil {
 		return nil, err

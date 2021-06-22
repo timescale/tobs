@@ -9,25 +9,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/timescale/tobs/cli/pkg/k8s"
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
-
-var RELEASE_NAME = "tobs"
-var NAMESPACE = "default"
-var PATH_TO_TOBS = "./../../bin/tobs"
-var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
 
 func TestHASetup(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping upgrade tests")
 	}
 
+	kubeClient.K8s, _ = k8s.NewClient()
 	installTobs(t)
 	fmt.Println("Successfully installed ha test setup.....")
 	time.Sleep(4 * time.Minute)
 
-	err := test_utils.CheckPodsRunning(NAMESPACE)
+	err := kubeClient.CheckPodsRunning(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +38,7 @@ func TestHASetup(t *testing.T) {
 	for {
 		i := 0
 		for i < 5 {
-			_ = test_utils.DeletePod(oldLeader, NAMESPACE)
+			_ = kubeClient.DeletePod(oldLeader, NAMESPACE)
 			i++
 			time.Sleep(3 * time.Second)
 		}

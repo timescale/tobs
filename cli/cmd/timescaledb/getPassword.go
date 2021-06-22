@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // timescaledbGetPasswordCmd represents the timescaledb get-password command
@@ -23,7 +22,7 @@ func init() {
 }
 
 func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
+	secret, err := kubeClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}

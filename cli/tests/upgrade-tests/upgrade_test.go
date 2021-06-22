@@ -3,11 +3,11 @@ package upgrade_tests
 import (
 	"errors"
 	"fmt"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"os/exec"
 	"testing"
 
-	"github.com/timescale/tobs/cli/pkg/utils"
-	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 func TestUpgrade(t *testing.T) {
@@ -21,10 +21,14 @@ func TestUpgrade(t *testing.T) {
 
 	fmt.Println("Successfully upgraded tobs to latest version")
 
-	err := test_utils.DeleteWebhooks()
+	fmt.Println("deleting webhooks 1")
+	kubeClient.K8s, _ = k8s.NewClient()
+	err := kubeClient.DeleteWebhooks()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	fmt.Println("deleted webhooks, performing upgrade 2")
 
 	out := exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart1/", "-f", "./../testdata/chart1/values.yaml", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
 	output, err := out.CombinedOutput()
@@ -66,11 +70,14 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = test_utils.DeleteWebhooks()
+	fmt.Println("deleting webhooks 2")
+	kubeClient.K8s, _ = k8s.NewClient()
+	err = kubeClient.DeleteWebhooks()
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	fmt.Println("performing upgrade 3")
 	out = exec.Command(PATH_TO_TOBS, "upgrade", "-c", "./../testdata/chart2/", "--namespace", NAMESPACE, "--name", RELEASE_NAME, "-y")
 	output, err = out.CombinedOutput()
 	if err != nil {
@@ -78,7 +85,8 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chartDetails, err := utils.GetDeployedChartMetadata(RELEASE_NAME)
+	hc = helm.NewClient(NAMESPACE)
+	chartDetails, err := hc.GetDeployedChartMetadata(RELEASE_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +94,9 @@ func TestUpgrade(t *testing.T) {
 		t.Fatal("failed to verify expected chart version after upgrade", chartDetails.Chart)
 	}
 
-	err = test_utils.DeleteWebhooks()
+	fmt.Println("deleting webhooks 3")
+	kubeClient.K8s, _ = k8s.NewClient()
+	err = kubeClient.DeleteWebhooks()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +107,11 @@ func TestUpgrade(t *testing.T) {
 		fmt.Println(string(output))
 		t.Fatal(err)
 	}
-	size, err := test_utils.GetUpdatedPromscaleMemResource(RELEASE_NAME, NAMESPACE)
+
+	fmt.Println("Checking resources after upgrade")
+	t.Log("HIII HELLO")
+	kubeClient.K8s, _ = k8s.NewClient()
+	size, err := kubeClient.GetUpdatedPromscaleMemResource(RELEASE_NAME, NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,14 +3,9 @@ package test_utils
 import (
 	"context"
 	"fmt"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 	v1 "k8s.io/api/core/v1"
-	"log"
-	"os"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 /*
@@ -19,38 +14,21 @@ Kubernetes utils for e2e tests.
 #########################################
 */
 
-var HOME = os.Getenv("HOME")
-
-func kubeInit() (kubernetes.Interface, *rest.Config) {
-	var err error
-
-	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: HOME + "/.kube/config"},
-		&clientcmd.ConfigOverrides{}).ClientConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	client, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return client, config
+type TestClient struct {
+	K8s *k8s.Client
 }
 
 // By default local storage provider doesn't let us to expand PVC's
 // For e2e tests to run we are configuring storageClass to allow PVC expansion
-func UpdateStorageClassAllowVolumeExpand() error {
-	client, _ := kubeInit()
-	storageClass, err := client.StorageV1().StorageClasses().Get(context.Background(), "standard", metav1.GetOptions{})
+func (c *TestClient) UpdateStorageClassAllowVolumeExpand() error {
+	storageClass, err := c.K8s.StorageV1().StorageClasses().Get(context.Background(), "standard", metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
 	setTrue := true
 	storageClass.AllowVolumeExpansion = &setTrue
-	_, err = client.StorageV1().StorageClasses().Update(context.Background(), storageClass, metav1.UpdateOptions{})
+	_, err = c.K8s.StorageV1().StorageClasses().Update(context.Background(), storageClass, metav1.UpdateOptions{})
 	if err != nil {
 		return err
 	}
@@ -58,9 +36,8 @@ func UpdateStorageClassAllowVolumeExpand() error {
 	return nil
 }
 
-func GetAllPVCSizes() (map[string]string, error) {
-	client, _ := kubeInit()
-	pvcs, err := client.CoreV1().PersistentVolumeClaims("ns").List(context.Background(), metav1.ListOptions{})
+func (c *TestClient) GetAllPVCSizes() (map[string]string, error) {
+	pvcs, err := c.K8s.CoreV1().PersistentVolumeClaims("ns").List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -72,9 +49,8 @@ func GetAllPVCSizes() (map[string]string, error) {
 	return results, nil
 }
 
-func GetUpdatedPromscaleMemResource(releaseName, namespace string) (string, error) {
-	client, _ := kubeInit()
-	promscale, err := client.AppsV1().Deployments(namespace).Get(context.Background(), releaseName+"-promscale", metav1.GetOptions{})
+func (c *TestClient) GetUpdatedPromscaleMemResource(releaseName, namespace string) (string, error) {
+	promscale, err := c.K8s.AppsV1().Deployments(namespace).Get(context.Background(), releaseName+"-promscale", metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
@@ -82,10 +58,9 @@ func GetUpdatedPromscaleMemResource(releaseName, namespace string) (string, erro
 	return mem.String(), nil
 }
 
-func CheckPodsRunning(namespace string) error {
+func (c *TestClient) CheckPodsRunning(namespace string) error {
 	fmt.Println("Performing check on all are pods are running.")
-	client, _ := kubeInit()
-	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{})
+	pods, err := c.K8s.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list pods to check status %v", err)
 	}
@@ -106,9 +81,8 @@ func CheckPodsRunning(namespace string) error {
 	return nil
 }
 
-func CreateTimescaleDBNodePortService(namespace string) (string, error) {
-	client, _ := kubeInit()
-	nodes, err := client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+func (c *TestClient) CreateTimescaleDBNodePortService(namespace string) (string, error) {
+	nodes, err := c.K8s.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to list nodes %v", err)
 	}
@@ -130,7 +104,7 @@ func CreateTimescaleDBNodePortService(namespace string) (string, error) {
 		},
 	}
 
-	_, err = client.CoreV1().Services(namespace).Create(context.Background(), lb, metav1.CreateOptions{})
+	_, err = c.K8s.CoreV1().Services(namespace).Create(context.Background(), lb, metav1.CreateOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to create load balancer service for timescaledb %v", err)
 	}
@@ -148,34 +122,30 @@ func CreateTimescaleDBNodePortService(namespace string) (string, error) {
 	return ip + ":30007", nil
 }
 
-func GetTSDBBackUpSecret(releaseName, namespace string) (*v1.Secret, error) {
-	client, _ := kubeInit()
-	return client.CoreV1().Secrets(namespace).Get(context.Background(), releaseName+"-pgbackrest", metav1.GetOptions{})
+func (c *TestClient) GetTSDBBackUpSecret(releaseName, namespace string) (*v1.Secret, error) {
+	return c.K8s.CoreV1().Secrets(namespace).Get(context.Background(), releaseName+"-pgbackrest", metav1.GetOptions{})
 }
 
-func DeleteNamespace(namespace string) error {
-	client, _ := kubeInit()
-	err := client.CoreV1().Namespaces().Delete(context.Background(), namespace, metav1.DeleteOptions{})
+func (c *TestClient) DeleteNamespace(namespace string) error {
+	err := c.K8s.CoreV1().Namespaces().Delete(context.Background(), namespace, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeletePod(pod, namespace string) error {
-	client, _ := kubeInit()
+func (c *TestClient) DeletePod(pod, namespace string) error {
 	gracePeriod := int64(0)
-	return client.CoreV1().Pods(namespace).Delete(context.Background(), pod, metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod})
+	return c.K8s.CoreV1().Pods(namespace).Delete(context.Background(), pod, metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod})
 }
 
-func DeleteWebhooks() error {
-	client, _ := kubeInit()
-	err := client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Delete(context.Background(), "tobs-kube-prometheus-admission", metav1.DeleteOptions{})
+func (c *TestClient) DeleteWebhooks() error {
+	err := c.K8s.AdmissionregistrationV1().ValidatingWebhookConfigurations().Delete(context.Background(), "tobs-kube-prometheus-admission", metav1.DeleteOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to delete validatingwebhook %v", err)
 	}
 
-	err = client.AdmissionregistrationV1().MutatingWebhookConfigurations().Delete(context.Background(), "tobs-kube-prometheus-admission", metav1.DeleteOptions{})
+	err = c.K8s.AdmissionregistrationV1().MutatingWebhookConfigurations().Delete(context.Background(), "tobs-kube-prometheus-admission", metav1.DeleteOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to delete mutatingwebhook %v", err)
 	}

@@ -1,6 +1,8 @@
 package upgrade_tests
 
 import (
+	"github.com/timescale/tobs/cli/pkg/helm"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 	"log"
 	"os"
 	"os/exec"
@@ -11,11 +13,15 @@ import (
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-var PATH_TO_TOBS = "./../../bin/tobs"
-var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
-var NAMESPACE = "ns"
-var RELEASE_NAME = "gg"
+var (
+	PATH_TO_TOBS        = "./../../bin/tobs"
+	PATH_TO_CHART       = "./../../../chart/"
+	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+	NAMESPACE           = "ns"
+	RELEASE_NAME        = "gg"
+	kubeClient          = &test_utils.TestClient{}
+	hc                  = &helm.ClientInfo{}
+)
 
 const upgradeFromVersion = "0.2.2"
 
@@ -32,10 +38,12 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
+	kubeClient.K8s, _ = k8s.NewClient()
+	hc = helm.NewClient(NAMESPACE)
 	// upgrade takes some time for pods to get into running state
 	time.Sleep(2 * time.Minute)
 
-	err := test_utils.CheckPodsRunning(NAMESPACE)
+	err := kubeClient.CheckPodsRunning(NAMESPACE)
 	if err != nil {
 		log.Fatal(err)
 	}

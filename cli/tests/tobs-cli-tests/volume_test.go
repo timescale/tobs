@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/timescale/tobs/cli/pkg/k8s"
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 	v1 "k8s.io/api/core/v1"
 )
@@ -125,13 +124,13 @@ func TestVolume(t *testing.T) {
 	}
 
 	// update default storageClass in Kind to allow pvc expansion
-	err := test_utils.UpdateStorageClassAllowVolumeExpand()
+	err := kubeClient.UpdateStorageClassAllowVolumeExpand()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	testVolumeExpansion(t, "151Gi", "21Gi", "9Gi", false)
-	res, err := test_utils.GetAllPVCSizes()
+	res, err := kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +142,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "152Gi", "22Gi", "", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +154,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "153Gi", "", "", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +166,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "23Gi", "", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +178,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "24Gi", "10Gi", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +190,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "11Gi", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +206,7 @@ func TestVolume(t *testing.T) {
 
 	// TESTCASE: Volume expand Prometheus storage and restart the pods
 
-	pods, err := k8s.KubeGetPods(NAMESPACE, prometheusLabels)
+	pods, err := kubeClient.K8s.KubeGetPods(NAMESPACE, prometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,7 +223,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "12Gi", true)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -245,7 +244,7 @@ func TestVolume(t *testing.T) {
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
-	pods, err = k8s.KubeGetPods(NAMESPACE, prometheusLabels)
+	pods, err = kubeClient.K8s.KubeGetPods(NAMESPACE, prometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +261,7 @@ func TestVolume(t *testing.T) {
 		}
 	}
 
-	pods, err = k8s.KubeGetPods(NAMESPACE, timescaleDBLabels)
+	pods, err = kubeClient.K8s.KubeGetPods(NAMESPACE, timescaleDBLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -277,7 +276,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "154Gi", "24Gi", "13Gi", true)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -297,7 +296,7 @@ func TestVolume(t *testing.T) {
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
-	pods, err = k8s.KubeGetPods(NAMESPACE, timescaleDBLabels)
+	pods, err = kubeClient.K8s.KubeGetPods(NAMESPACE, timescaleDBLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -315,7 +314,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "155Gi", "25Gi", "", true)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = kubeClient.GetAllPVCSizes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -336,7 +335,7 @@ func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]st
 	var pods []v1.Pod
 
 	for _, l := range labels {
-		p, err := k8s.KubeGetPods(NAMESPACE, l)
+		p, err := kubeClient.K8s.KubeGetPods(NAMESPACE, l)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -2,6 +2,7 @@ package tobs_cli_tests
 
 import (
 	"fmt"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 	"log"
 	"os"
 	"os/exec"
@@ -12,11 +13,14 @@ import (
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-var RELEASE_NAME = "gg"
-var NAMESPACE = "ns"
-var PATH_TO_TOBS = "./../../bin/tobs"
-var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+var (
+	RELEASE_NAME        = "gg"
+	NAMESPACE           = "ns"
+	PATH_TO_TOBS        = "./../../bin/tobs"
+	PATH_TO_CHART       = "./../../../chart/"
+	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+	kubeClient          = &test_utils.TestClient{}
+)
 
 func installObs() {
 	var err error
@@ -43,6 +47,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}()
 
+	kubeClient.K8s, _ = k8s.NewClient()
 	// tests on backEnabled tobs
 	// runs it prior to other tests as
 	// the tobs installation itself is different
@@ -55,7 +60,7 @@ func TestMain(m *testing.M) {
 	fmt.Println("starting e2e tests post tobs deployment....")
 	code := m.Run()
 
-	err := test_utils.CheckPodsRunning(NAMESPACE)
+	err := kubeClient.CheckPodsRunning(NAMESPACE)
 	if err != nil {
 		log.Fatal(err)
 	}

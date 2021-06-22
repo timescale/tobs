@@ -7,9 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/pgconn"
-	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
 // timescaledbChangePasswordCmd represents the timescaledb change-password command
@@ -48,7 +46,7 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 	}
 	defer pool.Close()
 
-	oldpassword, err := utils.GetDBPassword(d.SecretKey, root.HelmReleaseName, root.Namespace)
+	oldpassword, err := kubeClient.GetDBPassword(d.SecretKey, root.HelmReleaseName, root.Namespace)
 	if err != nil {
 		return fmt.Errorf("could not get existing TimescaleDB password: %w", err)
 	}
@@ -67,13 +65,13 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 
-	uri, err := utils.GetTimescaleDBURI(root.Namespace, root.HelmReleaseName)
+	uri, err := kubeClient.GetTimescaleDBURI(root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
 
 	if uri != "" {
-		secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-timescaledb-uri")
+		secret, err := kubeClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-timescaledb-uri")
 		if err != nil {
 			return fmt.Errorf("could not get TimescaleDB password: %w", err)
 		}
@@ -84,7 +82,7 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 		}
 
 		secret.Data["db-uri"] = []byte(newURI)
-		err = k8s.KubeUpdateSecret(root.Namespace, secret)
+		err = kubeClient.KubeUpdateSecret(root.Namespace, secret)
 		if err != nil {
 			return fmt.Errorf("could not change TimescaleDB password in external TimescaleDB uri secret: %w", err)
 		}
@@ -94,18 +92,18 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 }
 
 func updateDBPwdSecrets(secretKey, user, password string) error {
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
+	secret, err := kubeClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
 	secret.Data[secretKey] = []byte(password)
-	err = k8s.KubeUpdateSecret(root.Namespace, secret)
+	err = kubeClient.KubeUpdateSecret(root.Namespace, secret)
 	if err != nil {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 
-	secret, err = k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana-db")
+	secret, err = kubeClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana-db")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
@@ -113,7 +111,7 @@ func updateDBPwdSecrets(secretKey, user, password string) error {
 	dbUser, ok := secret.Data["GF_DATABASE_USER"]
 	if ok && string(dbUser) == user {
 		secret.Data["GF_DATABASE_PASSWORD"] = []byte(password)
-		err = k8s.KubeUpdateSecret(root.Namespace, secret)
+		err = kubeClient.KubeUpdateSecret(root.Namespace, secret)
 		if err != nil {
 			return fmt.Errorf("could not change TimescaleDB password: %w", err)
 		}

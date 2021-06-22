@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // grafanaPortForwardCmd represents the grafana port-forward command
@@ -31,12 +30,12 @@ func grafanaPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}
 
-	serviceName, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
+	serviceName, err := kubeClient.KubeGetServiceName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceName, port, common.FORWARD_PORT_GRAFANA)
+	_, err = kubeClient.KubePortForwardService(root.Namespace, serviceName, port, common.FORWARD_PORT_GRAFANA)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}

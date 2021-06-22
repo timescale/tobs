@@ -2,9 +2,9 @@ package helm
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
@@ -30,19 +30,20 @@ func version(cmd *cobra.Command, args []string) error {
 	}
 
 	var chartVersion string
+	helmClient = helm.NewClient(root.Namespace)
 	if d {
-		deployedChart, err := utils.GetDeployedChartMetadata(root.HelmReleaseName)
+		deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName)
 		if err != nil {
 			chartVersion = fmt.Errorf("failed to get the deployed chart version: %v", err).Error()
 		} else {
 			chartVersion = fmt.Sprintf("deployed tobs helm chart version: %s", deployedChart.Version)
 		}
 	} else {
-		err = utils.AddUpdateTobsChart()
+		err = helmClient.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
 		if err != nil {
 			return fmt.Errorf("failed to add and update the tobs helm chart version %v", err)
 		}
-		latestChart, err := utils.GetTobsChartMetadata(utils.DEFAULT_CHART)
+		latestChart, err := helmClient.GetTobsChartMetadata(utils.DEFAULT_CHART)
 		if err != nil {
 			return fmt.Errorf("failed to get latest tobs helm chart version %v", err)
 		}

@@ -1,4 +1,4 @@
-package utils
+package helm
 
 import (
 	"reflect"
@@ -50,9 +50,10 @@ func TestExportValuesFieldFromChart(t *testing.T) {
 			wantErr: true,
 		},
 	}
+	helmClient := NewClient("default")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ExportValuesFieldFromChart(tt.args.chart, "", tt.args.keys)
+			got, err := helmClient.ExportValuesFieldFromChart(tt.args.chart, "", tt.args.keys)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ExportValuesFieldValue() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -56,7 +56,32 @@ jobs:
         with:
           version: "v0.7.0"
 
+      - name: Upgrade-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make upgrade-tests
+
+      - name: HA-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make ha-tests
+
+      - name: Install-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make install-tests
+
+      - name: Helm-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make helm-tests
+
       - name: E2E-Tests
         working-directory: ${{env.working-directory}}
         run: |
           make e2e-tests
+
+      - name: External-DB-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          make external-db-tests

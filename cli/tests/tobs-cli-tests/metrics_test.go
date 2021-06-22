@@ -10,8 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/timescale/tobs/cli/pkg/k8s"
-
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -242,7 +240,7 @@ func TestMetrics(t *testing.T) {
 		t.Skip("Skipping metrics tests")
 	}
 
-	secret, err := k8s.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-credentials")
+	secret, err := kubeClient.K8s.KubeGetSecret(NAMESPACE, RELEASE_NAME+"-credentials")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,7 +252,7 @@ func TestMetrics(t *testing.T) {
 	}
 
 	dbLabelsSet := map[string]string{"release": RELEASE_NAME, "role": "master"}
-	podName, err := k8s.KubeGetPodName(NAMESPACE, dbLabelsSet)
+	podName, err := kubeClient.K8s.KubeGetPodName(NAMESPACE, dbLabelsSet)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +263,7 @@ func TestMetrics(t *testing.T) {
 
 	stdout := os.Stdout
 	os.Stdout = os.NewFile(0, os.DevNull)
-	_, err = k8s.KubePortForwardPod(NAMESPACE, podName, 5433, 5432)
+	_, err = kubeClient.K8s.KubePortForwardPod(NAMESPACE, podName, 5433, 5432)
 	if err != nil {
 		t.Fatal(err)
 	}

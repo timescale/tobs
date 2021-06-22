@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // promscalePortForwardCmd represents the PromScale port-forward command
@@ -23,12 +22,12 @@ func init() {
 }
 
 func PortForwardPromscale(listenPort int) error {
-	serviceNamePromscale, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": root.HelmReleaseName + "-promscale"})
+	serviceNamePromscale, err := kubeClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": root.HelmReleaseName + "-promscale"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Promscale: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceNamePromscale, listenPort, common.FORWARD_PORT_PROMSCALE)
+	_, err = kubeClient.KubePortForwardService(root.Namespace, serviceNamePromscale, listenPort, common.FORWARD_PORT_PROMSCALE)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Promscale: %w", err)
 	}

@@ -2,17 +2,17 @@ package helm_tests
 
 import (
 	"context"
+	"github.com/timescale/tobs/cli/pkg/utils"
 	"testing"
 
 	"github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/pkg/helm"
-	"helm.sh/helm/v3/pkg/repo"
 )
 
 var helmClientTest helm.Client
 
 func TestNewHelmClient(t *testing.T) {
-	opt := &helm.Options{
+	opt := &helm.ClientOptions{
 		Namespace: cmd.Namespace,
 		Linting:   true,
 	}
@@ -25,14 +25,8 @@ func TestNewHelmClient(t *testing.T) {
 }
 
 func TestHelmClientAddOrUpdateChartRepoPublic(t *testing.T) {
-	// Define a public chart repository
-	chartRepo := repo.Entry{
-		Name: "timescale",
-		URL:  "https://charts.timescale.com",
-	}
-
 	// Add a chart-repository to the client
-	if err := helmClientTest.AddOrUpdateChartRepo(chartRepo); err != nil {
+	if err := helmClientTest.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION); err != nil {
 		t.Fatal(err)
 	}
 }

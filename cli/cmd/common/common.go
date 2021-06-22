@@ -2,10 +2,9 @@ package common
 
 import (
 	"fmt"
-
-	"github.com/timescale/tobs/cli/cmd"
+	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/pgconn"
-	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
 const (
@@ -22,14 +21,14 @@ const (
 )
 
 func FormDBDetails(user, dbName string) (pgconn.DBDetails, error) {
-	secretKey, user, err := GetDBSecretKeyAndDBUser(cmd.HelmReleaseName, cmd.Namespace, user)
+	secretKey, user, err := GetDBSecretKeyAndDBUser(root.HelmReleaseName, user)
 	if err != nil {
 		return pgconn.DBDetails{}, fmt.Errorf("could not get DB secret key from helm release: %w", err)
 	}
 
 	d := pgconn.DBDetails{
-		Namespace: cmd.Namespace,
-		Name:      cmd.HelmReleaseName,
+		Namespace: root.Namespace,
+		Name:      root.HelmReleaseName,
 		DBName:    dbName,
 		User:      user,
 		SecretKey: secretKey,
@@ -39,9 +38,10 @@ func FormDBDetails(user, dbName string) (pgconn.DBDetails, error) {
 	return d, nil
 }
 
-func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, string, error) {
+func GetDBSecretKeyAndDBUser(releaseName, dbUser string) (string, string, error) {
 	var userName string
-	e, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "enabled"})
+	helmClient := helm.NewClient(root.Namespace)
+	e, err := helmClient.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "enabled"})
 	if err != nil {
 		return "", "", err
 	}
@@ -51,7 +51,7 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 	}
 
 	if !enableTimescaleDB {
-		dbURI, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledbExternal", "db_uri"})
+		dbURI, err := helmClient.ExportValuesFieldFromRelease(releaseName, []string{"timescaledbExternal", "db_uri"})
 		if err != nil {
 			return "", "", err
 		}
@@ -64,7 +64,7 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 		return "PATRONI_SUPERUSER_PASSWORD", userName, nil
 	}
 
-	data, err := utils.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "patroni", "postgresql", "authentication", "superuser", "username"})
+	data, err := helmClient.ExportValuesFieldFromRelease(releaseName, []string{"timescaledb-single", "patroni", "postgresql", "authentication", "superuser", "username"})
 	if err != nil {
 		return "", "", err
 	}
@@ -82,18 +82,4 @@ func GetDBSecretKeyAndDBUser(releaseName, namespace, dbUser string) (string, str
 	// use default super user from helm release
 	// the default super-user password is mapped to "PATRONI_SUPERUSER_PASSWORD" secret key
 	return "PATRONI_SUPERUSER_PASSWORD", fmt.Sprint(userName), nil
-}
-
-func GetTimescaleDBLabels() map[string]string {
-	return map[string]string{
-		"app":     cmd.HelmReleaseName + "-timescaledb",
-		"release": cmd.HelmReleaseName,
-	}
-}
-
-func GetPrometheusLabels() map[string]string {
-	return map[string]string{
-		"app":        "prometheus",
-		"prometheus": "tobs-kube-prometheus-prometheus",
-	}
 }

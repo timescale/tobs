@@ -1,14 +1,14 @@
 package helm
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/timescale/tobs/cli/cmd"
+	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/pkg/helm"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
@@ -29,7 +29,6 @@ func init() {
 	helmCmd.AddCommand(helmInstallCmd)
 	addChartDetailsFlags(helmInstallCmd)
 	addInstallUtilitiesFlags(helmInstallCmd)
-
 }
 
 func addChartDetailsFlags(cmd *cobra.Command) {
@@ -137,7 +136,7 @@ func (c *installSpec) installStack() error {
 cli: true`
 
 	if c.dbURI != "" {
-		helmValues = appendDBURIValues(c.dbURI, cmd.HelmReleaseName, helmValues)
+		helmValues = appendDBURIValues(c.dbURI, root.HelmReleaseName, helmValues)
 	} else {
 		// if db-uri is provided we do not need
 		// to create DB level secrets
@@ -152,20 +151,23 @@ cli: true`
 		}
 	}
 
+	helmClient = helm.NewClient(root.Namespace)
+
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
 	if c.ref == utils.DEFAULT_CHART {
-		err = helm.AddUpdateChart(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
+		err = helmClient.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
 		if err != nil {
 			return fmt.Errorf("failed to add & update tobs helm chart: %w", err)
 		}
 	}
 
 	helmValuesSpec := helm.ChartSpec{
-		ReleaseName:      cmd.HelmReleaseName,
+		ReleaseName:      root.HelmReleaseName,
 		ChartName:        c.ref,
-		Namespace:        cmd.Namespace,
+		Namespace:        root.Namespace,
 		DependencyUpdate: true,
+		CreateNamespace:  true,
 	}
 
 	if c.configFile != "" {
@@ -175,7 +177,7 @@ cli: true`
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
 	if !c.enableBackUp {
-		e, err := utils.ExportValuesFieldFromChart(c.ref, c.configFile, TimescaleDBBackUpKeyForValuesYaml)
+		e, err := helmClient.ExportValuesFieldFromChart(c.ref, c.configFile, TimescaleDBBackUpKeyForValuesYaml)
 		if err != nil {
 			return err
 		}
@@ -203,7 +205,7 @@ timescaledb-single:
 	helmValuesSpec.ValuesYaml = helmValues
 
 	fmt.Println("Installing The Observability Stack")
-	release, err := helm.InstallUpgradeChart(&helmValuesSpec)
+	release, err := helmClient.InstallOrUpgradeChart(context.Background(), &helmValuesSpec)
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -214,13 +216,13 @@ timescaledb-single:
 
 	if !c.skipWait {
 		fmt.Println("Waiting for pods to initialize...")
-		pods, err := k8s.KubeGetAllPods(cmd.Namespace, cmd.HelmReleaseName)
+		pods, err := kubeClient.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
 		if err != nil {
 			return err
 		}
 
 		for _, pod := range pods {
-			err = k8s.KubeWaitOnPod(cmd.Namespace, pod.Name)
+			err = kubeClient.KubeWaitOnPod(root.Namespace, pod.Name)
 			if err != nil {
 				return err
 			}
@@ -230,7 +232,9 @@ timescaledb-single:
 	}
 
 	fmt.Println("The Observability Stack has been installed successfully")
-	fmt.Println(release.Info.Notes)
+	if release != nil && release.Info != nil {
+		fmt.Println(release.Info.Notes)
+	}
 	return nil
 }
 
@@ -289,11 +293,12 @@ func (c *installSpec) createSecrets() error {
 	// installations needs secrets
 	if i > 3000 || c.version == "" {
 		t := timescaledb_secrets.TSDBSecretsInfo{
-			ReleaseName:    cmd.HelmReleaseName,
-			Namespace:      cmd.Namespace,
+			ReleaseName:    root.HelmReleaseName,
+			Namespace:      root.Namespace,
 			EnableS3Backup: c.enableBackUp,
 			TlsCert:        c.tsDBTlsCert,
 			TlsKey:         c.tsDBTlsKey,
+			KubeClient:     kubeClient,
 		}
 		err := t.CreateTimescaleDBSecrets()
 		if err != nil {

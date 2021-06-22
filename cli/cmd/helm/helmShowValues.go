@@ -3,6 +3,7 @@ package helm
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/pkg/helm"
 )
 
@@ -27,7 +28,8 @@ func helmShowValues(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	res, err := helm.GetValuesFromChart(chart)
+	helmClient = helm.NewClient(root.Namespace)
+	res, err := helmClient.GetChartValues(chart)
 	if err != nil {
 		return fmt.Errorf("failed to get helm values: %w", err)
 	}
