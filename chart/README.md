@@ -25,7 +25,13 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
 The recommended way to deploy tobs is through the [CLI tool](/cli). However, we also
 support helm deployments that do not use the CLI.
 
-The following command will install Prometheus, TimescaleDB, Promscale Connector, and Grafana
+## Creating Secrets
+
+By default, timescaledb helm chart doesn't create its own secrets. So please follow [these instructions][timescaledb-secrets] to create timescaledb-secrets. If you use tobs CLI this is taken care for you.
+
+## Installing the helm chart
+
+The following command will install Kube-Prometheus, TimescaleDB, and Promscale Connector
 into your Kubernetes cluster:
 ```
 helm repo add timescale https://charts.timescale.com/
@@ -240,3 +246,4 @@ For all the properties that can be configured and more details on how to set up 
 [kube-prometheus-helm-hub]: https://prometheus-community.github.io/helm-charts
 [prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
 [grafana-helm-hub]: https://grafana.github.io/helm-charts
+[timescaledb-secrets]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#creating-the-secrets
