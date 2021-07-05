@@ -32,8 +32,6 @@ See a demo of tobs in action by clicking the video below:
 
 # 🔥 Quick start
 
-__Dependencies__: [Helm 3](https://helm.sh/docs/intro/install/)
-
 ## Using the tobs CLI tool
 
 The [CLI tool](/cli/README.md) ([usage docs](docs/cli-usage.md)) provides the most seamless experience for interacting with tobs.
