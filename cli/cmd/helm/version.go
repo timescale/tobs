@@ -22,7 +22,7 @@ func init() {
 	versionCmd.Flags().BoolP("deployed-chart", "d", false, "Option to show deployed tobs helm chart version")
 }
 
-const tobsVersion = "0.4.1"
+const tobsVersion = "0.5.0"
 
 func version(cmd *cobra.Command, args []string) error {
 	d, err := cmd.Flags().GetBool("deployed-chart")

@@ -22,7 +22,7 @@ var (
 	PATH_TO_TOBS        = "./../../bin/tobs"
 	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
 	PATH_TO_MAIN_VALUES = "./../../../chart/values.yaml"
-	TOBS_VERSION        = "0.4.1"
+	TOBS_VERSION        = "0.5.0"
 )
 
 func TestNewHelmClient(t *testing.T) {
