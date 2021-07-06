@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
@@ -19,10 +20,11 @@ var (
 	oldNamespaceFromEnv string
 	NAMESPACE           = "hello"
 	CHART_NAME          = "timescale/tobs"
+	LATEST_CHART        = "./../../../chart"
 	PATH_TO_TOBS        = "./../../bin/tobs"
 	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
 	PATH_TO_MAIN_VALUES = "./../../../chart/values.yaml"
-	TOBS_VERSION        = "0.5.0"
+	TOBS_VERSION        = "0.4.1"
 )
 
 func TestNewHelmClient(t *testing.T) {
@@ -99,7 +101,7 @@ func TestExportValueFromChart(t *testing.T) {
 }
 
 func TestGetChartValues(t *testing.T) {
-	res, err := helmClientTest.GetChartValues(CHART_NAME)
+	res, err := helmClientTest.GetChartValues(LATEST_CHART)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +114,9 @@ func TestGetChartValues(t *testing.T) {
 	r := bytes.Compare(res, expected)
 
 	if r != 0 {
-		t.Fatal("failed to verify get chart values")
+		dmp := diffmatchpatch.New()
+		diffs := dmp.DiffMain(string(res), string(expected), false)
+		t.Fatalf("failed to verify get chart values:\n%v", dmp.DiffPrettyText(diffs))
 	}
 }
 
