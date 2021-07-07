@@ -18,16 +18,17 @@ import (
 var (
 	helmClientTest      helm.Client
 	oldNamespaceFromEnv string
+	tobsVersion         string
 	NAMESPACE           = "hello"
 	CHART_NAME          = "timescale/tobs"
 	LATEST_CHART        = "./../../../chart"
 	PATH_TO_TOBS        = "./../../bin/tobs"
 	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
 	PATH_TO_MAIN_VALUES = "./../../../chart/values.yaml"
-	TOBS_VERSION        = "0.5.0"
+	DEFAULT_TOBS_NAME   = "tobs"
 )
 
-func TestNewHelmClient(t *testing.T) {
+func testNewHelmClient() {
 	opt := &helm.ClientOptions{
 		Namespace: NAMESPACE,
 		Linting:   true,
@@ -38,7 +39,7 @@ func TestNewHelmClient(t *testing.T) {
 	var err error
 	helmClientTest, err = helm.New(opt)
 	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
@@ -68,26 +69,72 @@ func testUnSetHelmNamespaceEnv() {
 	}
 }
 
-func TestHelmClientAddOrUpdateChartRepoPublic(t *testing.T) {
+// add or update tobs helm repo
+func testHelmClientAddOrUpdateChartRepoPublic() {
 	// Add a chart-repository to the client
 	if err := helmClientTest.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION); err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
-func TestGetChartMetadata(t *testing.T) {
-	chart, err := helmClientTest.GetChartMetadata(CHART_NAME)
+// install or upgrade tobs instllation
+func testHelmClientInstallOrUpgradeChart() {
+	log.Println("Installing Tobs secrets...")
+	runTsdb := exec.Command(PATH_TO_TOBS, "install", "--namespace", NAMESPACE, "--only-secrets")
+	_, err := runTsdb.CombinedOutput()
 	if err != nil {
-		t.Fatal(err)
+		log.Fatalf("Error installing tobs secrets %v:", err)
 	}
 
-	if chart.Name != CHART_NAME && chart.Version != TOBS_VERSION {
-		t.Fatalf("failed to verify chart metadata %v", chart)
+	// Define the chart to be installed
+	chartSpec := helm.ChartSpec{
+		ReleaseName:     DEFAULT_TOBS_NAME,
+		ChartName:       CHART_NAME,
+		Namespace:       NAMESPACE,
+		Version:         tobsVersion,
+		CreateNamespace: true,
+		ValuesFiles:     []string{PATH_TO_TEST_VALUES},
+	}
+
+	res, err := helmClientTest.InstallOrUpgradeChart(context.Background(), &chartSpec)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if res.Info.Status != "deployed" {
+		log.Fatal("failed to perform helm chart install")
+	}
+}
+
+// list tobs deployment and verify it post uninstall
+func testTobsReleasePostUninstall() {
+	res, err := helmClientTest.GetDeployedChartMetadata("tobs")
+	if err == nil && res.Name == DEFAULT_TOBS_NAME {
+		log.Fatal("the tobs release after uninstalling are still showing up....", res)
+	}
+	testUnSetHelmNamespaceEnv()
+
+	ns := os.Getenv("HELM_NAMESPACE")
+	if ns != oldNamespaceFromEnv || ns != "hii" {
+		log.Fatal("failed to set back old HELM_NAMESPACE value to env variable")
+	}
+}
+
+func testGetChartMetadata() {
+	chart, err := helmClientTest.GetChartMetadata(CHART_NAME)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// assign the latest chart version from timescale/tobs helm chart
+	tobsVersion = chart.Version
+	if chart.Name != DEFAULT_TOBS_NAME {
+		log.Fatalf("failed to verify chart metadata %v", chart)
 	}
 }
 
 func TestExportValueFromChart(t *testing.T) {
-	res, err := helmClientTest.ExportValuesFieldFromChart("timescale/tobs", PATH_TO_TEST_VALUES, []string{"promscale", "resources", "requests", "memory"})
+	res, err := helmClientTest.ExportValuesFieldFromChart(CHART_NAME, PATH_TO_TEST_VALUES, []string{"promscale", "resources", "requests", "memory"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,54 +167,26 @@ func TestGetChartValues(t *testing.T) {
 	}
 }
 
-func TestHelmClientInstallOrUpgradeChart(t *testing.T) {
-	t.Log("Installing Tobs secrets...")
-	runTsdb := exec.Command(PATH_TO_TOBS, "install", "--namespace", NAMESPACE, "--only-secrets")
-	_, err := runTsdb.CombinedOutput()
-	if err != nil {
-		t.Fatalf("Error installing tobs secrets %v:", err)
-	}
-
-	// Define the chart to be installed
-	chartSpec := helm.ChartSpec{
-		ReleaseName:     "tobs",
-		ChartName:       CHART_NAME,
-		Namespace:       NAMESPACE,
-		Version:         TOBS_VERSION,
-		CreateNamespace: true,
-		ValuesFiles:     []string{PATH_TO_TEST_VALUES},
-	}
-
-	res, err := helmClientTest.InstallOrUpgradeChart(context.Background(), &chartSpec)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if res.Info.Status != "deployed" {
-		t.Fatal("failed to perform helm chart install")
-	}
-}
-
 func TestGetDeployedChartMetadata(t *testing.T) {
-	chart, err := helmClientTest.GetDeployedChartMetadata("tobs")
+	chart, err := helmClientTest.GetDeployedChartMetadata(DEFAULT_TOBS_NAME)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if chart.Name != "tobs" && chart.Namespace != NAMESPACE && chart.Status != "deployed" && chart.Version != TOBS_VERSION {
+	if chart.Name != DEFAULT_TOBS_NAME && chart.Namespace != NAMESPACE && chart.Status != "deployed" && chart.Version != tobsVersion {
 		t.Fatalf("failed to verify deployed chart metadata %v", chart)
 	}
 }
 
 func TestHelmClientGetReleaseValues(t *testing.T) {
-	_, err := helmClientTest.GetReleaseValues("tobs")
+	_, err := helmClientTest.GetReleaseValues(DEFAULT_TOBS_NAME)
 	if err != nil {
 		t.Fatal("failed to get all release values", err)
 	}
 }
 
 func TestExportValueFromRelease(t *testing.T) {
-	res, err := helmClientTest.ExportValuesFieldFromRelease("tobs", []string{"promscale", "resources", "requests", "cpu"})
+	res, err := helmClientTest.ExportValuesFieldFromRelease(DEFAULT_TOBS_NAME, []string{"promscale", "resources", "requests", "cpu"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,26 +203,13 @@ func TestExportValueFromRelease(t *testing.T) {
 func TestHelmClientUninstallRelease(t *testing.T) {
 	// Define the released chart to be installed
 	chartSpec := helm.ChartSpec{
-		ReleaseName: "tobs",
+		ReleaseName: DEFAULT_TOBS_NAME,
 		ChartName:   CHART_NAME,
 		Namespace:   NAMESPACE,
 	}
 
-	TestNewHelmClient(t)
+	testNewHelmClient()
 	if err := helmClientTest.UninstallRelease(&chartSpec); err != nil {
 		t.Fatal(err)
-	}
-}
-
-func TestHelmClientListDeployedReleases(t *testing.T) {
-	res, err := helmClientTest.GetDeployedChartMetadata("tobs")
-	if err == nil && res.Name == "tobs" {
-		t.Fatal("the tobs release after uninstalling are still showing up....", res)
-	}
-	testUnSetHelmNamespaceEnv()
-
-	ns := os.Getenv("HELM_NAMESPACE")
-	if ns != oldNamespaceFromEnv || ns != "hii" {
-		t.Fatal("failed to set back old HELM_NAMESPACE value to env variable")
 	}
 }
