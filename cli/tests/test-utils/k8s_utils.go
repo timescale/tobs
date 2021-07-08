@@ -58,9 +58,9 @@ func UpdateStorageClassAllowVolumeExpand() error {
 	return nil
 }
 
-func GetAllPVCSizes() (map[string]string, error) {
+func GetAllPVCSizes(namespace string) (map[string]string, error) {
 	client, _ := kubeInit()
-	pvcs, err := client.CoreV1().PersistentVolumeClaims("ns").List(context.Background(), metav1.ListOptions{})
+	pvcs, err := client.CoreV1().PersistentVolumeClaims(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}

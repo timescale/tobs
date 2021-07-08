@@ -23,7 +23,8 @@ func init() {
 }
 
 func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
+	k8sClient := k8s.NewClient()
+	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}

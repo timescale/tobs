@@ -55,9 +55,9 @@ func ConfirmAction() {
 	}
 }
 
-func GetTimescaleDBURI(namespace, name string) (string, error) {
+func GetTimescaleDBURI(k8sClient k8s.Client, namespace, name string) (string, error) {
 	secretName := name + "-timescaledb-uri"
-	secrets, err := k8s.KubeGetAllSecrets(namespace)
+	secrets, err := k8sClient.KubeGetAllSecrets(namespace)
 	if err != nil {
 		return "", err
 	}
@@ -77,8 +77,8 @@ func GetTimescaleDBURI(namespace, name string) (string, error) {
 	return "", nil
 }
 
-func GetDBPassword(secretKey, name, namespace string) ([]byte, error) {
-	secret, err := k8s.KubeGetSecret(namespace, name+"-credentials")
+func GetDBPassword(k8sClient k8s.Client, secretKey, name, namespace string) ([]byte, error) {
+	secret, err := k8sClient.KubeGetSecret(namespace, name+"-credentials")
 	if err != nil {
 		return nil, fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}

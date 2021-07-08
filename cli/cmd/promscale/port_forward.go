@@ -23,12 +23,13 @@ func init() {
 }
 
 func PortForwardPromscale(listenPort int) error {
-	serviceNamePromscale, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": root.HelmReleaseName + "-promscale"})
+	k8sClient := k8s.NewClient()
+	serviceNamePromscale, err := k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": root.HelmReleaseName + "-promscale"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Promscale: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceNamePromscale, listenPort, common.FORWARD_PORT_PROMSCALE)
+	_, err = k8sClient.KubePortForwardService(root.Namespace, serviceNamePromscale, listenPort, common.FORWARD_PORT_PROMSCALE)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Promscale: %w", err)
 	}

@@ -131,7 +131,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "151Gi", "21Gi", "9Gi", false)
-	res, err := test_utils.GetAllPVCSizes()
+	res, err := test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +143,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "152Gi", "22Gi", "", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "153Gi", "", "", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +167,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "23Gi", "", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +179,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "24Gi", "10Gi", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +191,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "11Gi", false)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +207,8 @@ func TestVolume(t *testing.T) {
 
 	// TESTCASE: Volume expand Prometheus storage and restart the pods
 
-	pods, err := k8s.KubeGetPods(NAMESPACE, prometheusLabels)
+	k8sClient := k8s.NewClient()
+	pods, err := k8sClient.KubeGetPods(NAMESPACE, prometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,7 +225,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "", "", "12Gi", true)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,13 +240,13 @@ func TestVolume(t *testing.T) {
 	labels = append(labels, prometheusLabels)
 	// pod restart takes sometime for Prometheus to start & to move to running state.
 	time.Sleep(1 * time.Minute)
-	verifyPodRestart(t, podsSet, labels)
+	verifyPodRestart(t, podsSet, labels, k8sClient)
 
 	// TESTCASE: Volume expand TimescaleDB storage, wal, Prometheus storage & restart the pods
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
-	pods, err = k8s.KubeGetPods(NAMESPACE, prometheusLabels)
+	pods, err = k8sClient.KubeGetPods(NAMESPACE, prometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +263,7 @@ func TestVolume(t *testing.T) {
 		}
 	}
 
-	pods, err = k8s.KubeGetPods(NAMESPACE, timescaleDBLabels)
+	pods, err = k8sClient.KubeGetPods(NAMESPACE, timescaleDBLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -277,7 +278,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "154Gi", "24Gi", "13Gi", true)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -291,13 +292,13 @@ func TestVolume(t *testing.T) {
 	labels = append(labels, timescaleDBLabels, prometheusLabels)
 	// pod restart takes sometime for TimescaleDB to start & to move to running state.
 	time.Sleep(1 * time.Minute)
-	verifyPodRestart(t, podsSet, labels)
+	verifyPodRestart(t, podsSet, labels, k8sClient)
 
 	// TESTCASE: Volume Expand only timescaleDB and restart pods.
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
-	pods, err = k8s.KubeGetPods(NAMESPACE, timescaleDBLabels)
+	pods, err = k8sClient.KubeGetPods(NAMESPACE, timescaleDBLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -315,7 +316,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	testVolumeExpansion(t, "155Gi", "25Gi", "", true)
-	res, err = test_utils.GetAllPVCSizes()
+	res, err = test_utils.GetAllPVCSizes(NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -329,14 +330,14 @@ func TestVolume(t *testing.T) {
 	labels = append(labels, timescaleDBLabels)
 	// pod restart takes sometime for TimescaleDB to start & to move to running state.
 	time.Sleep(1 * time.Minute)
-	verifyPodRestart(t, podsSet, labels)
+	verifyPodRestart(t, podsSet, labels, k8sClient)
 }
 
-func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]string) {
+func verifyPodRestart(t *testing.T, podsSet []podDetails, labels []map[string]string, k8sClient k8s.Client) {
 	var pods []v1.Pod
 
 	for _, l := range labels {
-		p, err := k8s.KubeGetPods(NAMESPACE, l)
+		p, err := k8sClient.KubeGetPods(NAMESPACE, l)
 		if err != nil {
 			t.Fatal(err)
 		}

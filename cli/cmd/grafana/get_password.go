@@ -23,7 +23,8 @@ func init() {
 func grafanaGetPassword(cmd *cobra.Command, args []string) error {
 	var err error
 
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana")
+	k8sClient := k8s.NewClient()
+	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana")
 	if err != nil {
 		return fmt.Errorf("could not get Grafana password: %w", err)
 	}

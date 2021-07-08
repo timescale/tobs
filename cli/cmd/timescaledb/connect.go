@@ -45,7 +45,8 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
+	k8sClient := k8s.NewClient()
+	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
@@ -63,18 +64,18 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
 	}
 
-	uri, err := utils.GetTimescaleDBURI(root.Namespace, root.HelmReleaseName)
+	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
 
 	if master {
-		masterpod, err := k8s.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
+		masterpod, err := k8sClient.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
-		err = k8s.KubeExecCmd(root.Namespace, masterpod, "", "psql -U "+user, os.Stdin, true)
+		err = k8sClient.KubeExecCmd(root.Namespace, masterpod, "", "psql -U "+user, os.Stdin, true)
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
@@ -88,26 +89,26 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 
 		pod := getPodObject(dbname, root.Namespace, user, pass, host, uri)
 
-		err = k8s.KubeCreatePod(pod)
+		err = k8sClient.KubeCreatePod(pod)
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
 		time.Sleep(time.Second)
 
-		err = k8s.KubeWaitOnPod(root.Namespace, "psql")
+		err = k8sClient.KubeWaitOnPod(root.Namespace, "psql")
 		if err != nil {
-			_ = k8s.KubeDeletePod(root.Namespace, "psql")
+			_ = k8sClient.KubeDeletePod(root.Namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
-		err = k8s.KubeExecCmd(root.Namespace, "psql", "", psqlCMD, os.Stdin, true)
+		err = k8sClient.KubeExecCmd(root.Namespace, "psql", "", psqlCMD, os.Stdin, true)
 		if err != nil {
-			_ = k8s.KubeDeletePod(root.Namespace, "psql")
+			_ = k8sClient.KubeDeletePod(root.Namespace, "psql")
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
-		err = k8s.KubeDeletePod(root.Namespace, "psql")
+		err = k8sClient.KubeDeletePod(root.Namespace, "psql")
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}

@@ -31,12 +31,13 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 	os.Stdout = nil
 	defer func() { os.Stdout = stdout }()
 
-	tspromPods, err := k8s.KubeGetPods(d.Namespace, map[string]string{"app": d.Name + "-promscale"})
+	k8sClient := k8s.NewClient()
+	tspromPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"app": d.Name + "-promscale"})
 	if err != nil {
 		return nil, err
 	}
 
-	passBytes, err := utils.GetDBPassword(d.SecretKey, d.Name, d.Namespace)
+	passBytes, err := utils.GetDBPassword(k8sClient, d.SecretKey, d.Name, d.Namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -55,18 +56,18 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 		}
 	}
 
-	dbURI, err := utils.GetTimescaleDBURI(d.Namespace, d.Name)
+	dbURI, err := utils.GetTimescaleDBURI(k8sClient, d.Namespace, d.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	tsdbPods, err := k8s.KubeGetPods(d.Namespace, map[string]string{"release": d.Name, "role": "master"})
+	tsdbPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"release": d.Name, "role": "master"})
 	if err != nil {
 		return nil, err
 	}
 
 	if len(tsdbPods) != 0 {
-		pf, err := k8s.KubePortForwardPod(d.Namespace, tsdbPods[0].Name, 0, d.Remote)
+		pf, err := k8sClient.KubePortForwardPod(d.Namespace, tsdbPods[0].Name, 0, d.Remote)
 		if err != nil {
 			return nil, err
 		}

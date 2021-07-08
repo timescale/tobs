@@ -55,9 +55,10 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Uninstalling The Observability Stack")
 
+	k8sClient := k8s.NewClient()
 	// If chart is upgraded to 0.4.0 & performing uninstall
 	// we should manually delete the 0.4.0 upgrade job
-	err = delete040UpgradeJob(helmClient)
+	err = delete040UpgradeJob(helmClient, k8sClient)
 	if err != nil {
 		return err
 	}
@@ -73,10 +74,10 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
 
-	timescaledb_secrets.DeleteTimescaleDBSecrets(root.HelmReleaseName, root.Namespace, enableBackUp)
+	timescaledb_secrets.DeleteTimescaleDBSecrets(k8sClient, root.HelmReleaseName, root.Namespace, enableBackUp)
 	fmt.Println("Waiting for pods to terminate...")
 	for i := 0; i < 1000; i++ {
-		pods, err := k8s.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
+		pods, err := k8sClient.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
 		if err != nil {
 			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
@@ -89,25 +90,25 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("Deleting remaining artifacts")
-	err = k8s.KubeDeleteService(root.Namespace, root.HelmReleaseName+"-config")
+	err = k8sClient.KubeDeleteService(root.Namespace, root.HelmReleaseName+"-config")
 	if err != nil {
 		fmt.Println(err, ", skipping")
 	}
 
-	err = k8s.KubeDeleteEndpoint(root.Namespace, root.HelmReleaseName)
+	err = k8sClient.KubeDeleteEndpoint(root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		fmt.Println(err, ", skipping")
 	}
 
 	if deleteData {
 		fmt.Println("Checking Persistent Volume Claims")
-		pvcnames, err := k8s.KubeGetPVCNames(root.Namespace, map[string]string{"release": root.HelmReleaseName})
+		pvcnames, err := k8sClient.KubeGetPVCNames(root.Namespace, map[string]string{"release": root.HelmReleaseName})
 		if err != nil {
 			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
 
 		// Prometheus PVC's doesn't hold the release labelSet
-		prometheusPvcNames, err := k8s.KubeGetPVCNames(root.Namespace, common.GetPrometheusLabels())
+		prometheusPvcNames, err := k8sClient.KubeGetPVCNames(root.Namespace, common.GetPrometheusLabels())
 		if err != nil {
 			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 		}
@@ -115,7 +116,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 		fmt.Println("Removing Persistent Volume Claims")
 		for _, s := range pvcnames {
-			err = k8s.KubeDeletePVC(root.Namespace, s)
+			err = k8sClient.KubeDeletePVC(root.Namespace, s)
 			if err != nil {
 				return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 			}
@@ -128,7 +129,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func delete040UpgradeJob(helmClient helm.Client) error {
+func delete040UpgradeJob(helmClient helm.Client, k8sClient k8s.Client) error {
 	deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName)
 	if err != nil {
 		return err
@@ -143,7 +144,7 @@ func delete040UpgradeJob(helmClient helm.Client) error {
 		return fmt.Errorf("failed to parse 0.4.0 version %w", err)
 	}
 	if dVersion >= version0_4_0 {
-		upgradeJob, err := k8s.GetJob(utils.UpgradeJob_040, root.Namespace)
+		upgradeJob, err := k8sClient.GetJob(utils.UpgradeJob_040, root.Namespace)
 		if err != nil {
 			ok := errors2.IsNotFound(err)
 			if !ok {
@@ -153,7 +154,7 @@ func delete040UpgradeJob(helmClient helm.Client) error {
 
 		if upgradeJob.Name != "" {
 			fmt.Println("deleting the 0.4.0 upgrade job...")
-			err = k8s.DeleteJob(utils.UpgradeJob_040, root.Namespace)
+			err = k8sClient.DeleteJob(utils.UpgradeJob_040, root.Namespace)
 			if err != nil {
 				return fmt.Errorf("failed to delete job %s %v\n", utils.UpgradeJob_040, err)
 			}

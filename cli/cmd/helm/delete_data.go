@@ -24,14 +24,15 @@ func helmDeleteData(cmd *cobra.Command, args []string) error {
 	var err error
 
 	fmt.Println("Getting Persistent Volume Claims")
-	pvcnames, err := k8s.KubeGetPVCNames(root.Namespace, map[string]string{"release": root.HelmReleaseName})
+	k8sClient := k8s.NewClient()
+	pvcnames, err := k8sClient.KubeGetPVCNames(root.Namespace, map[string]string{"release": root.HelmReleaseName})
 	if err != nil {
 		return fmt.Errorf("could not delete PVCs: %w", err)
 	}
 
 	fmt.Println("Removing Persistent Volume Claims")
 	for _, s := range pvcnames {
-		err = k8s.KubeDeletePVC(root.Namespace, s)
+		err = k8sClient.KubeDeletePVC(root.Namespace, s)
 		if err != nil {
 			return fmt.Errorf("could not delete PVCs: %w", err)
 		}

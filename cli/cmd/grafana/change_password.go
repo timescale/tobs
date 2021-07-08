@@ -25,7 +25,8 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 
 	password := args[0]
 
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana")
+	k8sClient := k8s.NewClient()
+	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana")
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
@@ -33,20 +34,20 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 	oldpassword := secret.Data["admin-password"]
 
 	secret.Data["admin-password"] = []byte(password)
-	err = k8s.KubeUpdateSecret(root.Namespace, secret)
+	err = k8sClient.KubeUpdateSecret(root.Namespace, secret)
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
 	fmt.Println("Changing password...")
-	grafanaPod, err := k8s.KubeGetPodName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
+	grafanaPod, err := k8sClient.KubeGetPodName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
-	err = k8s.KubeExecCmd(root.Namespace, grafanaPod, "grafana", "grafana-cli admin reset-admin-password "+password, nil, false)
+	err = k8sClient.KubeExecCmd(root.Namespace, grafanaPod, "grafana", "grafana-cli admin reset-admin-password "+password, nil, false)
 	if err != nil {
-		err1 := updateToOldPassword(oldpassword)
+		err1 := updateToOldPassword(k8sClient, oldpassword)
 		if err1 != nil {
 			// on failure just print the error, to indicate users the there is an inconsistency in pwd change.
 			fmt.Println(err1)
@@ -57,14 +58,14 @@ func grafanaChangePassword(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func updateToOldPassword(oldpassword []byte) error {
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana")
+func updateToOldPassword(k8sClient k8s.Client, oldpassword []byte) error {
+	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana")
 	if err != nil {
 		return fmt.Errorf("could not change Grafana password: %w", err)
 	}
 
 	secret.Data["admin-password"] = oldpassword
-	err = k8s.KubeUpdateSecret(root.Namespace, secret)
+	err = k8sClient.KubeUpdateSecret(root.Namespace, secret)
 	if err != nil {
 		return fmt.Errorf("failed to update secret to old password on change password failure %v", err)
 	}

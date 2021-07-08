@@ -116,14 +116,15 @@ func TestConcurrent(t *testing.T) {
 	time.Sleep(10 * time.Second)
 
 	t.Logf("Waiting for pods to initialize...")
-	pods, err := k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
+	k8sClient := k8s.NewClient()
+	pods, err := k8sClient.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
 	if err != nil {
 		t.Logf("Error getting all pods")
 		t.Fatal(err)
 	}
 
 	for _, pod := range pods {
-		err = k8s.KubeWaitOnPod(NAMESPACE, pod.Name)
+		err = k8sClient.KubeWaitOnPod(NAMESPACE, pod.Name)
 		if err != nil {
 			t.Logf("Error while waiting on pod")
 			t.Fatal(err)

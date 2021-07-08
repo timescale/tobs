@@ -31,12 +31,13 @@ func grafanaPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}
 
-	serviceName, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
+	k8sClient := k8s.NewClient()
+	serviceName, err := k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceName, port, common.FORWARD_PORT_GRAFANA)
+	_, err = k8sClient.KubePortForwardService(root.Namespace, serviceName, port, common.FORWARD_PORT_GRAFANA)
 	if err != nil {
 		return fmt.Errorf("could not port-forward Grafana: %w", err)
 	}

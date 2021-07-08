@@ -273,7 +273,8 @@ func (c *TestUnInstallSpec) TestHelmUninstall(t testing.TB) {
 		t.Fatal(err)
 	}
 
-	pods, err := k8s.KubeGetAllPods("tobs", "default")
+	k8sClient := k8s.NewClient()
+	pods, err := k8sClient.KubeGetAllPods("tobs", "default")
 	if err != nil {
 		t.Fatal(err)
 	}
