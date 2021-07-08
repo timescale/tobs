@@ -48,32 +48,33 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 	}
 	defer pool.Close()
 
-	oldpassword, err := utils.GetDBPassword(d.SecretKey, root.HelmReleaseName, root.Namespace)
+	k8sClient := k8s.NewClient()
+	oldpassword, err := utils.GetDBPassword(k8sClient, d.SecretKey, root.HelmReleaseName, root.Namespace)
 	if err != nil {
 		return fmt.Errorf("could not get existing TimescaleDB password: %w", err)
 	}
 
-	err = updateDBPwdSecrets(d.SecretKey, d.User, password)
+	err = updateDBPwdSecrets(k8sClient, d.SecretKey, d.User, password)
 	if err != nil {
 		return err
 	}
 
 	_, err = pool.Exec(context.Background(), "ALTER USER "+d.User+" WITH PASSWORD '"+password+"'")
 	if err != nil {
-		err1 := updateDBPwdSecrets(d.SecretKey, d.User, string(oldpassword))
+		err1 := updateDBPwdSecrets(k8sClient, d.SecretKey, d.User, string(oldpassword))
 		if err1 != nil {
 			fmt.Printf("failed to revert to the old password on password update failure %v", err1)
 		}
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 
-	uri, err := utils.GetTimescaleDBURI(root.Namespace, root.HelmReleaseName)
+	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
 
 	if uri != "" {
-		secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-timescaledb-uri")
+		secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-timescaledb-uri")
 		if err != nil {
 			return fmt.Errorf("could not get TimescaleDB password: %w", err)
 		}
@@ -84,7 +85,7 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 		}
 
 		secret.Data["db-uri"] = []byte(newURI)
-		err = k8s.KubeUpdateSecret(root.Namespace, secret)
+		err = k8sClient.KubeUpdateSecret(root.Namespace, secret)
 		if err != nil {
 			return fmt.Errorf("could not change TimescaleDB password in external TimescaleDB uri secret: %w", err)
 		}
@@ -93,19 +94,19 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func updateDBPwdSecrets(secretKey, user, password string) error {
-	secret, err := k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
+func updateDBPwdSecrets(k8sClient k8s.Client, secretKey, user, password string) error {
+	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
 	secret.Data[secretKey] = []byte(password)
-	err = k8s.KubeUpdateSecret(root.Namespace, secret)
+	err = k8sClient.KubeUpdateSecret(root.Namespace, secret)
 	if err != nil {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 
-	secret, err = k8s.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana-db")
+	secret, err = k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-grafana-db")
 	if err != nil {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
@@ -113,7 +114,7 @@ func updateDBPwdSecrets(secretKey, user, password string) error {
 	dbUser, ok := secret.Data["GF_DATABASE_USER"]
 	if ok && string(dbUser) == user {
 		secret.Data["GF_DATABASE_PASSWORD"] = []byte(password)
-		err = k8s.KubeUpdateSecret(root.Namespace, secret)
+		err = k8sClient.KubeUpdateSecret(root.Namespace, secret)
 		if err != nil {
 			return fmt.Errorf("could not change TimescaleDB password: %w", err)
 		}

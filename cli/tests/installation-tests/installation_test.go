@@ -10,7 +10,7 @@ import (
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-func testHelmDeleteData(t testing.TB, name, namespace string) {
+func testHelmDeleteData(t testing.TB, name, namespace string, k8sClient k8s.Client) {
 	cmds := []string{"helm", "delete-data"}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
@@ -32,7 +32,7 @@ func testHelmDeleteData(t testing.TB, name, namespace string) {
 		t.Fatal(err)
 	}
 
-	pvcs, err := k8s.KubeGetPVCNames("default", map[string]string{})
+	pvcs, err := k8sClient.KubeGetPVCNames("default", map[string]string{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,8 @@ func TestInstallation(t *testing.T) {
 		DeleteData:  false,
 	}
 	defUninstall.TestUninstall(t)
-	testHelmDeleteData(t, "def", "")
+	k8sClient := k8s.NewClient()
+	testHelmDeleteData(t, "def", "", k8sClient)
 
 	// f1 install
 	f1Install := test_utils.TestInstallSpec{
@@ -147,7 +148,7 @@ func TestInstallation(t *testing.T) {
 		OnlySecrets:  true,
 	}
 	f5Install.TestInstall(t)
-	pods, err := k8s.KubeGetAllPods("secrets", "f5")
+	pods, err := k8sClient.KubeGetAllPods("secrets", "f5")
 	if err != nil {
 		t.Log("failed to get all tobs pods")
 		t.Fatal(err)
@@ -184,14 +185,14 @@ func TestInstallation(t *testing.T) {
 	test_utils.ShowAllPods(t)
 
 	t.Logf("Waiting for pods to initialize...")
-	pods, err = k8s.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
+	pods, err = k8sClient.KubeGetAllPods(NAMESPACE, RELEASE_NAME)
 	if err != nil {
 		t.Logf("Error getting all pods")
 		t.Fatal(err)
 	}
 
 	for _, pod := range pods {
-		err = k8s.KubeWaitOnPod(NAMESPACE, pod.Name)
+		err = k8sClient.KubeWaitOnPod(NAMESPACE, pod.Name)
 		if err != nil {
 			t.Logf("Error while waiting on pod")
 			t.Fatal(err)

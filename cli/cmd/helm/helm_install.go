@@ -14,8 +14,6 @@ import (
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
-const DEVEL = false
-
 var TimescaleDBBackUpKeyForValuesYaml = []string{"timescaledb-single", "backup", "enabled"}
 
 // helmInstallCmd represents the helm install command
@@ -222,15 +220,16 @@ timescaledb-single:
 
 	time.Sleep(10 * time.Second)
 
+	k8sClient := k8s.NewClient()
 	if !c.skipWait {
 		fmt.Println("Waiting for pods to initialize...")
-		pods, err := k8s.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
+		pods, err := k8sClient.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
 		if err != nil {
 			return err
 		}
 
 		for _, pod := range pods {
-			err = k8s.KubeWaitOnPod(root.Namespace, pod.Name)
+			err = k8sClient.KubeWaitOnPod(root.Namespace, pod.Name)
 			if err != nil {
 				return err
 			}
@@ -304,6 +303,7 @@ func (c *installSpec) createSecrets() error {
 			EnableS3Backup: c.enableBackUp,
 			TlsCert:        c.tsDBTlsCert,
 			TlsKey:         c.tsDBTlsKey,
+			K8sClient:      k8s.NewClient(),
 		}
 		err := t.CreateTimescaleDBSecrets()
 		if err != nil {

@@ -23,12 +23,13 @@ func init() {
 }
 
 func PortForwardPromlens(listenPort int) error {
-	serviceNamePromlens, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "component": "promlens"})
+	k8sClient := k8s.NewClient()
+	serviceNamePromlens, err := k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "component": "promlens"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceNamePromlens, listenPort, common.FORWARD_PORT_PROMLENS)
+	_, err = k8sClient.KubePortForwardService(root.Namespace, serviceNamePromlens, listenPort, common.FORWARD_PORT_PROMLENS)
 	if err != nil {
 		return fmt.Errorf("could not port-forward PromLens: %w", err)
 	}
@@ -50,5 +51,4 @@ func promlensPortForward(cmd *cobra.Command, args []string) error {
 	}
 
 	select {}
-
 }

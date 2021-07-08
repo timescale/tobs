@@ -62,42 +62,43 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
+	k8sClient := k8s.NewClient()
 	// Port-forward TimescaleDB
 	// if db-uri exists skip the port-forwarding as it isn't the db within the cluster
-	uri, err := utils.GetTimescaleDBURI(root.Namespace, root.HelmReleaseName)
+	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
 	if uri == "" {
-		podName, err := k8s.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
+		podName, err := k8sClient.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
 		if err != nil {
 			return fmt.Errorf("could not port-forward: %w", err)
 		}
 
-		_, err = k8s.KubePortForwardPod(root.Namespace, podName, timescaledb, common.FORWARD_PORT_TSDB)
+		_, err = k8sClient.KubePortForwardPod(root.Namespace, podName, timescaledb, common.FORWARD_PORT_TSDB)
 		if err != nil {
 			return fmt.Errorf("could not port-forward: %w", err)
 		}
 	}
 
 	// Port-forward Grafana
-	serviceName, err := k8s.KubeGetServiceName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
+	serviceName, err := k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceName, grafana, common.FORWARD_PORT_GRAFANA)
+	_, err = k8sClient.KubePortForwardService(root.Namespace, serviceName, grafana, common.FORWARD_PORT_GRAFANA)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
 	// Port-forward Prometheus
-	serviceName, err = k8s.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "kube-prometheus-stack-prometheus"})
+	serviceName, err = k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "kube-prometheus-stack-prometheus"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	_, err = k8s.KubePortForwardService(root.Namespace, serviceName, prometheus, common.FORWARD_PORT_PROM)
+	_, err = k8sClient.KubePortForwardService(root.Namespace, serviceName, prometheus, common.FORWARD_PORT_PROM)
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}

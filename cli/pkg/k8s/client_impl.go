@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/timescale/tobs/cli/cmd"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -29,7 +28,12 @@ import (
 
 var HOME = os.Getenv("HOME")
 
-func KubeInit() (kubernetes.Interface, *rest.Config) {
+type clientImpl struct {
+	*kubernetes.Clientset
+	Config *rest.Config
+}
+
+func NewClient() Client {
 	var err error
 
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
@@ -46,20 +50,19 @@ func KubeInit() (kubernetes.Interface, *rest.Config) {
 		log.Fatal(err)
 	}
 
-	return client, config
+	return &clientImpl{client, config}
 }
 
-func KubeGetPodName(namespace string, labelmap map[string]string) (string, error) {
+func (c *clientImpl) KubeGetPodName(namespace string, labelmap map[string]string) (string, error) {
 	var err error
 	var podName string
-	client, _ := KubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
 	}
 
-	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), listOptions)
+	pods, err := c.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return podName, err
 	}
@@ -71,17 +74,15 @@ func KubeGetPodName(namespace string, labelmap map[string]string) (string, error
 	return podName, nil
 }
 
-func KubeGetServiceName(namespace string, labelmap map[string]string) (string, error) {
+func (c *clientImpl) KubeGetServiceName(namespace string, labelmap map[string]string) (string, error) {
 	var err error
-
-	client, _ := KubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
 	}
 
-	services, err := client.CoreV1().Services(namespace).List(context.Background(), listOptions)
+	services, err := c.CoreV1().Services(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return "", err
 	}
@@ -97,17 +98,15 @@ func KubeGetServiceName(namespace string, labelmap map[string]string) (string, e
 	return services.Items[0].Name, nil
 }
 
-func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, error) {
+func (c *clientImpl) KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, error) {
 	var err error
-
-	client, _ := KubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
 	}
 
-	pvcs, err := client.CoreV1().PersistentVolumeClaims(namespace).List(context.Background(), listOptions)
+	pvcs, err := c.CoreV1().PersistentVolumeClaims(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -120,17 +119,15 @@ func KubeGetPVCNames(namespace string, labelmap map[string]string) ([]string, er
 	return names, nil
 }
 
-func KubeGetPods(namespace string, labelmap map[string]string) ([]corev1.Pod, error) {
+func (c *clientImpl) KubeGetPods(namespace string, labelmap map[string]string) ([]corev1.Pod, error) {
 	var err error
-
-	client, _ := KubeInit()
 
 	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
 	}
 
-	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), listOptions)
+	pods, err := c.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -138,12 +135,10 @@ func KubeGetPods(namespace string, labelmap map[string]string) ([]corev1.Pod, er
 	return pods.Items, nil
 }
 
-func KubeGetSecret(namespace string, secretName string) (*corev1.Secret, error) {
+func (c *clientImpl) KubeGetSecret(namespace string, secretName string) (*corev1.Secret, error) {
 	var err error
 
-	client, _ := KubeInit()
-
-	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	secret, err := c.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -151,12 +146,10 @@ func KubeGetSecret(namespace string, secretName string) (*corev1.Secret, error) 
 	return secret, nil
 }
 
-func KubeGetAllSecrets(namespace string) (*corev1.SecretList, error) {
+func (c *clientImpl) KubeGetAllSecrets(namespace string) (*corev1.SecretList, error) {
 	var err error
 
-	client, _ := KubeInit()
-
-	secrets, err := client.CoreV1().Secrets(namespace).List(context.Background(), metav1.ListOptions{})
+	secrets, err := c.CoreV1().Secrets(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -164,29 +157,29 @@ func KubeGetAllSecrets(namespace string) (*corev1.SecretList, error) {
 	return secrets, nil
 }
 
-func KubeGetAllPods(namespace string, name string) ([]corev1.Pod, error) {
+func (c *clientImpl) KubeGetAllPods(namespace string, releaseName string) ([]corev1.Pod, error) {
 	var err error
 	var allpods []corev1.Pod
 
-	pods, err := KubeGetPods(namespace, map[string]string{"release": name})
+	pods, err := c.KubeGetPods(namespace, map[string]string{"release": releaseName})
 	if err != nil {
 		return nil, err
 	}
 	allpods = append(allpods, pods...)
 
-	pods, err = KubeGetPods(namespace, map[string]string{"app.kubernetes.io/instance": name})
+	pods, err = c.KubeGetPods(namespace, map[string]string{"app.kubernetes.io/instance": releaseName})
 	if err != nil {
 		return nil, err
 	}
 	allpods = append(allpods, pods...)
 
-	pods, err = KubeGetPods(namespace, map[string]string{"app": name + "-promscale"})
+	pods, err = c.KubeGetPods(namespace, map[string]string{"app": releaseName + "-promscale"})
 	if err != nil {
 		return nil, err
 	}
 	allpods = append(allpods, pods...)
 
-	pods, err = KubeGetPods(namespace, map[string]string{"job-name": name + "-grafana-db"})
+	pods, err = c.KubeGetPods(namespace, map[string]string{"job-name": releaseName + "-grafana-db"})
 	if err != nil {
 		return nil, err
 	}
@@ -196,17 +189,15 @@ func KubeGetAllPods(namespace string, name string) ([]corev1.Pod, error) {
 }
 
 // ExecCmd exec command on specific pod and wait the command's output.
-func KubeExecCmd(namespace string, podName string, container string, command string, stdin io.Reader, tty bool) error {
+func (c *clientImpl) KubeExecCmd(namespace string, podName string, container string, command string, stdin io.Reader, tty bool) error {
 	var err error
-
-	client, config := KubeInit()
 
 	shcmd := []string{
 		"/bin/sh",
 		"-c",
 		command,
 	}
-	req := client.CoreV1().RESTClient().Post().Resource("pods").Namespace(namespace).
+	req := c.CoreV1().RESTClient().Post().Resource("pods").Namespace(namespace).
 		Name(podName).SubResource("exec")
 	option := &corev1.PodExecOptions{
 		Container: container,
@@ -224,7 +215,7 @@ func KubeExecCmd(namespace string, podName string, container string, command str
 		scheme.ParameterCodec,
 	)
 
-	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	exec, err := remotecommand.NewSPDYExecutor(c.Config, "POST", req.URL())
 	if err != nil {
 		return err
 	}
@@ -241,19 +232,17 @@ func KubeExecCmd(namespace string, podName string, container string, command str
 	return nil
 }
 
-func KubePortForwardPod(namespace string, podName string, local int, remote int) (*portforward.PortForwarder, error) {
+func (c *clientImpl) KubePortForwardPod(namespace string, podName string, local int, remote int) (*portforward.PortForwarder, error) {
 	var err error
 
-	client, config := KubeInit()
-
 	fmt.Printf("Listening to pod %v from port %d\n", podName, local)
-	url := client.CoreV1().RESTClient().Post().
+	url := c.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Namespace(namespace).
 		Name(podName).
 		SubResource("portforward").URL()
 
-	transport, upgrader, err := spdy.RoundTripperFor(config)
+	transport, upgrader, err := spdy.RoundTripperFor(c.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -280,26 +269,24 @@ func KubePortForwardPod(namespace string, podName string, local int, remote int)
 	}
 }
 
-func KubePortForwardService(namespace string, serviceName string, local int, remote int) (*portforward.PortForwarder, error) {
+func (c *clientImpl) KubePortForwardService(namespace string, serviceName string, local int, remote int) (*portforward.PortForwarder, error) {
 	var err error
 
-	client, _ := KubeInit()
-
-	service, err := client.CoreV1().Services(namespace).Get(context.Background(), serviceName, metav1.GetOptions{})
+	service, err := c.CoreV1().Services(namespace).Get(context.Background(), serviceName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	set := labels.Set(service.Spec.Selector)
 	listOptions := metav1.ListOptions{LabelSelector: set.AsSelector().String()}
-	pods, err := client.CoreV1().Pods(namespace).List(context.Background(), listOptions)
+	pods, err := c.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
 		return nil, err
 	}
 
 	podName := pods.Items[0].Name
 
-	pf, err := KubePortForwardPod(namespace, podName, local, remote)
+	pf, err := c.KubePortForwardPod(namespace, podName, local, remote)
 	if err != nil {
 		return nil, err
 	}
@@ -308,13 +295,11 @@ func KubePortForwardService(namespace string, serviceName string, local int, rem
 	return pf, nil
 }
 
-func KubeCreatePod(pod *corev1.Pod) error {
+func (c *clientImpl) KubeCreatePod(pod *corev1.Pod) error {
 	var err error
 
-	client, _ := KubeInit()
-
 	fmt.Println("Creating pod...")
-	_, err = client.CoreV1().Pods(pod.Namespace).Create(context.Background(), pod, metav1.CreateOptions{})
+	_, err = c.CoreV1().Pods(pod.Namespace).Create(context.Background(), pod, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -322,14 +307,12 @@ func KubeCreatePod(pod *corev1.Pod) error {
 	return nil
 }
 
-func KubeDeletePod(namespace string, podName string) error {
+func (c *clientImpl) KubeDeletePod(namespace string, podName string) error {
 	var err error
-
-	client, _ := KubeInit()
 
 	fmt.Printf("Deleting pod %v...\n", podName)
 	gracePeriodSecs := int64(0)
-	err = client.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSecs})
+	err = c.CoreV1().Pods(namespace).Delete(context.Background(), podName, metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSecs})
 	if err != nil {
 		return err
 	}
@@ -337,12 +320,10 @@ func KubeDeletePod(namespace string, podName string) error {
 	return nil
 }
 
-func KubeWaitOnPod(namespace string, podName string) error {
-	client, _ := KubeInit()
-
+func (c *clientImpl) KubeWaitOnPod(namespace string, podName string) error {
 	fmt.Printf("Waiting on pod %v...\n", podName)
 	for i := 0; i < 6000; i++ {
-		pod, err := client.CoreV1().Pods(namespace).Get(context.Background(), podName, metav1.GetOptions{})
+		pod, err := c.CoreV1().Pods(namespace).Get(context.Background(), podName, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -360,13 +341,10 @@ func KubeWaitOnPod(namespace string, podName string) error {
 	return nil
 }
 
-func KubeDeleteService(namespace string, serviceName string) error {
+func (c *clientImpl) KubeDeleteService(namespace string, serviceName string) error {
 	var err error
-
-	client, _ := KubeInit()
-
 	fmt.Printf("Deleting service %v...\n", serviceName)
-	err = client.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
+	err = c.CoreV1().Services(namespace).Delete(context.Background(), serviceName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -374,13 +352,10 @@ func KubeDeleteService(namespace string, serviceName string) error {
 	return nil
 }
 
-func KubeDeleteEndpoint(namespace string, endpointName string) error {
+func (c *clientImpl) KubeDeleteEndpoint(namespace string, endpointName string) error {
 	var err error
-
-	client, _ := KubeInit()
-
 	fmt.Printf("Deleting endpoint %v...\n", endpointName)
-	err = client.CoreV1().Endpoints(namespace).Delete(context.Background(), endpointName, metav1.DeleteOptions{})
+	err = c.CoreV1().Endpoints(namespace).Delete(context.Background(), endpointName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -388,13 +363,11 @@ func KubeDeleteEndpoint(namespace string, endpointName string) error {
 	return nil
 }
 
-func KubeDeletePVC(namespace string, PVCName string) error {
+func (c *clientImpl) KubeDeletePVC(namespace string, PVCName string) error {
 	var err error
-
-	client, _ := KubeInit()
 
 	fmt.Printf("Deleting PVC %v...\n", PVCName)
-	err = client.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), PVCName, metav1.DeleteOptions{})
+	err = c.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), PVCName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -402,13 +375,10 @@ func KubeDeletePVC(namespace string, PVCName string) error {
 	return nil
 }
 
-func KubeUpdateSecret(namespace string, secret *corev1.Secret) error {
+func (c *clientImpl) KubeUpdateSecret(namespace string, secret *corev1.Secret) error {
 	var err error
-
-	client, _ := KubeInit()
-
 	fmt.Println("Updating secret...")
-	_, err = client.CoreV1().Secrets(namespace).Update(context.Background(), secret, metav1.UpdateOptions{})
+	_, err = c.CoreV1().Secrets(namespace).Update(context.Background(), secret, metav1.UpdateOptions{})
 	if err != nil {
 		return err
 	}
@@ -429,11 +399,11 @@ type PVCData struct {
 	StatusSize string
 }
 
-func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCData, error) {
+func (c *clientImpl) GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCData, error) {
 	var pvcs []string
 	var pvcData []*PVCData
 	if labels != nil {
-		pods, err := KubeGetPods(namespace, labels)
+		pods, err := c.KubeGetPods(namespace, labels)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get the pods using labels %w", err)
 		}
@@ -445,9 +415,8 @@ func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCD
 		pvcs = append(pvcs, pvcPrefix)
 	}
 
-	client, _ := KubeInit()
 	for _, pvcName := range pvcs {
-		podPVC, err := client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
+		podPVC, err := c.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
 		if err != nil {
 			fmt.Println(fmt.Errorf("failed to get the pvc for %s %w", pvcName, err))
 		}
@@ -467,16 +436,16 @@ func GetPVCSizes(namespace, pvcPrefix string, labels map[string]string) ([]*PVCD
 	return pvcData, nil
 }
 
-func ExpandPVCsForAllPods(namespace, value, pvcPrefix string, labels map[string]string) (map[string]string, error) {
+func (c *clientImpl) ExpandPVCsForAllPods(namespace, value, pvcPrefix string, labels map[string]string) (map[string]string, error) {
 	pvcResults := make(map[string]string)
-	pods, err := KubeGetPods(namespace, labels)
+	pods, err := c.KubeGetPods(namespace, labels)
 	if err != nil {
 		return pvcResults, fmt.Errorf("failed to get the pods using labels %w", err)
 	}
 
 	pvcs := buildPVCNames(pvcPrefix, pods)
 	for _, pvc := range pvcs {
-		err := ExpandPVC(namespace, pvc, value)
+		err := c.ExpandPVC(namespace, pvc, value)
 		if err != nil {
 			fmt.Println(fmt.Errorf("%w", err))
 		} else {
@@ -486,9 +455,8 @@ func ExpandPVCsForAllPods(namespace, value, pvcPrefix string, labels map[string]
 	return pvcResults, nil
 }
 
-func ExpandPVC(namespace, pvcName, value string) error {
-	client, _ := KubeInit()
-	podPVC, err := client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
+func (c *clientImpl) ExpandPVC(namespace, pvcName, value string) error {
+	podPVC, err := c.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to get the pvc for %s %w", pvcName, err)
 	}
@@ -504,7 +472,7 @@ func ExpandPVC(namespace, pvcName, value string) error {
 	}
 
 	podPVC.Spec.Resources.Requests["storage"] = newSize
-	_, err = client.CoreV1().PersistentVolumeClaims(namespace).Update(context.Background(), podPVC, metav1.UpdateOptions{})
+	_, err = c.CoreV1().PersistentVolumeClaims(namespace).Update(context.Background(), podPVC, metav1.UpdateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to update persistent volume claim %w", err)
 	}
@@ -512,8 +480,8 @@ func ExpandPVC(namespace, pvcName, value string) error {
 	return nil
 }
 
-func DeletePods(namespace string, labels map[string]string, forceKill bool) error {
-	pods, err := KubeGetPods(namespace, labels)
+func (c *clientImpl) DeletePods(namespace string, labels map[string]string, forceKill bool) error {
+	pods, err := c.KubeGetPods(namespace, labels)
 	if err != nil {
 		return fmt.Errorf("failed to get the pods using labels %w", err)
 	}
@@ -524,9 +492,8 @@ func DeletePods(namespace string, labels map[string]string, forceKill bool) erro
 		deleteOptions = metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSecs}
 	}
 
-	client, _ := KubeInit()
 	for _, pod := range pods {
-		err = client.CoreV1().Pods(namespace).Delete(context.Background(), pod.Name, deleteOptions)
+		err = c.CoreV1().Pods(namespace).Delete(context.Background(), pod.Name, deleteOptions)
 		if err != nil {
 			return fmt.Errorf("failed to delete the pod: %s %v\n", pod.Name, err)
 		}
@@ -534,18 +501,16 @@ func DeletePods(namespace string, labels map[string]string, forceKill bool) erro
 	return nil
 }
 
-func CreateSecret(secret *corev1.Secret) error {
-	client, _ := KubeInit()
-	_, err := client.CoreV1().Secrets(secret.Namespace).Create(context.Background(), secret, metav1.CreateOptions{})
+func (c *clientImpl) CreateSecret(secret *corev1.Secret) error {
+	_, err := c.CoreV1().Secrets(secret.Namespace).Create(context.Background(), secret, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create %s secret %v", secret.Name, err)
 	}
 	return nil
 }
 
-func DeleteSecret(secretName, namespace string) error {
-	client, _ := KubeInit()
-	err := client.CoreV1().Secrets(namespace).Delete(context.Background(), secretName, metav1.DeleteOptions{})
+func (c *clientImpl) DeleteSecret(secretName, namespace string) error {
+	err := c.CoreV1().Secrets(namespace).Delete(context.Background(), secretName, metav1.DeleteOptions{})
 	if err != nil {
 		ok := errors2.IsNotFound(err)
 		if !ok {
@@ -555,9 +520,8 @@ func DeleteSecret(secretName, namespace string) error {
 	return nil
 }
 
-func CreateNamespaceIfNotExists(namespace string) error {
-	client, _ := KubeInit()
-	namespaces, err := client.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+func (c *clientImpl) CreateNamespaceIfNotExists(namespace string) error {
+	namespaces, err := c.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list the namespaces to verify namespace existence %v", err)
 	}
@@ -573,7 +537,7 @@ func CreateNamespaceIfNotExists(namespace string) error {
 			Name: namespace,
 		},
 	}
-	_, err = client.CoreV1().Namespaces().Create(context.Background(), n, metav1.CreateOptions{})
+	_, err = c.CoreV1().Namespaces().Create(context.Background(), n, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create the namespace %v", err)
 	}
@@ -581,9 +545,8 @@ func CreateNamespaceIfNotExists(namespace string) error {
 	return nil
 }
 
-func CheckSecretExists(secretName, namespace string) (bool, error) {
-	client, _ := KubeInit()
-	secExists, err := client.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
+func (c *clientImpl) CheckSecretExists(secretName, namespace string) (bool, error) {
+	secExists, err := c.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		ok := errors2.IsNotFound(err)
 		if !ok {
@@ -598,41 +561,37 @@ func CheckSecretExists(secretName, namespace string) (bool, error) {
 	return false, nil
 }
 
-func DeleteJob(name, namespace string) error {
-	client, _ := KubeInit()
+func (c *clientImpl) DeleteJob(name, namespace string) error {
 	// deleting the job leaves the completed pods
 	// this might cause pvc to be in terminating state forever
 	// so delete the job with propagation as background
 	propagation := metav1.DeletePropagationBackground
-	err := client.BatchV1().Jobs(namespace).Delete(context.Background(), name, metav1.DeleteOptions{PropagationPolicy: &propagation})
+	err := c.BatchV1().Jobs(namespace).Delete(context.Background(), name, metav1.DeleteOptions{PropagationPolicy: &propagation})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteDaemonset(name, namespace string) error {
-	client, _ := KubeInit()
+func (c *clientImpl) DeleteDaemonset(name, namespace string) error {
 	fmt.Printf("Deleting daemonset %v...\n", name)
-	err := client.AppsV1().DaemonSets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
+	err := c.AppsV1().DaemonSets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func CreateJob(job *batchv1.Job) error {
-	client, _ := KubeInit()
-	_, err := client.BatchV1().Jobs(job.Namespace).Create(context.Background(), job, metav1.CreateOptions{})
+func (c *clientImpl) CreateJob(job *batchv1.Job) error {
+	_, err := c.BatchV1().Jobs(job.Namespace).Create(context.Background(), job, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func GetJob(jobName, namespace string) (*batchv1.Job, error) {
-	client, _ := KubeInit()
-	return client.BatchV1().Jobs(namespace).Get(context.Background(), jobName, metav1.GetOptions{})
+func (c *clientImpl) GetJob(jobName, namespace string) (*batchv1.Job, error) {
+	return c.BatchV1().Jobs(namespace).Get(context.Background(), jobName, metav1.GetOptions{})
 }
 
 func CreateCRDS(crds []string) error {
@@ -646,35 +605,33 @@ func CreateCRDS(crds []string) error {
 	return nil
 }
 
-func GetDeployment(name, namespace string) (*appsv1.Deployment, error) {
-	client, _ := KubeInit()
-	return client.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
+func (c *clientImpl) GetDeployment(name, namespace string) (*appsv1.Deployment, error) {
+	return c.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
 }
 
-func UpdateDeployment(deployment *appsv1.Deployment) error {
-	client, _ := KubeInit()
-	_, err := client.AppsV1().Deployments(deployment.Namespace).Update(context.Background(), deployment, metav1.UpdateOptions{})
+func (c *clientImpl) UpdateDeployment(deployment *appsv1.Deployment) error {
+	_, err := c.AppsV1().Deployments(deployment.Namespace).Update(context.Background(), deployment, metav1.UpdateOptions{})
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func UpdatePrometheusPV(pvcName, newPVCName, namespace string) error {
-	client, _ := KubeInit()
-	pvc, err := client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
+// This func helps to map the existing PV from a older PVC to new PVC
+func (c *clientImpl) UpdatePVToNewPVC(pvcName, newPVCName, namespace string, pvcLabels map[string]string) error {
+	pvc, err := c.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to get persistent volume claim %s: %v", pvcName, err)
 	}
 
 	pvName := pvc.Spec.VolumeName
-	pv, err := client.CoreV1().PersistentVolumes().Get(context.Background(), pvName, metav1.GetOptions{})
+	pv, err := c.CoreV1().PersistentVolumes().Get(context.Background(), pvName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to get the persistent volume %s: %v", pvName, err)
 	}
 
 	pv.Spec.ClaimRef = nil
-	pv, err = client.CoreV1().PersistentVolumes().Update(context.Background(), pv, metav1.UpdateOptions{})
+	pv, err = c.CoreV1().PersistentVolumes().Update(context.Background(), pv, metav1.UpdateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to update persistent volume %s: %v", pv.Name, err)
 	}
@@ -683,19 +640,19 @@ func UpdatePrometheusPV(pvcName, newPVCName, namespace string) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newPVCName,
 			Namespace: namespace,
-			Labels:    map[string]string{"app": "prometheus", "prometheus": "tobs-kube-prometheus", "release": cmd.HelmReleaseName},
+			Labels:    pvcLabels,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes: []corev1.PersistentVolumeAccessMode{"ReadWriteOnce"},
+			AccessModes: pvc.Spec.AccessModes,
 			Resources: corev1.ResourceRequirements{
-				Requests: map[corev1.ResourceName]resource.Quantity{"storage": resource.MustParse("8Gi")},
+				Requests: pvc.Spec.Resources.Requests,
 			},
 			VolumeName: pv.Name,
 			VolumeMode: pvc.Spec.VolumeMode,
 		},
 	}
 
-	_, err = client.CoreV1().PersistentVolumeClaims(namespace).Create(context.Background(), newPVC, metav1.CreateOptions{})
+	_, err = c.CoreV1().PersistentVolumeClaims(namespace).Create(context.Background(), newPVC, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to get persistent volume claim %s: %v", pvcName, err)
 	}

@@ -19,7 +19,8 @@ func TestPromscale(t *testing.T) {
 	fmt.Println("Running Promscale tests for external db setup...")
 
 	// Tests based on pod status & restarts
-	promscalePod, err := k8s.KubeGetPods(NAMESPACE, map[string]string{"app": "tobs-promscale"})
+	k8sClient := k8s.NewClient()
+	promscalePod, err := k8sClient.KubeGetPods(NAMESPACE, map[string]string{"app": "tobs-promscale"})
 	if err != nil {
 		log.Println("failed to get promscale pod")
 		os.Exit(1)
