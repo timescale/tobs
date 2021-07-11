@@ -4,6 +4,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ .Release.Name }}-grafana-db
+  namespace: {{ template "tobs.namespace" . }}
   labels:
     app: {{ template "tobs.fullname" . }}
     chart: {{ template "tobs.chart" . }}
