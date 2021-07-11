@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-promlens
+  namespace: {{ template "tobs.namespace" . }}
   labels:
     app: {{ template "tobs.fullname" . }}
     chart: {{ template "tobs.chart" . }}

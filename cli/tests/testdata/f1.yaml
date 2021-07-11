@@ -3,6 +3,10 @@
 #    https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 # Check out the various configuration options (administration guide) at:
 #    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
+
+# Override the deployment namespace
+namespaceOverride: ""
+
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
   enabled: true

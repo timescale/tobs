@@ -146,3 +146,14 @@ Extract the port from db uri
   {{- $host := $hostDetails._0 | quote }}
   {{- printf $host -}}
 {{- end -}}
+
+{{/*
+Allow the release namespace to be overridden
+*/}}
+{{- define "tobs.namespace" -}}
+  {{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+  {{- else -}}
+    {{- .Release.Namespace -}}
+  {{- end -}}
+{{- end -}}
