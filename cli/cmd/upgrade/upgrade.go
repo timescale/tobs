@@ -1,4 +1,4 @@
-package helm
+package upgrade
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/install"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/utils"
@@ -23,14 +24,14 @@ import (
 // upgradeCmd represents the upgrade command
 var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
-	Short: "Alias for helm upgrade",
+	Short: "Upgrades The Observability Stack",
 	Args:  cobra.ExactArgs(0),
 	RunE:  upgrade,
 }
 
 func init() {
 	root.RootCmd.AddCommand(upgradeCmd)
-	addChartDetailsFlags(upgradeCmd)
+	root.AddRootFlags(upgradeCmd)
 	upgradeCmd.Flags().BoolP("reset-values", "", false, "Reset helm chart to default values of the helm chart. This is same flag that exists in helm upgrade")
 	upgradeCmd.Flags().BoolP("reuse-values", "", false, "Reuse the last release's values and merge in any overrides from the command line via --set and -f. If '--reset-values' is specified, this is ignored.\nThis is same flag that exists in helm upgrade ")
 	upgradeCmd.Flags().BoolP("same-chart", "", false, "Use the same helm chart do not upgrade helm chart but upgrade the existing chart with new values")
@@ -86,11 +87,11 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 	}
 
 	upgradeHelmSpec := &helm.ChartSpec{
-		ReleaseName:      root.HelmReleaseName,
-		ChartName:        ref,
-		Namespace:        root.Namespace,
-		ResetValues:      reset,
-		ReuseValues:      reuse,
+		ReleaseName: root.HelmReleaseName,
+		ChartName:   ref,
+		Namespace:   root.Namespace,
+		ResetValues: reset,
+		ReuseValues: reuse,
 	}
 
 	if file != "" {
@@ -113,11 +114,11 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 			if !confirm {
 				utils.ConfirmAction()
 			}
-			s := installSpec{
-				configFile: file,
-				ref:        ref,
+			s := install.InstallSpec{
+				ConfigFile: file,
+				Ref:        ref,
 			}
-			err = s.installStack()
+			err = s.InstallStack()
 			if err != nil {
 				return err
 			}
@@ -192,7 +193,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		deployedChartVersion: deployedChart.Version,
 		newChartVersion:      latestChart.Version,
 		skipCrds:             skipCrds,
-		k8sClient:             k8s.NewClient(),
+		k8sClient:            k8s.NewClient(),
 	}
 
 	err = upgradeDetails.UpgradePathBasedOnVersion()
@@ -344,7 +345,7 @@ func (c *upgradeSpec) copyDBSecret() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newDBsecret,
 			Namespace: root.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: map[string][]byte{
 			"PATRONI_REPLICATION_PASSWORD": standby,
@@ -378,7 +379,7 @@ func (c *upgradeSpec) copyDBCertificate() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newDBCertificate,
 			Namespace: root.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: s.Data,
 		Type: "Opaque",
@@ -430,7 +431,7 @@ func (c *upgradeSpec) copyDBBackup() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newDBBackUp,
 			Namespace: root.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: newData,
 		Type: "Opaque",

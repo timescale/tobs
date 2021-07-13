@@ -31,7 +31,7 @@ func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
 
 	var pass string
 
-	d, err := common.FormDBDetails(user, "")
+	d, err := common.FormDBDetails(user, "", root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

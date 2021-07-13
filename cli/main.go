@@ -19,12 +19,16 @@ import (
 	"github.com/timescale/tobs/cli/cmd"
 	_ "github.com/timescale/tobs/cli/cmd/grafana"
 	_ "github.com/timescale/tobs/cli/cmd/helm"
+	_ "github.com/timescale/tobs/cli/cmd/install"
 	_ "github.com/timescale/tobs/cli/cmd/metrics"
 	_ "github.com/timescale/tobs/cli/cmd/port-forward"
 	_ "github.com/timescale/tobs/cli/cmd/prometheus"
 	_ "github.com/timescale/tobs/cli/cmd/promlens"
 	_ "github.com/timescale/tobs/cli/cmd/promscale"
 	_ "github.com/timescale/tobs/cli/cmd/timescaledb"
+	_ "github.com/timescale/tobs/cli/cmd/uninstall"
+	_ "github.com/timescale/tobs/cli/cmd/upgrade"
+	_ "github.com/timescale/tobs/cli/cmd/version"
 	_ "github.com/timescale/tobs/cli/cmd/volume"
 )
 

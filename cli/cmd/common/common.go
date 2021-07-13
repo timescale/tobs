@@ -2,8 +2,6 @@ package common
 
 import (
 	"fmt"
-
-	"github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/pgconn"
 )
@@ -21,17 +19,22 @@ const (
 	FORWARD_PORT_TSDB      = 5432
 )
 
-func FormDBDetails(user, dbName string) (pgconn.DBDetails, error) {
-	helmClient := helm.NewClient(cmd.Namespace)
+var (
+	TimescaleDBBackUpKeyForValuesYaml = []string{"timescaledb-single", "backup", "enabled"}
+	PrometheusLabels                  = map[string]string{"app": "prometheus", "prometheus": "tobs-kube-prometheus-prometheus"}
+)
+
+func FormDBDetails(user, dbName, namespace, releaseName string) (pgconn.DBDetails, error) {
+	helmClient := helm.NewClient(namespace)
 	defer helmClient.Close()
-	secretKey, user, err := getDBSecretKeyAndDBUser(helmClient, cmd.HelmReleaseName, user)
+	secretKey, user, err := getDBSecretKeyAndDBUser(helmClient, releaseName, user)
 	if err != nil {
 		return pgconn.DBDetails{}, fmt.Errorf("could not get DB secret key from helm release: %w", err)
 	}
 
 	d := pgconn.DBDetails{
-		Namespace: cmd.Namespace,
-		Name:      cmd.HelmReleaseName,
+		Namespace: namespace,
+		Name:      releaseName,
 		DBName:    dbName,
 		User:      user,
 		SecretKey: secretKey,
@@ -86,16 +89,9 @@ func getDBSecretKeyAndDBUser(client helm.Client, releaseName, dbUser string) (st
 	return "PATRONI_SUPERUSER_PASSWORD", fmt.Sprint(userName), nil
 }
 
-func GetTimescaleDBLabels() map[string]string {
+func GetTimescaleDBLabels(releaseName string) map[string]string {
 	return map[string]string{
-		"app":     cmd.HelmReleaseName + "-timescaledb",
-		"release": cmd.HelmReleaseName,
-	}
-}
-
-func GetPrometheusLabels() map[string]string {
-	return map[string]string{
-		"app":        "prometheus",
-		"prometheus": "tobs-kube-prometheus-prometheus",
+		"app":     releaseName + "-timescaledb",
+		"release": releaseName,
 	}
 }

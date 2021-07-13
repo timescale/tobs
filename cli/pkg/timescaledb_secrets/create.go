@@ -107,7 +107,7 @@ func (t *TSDBSecretsInfo) createTimescaleDBCredentials() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: t.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(t.ReleaseName),
 		},
 		Data: map[string][]byte{
 			"PATRONI_REPLICATION_PASSWORD": repPass,
@@ -200,7 +200,7 @@ WARNING: Using a generated self-signed certificate for TLS access to TimescaleDB
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: t.Namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(t.ReleaseName),
 		},
 		Data: map[string][]byte{"tls.key": privateKey, "tls.crt": publicKey},
 		Type: "Opaque",
@@ -310,7 +310,7 @@ func (t *TSDBSecretsInfo) createTimescaleDBPgBackRest(name, namespace string, s3
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: namespace,
-			Labels:    utils.GetTimescaleDBsecretLabels(),
+			Labels:    utils.GetTimescaleDBsecretLabels(t.ReleaseName),
 		},
 		Data: data,
 		Type: "Opaque",

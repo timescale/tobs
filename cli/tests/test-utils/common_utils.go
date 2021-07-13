@@ -7,8 +7,6 @@ import (
 	"syscall"
 	"testing"
 	"time"
-
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 var PATH_TO_TOBS = "./../../bin/tobs"
@@ -230,58 +228,6 @@ func (c *TestInstallSpec) TestInstall(t testing.TB) {
 		t.Logf(string(out))
 		t.Fatal(err)
 	}
-}
-
-func (c *TestInstallSpec) TestHelmInstall(t testing.TB) {
-	cmds := []string{"helm", "install", "--chart-reference", c.PathToChart, "-n", c.ReleaseName, "--namespace", c.Namespace}
-	if c.SkipWait {
-		cmds = append(cmds, "--skip-wait")
-	}
-	if c.PathToValues != "" {
-		cmds = append(cmds, "-f", c.PathToValues)
-	}
-
-	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	install := exec.Command(PATH_TO_TOBS, cmds...)
-
-	out, err := install.CombinedOutput()
-	if err != nil {
-		t.Logf(string(out))
-		// kubectl get pods -A
-		out := exec.Command("kubectl", "get", "pods", "-A")
-		output, err := out.CombinedOutput()
-		t.Log(string(output))
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Fatal(err)
-	}
-}
-
-func (c *TestUnInstallSpec) TestHelmUninstall(t testing.TB) {
-	cmds := []string{"helm", "uninstall", "-n", c.ReleaseName, "--namespace", c.Namespace}
-	if c.DeleteData {
-		cmds = append(cmds, "--delete-data")
-	}
-
-	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	uninstall := exec.Command(PATH_TO_TOBS, cmds...)
-
-	out, err := uninstall.CombinedOutput()
-	if err != nil {
-		t.Logf(string(out))
-		t.Fatal(err)
-	}
-
-	k8sClient := k8s.NewClient()
-	pods, err := k8sClient.KubeGetAllPods("tobs", "default")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pods) != 0 {
-		t.Fatal("Pod remaining after uninstall")
-	}
-
 }
 
 func ShowAllPods(t testing.TB) {

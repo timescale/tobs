@@ -3,10 +3,12 @@ package test_utils
 import (
 	"context"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
 	"log"
 	"os"
 
+	"github.com/timescale/tobs/cli/cmd/common"
+	"github.com/timescale/tobs/cli/pkg/k8s"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -103,6 +105,27 @@ func CheckPodsRunning(namespace string) error {
 	}
 
 	fmt.Println("All pods are in running state.")
+	return nil
+}
+
+func CheckPVCSExist(releaseName, namespace string) error {
+	k8sClient := k8s.NewClient()
+	pvcnames, err := k8sClient.KubeGetPVCNames(namespace, map[string]string{"release": releaseName})
+	if err != nil {
+		return fmt.Errorf("could not delete PVCs: %w", err)
+	}
+
+	// Prometheus PVC's doesn't hold the release labelSet
+	prometheusPvcNames, err := k8sClient.KubeGetPVCNames(namespace, common.PrometheusLabels)
+	if err != nil {
+		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
+	}
+	pvcnames = append(pvcnames, prometheusPvcNames...)
+
+	if len(pvcnames) > 0 {
+		return fmt.Errorf("failed to verify PVCs post uninstall with delete-data, PVCs still exist %v", pvcnames)
+	}
+
 	return nil
 }
 

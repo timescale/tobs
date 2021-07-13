@@ -51,7 +51,7 @@ func timescaledbConnect(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get TimescaleDB password: %w", err)
 	}
 
-	dbDetails, err := common.FormDBDetails(user, dbname)
+	dbDetails, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return fmt.Errorf("could not get DB secret key from helm release: %w", err)
 	}

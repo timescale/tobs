@@ -10,8 +10,8 @@ import (
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-func testHelmDeleteData(t testing.TB, name, namespace string, k8sClient k8s.Client) {
-	cmds := []string{"helm", "delete-data"}
+func testDeleteData(t testing.TB, name, namespace string, k8sClient k8s.Client) {
+	cmds := []string{"uninstall", "delete-data"}
 	if name != "" {
 		cmds = append(cmds, "-n", name)
 	} else {
@@ -74,7 +74,7 @@ func TestInstallation(t *testing.T) {
 		Namespace:    NAMESPACE,
 		DeleteData:   false,
 	}
-	abcUninstall.TestHelmUninstall(t)
+	abcUninstall.TestUninstall(t)
 
 	// def helm cmd install
 	defInstall := test_utils.TestInstallSpec{
@@ -86,7 +86,7 @@ func TestInstallation(t *testing.T) {
 		SkipWait:     true,
 		OnlySecrets:  false,
 	}
-	defInstall.TestHelmInstall(t)
+	defInstall.TestInstall(t)
 
 	// def uninstall
 	defUninstall := test_utils.TestUnInstallSpec{
@@ -96,7 +96,13 @@ func TestInstallation(t *testing.T) {
 	}
 	defUninstall.TestUninstall(t)
 	k8sClient := k8s.NewClient()
-	testHelmDeleteData(t, "def", "", k8sClient)
+	testDeleteData(t, "def", "", k8sClient)
+	time.Sleep(2 * time.Minute)
+	// check pvc status post delete-data
+	err := test_utils.CheckPVCSExist("def", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// f1 install
 	f1Install := test_utils.TestInstallSpec{
@@ -116,7 +122,7 @@ func TestInstallation(t *testing.T) {
 		Namespace:   NAMESPACE,
 		DeleteData:  false,
 	}
-	f1Uninstall.TestHelmUninstall(t)
+	f1Uninstall.TestUninstall(t)
 
 	// f2 install
 	f2Install := test_utils.TestInstallSpec{
@@ -128,7 +134,7 @@ func TestInstallation(t *testing.T) {
 		SkipWait:     true,
 		OnlySecrets:  false,
 	}
-	f2Install.TestHelmInstall(t)
+	f2Install.TestInstall(t)
 	// f2 uninstall
 	f2Uninstall := test_utils.TestUnInstallSpec{
 		ReleaseName: "f2",
@@ -164,7 +170,6 @@ func TestInstallation(t *testing.T) {
 	// kubectl get pods -A
 	test_utils.ShowAllPods(t)
 
-	// This installation is used to run all tests in tobs-cli-tests
 	dInstall := test_utils.TestInstallSpec{
 		PathToChart:  PATH_TO_CHART,
 		ReleaseName:  RELEASE_NAME,

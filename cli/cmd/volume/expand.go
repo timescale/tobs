@@ -66,7 +66,7 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 
 	k8sClient := k8s.NewClient()
 	if tsDBStorage != "" {
-		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, tsDBStorage, pvcStorage, common.GetTimescaleDBLabels())
+		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, tsDBStorage, pvcStorage, common.GetTimescaleDBLabels(root.HelmReleaseName))
 		if err != nil {
 			return fmt.Errorf("could not expand timescaleDB-storage: %w", err)
 		}
@@ -74,7 +74,7 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcStorage, results)
 
 		if restartsPods {
-			err = restartPods(k8sClient, common.GetTimescaleDBLabels(), forceKill)
+			err = restartPods(k8sClient, common.GetTimescaleDBLabels(root.HelmReleaseName), forceKill)
 			if err != nil {
 				return err
 			}
@@ -82,7 +82,7 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 	}
 
 	if tsDBWal != "" {
-		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, tsDBWal, pvcWAL, common.GetTimescaleDBLabels())
+		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, tsDBWal, pvcWAL, common.GetTimescaleDBLabels(root.HelmReleaseName))
 		if err != nil {
 			return fmt.Errorf("could not expand timescaleDB-wal: %w", err)
 		}
@@ -90,7 +90,7 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 		expandSuccessPrint(pvcWAL, results)
 
 		if restartsPods {
-			err = restartPods(k8sClient, common.GetTimescaleDBLabels(), forceKill)
+			err = restartPods(k8sClient, common.GetTimescaleDBLabels(root.HelmReleaseName), forceKill)
 			if err != nil {
 				return err
 			}
@@ -98,14 +98,14 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 	}
 
 	if promStorage != "" {
-		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, promStorage, pvcPrometheus, common.GetPrometheusLabels())
+		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, promStorage, pvcPrometheus, common.PrometheusLabels)
 		if err != nil {
 			return fmt.Errorf("could not expand prometheus-storage: %w", err)
 		}
 		expandSuccessPrint(pvcPrometheus, results)
 
 		if restartsPods {
-			err = restartPods(k8sClient, common.GetPrometheusLabels(), forceKill)
+			err = restartPods(k8sClient, common.PrometheusLabels, forceKill)
 			if err != nil {
 				return err
 			}

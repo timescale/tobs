@@ -52,7 +52,7 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 
 	k8sClient := k8s.NewClient()
 	if tsDBStorage {
-		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcStorage, common.GetTimescaleDBLabels())
+		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcStorage, common.GetTimescaleDBLabels(root.HelmReleaseName))
 		if err != nil {
 			return fmt.Errorf("could not get timescaleDB-storage: %w", err)
 		}
@@ -60,7 +60,7 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if tsDBWal {
-		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcWAL, common.GetTimescaleDBLabels())
+		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcWAL, common.GetTimescaleDBLabels(root.HelmReleaseName))
 		if err != nil {
 			return fmt.Errorf("could not get timescaleDB-wal: %w", err)
 		}
@@ -68,7 +68,7 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if promStorage {
-		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcPrometheus, common.GetPrometheusLabels())
+		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcPrometheus, common.PrometheusLabels)
 		if err != nil {
 			return fmt.Errorf("could not get prometheus-storage: %w", err)
 		}
