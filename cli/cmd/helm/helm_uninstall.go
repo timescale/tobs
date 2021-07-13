@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
-	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
@@ -100,28 +99,16 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		fmt.Println(err, ", skipping")
 	}
 
+	err = k8sClient.DeleteSecret("tobs-kube-prometheus-admission", root.Namespace)
+	if err != nil {
+		fmt.Println(err, ", failed to delete kube-prometheus-admission secret")
+	}
+
 	if deleteData {
-		fmt.Println("Checking Persistent Volume Claims")
-		pvcnames, err := k8sClient.KubeGetPVCNames(root.Namespace, map[string]string{"release": root.HelmReleaseName})
+		err = deletePVCData(&cobra.Command{}, []string{})
 		if err != nil {
-			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
+			fmt.Println(err, ", failed to delete pvc's")
 		}
-
-		// Prometheus PVC's doesn't hold the release labelSet
-		prometheusPvcNames, err := k8sClient.KubeGetPVCNames(root.Namespace, common.GetPrometheusLabels())
-		if err != nil {
-			return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
-		}
-		pvcnames = append(pvcnames, prometheusPvcNames...)
-
-		fmt.Println("Removing Persistent Volume Claims")
-		for _, s := range pvcnames {
-			err = k8sClient.KubeDeletePVC(root.Namespace, s)
-			if err != nil {
-				return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
-			}
-		}
-
 	} else {
 		fmt.Println("Data still remains. To delete data as well, run 'tobs helm delete-data'")
 	}
