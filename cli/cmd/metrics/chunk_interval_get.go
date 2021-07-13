@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
 )
 
@@ -26,7 +27,7 @@ func chunkIntervalGet(cmd *cobra.Command, args []string) error {
 
 	metric := args[0]
 
-	d, err := common.FormDBDetails(user, dbname)
+	d, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

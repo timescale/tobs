@@ -47,6 +47,11 @@ func Execute() {
 	}
 }
 
+func AddRootFlags(cmd *cobra.Command) {
+	cmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
+	cmd.Flags().StringP("chart-reference", "c", "timescale/tobs", "Helm chart reference")
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tobs.yaml)")

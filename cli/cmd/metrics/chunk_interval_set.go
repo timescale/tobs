@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
 )
 
@@ -36,7 +37,7 @@ func chunkIntervalSet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not set chunk interval for %v: %w", metric, errors.New("Chunk interval must be at least 1 minute"))
 	}
 
-	d, err := common.FormDBDetails(user, dbname)
+	d, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

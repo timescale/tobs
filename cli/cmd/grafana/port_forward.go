@@ -2,7 +2,6 @@ package grafana
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"

@@ -1,4 +1,4 @@
-package helm
+package uninstall
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ var helmDeleteDataCmd = &cobra.Command{
 }
 
 func init() {
-	helmCmd.AddCommand(helmDeleteDataCmd)
+	uninstallCmd.AddCommand(helmDeleteDataCmd)
 }
 
 func deletePVCData(cmd *cobra.Command, args []string) error {
@@ -32,17 +32,21 @@ func deletePVCData(cmd *cobra.Command, args []string) error {
 	}
 
 	// Prometheus PVC's doesn't hold the release labelSet
-	prometheusPvcNames, err := k8sClient.KubeGetPVCNames(root.Namespace, common.GetPrometheusLabels())
+	prometheusPvcNames, err := k8sClient.KubeGetPVCNames(root.Namespace, common.PrometheusLabels)
 	if err != nil {
 		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
 	pvcnames = append(pvcnames, prometheusPvcNames...)
 
-	fmt.Println("Removing Persistent Volume Claims")
-	for _, s := range pvcnames {
-		err = k8sClient.KubeDeletePVC(root.Namespace, s)
-		if err != nil {
-			return fmt.Errorf("could not delete PVCs: %w", err)
+	if len(pvcnames) == 0 {
+		fmt.Printf("could not find PVCs in release: %s, namespace: %s\n", root.HelmReleaseName, root.Namespace)
+	} else {
+		fmt.Println("Removing Persistent Volume Claims")
+		for _, s := range pvcnames {
+			err = k8sClient.KubeDeletePVC(root.Namespace, s)
+			if err != nil {
+				return fmt.Errorf("could not delete PVCs: %w", err)
+			}
 		}
 	}
 

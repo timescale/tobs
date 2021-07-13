@@ -37,7 +37,7 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Changing password...")
 
-	d, err := common.FormDBDetails(user, dbname)
+	d, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

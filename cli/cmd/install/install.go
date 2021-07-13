@@ -1,4 +1,4 @@
-package helm
+package install
 
 import (
 	"context"
@@ -7,17 +7,16 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
-var TimescaleDBBackUpKeyForValuesYaml = []string{"timescaledb-single", "backup", "enabled"}
-
 // helmInstallCmd represents the helm install command
-var helmInstallCmd = &cobra.Command{
+var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Installs The Observability Stack",
 	Args:  cobra.ExactArgs(0),
@@ -25,15 +24,10 @@ var helmInstallCmd = &cobra.Command{
 }
 
 func init() {
-	helmCmd.AddCommand(helmInstallCmd)
-	addChartDetailsFlags(helmInstallCmd)
-	addInstallUtilitiesFlags(helmInstallCmd)
+	cmd.RootCmd.AddCommand(installCmd)
+	cmd.AddRootFlags(installCmd)
+	addInstallUtilitiesFlags(installCmd)
 
-}
-
-func addChartDetailsFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP("filename", "f", "", "YAML configuration file to load")
-	cmd.Flags().StringP("chart-reference", "c", "timescale/tobs", "Helm chart reference")
 }
 
 func addInstallUtilitiesFlags(cmd *cobra.Command) {
@@ -47,9 +41,9 @@ func addInstallUtilitiesFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 }
 
-type installSpec struct {
-	configFile         string
-	ref                string
+type InstallSpec struct {
+	ConfigFile         string
+	Ref                string
 	dbURI              string
 	version            string
 	enableBackUp       bool
@@ -63,12 +57,12 @@ type installSpec struct {
 func helmInstall(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var i installSpec
-	i.configFile, err = cmd.Flags().GetString("filename")
+	var i InstallSpec
+	i.ConfigFile, err = cmd.Flags().GetString("filename")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.ref, err = cmd.Flags().GetString("chart-reference")
+	i.Ref, err = cmd.Flags().GetString("chart-reference")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -123,20 +117,20 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("receieved only TLS key, please provide TLS certificate in --timescaledb-tls-cert")
 	}
 
-	err = i.installStack()
+	err = i.InstallStack()
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 	return nil
 }
 
-func (c *installSpec) installStack() error {
+func (c *InstallSpec) InstallStack() error {
 	var err error
 	helmValues := `
 cli: true`
 
 	if c.dbURI != "" {
-		helmValues = appendDBURIValues(c.dbURI, root.HelmReleaseName, helmValues)
+		helmValues = appendDBURIValues(c.dbURI, cmd.HelmReleaseName, helmValues)
 	} else {
 		// if db-uri is provided we do not need
 		// to create DB level secrets
@@ -152,9 +146,9 @@ cli: true`
 	}
 
 	helmValuesSpec := helm.ChartSpec{
-		ReleaseName:      root.HelmReleaseName,
-		ChartName:        c.ref,
-		Namespace:        root.Namespace,
+		ReleaseName: cmd.HelmReleaseName,
+		ChartName:   c.Ref,
+		Namespace:   cmd.Namespace,
 		// by default prior to helm install
 		// we create namespace using kubeClient to
 		// create TimescaleDB secrets prior to the
@@ -162,28 +156,28 @@ cli: true`
 		// option is useful for backward compatibility
 		// i.e. if a user wants to install tobs helm chart < 0.3.0
 		// this option creates the namespace.
-		CreateNamespace:  true,
+		CreateNamespace: true,
 	}
 
-	helmClient := helm.NewClient(root.Namespace)
+	helmClient := helm.NewClient(cmd.Namespace)
 	defer helmClient.Close()
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
-	if c.ref == utils.DEFAULT_CHART {
+	if c.Ref == utils.DEFAULT_CHART {
 		err = helmClient.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
 		if err != nil {
 			return fmt.Errorf("failed to add & update tobs helm chart: %w", err)
 		}
 	}
 
-	if c.configFile != "" {
-		helmValuesSpec.ValuesFiles = []string{c.configFile}
+	if c.ConfigFile != "" {
+		helmValuesSpec.ValuesFiles = []string{c.ConfigFile}
 	}
 
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
 	if !c.enableBackUp {
-		e, err := helmClient.ExportValuesFieldFromChart(c.ref, c.configFile, TimescaleDBBackUpKeyForValuesYaml)
+		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, common.TimescaleDBBackUpKeyForValuesYaml)
 		if err != nil {
 			return err
 		}
@@ -223,13 +217,13 @@ timescaledb-single:
 	k8sClient := k8s.NewClient()
 	if !c.skipWait {
 		fmt.Println("Waiting for pods to initialize...")
-		pods, err := k8sClient.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
+		pods, err := k8sClient.KubeGetAllPods(cmd.Namespace, cmd.HelmReleaseName)
 		if err != nil {
 			return err
 		}
 
 		for _, pod := range pods {
-			err = k8sClient.KubeWaitOnPod(root.Namespace, pod.Name)
+			err = k8sClient.KubeWaitOnPod(cmd.Namespace, pod.Name)
 			if err != nil {
 				return err
 			}
@@ -282,7 +276,7 @@ kube-prometheus-stack:
 	return helmValues
 }
 
-func (c *installSpec) createSecrets() error {
+func (c *InstallSpec) createSecrets() error {
 	var i int64
 	var err error
 	if c.version != "" {
@@ -298,8 +292,8 @@ func (c *installSpec) createSecrets() error {
 	// installations needs secrets
 	if i > 3000 || c.version == "" {
 		t := timescaledb_secrets.TSDBSecretsInfo{
-			ReleaseName:    root.HelmReleaseName,
-			Namespace:      root.Namespace,
+			ReleaseName:    cmd.HelmReleaseName,
+			Namespace:      cmd.Namespace,
 			EnableS3Backup: c.enableBackUp,
 			TlsCert:        c.tsDBTlsCert,
 			TlsKey:         c.tsDBTlsKey,

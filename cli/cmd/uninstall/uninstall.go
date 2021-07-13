@@ -1,4 +1,4 @@
-package helm
+package uninstall
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
@@ -14,7 +15,7 @@ import (
 )
 
 // helmUninstallCmd represents the helm uninstall command
-var helmUninstallCmd = &cobra.Command{
+var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
 	Short: "Uninstalls The Observability Stack",
 	Args:  cobra.ExactArgs(0),
@@ -22,8 +23,8 @@ var helmUninstallCmd = &cobra.Command{
 }
 
 func init() {
-	helmCmd.AddCommand(helmUninstallCmd)
-	helmUninstallCmd.Flags().BoolP("delete-data", "", false, "Delete persistent volume claims")
+	root.RootCmd.AddCommand(uninstallCmd)
+	uninstallCmd.Flags().BoolP("delete-data", "", false, "Delete persistent volume claims")
 }
 
 func helmUninstall(cmd *cobra.Command, args []string) error {
@@ -42,7 +43,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	e, err := helm.FetchValue(r, TimescaleDBBackUpKeyForValuesYaml)
+	e, err := helm.FetchValue(r, common.TimescaleDBBackUpKeyForValuesYaml)
 	if err != nil {
 		return fmt.Errorf("failed to get timescaledb backup field value from values.yaml: %w", err)
 	}
@@ -110,7 +111,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 			fmt.Println(err, ", failed to delete pvc's")
 		}
 	} else {
-		fmt.Println("Data still remains. To delete data as well, run 'tobs helm delete-data'")
+		fmt.Println("Data still remains. To delete data as well, run 'tobs uninstall delete-data'")
 	}
 
 	return nil

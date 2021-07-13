@@ -67,6 +67,17 @@ func TestMain(m *testing.M) {
 
 	uninstallsObs()
 
+	// wait for the uninstall to succeed
+	// this takes 3 mins because in HA mode
+	// we have three 3 Prometheus instances to gracefully shutdown
+	// and to avoid flakiness.
+	time.Sleep(3 * time.Minute)
+
+	err = test_utils.CheckPVCSExist(RELEASE_NAME, NAMESPACE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	os.Exit(code)
 }
 
