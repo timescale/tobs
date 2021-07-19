@@ -9,6 +9,8 @@ import (
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
+const tobsVersion = "0.6.0"
+
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
@@ -21,8 +23,6 @@ func init() {
 	root.RootCmd.AddCommand(versionCmd)
 	versionCmd.Flags().BoolP("deployed-chart", "d", false, "Option to show deployed tobs helm chart version")
 }
-
-const tobsVersion = "0.5.0"
 
 func version(cmd *cobra.Command, args []string) error {
 	d, err := cmd.Flags().GetBool("deployed-chart")
