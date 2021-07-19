@@ -1,8 +1,9 @@
 {{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
 {{ if and $grafana.enabled $grafana.sidecar.datasources.enabled -}}
-{{- $tsEnabled := $grafana.timescale.datasource.enabled -}}
+{{- $tsdbExternalEnabled := .Values.timescaledbExternal.enabled -}}
+{{- $tsdbDatasource := $grafana.timescale.datasource -}}
 {{- $promEnabled := $grafana.prometheus.datasource.enabled -}}
-{{- $anyDataSources := or $tsEnabled $promEnabled -}}
+{{- $anyDataSources := or $tsdbDatasource.enabled $promEnabled -}}
 {{ if $anyDataSources -}}
 apiVersion: v1
 kind: Secret
@@ -28,10 +29,10 @@ stringData:
         editable: true
         access: proxy
 {{- end -}}
-{{ if $tsEnabled -}}
+{{ if $tsdbDatasource.enabled -}}
 {{- $isDefault := not $promEnabled -}}
 {{- $hostURL := "" -}}
-{{ if .Values.timescaledbExternal.enabled -}}
+{{ if $tsdbExternalEnabled -}}
   {{- $hostURL = include "tobs.dburi.host" . -}}
 {{ else -}}
   {{- $host := tpl $grafana.timescale.database.host $ -}}
@@ -43,13 +44,13 @@ stringData:
         type: postgres
         isDefault: {{ $isDefault }}
         access: proxy
-        user: {{ ternary (include "tobs.dburi.user" . ) ($grafana.timescale.database.user ) (.Values.timescaledbExternal.enabled) }}
-        database: {{ ternary (include "tobs.dburi.dbname" . ) ($grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}
+        user: {{ ternary (include "tobs.dburi.user" . ) ($tsdbDatasource.user) ($tsdbExternalEnabled) }}
+        database: {{ ternary (include "tobs.dburi.dbname" . ) ($tsdbDatasource.dbName) ($tsdbExternalEnabled) }}
         editable: true
         secureJsonData:
-          password: {{ ternary (include "tobs.dburi.password" . ) ($grafana.timescale.database.pass ) (.Values.timescaledbExternal.enabled) }}
+          password: {{ ternary (include "tobs.dburi.password" . ) ($tsdbDatasource.pass) ($tsdbExternalEnabled) }}
         jsonData:
-          sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) ($grafana.timescale.database.sslMode ) (.Values.timescaledbExternal.enabled) }}
+          sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) ($tsdbDatasource.sslMode) ($tsdbExternalEnabled) }}
           postgresVersion: 1000
           timescaledb: true
 {{- end -}}
