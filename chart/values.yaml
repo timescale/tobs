@@ -35,6 +35,15 @@ timescaledb-single:
       size: 150Gi
     wal:
       size: 20Gi
+  ## TimescaleDB resource requests
+  resources:
+    limits:
+      cpu: 1
+      memory: 3Gi
+    requests:
+      cpu: 1
+      memory: 2Gi
+
 
 # Values for configuring the deployment of the Promscale Connector
 # The charts README is at:
@@ -67,6 +76,9 @@ promscale:
     loadBalancer:
       enabled: false
   resources:
+    limits:
+      memory: 3Gi
+      cpu: 1
     requests:
       # By default this should be enough for a cluster
       # with only a few pods
@@ -79,6 +91,28 @@ promscale:
 kube-prometheus-stack:
   enabled: true
   fullnameOverride: "tobs-kube-prometheus"
+  prometheusOperator:
+    ## Prometheus sidecar config reloader container resource limits
+    configpReloaderCpu: 100m
+    configReloaderMemory: 50Mi
+    ## Prometheus Operator resource requests
+    resources:
+      limits:
+        memory: 3Gi
+        cpu: 1
+      requests:
+        memory: 2Gi
+        cpu: 1
+  alertmanager:
+    alertmanagerSpec:
+      ## AlertManager resource requests
+      resources:
+        limits:
+          memory: 500Mi
+          cpu: 500m
+        requests:
+          memory: 200Mi
+          cpu: 100m
   prometheus:
     prometheusSpec:
       scrapeInterval: "1m"
@@ -108,6 +142,18 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 8Gi
+
+      ## Prometheus metric retention
+      retention: 1d
+
+      ## Prometheus container retention
+      resources:
+        limits:
+          memory: 3Gi
+          cpu: 1
+        requests:
+          memory: 2Gi
+          cpu: 1
 
       # We've enabled annotation-based scraping by default for backward-compatibility
       # and to support the largest number of use-cases out-of-the-box.
@@ -310,6 +356,13 @@ kube-prometheus-stack:
   #   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
   grafana:
     enabled: true
+    resources:
+      limits:
+        cpu: 200m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 300Mi
     sidecar:
       datasources:
         enabled: true
@@ -323,6 +376,13 @@ kube-prometheus-stack:
         files:
           - dashboards/k8s-cluster.json
           - dashboards/k8s-hardware.json
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+        requests:
+         cpu: 50m
+         memory: 50Mi
     adminPassword: ""
     envFromSecret: "{{ .Release.Name }}-grafana-db"
     prometheus:
@@ -355,20 +415,40 @@ kube-prometheus-stack:
       adminUser: postgres
       adminPassSecret: *dbPassSecret
 
-  # By default kube-state-metrics are scraped using
-  # serviceMonitor disable annotation based scraping
   kube-state-metrics:
+    # By default kube-state-metrics are scraped using
+    # serviceMonitor disable annotation based scraping
     prometheusScrape: false
+    resources:
+      limits:
+        cpu: 500m
+        memory: 500Mi
+      requests:
+        cpu: 200m
+        memory: 300Mi
 
-  # By default node-exporter are scraped using
-  # serviceMonitor disable annotation based scraping
   prometheus-node-exporter:
+    # By default node-exporter are scraped using
+    # serviceMonitor disable annotation based scraping
     service:
       annotations:
         prometheus.io/scrape: "false"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 500Mi
+      requests:
+        cpu: 200m
+        memory: 300Mi
 
 grafanaDBJob:
-  resources: {}
+  resources:
+    limits:
+      memory: 100Mi
+      cpu: 200m
+    requests:
+      memory: 50Mi
+      cpu: 100m
 
 #Enable PromLens  https://promlens.com/
 #PromLens is a PromQL query builder, analyzer, and visualizer
@@ -381,6 +461,14 @@ promlens:
   defaultPrometheusUrl:  "http://localhost:9201"
   loadBalancer:
     enabled: false
+  resources:
+    limits:
+      memory: 200Mi
+      cpu: 200m
+    requests:
+      memory: 100Mi
+      cpu: 100m
+
 
 #Enable Promscale to connect to an existing database by providing the db-uri
 timescaledbExternal:
