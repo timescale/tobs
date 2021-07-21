@@ -44,6 +44,12 @@ timescaledb-single:
       size: 150Gi
     wal:
       size: 20Gi
+  ## TimescaleDB resource requests
+  resources:
+    requests:
+      cpu: 100m
+      memory: 2Gi
+
 
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
@@ -118,8 +124,8 @@ promscale:
     requests:
       # By default this should be enough for a cluster
       # with only a few pods
-      memory: 2Gi
-      cpu: 1
+      memory: 500Mi
+      cpu: 30m
 
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
@@ -130,7 +136,26 @@ kube-prometheus-stack:
   alertmanager:
     alertmanagerSpec:
       replicas: 3
-
+      ## AlertManager resource requests
+      resources:
+        limits:
+          memory: 100Mi
+          cpu: 100m
+        requests:
+          memory: 50Mi
+          cpu: 4m
+  prometheusOperator:
+    ## Prometheus sidecar config reloader container resource limits
+    configReloaderCpu: 100m
+    configReloaderMemory: 50Mi
+    ## Prometheus Operator resource requests
+    resources:
+      limits:
+        memory: 200Mi
+        cpu: 100m
+      requests:
+        memory: 100Mi
+        cpu: 10m
   prometheus:
     prometheusSpec:
       scrapeInterval: "1m"
@@ -140,6 +165,12 @@ kube-prometheus-stack:
       retention: 1d
       # Number of replicas of each shard to deploy for a Prometheus deployment.
       replicas: 2
+      ## Prometheus container retention
+      resources:
+        requests:
+          memory: 400Mi
+          cpu: 40m
+
       replicaExternalLabelName: "__replica__"
       # Promscale requires a cluster label to be present for high availability mode.
       prometheusExternalLabelName: "cluster"
@@ -374,6 +405,13 @@ kube-prometheus-stack:
       repository: grafana/grafana
       tag: 9.0.2
       pullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 200m
+        memory: 400Mi
+      requests:
+        cpu: 50m
+        memory: 250Mi
     sidecar:
       datasources:
         enabled: true
@@ -439,17 +477,31 @@ kube-prometheus-stack:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
       promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
 
-  # By default kube-state-metrics are scraped using
-  # serviceMonitor disable annotation based scraping
   kube-state-metrics:
+    # By default kube-state-metrics are scraped using
+    # serviceMonitor disable annotation based scraping
     prometheusScrape: false
+    resources:
+      limits:
+        cpu: 100m
+        memory: 200Mi
+      requests:
+        cpu: 10m
+        memory: 30Mi
 
-  # By default node-exporter are scraped using
-  # serviceMonitor disable annotation based scraping
   prometheus-node-exporter:
+    # By default node-exporter are scraped using
+    # serviceMonitor disable annotation based scraping
     service:
       annotations:
         prometheus.io/scrape: "false"
+    resources:
+      limits:
+        cpu: 250m
+        memory: 180Mi
+      requests:
+        cpu: 30m
+        memory: 50Mi
 
 # GrafanaDB job config this job pre-configures Grafana with datasources and dashbaords
 grafanaDBJob:
@@ -471,8 +523,15 @@ promlens:
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
 opentelemetryOperator:
   enabled: *otelEnabled
+  resources:
+    limits:
+      cpu: 50m
+      memory: 260Mi
+    requests:
+      cpu: 5m
+      memory: 130Mi
   collector:
-    # The default otel collector that will be deployed by CLI once
+    # The default otel collector that will be deployed by helm once
     # the otel operator is in running state
     config: |
       receivers:
