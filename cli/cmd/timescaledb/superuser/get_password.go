@@ -1,9 +1,8 @@
-package timescaledb
+package superuser
 
 import (
 	"errors"
 	"fmt"
-
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
@@ -19,7 +18,7 @@ var timescaledbGetPasswordCmd = &cobra.Command{
 }
 
 func init() {
-	timescaledbCmd.AddCommand(timescaledbGetPasswordCmd)
+	superuserCmd.AddCommand(timescaledbGetPasswordCmd)
 }
 
 func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
@@ -31,7 +30,7 @@ func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
 
 	var pass string
 
-	d, err := common.FormDBDetails(user, "", root.Namespace, root.HelmReleaseName)
+	d, err := common.GetSuperuserDBDetails(root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

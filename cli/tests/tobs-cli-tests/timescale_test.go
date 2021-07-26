@@ -15,13 +15,6 @@ func TestTimescale(t *testing.T) {
 		Namespace: NAMESPACE,
 	}
 
-	releaseInfo.TestTimescaleGetPassword(t, "")
-	releaseInfo.TestTimescaleChangePassword(t, "", "postgres", "battery")
-	releaseInfo.VerifyTimescalePassword(t, "postgres", "battery")
-	releaseInfo.TestTimescaleGetPassword(t, "")
-	releaseInfo.TestTimescaleChangePassword(t, "", "", "chips")
-	releaseInfo.VerifyTimescalePassword(t, "", "chips")
-
 	releaseInfo.TestTimescalePortForward(t, "")
 	releaseInfo.TestTimescalePortForward(t, "5432")
 	releaseInfo.TestTimescalePortForward(t, "1789")

@@ -36,7 +36,7 @@ func chunkIntervalSetDefault(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not set default chunk interval: %w", errors.New("Chunk interval must be at least 1 minute"))
 	}
 
-	d, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
+	d, err := common.GetSuperuserDBDetails(root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

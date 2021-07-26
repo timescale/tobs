@@ -27,7 +27,7 @@ func chunkIntervalGet(cmd *cobra.Command, args []string) error {
 
 	metric := args[0]
 
-	d, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
+	d, err := common.GetSuperuserDBDetails(root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
