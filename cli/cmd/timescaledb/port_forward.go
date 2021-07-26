@@ -18,7 +18,7 @@ var timescaledbPortForwardCmd = &cobra.Command{
 }
 
 func init() {
-	timescaledbCmd.AddCommand(timescaledbPortForwardCmd)
+	Cmd.AddCommand(timescaledbPortForwardCmd)
 	timescaledbPortForwardCmd.Flags().IntP("port", "p", common.LISTEN_PORT_TSDB, "Port to listen from")
 }
 

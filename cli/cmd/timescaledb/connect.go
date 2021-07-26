@@ -1,15 +1,16 @@
 package timescaledb
 
 import (
-	"errors"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
-	"github.com/timescale/tobs/cli/cmd/common"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
+	"github.com/timescale/tobs/cli/pkg/pgconn"
 	"github.com/timescale/tobs/cli/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,107 +18,113 @@ import (
 
 // timescaledbConnectCmd represents the timescaledb connect command
 var timescaledbConnectCmd = &cobra.Command{
-	Use:   "connect",
-	Short: "Connects to the TimescaleDB database",
-	Args:  cobra.ExactArgs(0),
+	Use:   "connect <user>",
+	Short: "Connects to the TimescaleDB database with provided user",
+	Args:  cobra.ExactArgs(1),
 	RunE:  timescaledbConnect,
 }
 
 func init() {
-	timescaledbCmd.AddCommand(timescaledbConnectCmd)
+	Cmd.AddCommand(timescaledbConnectCmd)
 	timescaledbConnectCmd.Flags().BoolP("master", "m", false, "directly execute session on master node")
-	timescaledbConnectCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
+	timescaledbConnectCmd.Flags().StringP("dbname", "d", "", "database name to connect to, defaults to dbname from the helm release")
 }
 
 func timescaledbConnect(cmd *cobra.Command, args []string) error {
-	var err error
-
-	var host, psqlCMD string
-
-	var master bool
-	master, err = cmd.Flags().GetBool("master")
+	master, err := cmd.Flags().GetBool("master")
 	if err != nil {
 		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
 	dbname, err := cmd.Flags().GetString("dbname")
 	if err != nil {
-		return fmt.Errorf("could not change TimescaleDB password: %w", err)
+		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 	}
 
+	if dbname == "" {
+		// if dbname is empty get the default db name from helm release
+		dbname, err = getDBNameFromValues()
+		if err != nil {
+			return fmt.Errorf("failed to get db name from helm values %v", err)
+		}
+	}
+
+	if len(args) == 0 {
+		return fmt.Errorf("provide db-user to connect or to use super-user use timescaledb superuser cmd")
+	}
+
+	dbDetails := &pgconn.DBDetails{
+		Namespace:   root.Namespace,
+		ReleaseName: root.HelmReleaseName,
+		DBName:      dbname,
+		User:        args[0],
+	}
 	k8sClient := k8s.NewClient()
-	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
-	if err != nil {
-		return fmt.Errorf("could not get TimescaleDB password: %w", err)
-	}
+	return PsqlConnect(k8sClient, dbDetails, master)
+}
 
-	dbDetails, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
-	if err != nil {
-		return fmt.Errorf("could not get DB secret key from helm release: %w", err)
-	}
+func getDBNameFromValues() (string, error) {
+	helmClient := helm.NewClient(root.Namespace)
+	dbName, err := helmClient.ExportValuesFieldFromRelease(root.HelmReleaseName, []string{"promscale", "connection", "dbName"})
+	return fmt.Sprint(dbName), err
+}
 
-	user = dbDetails.User
-	var pass string
-	if bytepass, exists := secret.Data[dbDetails.SecretKey]; exists {
-		pass = string(bytepass)
-	} else {
-		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
-	}
-
-	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
-	if err != nil {
-		return err
-	}
-
+func PsqlConnect(k8sClient k8s.Client, dbDetails *pgconn.DBDetails, master bool) error {
+	var host, psqlCMD string
 	if master {
 		masterpod, err := k8sClient.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
 
-		err = k8sClient.KubeExecCmd(root.Namespace, masterpod, "", "psql -U "+user, os.Stdin, true)
+		err = k8sClient.KubeExecCmd(root.Namespace, masterpod, "", "psql -U "+dbDetails.User, os.Stdin, true)
 		if err != nil {
 			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
 		}
+		return nil
+	}
+
+	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
+	if err != nil {
+		return err
+	}
+	if uri == "" {
+		host = root.HelmReleaseName + "." + root.Namespace + ".svc.cluster.local"
+		psqlCMD = "psql -U " + dbDetails.User + " -h " + host + " " + dbDetails.DBName
 	} else {
-		if uri == "" {
-			host = root.HelmReleaseName + "." + root.Namespace + ".svc.cluster.local"
-			psqlCMD = "psql -U " + user + " -h " + host + " " + dbname
-		} else {
-			psqlCMD = "psql " + uri
-		}
+		psqlCMD = "psql " + uri
+	}
 
-		pod := getPodObject(dbname, root.Namespace, user, pass, host, uri)
+	pod := formPsqlPodObject(dbDetails.DBName, root.Namespace, dbDetails.User, dbDetails.Password, host, uri)
 
-		err = k8sClient.KubeCreatePod(pod)
-		if err != nil {
-			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
-		}
+	err = k8sClient.KubeCreatePod(pod)
+	if err != nil {
+		return fmt.Errorf("could not connect to TimescaleDB: %w", err)
+	}
 
-		time.Sleep(time.Second)
+	time.Sleep(time.Second)
 
-		err = k8sClient.KubeWaitOnPod(root.Namespace, "psql")
-		if err != nil {
-			_ = k8sClient.KubeDeletePod(root.Namespace, "psql")
-			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
-		}
-
-		err = k8sClient.KubeExecCmd(root.Namespace, "psql", "", psqlCMD, os.Stdin, true)
-		if err != nil {
-			_ = k8sClient.KubeDeletePod(root.Namespace, "psql")
-			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
-		}
-
+	defer func() {
 		err = k8sClient.KubeDeletePod(root.Namespace, "psql")
 		if err != nil {
-			return fmt.Errorf("could not connect to TimescaleDB: %w", err)
+			log.Fatalf("failed to delete psql pod %v", err)
 		}
+	}()
+
+	err = k8sClient.KubeWaitOnPod(root.Namespace, "psql")
+	if err != nil {
+		return fmt.Errorf("failed to wait for psql pod: %w", err)
+	}
+
+	err = k8sClient.KubeExecCmd(root.Namespace, "psql", "", psqlCMD, os.Stdin, true)
+	if err != nil {
+		return fmt.Errorf("could not connect to TimescaleDB with psql pod: %w", err)
 	}
 
 	return nil
 }
 
-func getPodObject(name, namespace, user, pass, host, uri string) *corev1.Pod {
+func formPsqlPodObject(name, namespace, user, pass, host, uri string) *corev1.Pod {
 	var args []string
 	if uri == "" {
 		args = []string{"-U", user, "-h", host, name}

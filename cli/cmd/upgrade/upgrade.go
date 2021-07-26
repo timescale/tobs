@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/cmd/install"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
@@ -351,9 +352,9 @@ func (c *upgradeSpec) copyDBSecret() error {
 			Labels:    utils.GetTimescaleDBsecretLabels(root.HelmReleaseName),
 		},
 		Data: map[string][]byte{
-			"PATRONI_REPLICATION_PASSWORD": standby,
-			"PATRONI_admin_PASSWORD":       admin,
-			"PATRONI_SUPERUSER_PASSWORD":   postgres,
+			common.DBReplicationSecretKey: standby,
+			common.DBAdminSecretKey:       admin,
+			common.DBSuperUserSecretKey:   postgres,
 		},
 		Type: "Opaque",
 	}

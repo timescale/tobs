@@ -77,7 +77,7 @@ func runTobsWithoutTSDB() {
 
 	fmt.Printf("Created nodeport service for timescaleDB, connecting using ip %s\n", ip)
 
-	cmds := []string{"timescaledb", "get-password", "-n", "external-db-tests"}
+	cmds := []string{"timescaledb", "superuser", "get-password", "-n", "external-db-tests"}
 	getpass := exec.Command(PATH_TO_TOBS, cmds...)
 
 	out, err := getpass.CombinedOutput()

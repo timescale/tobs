@@ -26,6 +26,7 @@ import (
 	_ "github.com/timescale/tobs/cli/cmd/promlens"
 	_ "github.com/timescale/tobs/cli/cmd/promscale"
 	_ "github.com/timescale/tobs/cli/cmd/timescaledb"
+	_ "github.com/timescale/tobs/cli/cmd/timescaledb/superuser"
 	_ "github.com/timescale/tobs/cli/cmd/uninstall"
 	_ "github.com/timescale/tobs/cli/cmd/upgrade"
 	_ "github.com/timescale/tobs/cli/cmd/version"

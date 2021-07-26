@@ -1,9 +1,8 @@
-package timescaledb
+package superuser
 
 import (
 	"context"
 	"fmt"
-
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
@@ -15,14 +14,13 @@ import (
 // timescaledbChangePasswordCmd represents the timescaledb change-password command
 var timescaledbChangePasswordCmd = &cobra.Command{
 	Use:   "change-password",
-	Short: "Changes the TimescaleDB password for a specific user",
+	Short: "Changes the TimescaleDB super-user password",
 	Args:  cobra.ExactArgs(1),
 	RunE:  timescaledbChangePassword,
 }
 
 func init() {
-	timescaledbCmd.AddCommand(timescaledbChangePasswordCmd)
-	timescaledbChangePasswordCmd.Flags().StringP("dbname", "d", "postgres", "database name to connect to")
+	superuserCmd.AddCommand(timescaledbChangePasswordCmd)
 }
 
 func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
@@ -30,38 +28,32 @@ func timescaledbChangePassword(cmd *cobra.Command, args []string) error {
 
 	password := args[0]
 
-	dbname, err := cmd.Flags().GetString("dbname")
-	if err != nil {
-		return fmt.Errorf("could not change TimescaleDB password: %w", err)
-	}
-
 	fmt.Println("Changing password...")
-
-	d, err := common.FormDBDetails(user, dbname, root.Namespace, root.HelmReleaseName)
+	dbDetails, err := common.GetSuperuserDBDetails(root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
 
-	pool, err := d.OpenConnectionToDB()
+	pool, err := dbDetails.OpenConnectionToDB()
 	if err != nil {
 		return fmt.Errorf("could not change TimescaleDB password: %w", err)
 	}
 	defer pool.Close()
 
 	k8sClient := k8s.NewClient()
-	oldpassword, err := utils.GetDBPassword(k8sClient, d.SecretKey, root.HelmReleaseName, root.Namespace)
+	oldpassword, err := utils.GetDBPassword(k8sClient, dbDetails.SecretKey, root.HelmReleaseName, root.Namespace)
 	if err != nil {
 		return fmt.Errorf("could not get existing TimescaleDB password: %w", err)
 	}
 
-	err = updateDBPwdSecrets(k8sClient, d.SecretKey, d.User, password)
+	err = updateDBPwdSecrets(k8sClient, dbDetails.SecretKey, dbDetails.User, password)
 	if err != nil {
 		return err
 	}
 
-	_, err = pool.Exec(context.Background(), "ALTER USER "+d.User+" WITH PASSWORD '"+password+"'")
+	_, err = pool.Exec(context.Background(), "ALTER USER "+dbDetails.User+" WITH PASSWORD '"+password+"'")
 	if err != nil {
-		err1 := updateDBPwdSecrets(k8sClient, d.SecretKey, d.User, string(oldpassword))
+		err1 := updateDBPwdSecrets(k8sClient, dbDetails.SecretKey, dbDetails.User, string(oldpassword))
 		if err1 != nil {
 			fmt.Printf("failed to revert to the old password on password update failure %v", err1)
 		}

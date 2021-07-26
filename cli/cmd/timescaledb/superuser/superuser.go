@@ -1,16 +1,17 @@
-package timescaledb
+package superuser
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/timescaledb"
 )
 
-// Cmd represents the timescaledb command
-var Cmd = &cobra.Command{
-	Use:   "timescaledb",
-	Short: "Subcommand for TimescaleDB operations",
+// Cmd represents the timescaledb superuser command
+var superuserCmd = &cobra.Command{
+	Use:   "superuser",
+	Short: "Subcommand for TimescaleDB super-user operations",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		err := root.RootCmd.PersistentPreRunE(cmd, args)
 		if err != nil {
@@ -22,5 +23,5 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	root.RootCmd.AddCommand(Cmd)
+	timescaledb.Cmd.AddCommand(superuserCmd)
 }

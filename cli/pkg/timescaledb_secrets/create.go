@@ -13,6 +13,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -110,9 +111,9 @@ func (t *TSDBSecretsInfo) createTimescaleDBCredentials() error {
 			Labels:    utils.GetTimescaleDBsecretLabels(t.ReleaseName),
 		},
 		Data: map[string][]byte{
-			"PATRONI_REPLICATION_PASSWORD": repPass,
-			"PATRONI_admin_PASSWORD":       adminPass,
-			"PATRONI_SUPERUSER_PASSWORD":   superUserPass,
+			common.DBReplicationSecretKey: repPass,
+			common.DBAdminSecretKey:       adminPass,
+			common.DBSuperUserSecretKey:   superUserPass,
 		},
 		Type: "Opaque",
 	}

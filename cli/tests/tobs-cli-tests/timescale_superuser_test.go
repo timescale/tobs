@@ -1,17 +1,16 @@
-package external_db_tests
+package tobs_cli_tests
 
 import (
-	"fmt"
-	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 	"testing"
+
+	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-func TestTimescale(t *testing.T) {
+func TestTimescaleSuper(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping TimescaleDB tests")
+		t.Skip("Skipping TimescaleDB Super User tests")
 	}
 
-	fmt.Println("Performing TimescaleDB tests for external db setup...")
 	releaseInfo := test_utils.ReleaseInfo{
 		Release:   RELEASE_NAME,
 		Namespace: NAMESPACE,
@@ -20,12 +19,13 @@ func TestTimescale(t *testing.T) {
 	releaseInfo.TestTimescaleGetPassword(t)
 	releaseInfo.TestTimescaleChangePassword(t, "battery")
 	releaseInfo.VerifyTimescalePassword(t, "battery")
-
 	releaseInfo.TestTimescaleGetPassword(t)
 	releaseInfo.TestTimescaleChangePassword(t, "chips")
 	releaseInfo.VerifyTimescalePassword(t, "chips")
 
 	releaseInfo.TestTimescaleSuperUserConnect(t, true)
+	releaseInfo.TestTimescaleSuperUserConnect(t, false)
+	releaseInfo.TestTimescaleSuperUserConnect(t, false)
 	releaseInfo.TestTimescaleSuperUserConnect(t, false)
 	releaseInfo.TestTimescaleSuperUserConnect(t, false)
 	releaseInfo.TestTimescaleSuperUserConnect(t, false)

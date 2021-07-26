@@ -14,12 +14,13 @@ import (
 )
 
 type DBDetails struct {
-	Namespace string
-	Name      string
-	DBName    string
-	User      string
-	SecretKey string
-	Remote    int
+	Namespace   string
+	ReleaseName string
+	DBName      string
+	User        string
+	SecretKey   string
+	Password    string
+	Remote      int
 }
 
 func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
@@ -32,12 +33,12 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 	defer func() { os.Stdout = stdout }()
 
 	k8sClient := k8s.NewClient()
-	tspromPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"app": d.Name + "-promscale"})
+	tspromPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"app": d.ReleaseName + "-promscale"})
 	if err != nil {
 		return nil, err
 	}
 
-	passBytes, err := utils.GetDBPassword(k8sClient, d.SecretKey, d.Name, d.Namespace)
+	passBytes, err := utils.GetDBPassword(k8sClient, d.SecretKey, d.ReleaseName, d.Namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -56,12 +57,12 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 		}
 	}
 
-	dbURI, err := utils.GetTimescaleDBURI(k8sClient, d.Namespace, d.Name)
+	dbURI, err := utils.GetTimescaleDBURI(k8sClient, d.Namespace, d.ReleaseName)
 	if err != nil {
 		return nil, err
 	}
 
-	tsdbPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"release": d.Name, "role": "master"})
+	tsdbPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"release": d.ReleaseName, "role": "master"})
 	if err != nil {
 		return nil, err
 	}
