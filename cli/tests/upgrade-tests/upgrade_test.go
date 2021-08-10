@@ -94,7 +94,7 @@ func TestUpgrade(t *testing.T) {
 
 	helmClient = helm.NewClient(NAMESPACE)
 	defer helmClient.Close()
-	chartDetails, err := helmClient.GetDeployedChartMetadata(RELEASE_NAME)
+	chartDetails, err := helmClient.GetDeployedChartMetadata(RELEASE_NAME, NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}

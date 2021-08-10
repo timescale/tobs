@@ -84,6 +84,8 @@ kube-prometheus-stack:
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
+      ## Prometheus metric retention
+      retention: 1d
       ## The remote_read spec configuration for Prometheus.
       ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:

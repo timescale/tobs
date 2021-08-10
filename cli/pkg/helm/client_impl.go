@@ -160,9 +160,9 @@ func (c *clientImpl) GetChartMetadata(chart string) (*ChartMetadata, error) {
 	return nil, fmt.Errorf("failed to get Chart.yaml from the provided chart")
 }
 
-func (c *clientImpl) GetDeployedChartMetadata(releaseName string) (*DeployedChartMetadata, error) {
+func (c *clientImpl) GetDeployedChartMetadata(releaseName, namespace string) (*DeployedChartMetadata, error) {
 	var charts []DeployedChartMetadata
-	l, err := c.listDeployedReleases()
+	l, err := c.listDeployedReleases(namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -581,12 +581,12 @@ func setUninstallReleaseOptions(chartSpec *ChartSpec, uninstallReleaseOptions *a
 
 // ListDeployedReleases lists all deployed releases.
 // Namespace and other context is provided via the Options struct when instantiating a client.
-func (c *clientImpl) listDeployedReleases() ([]*release.Release, error) {
-	err := c.actionConfig.Init(c.settings.RESTClientGetter(), "", "", func(_ string, _ ...interface{}) {})
+func (c *clientImpl) listDeployedReleases(namespace string) ([]*release.Release, error) {
+	err := c.actionConfig.Init(c.settings.RESTClientGetter(), namespace, "", func(_ string, _ ...interface{}) {})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list deployed releases %v", err)
 	}
 	listClient := action.NewList(c.actionConfig)
-	listClient.StateMask = action.ListDeployed
+	listClient.StateMask = action.ListDeployed | action.ListFailed | action.ListPendingInstall | action.ListPendingUpgrade
 	return listClient.Run()
 }

@@ -23,7 +23,7 @@ stringData:
 
     datasources:
 {{- if $promEnabled }}
-      - name: Prometheus
+      - name: Promscale
         type: prometheus
         url: {{ tpl $grafana.prometheus.datasource.url . }}
         isDefault: true

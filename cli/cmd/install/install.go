@@ -290,7 +290,7 @@ func (c *InstallSpec) createSecrets() error {
 	// equal to or greater than 0.3.0
 	// if version isn't provided new
 	// installations needs secrets
-	if i > 3000 || c.version == "" {
+	if i >= 3000 || c.version == "" {
 		t := timescaledb_secrets.TSDBSecretsInfo{
 			ReleaseName:    cmd.HelmReleaseName,
 			Namespace:      cmd.Namespace,
