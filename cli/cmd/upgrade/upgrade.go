@@ -105,7 +105,7 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName)
+	deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName, root.Namespace)
 	if err != nil {
 		if err.Error() != utils.ErrorTobsDeploymentNotFound(root.HelmReleaseName).Error() {
 			return err
@@ -232,7 +232,10 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
 	}
 
-	if nVersion >= version0_4_0 {
+	// kube-prometheus is introduced on tobs >= 0.4.0 release
+	// so create CRDs if version >= 0.4.0 and only create CRDs
+	// if version change is noticed in upgrades...
+	if nVersion >= version0_4_0 && nVersion != dVersion {
 		if !c.skipCrds {
 			err = createCRDS()
 			if err != nil {

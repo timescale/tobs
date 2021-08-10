@@ -118,7 +118,7 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 }
 
 func delete040UpgradeJob(helmClient helm.Client, k8sClient k8s.Client) error {
-	deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName)
+	deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName, root.Namespace)
 	if err != nil {
 		return err
 	}

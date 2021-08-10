@@ -34,7 +34,7 @@ func version(cmd *cobra.Command, args []string) error {
 	helmClient := helm.NewClient(root.Namespace)
 	defer helmClient.Close()
 	if d {
-		deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName)
+		deployedChart, err := helmClient.GetDeployedChartMetadata(root.HelmReleaseName, root.Namespace)
 		if err != nil {
 			chartVersion = fmt.Errorf("failed to get the deployed chart version: %v", err).Error()
 		} else {

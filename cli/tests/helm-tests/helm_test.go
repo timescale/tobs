@@ -108,7 +108,7 @@ func testHelmClientInstallOrUpgradeChart() {
 
 // list tobs deployment and verify it post uninstall
 func testTobsReleasePostUninstall() {
-	res, err := helmClientTest.GetDeployedChartMetadata("tobs")
+	res, err := helmClientTest.GetDeployedChartMetadata("tobs", NAMESPACE)
 	if err == nil && res.Name == DEFAULT_TOBS_NAME {
 		log.Fatal("the tobs release after uninstalling are still showing up....", res)
 	}
@@ -168,7 +168,7 @@ func TestGetChartValues(t *testing.T) {
 }
 
 func TestGetDeployedChartMetadata(t *testing.T) {
-	chart, err := helmClientTest.GetDeployedChartMetadata(DEFAULT_TOBS_NAME)
+	chart, err := helmClientTest.GetDeployedChartMetadata(DEFAULT_TOBS_NAME, NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}
