@@ -321,6 +321,11 @@ kube-prometheus-stack:
         # Promscale is the default datasource
         defaultDatasourceEnabled: false
       dashboards:
+        # option to enable multi-cluster support
+        # in Grafana dashboards by default disabled
+        multicluster:
+          global:
+            enabled: false
         enabled: true
         files:
           - dashboards/k8s-cluster.json
