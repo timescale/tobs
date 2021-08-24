@@ -1,0 +1,49 @@
+{{ if .Values.opentelemetryOperator.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-jaeger-promscale-query
+  namespace: {{ template "tobs.namespace" . }}
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    component: jaeger-promscale-query
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "tobs.fullname" . }}
+      component: jaeger-promscale-query
+  template:
+    metadata:
+      labels:
+        app: {{ template "tobs.fullname" . }}
+        component: jaeger-promscale-query
+    spec:
+      containers:
+        - image: {{ .Values.opentelemetryOperator.jaegerPromscaleQuery.image }}
+          imagePullPolicy: IfNotPresent
+          name: jaeger-promscale-query
+          {{- if .Values.opentelemetryOperator.jaegerPromscaleQuery.args }}
+          args:
+            {{- range .Values.opentelemetryOperator.jaegerPromscaleQuery.args }}
+              - {{ . }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.opentelemetryOperator.jaegerPromscaleQuery.resources }}
+          resources:
+            {{- toYaml .Values.opentelemetryOperator.jaegerPromscaleQuery.resources | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: 16686
+              name: jaeger-ui
+          volumeMounts:
+            - mountPath: /configs/jaeger-promscale-query.yaml
+              subPath: jaeger-promscale-query.yaml
+              name: config-out
+      volumes:
+        - name: config-out
+          configMap:
+            name: {{ $.Release.Name }}-jaeger-promscale-query-config
+{{- end -}}

@@ -1,0 +1,14 @@
+{{ if .Values.opentelemetryOperator.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-jaeger-promscale-query-config
+  namespace: {{ template "tobs.namespace" . }}
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+data:
+  jaeger-promscale-query.yaml: |
+{{ tpl .Values.opentelemetryOperator.jaegerPromscaleQuery.config $ | indent 4}}
+{{- end -}}

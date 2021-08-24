@@ -31,16 +31,24 @@ func timescaledbPortForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}
 
+	if err := PortForwardTimescaleDB(port); err != nil {
+		return err
+	}
+
+	select {}
+}
+
+func PortForwardTimescaleDB(listenPort int) error {
 	k8sClient := k8s.NewClient()
 	podName, err := k8sClient.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}
 
-	_, err = k8sClient.KubePortForwardPod(root.Namespace, podName, port, common.FORWARD_PORT_TSDB)
+	_, err = k8sClient.KubePortForwardPod(root.Namespace, podName, listenPort, common.FORWARD_PORT_TSDB)
 	if err != nil {
 		return fmt.Errorf("could not port-forward TimescaleDB: %w", err)
 	}
 
-	select {}
+	return nil
 }

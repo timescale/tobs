@@ -495,7 +495,7 @@ var kubePrometheusCRDNames = []string{
 }
 
 func createCRDS() error {
-	err := k8s.CreateCRDS(kubePrometheusCRDURLs)
+	err := k8s.CreateK8sManifests(kubePrometheusCRDURLs)
 	if err != nil {
 		return err
 	}

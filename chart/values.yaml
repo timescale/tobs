@@ -42,7 +42,16 @@ timescaledb-single:
 promscale:
   enabled: true
   image: timescale/promscale:0.6.0
-  # connection options
+  imagePullPolicy: Always
+  # needs to be enabled for tracing support in Promscale
+  # to expose traces port
+  tracing:
+    enabled: false
+  # by default Promscale isn't configured to accept traces
+  # to enable pass below arg
+  # arg:
+  # - -otlp-grpc-server-listen-address=:9202
+
   connection:
     # the db name in which the metrics will be stored
     dbName: &metricDB postgres
@@ -84,24 +93,24 @@ kube-prometheus-stack:
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
-      ## Prometheus metric retention
+      # Prometheus metric retention
       retention: 1d
-      ## The remote_read spec configuration for Prometheus.
-      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
+      # The remote_read spec configuration for Prometheus.
+      # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
         # - {protocol}://{host}:{port}/{endpoint}
         - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/read"
           readRecent: true
 
-      ## The remote_write spec configuration for Prometheus.
-      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
+      # The remote_write spec configuration for Prometheus.
+      # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
         - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/write"
 
-      ## Prometheus pod storage spec
+      # Prometheus pod storage spec
       storageSpec:
-        ## Using PersistentVolumeClaim
-        ## disable mount sub path, use the root directory of pvc
+        # Using PersistentVolumeClaim
+        # disable mount sub path, use the root directory of pvc
         disableMountSubPath: true
         volumeClaimTemplate:
           spec:
@@ -377,8 +386,8 @@ kube-prometheus-stack:
 grafanaDBJob:
   resources: {}
 
-#Enable PromLens  https://promlens.com/
-#PromLens is a PromQL query builder, analyzer, and visualizer
+# Enable PromLens  https://promlens.com/
+# PromLens is a PromQL query builder, analyzer, and visualizer
 promlens:
   enabled: true
   image: "promlabs/promlens:latest"
@@ -389,7 +398,28 @@ promlens:
   loadBalancer:
     enabled: false
 
-#Enable Promscale to connect to an existing database by providing the db-uri
+# Enable OpenTelemetry Operator
+# If using tobs CLI you can enable otel with --enable-opentelemetry flag
+opentelemetryOperator:
+  enabled: false
+  jaegerPromscaleQuery:
+    # later will be chnaged to Jaeger query that includes Promscale plugin
+    image: vineeth97/promscale-jaeger-query
+    endpoint: "{{ .Release.Name }}-jaeger-promscale.{{ .Release.Namespace }}.svc.cluster.local:16686"
+    args:
+      - --grpc-storage-plugin.configuration-file=/configs/jaeger-promscale-query.yaml
+      - --grpc-storage-plugin.binary=/tmp/promscale-jaeger-plugin
+      - --query.max-clock-skew-adjustment=1s
+    config: |
+      promscale-tls: false
+      promscale-grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
+      connection-timeout: 1h
+
+    service:
+      loadBalancer:
+        enabled: false
+
+# Enable Promscale to connect to an existing database by providing the db-uri
 timescaledbExternal:
   enabled: false
   db_uri: ""

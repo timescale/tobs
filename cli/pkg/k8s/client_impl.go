@@ -13,6 +13,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apiext "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,6 +35,10 @@ type clientImpl struct {
 	Config *rest.Config
 }
 
+type apiClient struct {
+	*apiext.Clientset
+}
+
 func NewClient() Client {
 	var err error
 
@@ -51,6 +57,25 @@ func NewClient() Client {
 	}
 
 	return &clientImpl{client, config}
+}
+
+func NewAPIClient() apiClient {
+	var err error
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		loadingRules,
+		&clientcmd.ConfigOverrides{},
+	).ClientConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client, err := apiext.NewForConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return apiClient{client}
 }
 
 func (c *clientImpl) KubeGetPodName(namespace string, labelmap map[string]string) (string, error) {
@@ -284,6 +309,9 @@ func (c *clientImpl) KubePortForwardService(namespace string, serviceName string
 		return nil, err
 	}
 
+	if len(pods.Items) == 0 {
+		return nil, fmt.Errorf("couldn't find the pods for service: %s", serviceName)
+	}
 	podName := pods.Items[0].Name
 
 	pf, err := c.KubePortForwardPod(namespace, podName, local, remote)
@@ -594,7 +622,7 @@ func (c *clientImpl) GetJob(jobName, namespace string) (*batchv1.Job, error) {
 	return c.BatchV1().Jobs(namespace).Get(context.Background(), jobName, metav1.GetOptions{})
 }
 
-func CreateCRDS(crds []string) error {
+func CreateK8sManifests(crds []string) error {
 	for _, crd := range crds {
 		out := exec.Command("kubectl", "apply", "-f", crd)
 		output, err := out.CombinedOutput()
@@ -658,4 +686,16 @@ func (c *clientImpl) UpdatePVToNewPVC(pvcName, newPVCName, namespace string, pvc
 	}
 
 	return nil
+}
+
+func (c *apiClient) GetCRD(name string) (*v1.CustomResourceDefinition, error) {
+	return c.ApiextensionsV1().CustomResourceDefinitions().Get(context.Background(), name, metav1.GetOptions{})
+}
+
+func (c *clientImpl) CreateCustomResource(namespace, apiVersion, resourceName string, body []byte) error {
+	_, err := c.RESTClient().Post().
+		AbsPath("/apis/" + apiVersion).Namespace(namespace).Resource(resourceName).
+		Body(body).
+		DoRaw(context.TODO())
+	return err
 }

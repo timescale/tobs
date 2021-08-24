@@ -23,10 +23,17 @@ stringData:
 
     datasources:
 {{- if $promEnabled }}
-      - name: Promscale
+      - name: Promscale-PromQL
         type: prometheus
         url: {{ tpl $grafana.prometheus.datasource.url . }}
         isDefault: true
+        editable: true
+        access: proxy
+{{- end -}}
+{{- if .Values.opentelemetryOperator.enabled }}
+      - name: Promscale-Tracing
+        type: jaeger
+        url: {{ tpl .Values.opentelemetryOperator.jaegerPromscaleQuery.endpoint . }}
         editable: true
         access: proxy
 {{- end -}}
@@ -40,7 +47,7 @@ stringData:
   {{- $port := $grafana.timescale.database.port | int -}}
   {{- $hostURL = printf "%s:%d" $host $port -}}
 {{ end }}
-      - name: TimescaleDB
+      - name: Promscale-SQL
         url: {{ $hostURL }}
         type: postgres
         isDefault: {{ $isDefault }}
