@@ -57,6 +57,11 @@ jobs:
         run: |
           make helm-tests
 
+      - name: Dependency-Tests
+        working-directory: ${{env.working-directory}}
+        run: |
+          go test -v ./tests/dependency-tests
+
       - name: E2E-Tests
         working-directory: ${{env.working-directory}}
         run: |

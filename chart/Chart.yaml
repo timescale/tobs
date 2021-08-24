@@ -18,5 +18,5 @@ dependencies:
     repository: https://charts.timescale.com
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
-    version: 17.2.1
+    version: 18.0.0
     repository: https://prometheus-community.github.io/helm-charts

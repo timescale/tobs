@@ -42,6 +42,8 @@ kube-prometheus-stack:
 
 ## Multi-cluster support
 
+<img src="./../../docs/assets/multi-cluster.png" alt="multi-cluster setup diagram" width="800"/>
+
 In tobs you can enable multi-cluster support to install a data aggregation cluster to collect observability data coming from different observer clusters. 
 
 With tobs you can deploy both observer clusters and data aggregation cluster. 
@@ -121,7 +123,7 @@ kube-prometheus-stack:
       externalLabels:
         cluster: <clusterName>  
       remoteRead:
-      - url: "<PROMSCALE_ENDPOINT>/read"
+      - url: "<PROMSCALE_SERVICE_ENDPOINT_OF_DATA_AGGREGATION_CLUSTER>/read"
         readRecent: true
       remoteWrite:
       - url: "<PROMSCALE_ENDPOINT>/write"  
