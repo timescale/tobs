@@ -469,18 +469,20 @@ func parsePgBackRestConf(data string) map[string]string {
 	return newData
 }
 
-var crdURLs = []string{
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
+var KubePrometheusCRDVersion = "v0.50.0"
+
+var kubePrometheusCRDURLs = []string{
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
+	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
 }
 
-var crdNames = []string{
+var kubePrometheusCRDNames = []string{
 	"alertmanagerconfigs.monitoring.coreos.com",
 	"alertmanagers.monitoring.coreos.com",
 	"podmonitors.monitoring.coreos.com",
@@ -492,11 +494,11 @@ var crdNames = []string{
 }
 
 func createCRDS() error {
-	err := k8s.CreateCRDS(crdURLs)
+	err := k8s.CreateCRDS(kubePrometheusCRDURLs)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Successfully created CRDs: ", crdNames)
+	fmt.Println("Successfully created CRDs: ", kubePrometheusCRDNames)
 	return nil
 }
 
