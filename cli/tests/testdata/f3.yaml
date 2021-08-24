@@ -163,6 +163,11 @@ promlens:
   loadBalancer:
     enabled: false
 
+# Enable OpenTelemetry Operator
+# If using tobs CLI you can enable otel with --enable-opentelemetry flag
+opentelemetryOperator:
+  enabled: false
+
 #Enable Promscale to connect to an existing database by providing the db-uri
 timescaledbExternal:
   enabled: false

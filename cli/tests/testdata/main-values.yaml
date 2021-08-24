@@ -378,6 +378,18 @@ promlens:
   loadBalancer:
     enabled: false
 
+# Enable OpenTelemetry Operator
+# If using tobs CLI you can enable otel with --enable-opentelemetry flag
+opentelemetryOperator:
+  enabled: false
+  jaegerPromscaleQuery:
+    # later will be chnaged to Jaeger query that includes Promscale plugin
+    image: vineeth97/promscale-jaeger-query
+    config: |
+      promscale-tls: false
+      promscale-grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
+      connection-timeout: 1h
+
 #Enable Promscale to connect to an existing database by providing the db-uri
 timescaledbExternal:
   enabled: false

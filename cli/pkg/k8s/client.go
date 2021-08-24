@@ -60,4 +60,7 @@ type Client interface {
 
 	// namespace specific actions
 	CreateNamespaceIfNotExists(namespace string) error
+
+	// create CR
+	CreateCustomResource(namespace, apiVersion, resourceName string, body []byte) error
 }

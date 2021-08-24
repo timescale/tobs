@@ -6,8 +6,13 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
+	"github.com/timescale/tobs/cli/cmd/grafana"
+	"github.com/timescale/tobs/cli/cmd/jaeger"
+	"github.com/timescale/tobs/cli/cmd/prometheus"
 	"github.com/timescale/tobs/cli/cmd/promlens"
 	"github.com/timescale/tobs/cli/cmd/promscale"
+	"github.com/timescale/tobs/cli/cmd/timescaledb"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
@@ -15,7 +20,7 @@ import (
 // portForwardCmd represents the port-forward command
 var portForwardCmd = &cobra.Command{
 	Use:   "port-forward",
-	Short: "Port-forwards TimescaleDB, Promscale, Promlens, Grafana, and Prometheus to localhost",
+	Short: "Port-forwards TimescaleDB, Promscale, Promlens, Grafana, Prometheus, and Jaeger to localhost",
 	Args:  cobra.ExactArgs(0),
 	RunE:  portForward,
 }
@@ -27,88 +32,92 @@ func init() {
 	portForwardCmd.Flags().IntP("prometheus", "p", common.LISTEN_PORT_PROM, "Port to listen from for Prometheus")
 	portForwardCmd.Flags().IntP("promscale", "c", common.LISTEN_PORT_PROMSCALE, "Port to listen from for the Promscale")
 	portForwardCmd.Flags().IntP("promlens", "l", common.LISTEN_PORT_PROMLENS, "Port to listen from for PromLens")
+	portForwardCmd.Flags().IntP("jaeger", "j", common.LISTEN_PORT_JAEGER, "Port to listen from for Jaeger")
 }
 
 func portForward(cmd *cobra.Command, args []string) error {
 	var err error
 
-	var timescaledb int
-	timescaledb, err = cmd.Flags().GetInt("timescaledb")
+	timescaledbPort, err := cmd.Flags().GetInt("timescaledb")
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	var grafana int
-	grafana, err = cmd.Flags().GetInt("grafana")
+	grafanaPort, err := cmd.Flags().GetInt("grafana")
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	var prometheus int
-	prometheus, err = cmd.Flags().GetInt("prometheus")
+	prometheusPort, err := cmd.Flags().GetInt("prometheus")
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	var promscalePort int
-	promscalePort, err = cmd.Flags().GetInt("promscale")
+	promscalePort, err := cmd.Flags().GetInt("promscale")
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	var promlensPort int
-	promlensPort, err = cmd.Flags().GetInt("promlens")
+	promlensPort, err := cmd.Flags().GetInt("promlens")
 	if err != nil {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	k8sClient := k8s.NewClient()
+	jaegerPort, err := cmd.Flags().GetInt("jaeger")
+	if err != nil {
+		return fmt.Errorf("could not port-forward: %w", err)
+	}
+
 	// Port-forward TimescaleDB
 	// if db-uri exists skip the port-forwarding as it isn't the db within the cluster
+	k8sClient := k8s.NewClient()
 	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
-	if uri == "" {
-		podName, err := k8sClient.KubeGetPodName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "role": "master"})
-		if err != nil {
-			return fmt.Errorf("could not port-forward: %w", err)
-		}
 
-		_, err = k8sClient.KubePortForwardPod(root.Namespace, podName, timescaledb, common.FORWARD_PORT_TSDB)
-		if err != nil {
-			return fmt.Errorf("could not port-forward: %w", err)
+	if uri == "" {
+		if err := timescaledb.PortForwardTimescaleDB(timescaledbPort); err != nil {
+			return err
 		}
 	}
 
 	// Port-forward Grafana
-	serviceName, err := k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName, "app.kubernetes.io/name": "grafana"})
-	if err != nil {
-		return fmt.Errorf("could not port-forward: %w", err)
-	}
-
-	_, err = k8sClient.KubePortForwardService(root.Namespace, serviceName, grafana, common.FORWARD_PORT_GRAFANA)
-	if err != nil {
-		return fmt.Errorf("could not port-forward: %w", err)
+	if err := grafana.PortForwardGrafana(grafanaPort); err != nil {
+		return err
 	}
 
 	// Port-forward Prometheus
-	serviceName, err = k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "kube-prometheus-stack-prometheus"})
-	if err != nil {
-		return fmt.Errorf("could not port-forward: %w", err)
+	if err := prometheus.PortForwardPrometheus(prometheusPort); err != nil {
+		return err
 	}
 
-	_, err = k8sClient.KubePortForwardService(root.Namespace, serviceName, prometheus, common.FORWARD_PORT_PROM)
-	if err != nil {
-		return fmt.Errorf("could not port-forward: %w", err)
-	}
-
+	// Port-forward Promlens
 	if err := promlens.PortForwardPromlens(promlensPort); err != nil {
 		return err
 	}
 
+	// Port-forward Promscale
 	if err := promscale.PortForwardPromscale(promscalePort); err != nil {
 		return err
+	}
+
+	// As Jaeger isn't part of default install, check whether
+	// Jaeger is enabled
+	helmClient := helm.NewClient(root.Namespace)
+	e, err := helmClient.ExportValuesFieldFromRelease(root.HelmReleaseName, []string{"opentelemetryOperator", "enabled"})
+	if err != nil {
+		return err
+	}
+	enableOtel, ok := e.(bool)
+	if !ok {
+		return fmt.Errorf("timescaledb-single.enabled was not a bool")
+	}
+	// Port-forward Jaeger
+	if enableOtel {
+		if err := jaeger.PortForwardJaeger(jaegerPort); err != nil {
+			return err
+		}
 	}
 	select {}
 }
