@@ -12,7 +12,7 @@ import (
 )
 
 func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens string) {
-	cmds := []string{"port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"port-forward", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	if timescale != "" {
 		cmds = append(cmds, "-t", timescale)
 	}

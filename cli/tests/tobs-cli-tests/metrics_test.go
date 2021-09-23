@@ -18,7 +18,7 @@ import (
 var PASS string
 
 func testRetentionSetDefault(t testing.TB, period int) {
-	cmds := []string{"metrics", "retention", "set-default", strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "retention", "set-default", strconv.Itoa(period), "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	set := exec.Command(PATH_TO_TOBS, cmds...)
 
@@ -30,7 +30,7 @@ func testRetentionSetDefault(t testing.TB, period int) {
 }
 
 func testRetentionSet(t testing.TB, metric string, period int) {
-	cmds := []string{"metrics", "retention", "set", metric, strconv.Itoa(period), "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "retention", "set", metric, strconv.Itoa(period), "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	set := exec.Command(PATH_TO_TOBS, cmds...)
 
@@ -42,7 +42,7 @@ func testRetentionSet(t testing.TB, metric string, period int) {
 }
 
 func testRetentionReset(t testing.TB, metric string) {
-	cmds := []string{"metrics", "retention", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "retention", "reset", metric, "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	reset := exec.Command(PATH_TO_TOBS, cmds...)
 
@@ -54,7 +54,7 @@ func testRetentionReset(t testing.TB, metric string) {
 }
 
 func testRetentionGet(t testing.TB, metric string, expectedDays int64) {
-	cmds := []string{"metrics", "retention", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "retention", "get", metric, "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	get := exec.Command(PATH_TO_TOBS, cmds...)
 
@@ -75,7 +75,7 @@ func testRetentionGet(t testing.TB, metric string, expectedDays int64) {
 }
 
 func testChunkIntervalSetDefault(t testing.TB, interval string) {
-	cmds := []string{"metrics", "chunk-interval", "set-default", interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "chunk-interval", "set-default", interval, "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	set := exec.Command(PATH_TO_TOBS, cmds...)
 
@@ -87,7 +87,7 @@ func testChunkIntervalSetDefault(t testing.TB, interval string) {
 }
 
 func testChunkIntervalSet(t testing.TB, metric, interval string) {
-	cmds := []string{"metrics", "chunk-interval", "set", metric, interval, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "chunk-interval", "set", metric, interval, "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	set := exec.Command(PATH_TO_TOBS, cmds...)
 
@@ -99,7 +99,7 @@ func testChunkIntervalSet(t testing.TB, metric, interval string) {
 }
 
 func testChunkIntervalReset(t testing.TB, metric string) {
-	cmds := []string{"metrics", "chunk-interval", "reset", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "chunk-interval", "reset", metric, "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	reset := exec.Command(PATH_TO_TOBS, cmds...)
 
@@ -111,7 +111,7 @@ func testChunkIntervalReset(t testing.TB, metric string) {
 }
 
 func testChunkIntervalGet(t testing.TB, metric string, expectedDuration time.Duration) {
-	cmds := []string{"metrics", "chunk-interval", "get", metric, "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"metrics", "chunk-interval", "get", metric, "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	get := exec.Command(PATH_TO_TOBS, cmds...)
 

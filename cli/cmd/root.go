@@ -55,8 +55,8 @@ func AddRootFlags(cmd *cobra.Command) {
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tobs.yaml)")
-	RootCmd.PersistentFlags().StringP("name", "n", "tobs", "Helm release name")
-	RootCmd.PersistentFlags().StringP("namespace", "", "default", "Kubernetes namespace")
+	RootCmd.PersistentFlags().StringP("name", "", "tobs", "Helm release name")
+	RootCmd.PersistentFlags().StringP("namespace", "n", "default", "Kubernetes namespace")
 }
 
 // initConfig reads in config file and ENV variables if set.

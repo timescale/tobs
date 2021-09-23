@@ -10,7 +10,7 @@ import (
 )
 
 func testGrafanaPortForward(t testing.TB, port string) {
-	cmds := []string{"grafana", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"grafana", "port-forward", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	if port != "" {
 		cmds = append(cmds, "-p", port)
 	}
@@ -40,7 +40,7 @@ func testGrafanaPortForward(t testing.TB, port string) {
 }
 
 func testGrafanaGetPass(t testing.TB) {
-	cmds := []string{"grafana", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"grafana", "get-password", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	getpass := exec.Command(PATH_TO_TOBS, cmds...)
@@ -53,7 +53,7 @@ func testGrafanaGetPass(t testing.TB) {
 }
 
 func testGrafanaChangePass(t testing.TB, newpass string, expectError bool) {
-	cmds := []string{"grafana", "change-password", "\"" + newpass + "\"", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"grafana", "change-password", "\"" + newpass + "\"", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	changepass := exec.Command(PATH_TO_TOBS, cmds...)
@@ -66,7 +66,7 @@ func testGrafanaChangePass(t testing.TB, newpass string, expectError bool) {
 }
 
 func verifyGrafanaPass(t testing.TB, expectedPass string) {
-	getpass := exec.Command(PATH_TO_TOBS, "grafana", "get-password", "-n", RELEASE_NAME, "--namespace", NAMESPACE)
+	getpass := exec.Command(PATH_TO_TOBS, "grafana", "get-password", "--name", RELEASE_NAME, "--namespace", NAMESPACE)
 
 	out, err := getpass.CombinedOutput()
 	if err != nil {
