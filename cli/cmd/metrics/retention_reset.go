@@ -38,7 +38,7 @@ func retentionReset(cmd *cobra.Command, args []string) error {
 	defer pool.Close()
 
 	fmt.Printf("Resetting retention period for %v back to default\n", metric)
-	_, err = pool.Exec(context.Background(), "SELECT prom_api.reset_metric_retention_period($1)", metric)
+	_, err = pool.Exec(context.Background(), "SELECT prom_api.reset_metric_retention_period('prom_data', $1)", metric)
 	if err != nil {
 		return fmt.Errorf("could not reset retention period for %v: %w", metric, err)
 	}
