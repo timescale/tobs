@@ -39,7 +39,7 @@ func retentionSet(cmd *cobra.Command, args []string) error {
 	defer pool.Close()
 
 	fmt.Printf("Setting retention period for %v to %v days\n", metric, retention_period)
-	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_metric_retention_period($1, INTERVAL '1 day' * $2)", metric, retention_period)
+	_, err = pool.Exec(context.Background(), "SELECT prom_api.set_metric_retention_period('prom_data', $1, INTERVAL '1 day' * $2)", metric, retention_period)
 	if err != nil {
 		return fmt.Errorf("could not set retention period for %v: %w", metric, err)
 	}
