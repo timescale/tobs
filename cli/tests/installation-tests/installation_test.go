@@ -13,9 +13,9 @@ import (
 func testDeleteData(t testing.TB, name, namespace string, k8sClient k8s.Client) {
 	cmds := []string{"uninstall", "delete-data"}
 	if name != "" {
-		cmds = append(cmds, "-n", name)
+		cmds = append(cmds, "--name", name)
 	} else {
-		cmds = append(cmds, "-n", RELEASE_NAME)
+		cmds = append(cmds, "--name", RELEASE_NAME)
 	}
 	if namespace != "" {
 		cmds = append(cmds, "--namespace", namespace)

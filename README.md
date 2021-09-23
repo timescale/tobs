@@ -18,6 +18,8 @@ stack into a Kubernetes cluster. Currently this stack includes:
  * [Promscale](https://github.com/timescale/promscale) ([design doc][design-doc]) to store metrics for the long-term and allow analysis with both PromQL and SQL.
  * [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL. 
  * [Promlens](https://promlens.com/) tool to build and analyse promql queries with ease.
+ * [Opentelemetry-Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-operator-for-kubernetes) to manage the lifecycle of OpenTelemetryCollector Custom Resource Definition (CRDs)
+ * [Jaeger Query](https://github.com/jaegertracing/jaeger) to visualise the traces 
  
 We plan to expand this stack over time and welcome contributions.
 
@@ -32,13 +34,7 @@ See a demo of tobs in action by clicking the video below:
 
 # 🔥 Quick start
 
-## Using the tobs CLI tool
-
-The [CLI tool](/cli/README.md) ([usage docs](docs/cli-usage.md)) provides the most seamless experience for interacting with tobs.
-
-Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
-
-### Installing the CLI tool
+## Installing the CLI tool
 
 To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
 
@@ -46,9 +42,11 @@ To download and install tobs, run the following in your terminal, then follow th
 curl --proto '=https' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
 ```
 
-Alternatively, you can download the CLI directly via [our releases page](/releases)
+Alternatively, you can download the CLI directly via [our releases page](https://github.com/timescale/tobs/releases/latest)
 
-### Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
+Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
+
+## Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
 
 After setting up tobs run the following to install the tobs helm charts into your Kubernetes cluster
 
@@ -58,20 +56,16 @@ tobs install
 
 This will deploy all of the tobs components into your cluster and provide instructions as to next steps.
 
-### Getting started by viewing your metrics in Grafana
-To see your Grafana dashboards after installation run
+__Dependencies__: [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 
-```bash
-tobs grafana change-password <new_password>
-tobs grafana port-forward
-```
-Then, point your browser to http://127.0.0.1:8080/ and login with the `admin` username.
+### Tracing support
 
-### Do more with the CLI 
+From `0.7.0` release tobs supports installation of tracing components. To install tracing components use `tobs install --tracing`. 
+For more details on tracing support visit [Promscale tracing docs](https://github.com/timescale/promscale/blob/master/docs/tracing.md)
 
-Our [**full usage docs**](docs/cli-usage.md) give a good overview of what you can do with the CLI tool.
+## Using the tobs CLI tool
 
-More details about the CLI tool can be found [here](/cli/README.md)
+The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#usage-guide)) provides the most seamless experience for interacting with tobs.
 
 # Configuring the stack
 

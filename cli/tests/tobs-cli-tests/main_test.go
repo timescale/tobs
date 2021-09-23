@@ -23,7 +23,7 @@ func installObs() {
 
 	log.Println("Installing The Observability Stack")
 
-	obsinstall := exec.Command(PATH_TO_TOBS, "install", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--enable-prometheus-ha")
+	obsinstall := exec.Command(PATH_TO_TOBS, "install", "--name", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--enable-prometheus-ha")
 	err = obsinstall.Run()
 	if err != nil {
 		log.Println("Error installing The Observability Stack:", err)
@@ -83,7 +83,7 @@ func TestMain(m *testing.M) {
 
 func uninstallsObs() {
 	log.Println("Uninstalling The Observability Stack")
-	obsinstall := exec.Command(PATH_TO_TOBS, "uninstall", "-n", RELEASE_NAME, "--namespace", NAMESPACE, "--delete-data")
+	obsinstall := exec.Command(PATH_TO_TOBS, "uninstall", "--name", RELEASE_NAME, "--namespace", NAMESPACE, "--delete-data")
 	err := obsinstall.Run()
 	if err != nil {
 		log.Println("Error installing The Observability Stack:", err)

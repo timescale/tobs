@@ -1,26 +1,30 @@
 # tobs Helm Charts
 
-A Helm chart for deploying Prometheus configured to use TimescaleDB as compressed long-term store for time-series metrics through the Promscale Connector.
+A Helm chart for deploying Prometheus configured to use TimescaleDB as compressed long-term store for time-series metrics through the Promscale.
 
 ### Table of contents
-* **[Installing](#installing)**
-  * **[Prometheus, Promscale High-Availability](./docs/ha-setup.md)**
-  * **[Cleanup](#cleanup)**
-    * [TimescaleDB PVCs and Backup](#timescaledb-pvcs-and-backup)
-    * [TimescaleDB config service](#timescaledb-config-service)
-    * [Connecting to External TimescaleDB](#timescaledb-external-integration)
+* **[Install](#install)**
+  * [Creating Secrets](#install-create-secrets)
+  * [Installing the helm chart](#installing-the-helm-chart)
 * **[Configuring Helm Chart](#configuring-helm-chart)**
-  * **[TimescaleDB related values](#timescaledb-related-values)**
+  * **[TimescaleDB](#timescaledb)**
+    * [Configuring an external TimescaleDB](#timescaledb-external-integration)
     * [Additional configuration for TimescaleDB](#additional-configuration-for-timescaledb)
-  * **[Promscale related values](#promscale-related-values)**
-    * [Additional configuration for Promscale Connector](#additional-configuration-for-promscale-connector)
-  * **[Prometheus related values](#prometheus-related-values)**
+  * **[Promscale](#promscale)**
+    * [Additional configuration for Promscale](#additional-configuration-for-promscale)
+    * [Prometheus, Promscale High-Availability](./docs/values-config.md#prometheus-high-availability)
+  * **[Prometheus](#prometheus)**
     * [Additional configuration for Prometheus](#additional-configuration-for-prometheus)
-  * **[Grafana related values](#grafana-related-values)**
+  * **[Grafana](#grafana)**
     * [Additional configuration for Grafana](#additional-configuration-for-grafana)
 * **[Upgrading Helm Chart](./docs/upgrades.md)**
+* **[Uninstall](#uninstall)**
+    * [TimescaleDB secrets](#timescaledb-secrets)
+    * [Kube-Prometheus secret](#kube-prometheus-secret)
+    * [TimescaleDB PVCs and Backup](#timescaledb-pvcs-and-backup)
+    * [Prometheus PVCs](#prometheus-pvc)
 
-# Installing
+# Install
 
 The recommended way to deploy tobs is through the [CLI tool](/cli). However, we also
 support helm deployments that do not use the CLI.
@@ -29,23 +33,46 @@ support helm deployments that do not use the CLI.
 
 By default, timescaledb helm chart doesn't create its own secrets. So please follow [these instructions][timescaledb-secrets] to create timescaledb-secrets. If you use tobs CLI this is taken care for you.
 
+You can also let the timescaledb-single helm chart create the secrets for you without running the above mentioned instruction by adding the configuration below to timescaledb-single in values.yaml
+**Note**: This isn't recommended by [timescaledb-single][timescaledb-helm-repo] helm chart.
+
+```
+timescaledb-single:
+  unsafe: true
+```
+
 ## Installing the helm chart
 
-The following command will install Kube-Prometheus, TimescaleDB, and Promscale Connector
+The following command will install Kube-Prometheus, TimescaleDB, and Promscale
 into your Kubernetes cluster:
 ```
 helm repo add timescale https://charts.timescale.com/
 helm repo update
-helm install --devel <release_name> timescale/tobs
+helm install <release_name> timescale/tobs
 ```
 
-Note: The `--devel` option is needed until the chart is in beta -- helm won't find the chart withot this option.  See the helm docs for more.
-
-## Cleanup
+# Uninstall
 
 To uninstall a release you can run:
 ```
 helm uninstall <release_name>
+```
+
+### TimescaleDB secrets
+
+TimescaleDB secret's created with the deployment aren't deleted. These secrets need to be manually deleted:
+
+```
+RELEASE=<release_name>
+kubectl delete $(kubectl get secrets -l app=$RELEASE-timescaledb -o name)
+```
+
+### Kube-Prometheus secret
+
+One of the Kube-Prometheus secrets created with the deployment isn't deleted. This secret needs to be manually deleted:
+
+```
+kubectl delete secret <release_name>-kube-prometheus-admission
 ```
 
 ### TimescaleDB PVCs and Backup
@@ -59,13 +86,13 @@ kubectl delete $(kubectl get pvc -l release=$RELEASE -o name)
 
 If you had TimescaleDB backups enabled please check the guide for cleaning them at the [TimescaleDB Helm Chart repo][timescaledb-helm-cleanup]
 
-### TimescaleDB config service
+### Prometheus PVCs
 
-Sometimes one of the services created with the deployment is not deleted. The `<release_name>-config` service and `<release_name>` endpoint
-may need to be manually deleted with
+Removing the deployment does not remove the Persistent Volume
+Claims (pvc) of Prometheus belonging to the release. For a full cleanup run:
 ```
-kubectl delete svc <release_name>-config
-kubectl delete endpoints <release_name>
+RELEASE=<release_name>
+kubectl delete $(kubectl get pvc -l operator.prometheus.io/name=$RELEASE-kube-prometheus-prometheus -o name)
 ```
 
 # Configuring Helm Chart
@@ -73,7 +100,7 @@ kubectl delete endpoints <release_name>
 To get a fully-documented configuration file for `tobs`, please run:
 
 ```
-helm show values --devel timescale/tobs > my_values.yml
+helm show values timescale/tobs > my_values.yml
 ```
 
 You can then edit `my_values.yml` and deploy the release with the following command:
@@ -87,7 +114,7 @@ You can additionally change any of the configurable properties of each sub-chart
 
 The chart has the following properties in the `values.yaml` file:
 
-## TimescaleDB related values
+## TimescaleDB
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
 | `timescaledb-single.enabled`                        | If false TimescaleDB will not be created              | `true`      |
@@ -95,6 +122,7 @@ The chart has the following properties in the `values.yaml` file:
 | `timescaledb-single.loadBalancer.enabled`           | Create a LB for the DB instead of a ClusterIP         | `false`     |
 | `timescaledb-single.replicaCount`                   | Number of pods for DB, set to 3 for HA                | `1`         |
 | `timescaledb-single.backup.enabled`                 | TimescaleDB backup option by default set to false     | `false`     |
+
 
 ### Additional configuration for TimescaleDB
 
@@ -104,41 +132,47 @@ interested in a replicated setup for high-availability with automated backups, p
 
 You can set up the credentials, nodeSelector, volume sizes (default volumes created are 1GB for WAL and 2GB for storage).
 
-### Configuring External TimescaleDB
+### Configuring an external TimescaleDB
 
-To configure tobs to connect with an external TimescaleDB you need to modify few fields in the default values.yaml while performing the installation
+To configure tobs to connect with an external TimescaleDB you need to modify a few fields in the default values.yaml while performing the installation
 
-Below is the helm command to disable TimescaleDB installation and to set external db uri details:
+Below is the helm command to disable the TimescaleDB installation and set external db uri details:
 ```
 helm install <release-name> timescale/tobs \
 --set timescaledb-single.enabled=false,timescaledbExternal.enabled=true,timescaledbExternal.db_uri=<timescaledb-uri>, \
 promscale.connection.uri.secretTemplate=<release-name>-timescaledb-uri
 ```
 
-## Promscale related values
+#### External TimescaleDB related values
+| Parameter                           | Description                                           | Default     |
+|-------------------------------------|-------------------------------------------------------|-------------|
+| `timescaledbExternal.enabled`       | Enable external TimescaleDB                           | `false`     |
+| `timescaledbExternal.db_uri`        | Enable external TimescaleDB URI                       | ``          |
+
+## Promscale
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
-| `promscale.enabled`                      | If false Promscale Connector will not be created| `true` |
-| `promscale.image`                        | Docker image to use for the Connector                 | `timescale/promscale:0.4.0` |
+| `promscale.enabled`                      | If false Promscale will not be started| `true` |
+| `promscale.image`                        | Docker image to use for the Promscale                 | `timescale/promscale:0.6.0` |
 | `promscale.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
 | `promscale.connection.user`              | User used for connection to db | `postgres` |
 | `promscale.connection.dbURI.secretTemplate` | The template for generating the name of a secret object which will hold the db URI | `` |
 | `promscale.connection.password.secretTemplate` | Name (templated) of secret object containing the connection password. Key must be value of `PATRONI_SUPERUSER_PASSWORD` as this is used in TimescaleDB helm chart as reference to user `postgres`. | `"{{ .Release.Name }}-credentials"` |
 | `promscale.connection.host.nameTemplate` | Host name (templated) of the database instance. Defaults to service created in `timescaledb-single` | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"` |
-| `promscale.service.loadBalancer.enabled` | Create a LB for the connector instead of a Cluster IP | `false`     |
-| `promscale.resources.requests.memory`    | Amount of memory for the Connector pod                | `2Gi`       |
-| `promscale.resources.requests.cpu`       | Number of vCPUs for the Connector pod                 | `1`         |
+| `promscale.service.loadBalancer.enabled` | Create a LB for the Promscale instead of a Cluster IP | `false`     |
+| `promscale.resources.requests.memory`    | Amount of memory for the Promscale pod                | `2Gi`       |
+| `promscale.resources.requests.cpu`       | Number of vCPUs for the Promscale pod                 | `1`         |
 
-### Additional configuration for Promscale Connector
+### Additional configuration for Promscale
 
-The connector is configured to connect to the TimescaleDB instance deployed with this chart.
-But it can be configured to connect to any TimescaleDB host, and expose whichever port you like.
-For more details about how to configure the Promscale connector please see the
+The Promscale is configured to connect to the TimescaleDB instance deployed with this chart.
+But it can be configured to connect to [any TimescaleDB host](./README.md/#timescaledb-external-integration), and expose whichever port you like.
+For more details about how to configure the Promscale please see the
 [Helm chart directory][promscale-helm] of the [Promscale][promscale-repo] repo.
 
 ## Kube-Prometheus 
 
-### Prometheus related values
+### Prometheus
 
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
@@ -149,6 +183,7 @@ For more details about how to configure the Promscale connector please see the
 | `kube-prometheus-stack.prometheus.prometheusSpec.scrapeInterval` | Prometheus scrape interval |      `1m` |
 | `kube-prometheus-stack.prometheus.prometheusSpec.scrapeTimeout` | Prometheus scrape timeout |      `10s` |
 | `kube-prometheus-stack.prometheus.prometheusSpec.evaluationInterval` | Prometheus evaluation interval |    `1m` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.retention` | Prometheus data retention |    `1d` |
 | `kube-prometheus-stack.prometheus.prometheusSpec.remoteRead` | Prometheus remote read config |  `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/read` and `readRecent: true` |
 | `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote write config |  `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/write` |
 | `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage` | Prometheus persistent volume storage |  `8Gi` |
@@ -157,7 +192,7 @@ For more details about how to configure the Promscale connector please see the
 #### Additional configuration for Prometheus
 
 The Kube-Prometheus Community chart is used as a dependency for deploying Prometheus. We specify
-the Promscale Connector as a `remote_write` and `remote_read` endpoint in the `values.yaml` that is still compatible and respects all the configuration
+Promscale as a `remote_write` and `remote_read` endpoint in the `values.yaml` that is still compatible and respects all the configuration
 properties for the kube-prometheus chart, so no functionality is lost.
 
 The Promscale connection is set using the values in `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite`.
@@ -172,7 +207,7 @@ deployment see the [Kube Prometheus Community Chart Repo][kube-prometheus-helm-h
 For more information about the `remote_write` configuration that can be set with
 `kube-prometheus-stack.prometheus.prometheusSpec.` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
 
-### Grafana related values
+### Grafana
 
 | Parameter                                                           | Description                                           | Default     |
 |---------------------------------------------------------------------|-------------------------------------------------------|-------------|

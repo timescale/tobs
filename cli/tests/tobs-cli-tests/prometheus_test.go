@@ -10,7 +10,7 @@ import (
 )
 
 func testPrometheusPortForward(t testing.TB, port string) {
-	cmds := []string{"prometheus", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"prometheus", "port-forward", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	if port != "" {
 		cmds = append(cmds, "-p", port)
 	}

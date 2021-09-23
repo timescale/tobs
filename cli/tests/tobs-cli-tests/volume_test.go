@@ -13,7 +13,7 @@ import (
 )
 
 func testVolumeExpansion(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusStorage string, restartPods bool) {
-	cmds := []string{"volume", "expand", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"volume", "expand", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	if timescaleDBStorage != "" {
 		cmds = append(cmds, "--timescaleDB-storage", timescaleDBStorage)
 	}
@@ -40,7 +40,7 @@ func testVolumeExpansion(t testing.TB, timescaleDBStorage, timescaleDBWal, prome
 }
 
 func testVolumeGet(t testing.TB, timescaleDBStorage, timescaleDBWal, prometheusStorage bool) string {
-	cmds := []string{"volume", "get", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"volume", "get", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	if timescaleDBStorage {
 		cmds = append(cmds, "--timescaleDB-storage")
 	}

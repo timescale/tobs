@@ -4,42 +4,18 @@ This is a CLI tool for installing and managing the The Observability Stack for K
 
 ## Quick Start
 
-__Dependencies__: [Helm](https://helm.sh/docs/intro/install/)
-
-Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
-
-### Installing the CLI tool
-
-To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
-```
-
-Alternatively, you can download the CLI directly via [our releases page](https://github.com/timescale/tobs/releases/latest)
-
-### Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
-
-After setting up tobs run the following to install the tobs helm charts into your Kubernetes cluster
-
-```bash
-tobs install
-```
-
-This will deploy all of the tobs components into your cluster and provide instructions as to next steps.
-
 ### Getting started by viewing your metrics in Grafana
 To see your Grafana dashboards after installation run
 
 ```bash
-tobs grafana change-password <new_password>
+tobs grafana get-password
 tobs grafana port-forward
 ```
 Then, point your browser to http://127.0.0.1:8080/ and login with the `admin` username.
 
 ## Usage guide
 
-Our [**usage guide**](docs/cli-usage.md) provides a good high-level overview of what tobs can do.
+The usage guide provides a good high-level overview of what tobs CLI can do.
 
 ## Commands
 
@@ -49,7 +25,7 @@ The following are the commands possible with the CLI.
 
 | Command             | Description                                                      | Flags                                                |
 |---------------------|------------------------------------------------------------------|------------------------------------------------------|
-| `tobs install`      | Alias for `tobs helm install`.                                   | `--filename`, `-f` : file to load configuration from <br> `--chart-reference`, `-c` : helm chart reference (default "timescale/tobs") <br>  `--external-timescaledb-uri`, `-e`: external database URI, TimescaleDB installation will be skipped & Promscale connects to the provided database <br> `--enable-prometheus-ha` : option to enable prometheus and promscale high-availability, by default scales to 3 replicas <br> `--enable-timescaledb-backup`, `-b` : option to enable TimescaleDB S3 backup <br> `--only-secrets` :  option to create only TimescaleDB secrets <br> `--skip-wait` : option to do not wait for pods to get into running state (useful for faster tobs installation) <br> `--timescaledb-tls-cert` : option to provide your own tls certificate for TimescaleDB <br> `--timescaledb-tls-key` : option to provide your own tls key for TimescaleDB <br> `--version` : option to provide tobs helm chart version, if not provided will install the latest tobs chart available   |
+| `tobs install`      | Alias for `tobs helm install`.                                   | `--filename`, `-f` : file to load configuration from <br> `--chart-reference`, `-c` : helm chart reference (default "timescale/tobs") <br>  `--external-timescaledb-uri`, `-e`: external database URI, TimescaleDB installation will be skipped & Promscale connects to the provided database <br> `--enable-prometheus-ha` : option to enable prometheus and promscale high-availability, by default scales to 3 replicas <br> `--enable-timescaledb-backup`, `-b` : option to enable TimescaleDB S3 backup <br> `--only-secrets` :  option to create only TimescaleDB secrets <br> `--skip-wait` : option to do not wait for pods to get into running state (useful for faster tobs installation) <br> `--timescaledb-tls-cert` : option to provide your own tls certificate for TimescaleDB <br> `--timescaledb-tls-key` : option to provide your own tls key for TimescaleDB <br> `--version` : option to provide tobs helm chart version, if not provided will install the latest tobs chart available <br> `--tracing` : option to enable tracing components   |
 | `tobs uninstall`    | Alias for `tobs helm unintall`.                                  | `--delete-data`: option to delete persistent volume claims |
 | `tobs port-forward` | Port-forwards TimescaleDB, Grafana, and Prometheus to localhost. | `--timescaledb`, `-t` : port for TimescaleDB <br> `--grafana`, `-g` : port for Grafana <br> `--prometheus`, `-p` : port for Prometheus <br> `--promscale`, `-c` : port for Promscale <br> `--promlens`, `-l` : port for Promlens |
 | `tobs version`      | Shows the version of tobs CLI and latest helm chart              | `--deployed-chart`, `-d` : option to show the deployed helm chart version alongside tobs CLI version   |
@@ -60,19 +36,22 @@ Documentation about Helm configuration can be found in the [Helm chart directory
 
 | Command                 | Description                                                                  | Flags                                                |
 |-------------------------|------------------------------------------------------------------------------|------------------------------------------------------|
-| `tobs helm install`     | Installs Helm chart for The Observability Stack.                             | `--filename`, `-f` : file to load configuration from <br> `--chart-reference`, `-c` : helm chart reference (default "timescale/tobs") <br>  `--external-timescaledb-uri`, `-e`: external database URI, TimescaleDB installation will be skipped & Promscale connects to the provided database <br> `--enable-prometheus-ha` : option to enable prometheus and promscale high-availability, by default scales to 3 replicas <br> `--enable-timescaledb-backup`, `-b` : Option to enable TimescaleDB S3 backup <br> `--only-secrets` :  Option to create only TimescaleDB secrets <br> `--skip-wait` : Option to do not wait for pods to get into running state (useful for faster tobs installation) <br> `--timescaledb-tls-cert` : Option to provide your own tls certificate for TimescaleDB <br> `--timescaledb-tls-key` : Option to provide your own tls key for TimescaleDB <br> `--version` : Option to provide tobs helm chart version, if not provided will install the latest tobs chart available  |
-| `tobs helm uninstall`   | Uninstalls Helm chart for The Observability Stack.                           | `--delete-data`: Delete persistent volume claims     |
-| `tobs helm show-values` | Prints the YAML configuration of the Helm chart for The Observability Stack. | None                                                 |
-| `tobs helm delete-data` | Deletes persistent volume claims associated with The Observability Stack.    | None                                                 |
+| `tobs helm show-values` | Prints the YAML configuration of the Helm chart for The Observability Stack. | `--filename`, `-f` : file to load configuration from <br> `--chart-reference`, `-c` : helm chart reference (default "timescale/tobs") |
 
 ### TimescaleDB Commands
 
 | Command                            | Description                                                | Flags                                       |
 |------------------------------------|------------------------------------------------------------|---------------------------------------------|
-| `tobs timescaledb connect`         | Connects to the Timescale database running in the cluster. | `--user`, `-U` : user to login with <br> `--master`, `-m` : directly execute session on master node |
+| `tobs timescaledb connect`         | Connects to the Timescale database with the provided user. | `--dbname`, `-d` : database name to connect to, defaults to dbname from the helm release <br> `--master`, `-m` : directly execute session on master node |
 | `tobs timescaledb port-forward`    | Port-forwards TimescaleDB to localhost.                    | `--port`, `-p` : port to listen from        |
-| `tobs timescaledb get-password`    | Gets the password for a user in the Timescale database.    | `--user`, `-U` : user whose password to get |
-| `tobs timescaledb change-password` | Changes the password for a user in the Timescale database. | `--user`, `-U` : user whose password to get |
+
+**TimescaleDB superuser Commands**
+
+| Command                                       | Description                                                  | Flags                                                       |
+|-----------------------------------------------|--------------------------------------------------------------|-------------------------------------------------------------|
+| `tobs timescaledb superuser get-password`     | Gets the password of superuser in the Timescale database.    | None                                                        |
+| `tobs timescaledb superuser change-password`  | Changes the password of superuser in the Timescale database. | None                                                        |
+| `tobs timescaledb superuser connect`          | Connects to the TimescaleDB database using super-user        | `--master`, `-m` : directly execute session on master node  |
 
 ### Grafana Commands
 
@@ -88,18 +67,26 @@ Documentation about Helm configuration can be found in the [Helm chart directory
 |--------------------------------|---------------------------------------------------|--------------------------------------|
 | `tobs prometheus port-forward` | Port-forwards the Prometheus server to localhost. | `--port`, `-p` : port to listen from |
 
+### Jaeger Commands
+
+Jaeger cmds are only supported if tracing is enabled in tobs installation
+
+| Command                        | Description                                       | Flags                                |
+|--------------------------------|---------------------------------------------------|--------------------------------------|
+| `tobs jaeger port-forward`     | Port-forwards the jaeger query to localhost.      | `--port`, `-p` : port to listen from |
+
 ### Metrics Commands
 
 | Command                                   | Description                                                                          | Flags |
 |-------------------------------------------|--------------------------------------------------------------------------------------|-------|
-| `tobs metrics retention get`              | Gets the data retention period of a specific metric.                                 | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
-| `tobs metrics retention set-default`      | Sets the default data retention period to the specified number of days.              | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
-| `tobs metrics retention set`              | Sets the data retention period of a specific metric to the specified number of days. | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
-| `tobs metrics retention reset`            | Resets the data retention period of a specific metric to the default value.          | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
-| `tobs metrics chunk-interval get`         | Gets the chunk interval of a specific metric.                                        | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
-| `tobs metrics chunk-interval set-default` | Sets the default chunk interval to the specified duration.                           | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
-| `tobs metrics chunk-interval set`         | Sets the chunk interval of a specific metric to the specified duration.              | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
-| `tobs metrics chunk-interval reset`       | Resets chunk interval of a specific metric to the default value.                     | `--user`, `-U` : database user name <br> `--dbname`, `-d` : database name to connect to |
+| `tobs metrics retention get`              | Gets the data retention period of a specific metric.                                 | None  |
+| `tobs metrics retention set-default`      | Sets the default data retention period to the specified number of days.              | None  |
+| `tobs metrics retention set`              | Sets the data retention period of a specific metric to the specified number of days. | None  |
+| `tobs metrics retention reset`            | Resets the data retention period of a specific metric to the default value.          | None  |
+| `tobs metrics chunk-interval get`         | Gets the chunk interval of a specific metric.                                        | None  |
+| `tobs metrics chunk-interval set-default` | Sets the default chunk interval to the specified duration.                           | None  |
+| `tobs metrics chunk-interval set`         | Sets the chunk interval of a specific metric to the specified duration.              | None  |
+| `tobs metrics chunk-interval reset`       | Resets chunk interval of a specific metric to the default value.                     | None  |
 
 ### Volume Commands
 
@@ -125,11 +112,11 @@ You can also upgrade your existing tobs deployment to latest `values.yaml` confi
 
 The following are global flags that can be used with any of the above commands:
 
-| Flag           | Description          |
-|----------------|----------------------|
-| `--name`, `-n` | Helm release name    |
-| `--namespace`  | Kubernetes namespace |
-| `--config`     | Tobs config file (default is $HOME/.tobs.yaml) |
+| Flag                 | Description                                    |
+|----------------------|------------------------------------------------|
+| `--name`             | Helm release name                              |
+| `--namespace`, `-n`  | Kubernetes namespace                           |
+| `--config`           | Tobs config file (default is $HOME/.tobs.yaml) |
 
 ## Advanced configuration
 
@@ -138,7 +125,7 @@ Custom values.yml files can be used with the `tobs helm install -f values.yml` c
 
 ## Building from source
 
-__Dependencies__: [Go](https://golang.org/doc/install), [Helm](https://helm.sh/docs/intro/install/)
+__Dependencies__: [Go](https://golang.org/doc/install)
 
 To build from source, run `go build -o tobs` from inside the `cli` folder.
 Then, move the `tobs` binary from the current directory to your `/bin` folder.

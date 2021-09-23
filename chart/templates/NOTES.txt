@@ -174,7 +174,7 @@ To connect to your database, chose one of these options:
 {{- else }}
       kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name }}-promlens 8081:80
       kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "promscale.fullname" $tsPromEnv |trunc 53 }}-connector 9201:{{ index .Values "promscale" "service" "port"}}
-      (Note: You have to port-forward both PromLens and the connector at the same time)
+      (Note: You have to port-forward both PromLens and Promscale at the same time)
 {{- end }}
 
    Then you can point your browser to http://127.0.0.1:8081/.
@@ -274,3 +274,5 @@ WARNING! Persistence is disabled!!! You will lose your data when
 {{- end }}
 
 🚀 Happy observing!
+
+

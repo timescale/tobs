@@ -10,7 +10,7 @@ import (
 )
 
 func testPromlensPortForward(t testing.TB, portPromlens string) {
-	cmds := []string{"promlens", "port-forward", "-n", RELEASE_NAME, "--namespace", NAMESPACE}
+	cmds := []string{"promlens", "port-forward", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	if portPromlens != "" {
 		cmds = append(cmds, "-p", portPromlens)
 	}

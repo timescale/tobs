@@ -2,14 +2,55 @@
 
 The following steps are necessary if using helm without the tobs CLI. The tobs CLI will handle these upgrade tasks automatically for you.
 
-Firstly upgrade the helm repo to pull the latest available tobs helm chart.  We always recommend to upgrading latest tobs stack available. 
+Firstly upgrade the helm repo to pull the latest available tobs helm chart.  We always recommend upgrading to the [latest](https://github.com/timescale/tobs/releases/latest) tobs stack available. 
 ```
 helm repo update
 ```
 
+## Upgrading to 0.7.0:
+
+Upgrade tobs:
+```
+helm upgrade <release_name> timescale/tobs
+```
+
+## Upgrading to 0.6.1:
+
+In tobs `0.6.1` we upgraded the CRDs of Prometheus-Operator that are part of Kube-Prometheus helm chart. You need to manually upgrade the CRDs by following the instructions below. 
+
+```
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+```
+
+Upgrade tobs:
+```
+helm upgrade <release_name> timescale/tobs
+```
+
+## Upgrading to 0.6.x:
+
+Upgrade tobs:
+```
+helm upgrade <release_name> timescale/tobs
+```
+
+## Upgrading to 0.5.x:
+
+Upgrade tobs:
+```
+helm upgrade <release_name> timescale/tobs
+```
+
 ## Upgrading to 0.4.x:
 
-In tobs `0.4.x` we swapped our existing Prometheus and Grafana helm charts with Kube-Prometheus helm charts. The Kube-Prometheus depends on Prometheus-Operator which uses the CRDs (Custom Resource Definitations) to upgrade the tobs. You need to manually install the CRDs by running:
+In tobs `0.4.x` we swapped our existing Prometheus and Grafana helm charts with Kube-Prometheus helm charts. Kube-Prometheus depends on Prometheus-Operator which uses the CRDs (Custom Resource Definitions) to upgrade tobs. You need to manually install the CRDs:
 
 ```
 kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
@@ -22,7 +63,7 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
 kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
 ```
 
-The tobs `0.4.x` installation uses the node-exporter daemonset & node-exporter service from Kube-Prometheus stack. This requires manual deletion of these resources. The upgrade flow will re-create these resources. 
+The tobs `0.4.x` installation uses the node-exporter daemonset & node-exporter service from the Kube-Prometheus stack. This requires manual deletion of these resources. The upgrade flow will recreate these resources. 
 
 Delete `tobs-node-exporter` daemonset:
 
@@ -36,30 +77,30 @@ Delete `tobs-node-exporter` service:
 kubectl delete svc <RELEASE_NAME>-prometheus-node-exporter -n <NAMESPACE>
 ```
 
-To migrate data from old Prometheus instance to new Prometheus instance follow the below steps:
+To migrate data from an old Prometheus instance to a new one follow the steps below:
 
-Scale down the existing Prometheus replicas to 0. So that all the in-memory data is stored in Prometheus persistent volume. 
+Scale down the existing Prometheus replicas to 0 so that all the in-memory data is stored in Prometheus persistent volume. 
 
 ```
 kubectl scale --replicas=0 deploy/tobs-prometheus-server 
 ```
 **Note**: Wait for the Prometheus pod to gracefully shut down.
 
-Find Persistent Volume name that is claimed by the Persistent Volume Claim:
+Find the Persistent Volume (PV) name that is claimed by the Persistent Volume Claim (PVC):
 
 ```
 kubectl get pvc/<RELEASE_NAME>-prometheus-server
 ```
 
-Patch the Persistent Volume claim reference to null. So that new Persistent Volume Claim created for Kube-Prometheus stack will mount to the Persistent Volume owned by the previous Prometheus pod.
+Patch the PVC reference to null so that new PVC created for the Kube-Prometheus stack will mount to the PV owned by the previous Prometheus pod.
 
 ```
 kubectl edit pv/<PERSISTENT_VOLUME>
 ```
 
-Now update the pv claim reference field to `null` i.e. `spec.claimRef: null`. So that new PVC will mount to this PV. 
+Now update the PVC reference field to `null` i.e. `spec.claimRef: null` so that new PVC will mount to this PV. 
 
-Create a new Persistent Volume Claim and mount its volumeName to the Persistent Volume released in the previous step:
+Create a new PVC and mount its volumeName to the PV released in the previous step:
 
 ```
 apiVersion: v1
@@ -81,13 +122,13 @@ spec:
   volumeName: <PERSISTENT_VOLUME>
 ```
 
-Create the Persistent Volume Claim defined in the above code snippet:
+Create the PVC defined in the above code snippet:
 
 ```
 kubectl create -f pvc-file-name.yaml
 ```
 
-Change the permissions of Prometheus data directory as new Kube-Prometheus instance by default comes with security context.
+Change the permissions of the Prometheus data directory as the new Kube-Prometheus instance comes with security context by default.
 
 ```
 apiVersion: batch/v1
@@ -125,21 +166,21 @@ spec:
           claimName: prometheus-tobs-kube-prometheus-prometheus-db-prometheus-tobs-kube-prometheus-prometheus-0
 ```
 
-Create the job from the above defined code snippet:
+Create the job from the code snippet defined above:
 
 ```
 kubectl create -f job-file-name.yaml
 ```
 
 
-Now upgrade the tobs by running:
+Now upgrade tobs:
 ```
 helm upgrade <release_name> timescale/tobs
 ```
 
 ## Upgrading to 0.3.x:
 
-In tobs `0.3.x` TimescaleDB doesn't create the secrets by default. During the upgrade you need to copy the existing timescaledb passwords to new secrets. This can be done by running this [script](https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/upgrade-guide.md#migrate-the-secrets).
+In tobs `0.3.x` TimescaleDB doesn't create the required secrets by default. During the upgrade you need to copy the existing timescaledb passwords to new secrets. This can be done by running this [script](https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/upgrade-guide.md#migrate-the-secrets).
 
 Delete the `grafana-db` job as the upgrade re-creates the same job for the upgraded tobs deployment
 
@@ -147,7 +188,7 @@ Delete the `grafana-db` job as the upgrade re-creates the same job for the upgra
 kubectl delete job/<RELEASE_NAME>-grafana-db -n <NAMESPACE>
 ``` 
 
-Now upgrade the tobs by running:
+Now upgrade tobs:
 ```
 helm upgrade <release_name> timescale/tobs
 ```
