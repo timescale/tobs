@@ -73,8 +73,6 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not uninstall The Observability Stack: %w", err)
 	}
-
-	timescaledb_secrets.DeleteTimescaleDBSecrets(k8sClient, root.HelmReleaseName, root.Namespace, enableBackUp)
 	fmt.Println("Waiting for pods to terminate...")
 	for i := 0; i < 1000; i++ {
 		pods, err := k8sClient.KubeGetAllPods(root.Namespace, root.HelmReleaseName)
@@ -106,6 +104,11 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 	}
 
 	if deleteData {
+		// delete TimescaleDB secrets only if data is being deleted
+		// as TimescaleDB can be authenticated only with this secrets
+		// do not delete them until data is deleted.
+		timescaledb_secrets.DeleteTimescaleDBSecrets(k8sClient, root.HelmReleaseName, root.Namespace, enableBackUp)
+
 		err = deletePVCData(&cobra.Command{}, []string{})
 		if err != nil {
 			fmt.Println(err, ", failed to delete pvc's")
