@@ -51,6 +51,22 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
+	// uninstall timescaledb
+	spec := test_utils.TestUnInstallSpec{
+		ReleaseName: "external-db-tests",
+		Namespace:   NAMESPACE,
+		DeleteData:  true,
+	}
+	spec.TestUninstall(&testing.T{})
+
+	// uninstall tobs
+	spec = test_utils.TestUnInstallSpec{
+		ReleaseName: RELEASE_NAME,
+		DeleteData:  true,
+		Namespace:   NAMESPACE,
+	}
+	spec.TestUninstall(&testing.T{})
+
 	os.Exit(code)
 }
 

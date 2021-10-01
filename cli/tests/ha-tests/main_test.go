@@ -25,5 +25,14 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// uninstall tobs
+	spec := test_utils.TestUnInstallSpec{
+		ReleaseName: RELEASE_NAME,
+		Namespace:   NAMESPACE,
+		DeleteData:  true,
+	}
+	spec.TestUninstall(&testing.T{})
+
 	os.Exit(code)
 }

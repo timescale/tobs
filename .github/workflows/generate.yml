@@ -1,4 +1,4 @@
-name: Static deploy generation
+name: Go Tests
 
 on:
   push:
@@ -52,17 +52,7 @@ jobs:
         run: |
           make unit-tests
 
-      - name: Helm-Tests
-        working-directory: ${{env.working-directory}}
-        run: |
-          make helm-tests
-
       - name: Dependency-Tests
         working-directory: ${{env.working-directory}}
         run: |
           go test -v ./tests/dependency-tests
-
-      - name: E2E-Tests
-        working-directory: ${{env.working-directory}}
-        run: |
-          make e2e-tests
