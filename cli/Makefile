@@ -1,3 +1,6 @@
+KUBE_VERSION ?= 1.21
+KIND_CONFIG ?= ./tests/kind-$(KUBE_VERSION).yaml
+
 build:
 		go build -o bin/tobs .
 
@@ -5,22 +8,22 @@ unit-tests:
 		go test ./pkg/...
 
 e2e-tests:
-		./tests/e2e-tests.sh
+		go test -v ./tests/tobs-cli-tests --timeout 20m
 
 external-db-tests:
-		./tests/external-db-tests.sh
+		go test -v ./tests/external-db-tests --timeout 30m
 
 upgrade-tests:
-		./tests/upgrade-tests.sh
+		go test -v ./tests/upgrade-tests
 
 ha-tests:
-		./tests/ha-tests.sh
+		go test -v ./tests/ha-tests --timeout 20m
 
 install-tests:
-		./tests/install-tests.sh
+		go test -v ./tests/installation-tests --timeout 30m
 
 helm-tests:
-		./tests/helm-tests.sh
+		go test -v ./tests/helm-tests
 
 go-vet:
 		go vet ./...
@@ -31,4 +34,13 @@ go-fmt:
 go-lint:
 		golangci-lint run
 
-all: build e2e-tests external-db-tests go-vet go-fmt go-lint
+start-kind:
+		kind create cluster --name tobs --config $(KIND_CONFIG)
+
+uninstall-tobs:
+		./bin/tobs uninstall
+
+delete-kind:
+		kind delete cluster --name tobs
+
+all: build start-kind e2e-tests external-db-tests go-vet go-fmt go-lint

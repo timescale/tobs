@@ -94,6 +94,15 @@ tobs install -f values.yaml
 
 Users sometimes want to use our Helm charts as sub-charts for other project or integrate them into their infrastructure without using our CLI tool. This is a supported use-case and instructions on using the Helm charts can be found [here](/chart/README.md).
 
+# Compatibility matrix
+
+## Tobs vs. Kubernetes
+
+| Tobs     | Kubernetes           |
+|----------|----------------------|
+| 0.7.0    | v1.19 to v1.21       | 
+
+
 # ✏️ Contributing
 
 We welcome contributions to tobs, which is

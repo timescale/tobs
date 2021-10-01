@@ -530,7 +530,7 @@ func (c *upgradeSpec) persistPrometheusDataDuringUpgrade() error {
 			break
 		}
 
-		if count == 3 {
+		if count == 10 {
 			return fmt.Errorf("prometheus pod shutdown saves all in memory data to persistent volume, prometheus pod is taking too long to shut down... ")
 		}
 		count++

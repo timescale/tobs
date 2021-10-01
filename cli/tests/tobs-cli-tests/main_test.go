@@ -23,6 +23,8 @@ func installObs() {
 
 	log.Println("Installing The Observability Stack")
 
+	test_utils.ShowAllPods(&testing.T{})
+
 	obsinstall := exec.Command(PATH_TO_TOBS, "install", "--name", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--enable-prometheus-ha")
 	err = obsinstall.Run()
 	if err != nil {
@@ -52,6 +54,8 @@ func TestMain(m *testing.M) {
 	// runs it prior to other tests as
 	// the tobs installation itself is different
 	testBackUpEnabledInstallation(&testing.T{})
+
+	log.Println("successfully performed backup install tests...")
 
 	installObs()
 

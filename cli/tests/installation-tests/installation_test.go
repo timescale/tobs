@@ -14,13 +14,9 @@ func testDeleteData(t testing.TB, name, namespace string, k8sClient k8s.Client) 
 	cmds := []string{"uninstall", "delete-data"}
 	if name != "" {
 		cmds = append(cmds, "--name", name)
-	} else {
-		cmds = append(cmds, "--name", RELEASE_NAME)
 	}
 	if namespace != "" {
 		cmds = append(cmds, "--namespace", namespace)
-	} else {
-		cmds = append(cmds, "--namespace", NAMESPACE)
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
@@ -32,12 +28,19 @@ func testDeleteData(t testing.TB, name, namespace string, k8sClient k8s.Client) 
 		t.Fatal(err)
 	}
 
-	pvcs, err := k8sClient.KubeGetPVCNames("default", map[string]string{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pvcs) != 0 {
-		t.Fatal("PVC remaining")
+	for i := 1; i <= 5; i++ {
+		pvcs, err := k8sClient.KubeGetPVCNames(namespace, map[string]string{"release": name})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(pvcs) == 0 {
+			return
+		}
+
+		time.Sleep(time.Duration(i*10) * time.Second)
+		if i == 10 {
+			t.Fatal("PVC remaining")
+		}
 	}
 }
 
@@ -70,15 +73,15 @@ func TestInstallation(t *testing.T) {
 
 	// abc Uninstall
 	abcUninstall := test_utils.TestUnInstallSpec{
-		ReleaseName:  "abc",
-		Namespace:    NAMESPACE,
-		DeleteData:   false,
+		ReleaseName: "abc",
+		Namespace:   NAMESPACE,
+		DeleteData:  false,
 	}
 	abcUninstall.TestUninstall(t)
 
 	// def helm cmd install
 	defInstall := test_utils.TestInstallSpec{
-		PathToChart: PATH_TO_CHART,
+		PathToChart:  PATH_TO_CHART,
 		ReleaseName:  "def",
 		Namespace:    NAMESPACE,
 		PathToValues: PATH_TO_TEST_VALUES,
@@ -96,10 +99,10 @@ func TestInstallation(t *testing.T) {
 	}
 	defUninstall.TestUninstall(t)
 	k8sClient := k8s.NewClient()
-	testDeleteData(t, "def", "", k8sClient)
+	testDeleteData(t, "def", NAMESPACE, k8sClient)
 	time.Sleep(2 * time.Minute)
 	// check pvc status post delete-data
-	err := test_utils.CheckPVCSExist("def", "")
+	err := test_utils.CheckPVCSExist("def", NAMESPACE)
 	if err != nil {
 		t.Fatal(err)
 	}

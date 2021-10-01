@@ -1,6 +1,7 @@
 package test_utils
 
 import (
+	"log"
 	"net"
 	"os/exec"
 	"strings"
@@ -239,7 +240,7 @@ func (c *TestInstallSpec) TestInstall(t testing.TB) {
 func ShowAllPods(t testing.TB) {
 	out := exec.Command("kubectl", "get", "pods", "-A")
 	output, err := out.CombinedOutput()
-	t.Log(string(output))
+	log.Println(string(output))
 	if err != nil {
 		t.Fatal(err)
 	}

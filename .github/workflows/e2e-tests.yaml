@@ -1,0 +1,41 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        kube-version:
+          - "1.19"
+          - "1.20"
+          - "1.21"
+
+    env:
+      working-directory: ./cli
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Check out master
+        uses: actions/checkout@v2
+
+      - name: Build
+        working-directory: ${{env.working-directory}}
+        run: |
+          make build
+
+      - name: HELM-E2E-Tests
+        working-directory: ${{env.working-directory}}
+        env:
+          KUBE_VERSION: ${{ matrix.kube-version }}
+        run: |
+          make start-kind helm-tests e2e-tests delete-kind KUBE_VERSION=$KUBE_VERSION

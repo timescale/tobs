@@ -104,7 +104,7 @@ kube-prometheus-stack:
   # can be found at:
   #   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
   grafana:
-    enabled: true
+    enabled: false
     sidecar:
       datasources:
         enabled: true

@@ -41,13 +41,14 @@ func TestHASetup(t *testing.T) {
 	retries := 0
 	for {
 		i := 0
-		for i < 5 {
+		for i < 10 {
 			_ = test_utils.DeletePod(oldLeader, NAMESPACE)
 			i++
 			time.Sleep(5 * time.Second)
 		}
 		// Prometheus new leader after
 		// shutting down the old Prometheus leader
+		time.Sleep(20 * time.Second)
 		newLeader = findCurrentLeader(t)
 		fmt.Println("New Leader: ", newLeader)
 		if oldLeader != newLeader {
@@ -55,9 +56,9 @@ func TestHASetup(t *testing.T) {
 			break
 		}
 
-		// Every retry consumes 5 secs sleep * 5 attempts = 25 secs
+		// Every retry consumes 5 secs sleep * 10 attempts = 50 secs
 		// In Promscale Prometheus leader change over happens when
-		// the last write request is older than 30s. Approx after 3 retries i.e. 1m 15s secs
+		// the last write request is older than 30s. Approx after 7 retries i.e. 35 secs
 		// the change-over should happen :)
 		if retries == 10 {
 			t.Fatal("Leader switch over doesn't happen after multiple retries....")

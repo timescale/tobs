@@ -96,6 +96,7 @@ func testHelmClientInstallOrUpgradeChart() {
 		ValuesFiles:     []string{PATH_TO_TEST_VALUES},
 	}
 
+	log.Println("Installing Tobs...")
 	res, err := helmClientTest.InstallOrUpgradeChart(context.Background(), &chartSpec)
 	if err != nil {
 		log.Fatal(err)
