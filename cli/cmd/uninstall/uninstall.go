@@ -9,9 +9,10 @@ import (
 	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
+	"github.com/timescale/tobs/cli/pkg/otel"
 	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
-	errors2 "k8s.io/apimachinery/pkg/api/errors"
+	k8sApiErrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // helmUninstallCmd represents the helm uninstall command
@@ -68,6 +69,43 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 		Namespace:   root.Namespace,
 	}
 
+	otelCol := otel.OtelCol{
+		ReleaseName: root.HelmReleaseName,
+		Namespace:   root.Namespace,
+		K8sClient:   k8sClient,
+		HelmClient:  helmClient,
+	}
+	isOtelEnabled, err := otelCol.IsOtelOperatorEnabledInRelease()
+	if err != nil {
+		return err
+	}
+
+	if isOtelEnabled {
+		// delete default otel collector
+		fmt.Println("deleting the default opentelemetry collector...")
+		err = otelCol.DeleteDefaultOtelCollector()
+		if err != nil {
+			if !k8sApiErrors.IsNotFound(err) {
+				return err
+			}
+			fmt.Println("couldn't find the default otel collector.")
+		}
+
+		certManagerInstalled, err := otelCol.IsCertManagerInstalledByTobs()
+		if err != nil {
+			fmt.Printf("ERROR: couldn't find the cert-manager status %v", err)
+		}
+		if certManagerInstalled {
+			fmt.Printf(`
+WARNING: Cert-manager, version: %s  is installed by tobs, 
+As cert-manager can be used by other components running in the cluster.
+We are leaving the task of uninstalling cert-manager to the user.
+Steps to uninstall cert-manager is documented here: https://cert-manager.io/docs/installation/kubectl/#uninstalling
+
+`, otel.CertManagerVersion)
+		}
+	}
+
 	helmClient = helm.NewClient(root.Namespace)
 	err = helmClient.UninstallRelease(spec)
 	if err != nil {
@@ -85,6 +123,15 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 			fmt.Println("WARNING: pods did not terminate in 100 seconds")
 		}
 		time.Sleep(100 * time.Millisecond)
+	}
+
+	// As helm uninstall doesn't remove CRD, we are manually deleting
+	// the otelcol CRD post helm successful uninstall by now otel operator is down
+	if isOtelEnabled {
+		fmt.Println("Deleting opentelemetry collector CRD...")
+		if err = otel.DeleteOtelColCRD(); err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("Deleting remaining artifacts")
@@ -137,7 +184,7 @@ func delete040UpgradeJob(helmClient helm.Client, k8sClient k8s.Client) error {
 	if dVersion >= version0_4_0 {
 		upgradeJob, err := k8sClient.GetJob(utils.UpgradeJob_040, root.Namespace)
 		if err != nil {
-			ok := errors2.IsNotFound(err)
+			ok := k8sApiErrors.IsNotFound(err)
 			if !ok {
 				return fmt.Errorf("failed to delete %s job %v", utils.UpgradeJob_040, err)
 			}

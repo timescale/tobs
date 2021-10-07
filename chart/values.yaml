@@ -403,13 +403,10 @@ promlens:
 opentelemetryOperator:
   enabled: false
   jaegerPromscaleQuery:
-    # later will be chnaged to Jaeger query that includes Promscale plugin
-    image: vineeth97/promscale-jaeger-query
+    image: timescale/jaeger-query-proxy:0.0.1
     endpoint: "{{ .Release.Name }}-jaeger-promscale.{{ .Release.Namespace }}.svc.cluster.local:16686"
     args:
       - --grpc-storage-plugin.configuration-file=/configs/jaeger-promscale-query.yaml
-      - --grpc-storage-plugin.binary=/tmp/promscale-jaeger-plugin
-      - --query.max-clock-skew-adjustment=1s
     config: |
       promscale-tls: false
       promscale-grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"

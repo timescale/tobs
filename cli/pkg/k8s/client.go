@@ -60,7 +60,10 @@ type Client interface {
 
 	// namespace specific actions
 	CreateNamespaceIfNotExists(namespace string) error
+	UpdateNamespaceLabels(name string, labels map[string]string) error
+	GetNamespaceLabels(name string) (map[string]string, error)
 
-	// create CR
+	// CR operations
 	CreateCustomResource(namespace, apiVersion, resourceName string, body []byte) error
+	DeleteCustomResource(namespace, apiVersion, resourceName, crName string) error
 }
