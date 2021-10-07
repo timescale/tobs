@@ -236,7 +236,7 @@ timescaledb-single:
 		var ok bool
 		c.enableOtel, ok = e.(bool)
 		if !ok {
-			return fmt.Errorf("enable otel was not a bool")
+			return fmt.Errorf("opentelemetryOperator.enabled is not a bool")
 		}
 	}
 
@@ -292,7 +292,13 @@ timescaledb-single:
 
 	// create the default otelcol CR as operator should be is up & running by now....
 	if c.enableOtel {
-		err = otel.CreateDefaultCollector(cmd.HelmReleaseName, cmd.Namespace, c.otelColConfig)
+		otelCol := otel.OtelCol{
+			ReleaseName: cmd.HelmReleaseName,
+			Namespace:   cmd.Namespace,
+			K8sClient:   k8sClient,
+			HelmClient:  helmClient,
+		}
+		err = otelCol.CreateDefaultCollector(c.otelColConfig)
 		if err != nil {
 			return err
 		}
@@ -332,6 +338,7 @@ func appendPromscaleValues(enableOtel, promHA bool, dbURI string) string {
 promscale:`
 	if enableOtel {
 		config = config + `
+  image: timescale/promscale:0.7.0-beta.latest
   tracing:
     enabled: true`
 

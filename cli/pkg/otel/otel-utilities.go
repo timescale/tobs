@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/open-telemetry/opentelemetry-operator/api/v1alpha1"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/utils"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
@@ -12,13 +13,25 @@ import (
 )
 
 const (
-	CertManagerManifests  = "https://github.com/jetstack/cert-manager/releases/download/v1.5.2/cert-manager.yaml"
+	CertManagerVersion    = "v1.5.2"
 	CertManagerNamespace  = "cert-manager"
 	otelColKind           = "OpenTelemetryCollector"
 	otelColApiVersion     = "opentelemetry.io/v1alpha1"
 	otelOperatorNamespace = "opentelemetry-operator-system"
 	otelColResourceName   = "opentelemetrycollectors"
 )
+
+var (
+	CertManagerManifests = fmt.Sprintf("https://github.com/jetstack/cert-manager/releases/download/%s/cert-manager.yaml", CertManagerVersion)
+	otelColCRD           = fmt.Sprintf("%s.opentelemetry.io", otelColResourceName)
+)
+
+type OtelCol struct {
+	ReleaseName string
+	Namespace   string
+	K8sClient   k8s.Client
+	HelmClient  helm.Client
+}
 
 func CreateCertManager(confirmActions bool) error {
 	apiClient := k8s.NewAPIClient()
@@ -41,10 +54,13 @@ func CreateCertManager(confirmActions bool) error {
 			}
 
 			for _, pod := range pods {
-				err = k8sClient.KubeWaitOnPod(CertManagerNamespace, pod.Name)
-				if err != nil {
+				if err = k8sClient.KubeWaitOnPod(CertManagerNamespace, pod.Name); err != nil {
 					return err
 				}
+			}
+
+			if err = k8sClient.UpdateNamespaceLabels(CertManagerNamespace, map[string]string{"app.kubernetes.io/created-by": "tobs-cli"}); err != nil {
+				return err
 			}
 			fmt.Println("Successfully created cert-manager")
 			return nil
@@ -54,26 +70,48 @@ func CreateCertManager(confirmActions bool) error {
 	return err
 }
 
-func CreateDefaultCollector(release, namespace, otelColConfig string) error {
+func DeleteOtelColCRD() error {
+	apiClient := k8s.NewAPIClient()
+	err := apiClient.DeleteCRD(otelColCRD)
+	if err != nil {
+		return fmt.Errorf("failed to delete %s CRD with error: %v", otelColCRD, err)
+	}
+	return nil
+}
+
+func (c *OtelCol) IsCertManagerInstalledByTobs() (bool, error) {
+	labels, err := c.K8sClient.GetNamespaceLabels(CertManagerNamespace)
+	if err != nil {
+		return false, err
+	}
+
+	if val, ok := labels["app.kubernetes.io/created-by"]; ok {
+		if val == "tobs-cli" {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (c *OtelCol) CreateDefaultCollector(otelColConfig string) error {
 	// check the status of otel operator as CR creation needs webhooks
 	// validation from operator
-	k8sClient := k8s.NewClient()
-	otelOperatorPod, err := k8sClient.KubeGetPodName(otelOperatorNamespace, map[string]string{"control-plane": "controller-manager"})
+	otelOperatorPod, err := c.K8sClient.KubeGetPodName(otelOperatorNamespace, map[string]string{"control-plane": "controller-manager"})
 	if err != nil {
 		return fmt.Errorf("failed to find otel operator: %v", err)
 	}
-	err = k8sClient.KubeWaitOnPod(otelOperatorNamespace, otelOperatorPod)
+	err = c.K8sClient.KubeWaitOnPod(otelOperatorNamespace, otelOperatorPod)
 	if err != nil {
 		return err
 	}
 
 	if otelColConfig == "" {
-		otelColConfig = getDefaultOtelColConfig(release, namespace)
+		otelColConfig = getDefaultOtelColConfig(c.ReleaseName, c.Namespace)
 	}
 
 	defaultOtelCol := &v1alpha1.OpenTelemetryCollector{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: release + "-opentelemetry-collector",
+			Name: c.ReleaseName + "-opentelemetry",
 		},
 		TypeMeta: metav1.TypeMeta{
 			Kind:       otelColKind,
@@ -88,7 +126,11 @@ func CreateDefaultCollector(release, namespace, otelColConfig string) error {
 		return err
 	}
 
-	return k8sClient.CreateCustomResource(namespace, otelColApiVersion, otelColResourceName, body)
+	return c.K8sClient.CreateCustomResource(c.Namespace, otelColApiVersion, otelColResourceName, body)
+}
+
+func (c *OtelCol) DeleteDefaultOtelCollector() error {
+	return c.K8sClient.DeleteCustomResource(c.Namespace, otelColApiVersion, otelColResourceName, c.ReleaseName+"-opentelemetry")
 }
 
 func getDefaultOtelColConfig(release, namespace string) string {
@@ -120,4 +162,19 @@ func getDefaultOtelColConfig(release, namespace string) string {
           exporters: [logging, otlp]
           processors: [batch]
 `, release, namespace)
+}
+
+func (c *OtelCol) IsOtelOperatorEnabledInRelease() (bool, error) {
+	var isEnabled bool
+	e, err := c.HelmClient.ExportValuesFieldFromRelease(c.ReleaseName, []string{"opentelemetryOperator", "enabled"})
+	if err != nil {
+		return isEnabled, err
+	}
+	var ok bool
+	isEnabled, ok = e.(bool)
+	if !ok {
+		return isEnabled, fmt.Errorf("opentelemetryOperator.enabled is not a bool")
+	}
+
+	return isEnabled, nil
 }

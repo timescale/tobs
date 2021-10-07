@@ -573,6 +573,33 @@ func (c *clientImpl) CreateNamespaceIfNotExists(namespace string) error {
 	return nil
 }
 
+func (c *clientImpl) UpdateNamespaceLabels(name string, labels map[string]string) error {
+	namespace, err := c.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get the namespace %v", err)
+	}
+
+	for k, v := range labels {
+		namespace.Labels[k] = v
+	}
+
+	_, err = c.CoreV1().Namespaces().Update(context.TODO(), namespace, metav1.UpdateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to update the namespace annotations %v", err)
+	}
+
+	return nil
+}
+
+func (c *clientImpl) GetNamespaceLabels(name string) (map[string]string, error) {
+	namespace, err := c.CoreV1().Namespaces().Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get the namespace %v", err)
+	}
+
+	return namespace.Labels, nil
+}
+
 func (c *clientImpl) CheckSecretExists(secretName, namespace string) (bool, error) {
 	secExists, err := c.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
@@ -692,10 +719,21 @@ func (c *apiClient) GetCRD(name string) (*v1.CustomResourceDefinition, error) {
 	return c.ApiextensionsV1().CustomResourceDefinitions().Get(context.Background(), name, metav1.GetOptions{})
 }
 
+func (c *apiClient) DeleteCRD(name string) error {
+	return c.ApiextensionsV1().CustomResourceDefinitions().Delete(context.TODO(), name, metav1.DeleteOptions{})
+}
+
 func (c *clientImpl) CreateCustomResource(namespace, apiVersion, resourceName string, body []byte) error {
 	_, err := c.RESTClient().Post().
 		AbsPath("/apis/" + apiVersion).Namespace(namespace).Resource(resourceName).
 		Body(body).
+		DoRaw(context.TODO())
+	return err
+}
+
+func (c *clientImpl) DeleteCustomResource(namespace, apiVersion, resourceName, crName string) error {
+	_, err := c.RESTClient().Delete().
+		AbsPath("/apis/" + apiVersion).Namespace(namespace).Resource(resourceName).Name(crName).
 		DoRaw(context.TODO())
 	return err
 }
