@@ -42,7 +42,6 @@ timescaledb-single:
 promscale:
   enabled: true
   image: timescale/promscale:0.6.0
-  imagePullPolicy: Always
   # needs to be enabled for tracing support in Promscale
   # to expose traces port
   tracing:
@@ -408,8 +407,8 @@ opentelemetryOperator:
     args:
       - --grpc-storage-plugin.configuration-file=/configs/jaeger-promscale-query.yaml
     config: |
-      promscale-tls: false
-      promscale-grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
+      tls: false
+      grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
       connection-timeout: 1h
 
     service:

@@ -19,6 +19,11 @@
 {{- if index .Values "kube-prometheus-stack" "grafana" "enabled" }}
 📈 Grafana
 {{- end }}
+{{- if index .Values "opentelemetryOperator" "enabled" }}
+🚀 OpenTelemetry
+🎯 Jaeger
+{{- end }}
+
 {{- $prometheus := index .Values "kube-prometheus-stack" "prometheus" }}
 {{- $kubePrometheus := index .Values "kube-prometheus-stack" }}
 {{ if $prometheus.enabled }}
@@ -175,6 +180,37 @@ To connect to your database, chose one of these options:
    Then you can point your browser to http://127.0.0.1:8081/.
 
 {{- end -}}
+
+{{- if .Values.opentelemetryOperator.enabled }}
+###############################################################################
+🚀  OPENTELEMETRY NOTES:
+###############################################################################
+
+    The OpenTelemetry collector is deployed to collect traces.
+
+    OpenTelemetry collector can be accessed with the following DNS name from within your cluster:
+    {{ .Release.Name }}-opentelemetry-collector.{{ .Release.Namespace }}.svc.cluster.local
+
+{{- end -}}
+
+{{- if .Values.opentelemetryOperator.enabled }}
+###############################################################################
+🎯 JAEGER NOTES:
+###############################################################################
+
+    Jaeger visualizes traces.
+
+    You can access Jaeger via a local browser by executing:
+{{- if .Values.cli }}
+    tobs {{- template "tobs.cliOptions" . }} jaeger port-forward
+{{- else }}
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name }}-jaeger-promscale 16686:16686
+{{- end }}
+
+    Then you can point your browser to http://127.0.0.1:16686/.
+
+{{- end -}}
+
 {{ if and $kubePrometheus.enabled $kubePrometheus.grafana.enabled }}
 ###############################################################################
 📈 GRAFANA NOTES:
