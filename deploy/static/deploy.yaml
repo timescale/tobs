@@ -485,7 +485,7 @@ metadata:
 type: Opaque
 data:
   admin-user: "YWRtaW4="
-  admin-password: "RXZleTZnaUFUUUVXYUFDckY0N1ZodUVRN0NTSFBTcGVOcmVSRFZNQQ=="
+  admin-password: "b3Fsa3Q4VXZvTG1pWkxXbVBIMTZ2THdSY3l3NFFLOHgzNHFGYkh1cQ=="
   ldap-toml: ""
 ---
 # Source: tobs/charts/kube-prometheus-stack/templates/alertmanager/secret.yaml
@@ -535,7 +535,7 @@ metadata:
   labels:
     tobs_datasource: "true"
     app: tobs
-    chart: tobs-0.6.1
+    chart: tobs-0.7.0
     release: tobs
 type: Opaque
 stringData:
@@ -544,13 +544,13 @@ stringData:
     apiVersion: 1
 
     datasources:
-      - name: Promscale
+      - name: Promscale-PromQL
         type: prometheus
         url: http://tobs-promscale-connector.tobs.svc.cluster.local:9201
         isDefault: true
         editable: true
         access: proxy
-      - name: TimescaleDB
+      - name: Promscale-SQL
         url: tobs.tobs.svc.cluster.local:5432
         type: postgres
         isDefault: false
@@ -573,7 +573,7 @@ metadata:
   namespace: tobs
   labels:
     app: tobs
-    chart: tobs-0.6.1
+    chart: tobs-0.7.0
     release: tobs
 type: Opaque
 data:
@@ -38879,7 +38879,7 @@ metadata:
   labels:
    grafana_dashboard: "1"
    app: tobs
-   chart: tobs-0.6.1
+   chart: tobs-0.7.0
    release: tobs
 data:
 
@@ -42524,7 +42524,7 @@ metadata:
   namespace: tobs
   labels:
    app: tobs
-   chart: tobs-0.6.1
+   chart: tobs-0.7.0
    release: tobs
 data:
    add-users.sql: |-
@@ -43606,7 +43606,7 @@ metadata:
   namespace: tobs
   labels:
     app: tobs-promscale
-    chart: promscale-0.6.0
+    chart: promscale-0.6.1
     release: tobs
     heritage: Helm
   annotations:
@@ -43711,7 +43711,7 @@ metadata:
   namespace: tobs
   labels:
     app: tobs
-    chart: tobs-0.6.1
+    chart: tobs-0.7.0
     release: tobs
     component: promlens
   annotations:
@@ -43851,7 +43851,7 @@ spec:
         checksum/config: 9943b3f9b9cf7c0f467186141ca49b2ea9b6e11ac72fea94690b59dbccf7cdd1
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
         checksum/sc-dashboard-provider-config: 5e1224c9f94c5614a365eb9ed8fdb3179b0e87876ab2d6fc46a50592e9837ff2
-        checksum/secret: 93aec58b8339c2773d60c6c4bae9028a2c6a32f8dce91a6df16a6682226f10ae
+        checksum/secret: aaa02e741facfd6a5e3a7b534d2c66badb69ea69a7db80146dfc2896196a8927
     spec:
       
       serviceAccountName: tobs-grafana
@@ -44110,7 +44110,7 @@ metadata:
   namespace: tobs
   labels:
     app: tobs-promscale
-    chart: promscale-0.6.0
+    chart: promscale-0.6.1
     release: tobs
     heritage: Helm
 spec:
@@ -44132,7 +44132,7 @@ spec:
       
     spec:
       containers:
-        - image: timescale/promscale:0.6.0
+        - image: timescale/promscale:0.6.1
           imagePullPolicy: IfNotPresent
           name: promscale-connector
           resources:
@@ -44142,6 +44142,7 @@ spec:
           ports:
             - containerPort: 9201
               name: connector-port
+          
           env:
             - name: PROMSCALE_DB_PORT
               value: "5432"
@@ -44167,7 +44168,7 @@ metadata:
   namespace: tobs
   labels:
     app: tobs
-    chart: tobs-0.6.1
+    chart: tobs-0.7.0
     release: tobs
     component: promlens
 spec:
@@ -44584,7 +44585,7 @@ metadata:
   namespace: tobs
   labels:
     app: tobs
-    chart: tobs-0.6.1
+    chart: tobs-0.7.0
     release: tobs
     heritage: Helm
 spec:
@@ -48680,7 +48681,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "tobs-patroni-o3"
+  name: "tobs-patroni-5i"
   labels:
     app: tobs-timescaledb
     chart: timescaledb-single-0.8.2
