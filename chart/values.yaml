@@ -408,6 +408,37 @@ promlens:
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
 opentelemetryOperator:
   enabled: false
+  collector:
+    # The default otel collector that will be deployed by CLI once
+    # the otel operator is in running state
+    defaultConfig: |
+      receivers:
+        jaeger:
+          protocols:
+            grpc:
+            thrift_http:
+
+        otlp:
+          protocols:
+            grpc:
+            http:
+
+      exporters:
+        logging:
+        otlp:
+          endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
+          insecure: true
+
+      processors:
+        batch:
+
+      service:
+        pipelines:
+          traces:
+            receivers: [jaeger, otlp]
+            exporters: [logging, otlp]
+            processors: [batch]
+
   jaegerPromscaleQuery:
     image: timescale/jaeger-query-proxy:0.0.1
     endpoint: "{{ .Release.Name }}-jaeger-promscale.{{ .Release.Namespace }}.svc.cluster.local:16686"
