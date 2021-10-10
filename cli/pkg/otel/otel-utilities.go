@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/open-telemetry/opentelemetry-operator/api/v1alpha1"
 	"github.com/timescale/tobs/cli/pkg/helm"
@@ -127,9 +128,9 @@ func (c *OtelCol) CreateDefaultCollector(otelColConfig string) error {
 		return err
 	}
 
-	if otelColConfig == "" {
-		otelColConfig = getDefaultOtelColConfig(c.ReleaseName, c.Namespace)
-	}
+	// As collector config is string we should template .ReleaseName.Name and .Release.Namespace
+	otelColConfig = strings.Replace(otelColConfig, "{{ .Release.Name }}", c.ReleaseName, -1)
+	otelColConfig = strings.Replace(otelColConfig, "{{ .Release.Namespace }}", c.Namespace, -1)
 
 	defaultOtelCol := &v1alpha1.OpenTelemetryCollector{
 		ObjectMeta: metav1.ObjectMeta{
@@ -153,37 +154,6 @@ func (c *OtelCol) CreateDefaultCollector(otelColConfig string) error {
 
 func (c *OtelCol) DeleteDefaultOtelCollector() error {
 	return c.K8sClient.DeleteCustomResource(c.Namespace, otelColApiVersion, otelColResourceName, c.ReleaseName+"-opentelemetry")
-}
-
-func getDefaultOtelColConfig(release, namespace string) string {
-	return fmt.Sprintf(`
-    receivers:
-      jaeger:
-        protocols:
-          grpc:
-          thrift_http:
-
-      otlp:
-        protocols:
-          grpc:
-          http:
-
-    exporters:
-      logging:
-      otlp:
-        endpoint: "%s-promscale-connector.%s.svc.cluster.local:9202"
-        insecure: true
-
-    processors:
-      batch:
-
-    service:
-      pipelines:
-        traces:
-          receivers: [jaeger, otlp]
-          exporters: [logging, otlp]
-          processors: [batch]
-`, release, namespace)
 }
 
 func (c *OtelCol) IsOtelOperatorEnabledInRelease() (bool, error) {

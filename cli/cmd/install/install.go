@@ -41,7 +41,6 @@ func addInstallUtilitiesFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 3 replicas")
 	cmd.Flags().BoolP("tracing", "", false, "Option to enable OpenTelemetry and Jaeger components")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
-	cmd.Flags().StringP("otel-collector-config", "", "", "Otel collector config file path, if not provided default collector will be deployed, Works only if opentelemetry is enabled")
 	cmd.Flags().BoolP("confirm", "y", false, "Confirmation for all user input prompts")
 }
 
@@ -57,7 +56,6 @@ type InstallSpec struct {
 	skipWait           bool
 	tsDBTlsCert        []byte
 	tsDBTlsKey         []byte
-	otelColConfig      string
 	confirmActions     bool
 }
 
@@ -114,19 +112,6 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	keyFile, err := cmd.Flags().GetString("timescaledb-tls-key")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-
-	otelColConfigFile, err := cmd.Flags().GetString("otel-collector-config")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-
-	if i.enableOtel && otelColConfigFile != "" {
-		config, err := ioutil.ReadFile(otelColConfigFile)
-		if err != nil {
-			return fmt.Errorf("failed to read file %s: %v", otelColConfigFile, err)
-		}
-		i.otelColConfig = string(config)
 	}
 
 	if certFile != "" && keyFile != "" {
@@ -309,7 +294,15 @@ timescaledb-single:
 			K8sClient:   k8sClient,
 			HelmClient:  helmClient,
 		}
-		err = otelCol.CreateDefaultCollector(c.otelColConfig)
+		config, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"opentelemetryOperator", "collector", "defaultConfig"})
+		if err != nil {
+			return err
+		}
+		otelColConfig, ok := config.(string)
+		if !ok {
+			return fmt.Errorf("opentelemetryOperator.collector.defaultConfig is not a string")
+		}
+		err = otelCol.CreateDefaultCollector(otelColConfig)
 		if err != nil {
 			return err
 		}
