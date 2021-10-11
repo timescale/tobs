@@ -62,7 +62,7 @@ __Dependencies__: [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubec
 
 From `0.7.0` release tobs supports installation of tracing components. To install tracing components use 
 ```
-tobs install --tracing`
+tobs install --tracing
 ```
 For more details on tracing support visit [Promscale tracing docs](https://github.com/timescale/promscale/blob/master/docs/tracing.md).
 
