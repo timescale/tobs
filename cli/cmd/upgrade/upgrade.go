@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -238,7 +240,7 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 	// if version change is noticed in upgrades...
 	if nVersion >= version0_4_0 && nVersion != dVersion {
 		if !c.skipCrds {
-			err = createCRDS()
+			err = c.createCRDS()
 			if err != nil {
 				return err
 			}
@@ -472,34 +474,42 @@ func parsePgBackRestConf(data string) map[string]string {
 
 var KubePrometheusCRDVersion = "v0.50.0"
 
-var kubePrometheusCRDURLs = []string{
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
-	"https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/"+KubePrometheusCRDVersion+"/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
+var kubePrometheusCRDs = map[string]string{
+	"alertmanagerconfigs.monitoring.coreos.com": "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
+	"alertmanagers.monitoring.coreos.com":       "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
+	"podmonitors.monitoring.coreos.com":         "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
+	"probes.monitoring.coreos.com":              "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
+	"prometheuses.monitoring.coreos.com":        "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
+	"servicemonitors.monitoring.coreos.com":     "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
+	"thanosrulers.monitoring.coreos.com":        "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
+	"prometheusrules.monitoring.coreos.com":     "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
 }
 
-var kubePrometheusCRDNames = []string{
-	"alertmanagerconfigs.monitoring.coreos.com",
-	"alertmanagers.monitoring.coreos.com",
-	"podmonitors.monitoring.coreos.com",
-	"probes.monitoring.coreos.com",
-	"prometheuses.monitoring.coreos.com",
-	"prometheusrules.monitoring.coreos.com",
-	"servicemonitors.monitoring.coreos.com",
-	"thanosrulers.monitoring.coreos.com",
-}
+func (c *upgradeSpec) createCRDS() error {
+	for name, manifestURL := range kubePrometheusCRDs {
+		res, err := http.Get(manifestURL)
+		if err != nil {
+			return fmt.Errorf("failed to download %s: %v", name, err)
+		}
+		// Check server response
+		if res.StatusCode != http.StatusOK {
+			return fmt.Errorf("bad status: %s", res.Status)
+		}
 
-func createCRDS() error {
-	err := k8s.CreateK8sManifests(kubePrometheusCRDURLs)
-	if err != nil {
-		return err
+		// scan the response
+		var out []byte
+		out, err = ioutil.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		err = c.k8sClient.ApplyManifests(out)
+		if err != nil {
+			return fmt.Errorf("failed to apply manifest %s with error %v", name, err)
+		}
+		res.Body.Close()
 	}
-	fmt.Println("Successfully created CRDs: ", kubePrometheusCRDNames)
+
+	fmt.Println("Successfully created CRDs: ", reflect.ValueOf(kubePrometheusCRDs).MapKeys())
 	return nil
 }
 
