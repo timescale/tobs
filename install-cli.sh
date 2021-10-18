@@ -2,16 +2,19 @@
 
 set -eu
 
-INSTALLROOT=${INSTALLROOT:-"${HOME}/.tobs"}
+INSTALLROOT=${INSTALLROOT:-"${HOME}/.local/bin"}
 TOBS_VERSION=${TOBS_VERSION:-0.7.0}
 
 happyexit() {
+	local symlink_msg=""
+	if [ "$1" == "1" ]; then
+		symlink_msg=" and for your coinvenience linked to /usr/local/bin/tobs"
+	fi
 	cat <<-EOF
-		Add the tobs CLI to your system binaries with:
 
-		  sudo cp ${INSTALLROOT}/tobs /usr/local/bin
+		tobs ${TOBS_VERSION} was successfully installed 🎉
 
-		Alternatively, add tobs to your path in the current session with: export PATH=\$PATH:${INSTALLROOT}
+		Binary is available at ${INSTALLROOT}/tobs${symlink_msg}.
 
 		After starting your Kubernetes cluster, run
 
@@ -93,17 +96,23 @@ install_tobs() {
 		chmod +x "${dstfile}"
 		rm -f "${INSTALLROOT}/tobs"
 		ln -s "${dstfile}" "${INSTALLROOT}/tobs"
-
-		if [ ! -L "/usr/local/bin/tobs" ]; then
-			echo "Attempting to link ${INSTALLROOT}/tobs to /usr/local/bin to easier binary discovery."
-			# Following command shouldn't stop installation when sudo prompt is canceled
-			sudo ln -s "${INSTALLROOT}/tobs" "/usr/local/bin/tobs" || :
-		fi
 	)
 
 	rm -r "$tmpdir"
 	echo "tobs ${TOBS_VERSION} was successfully installed 🎉"
 	echo ""
-	happyexit
+
+	local symlink=0
+	if [ ! -L "/usr/local/bin/tobs" ]; then
+		echo "Attempting to link ${INSTALLROOT}/tobs to /usr/local/bin for easier binary discovery."
+		# Following command shouldn't stop installation when sudo prompt is canceled
+		if timeout --foreground 120s sudo ln -s "${INSTALLROOT}/tobs" "/usr/local/bin/tobs" 2> /dev/null; then
+			symlink=1
+		else
+			echo "Proceeding without creating symlink at /usr/local/bin/tobs"
+		fi
+	fi
+
+	happyexit $symlink
 }
 install_tobs
