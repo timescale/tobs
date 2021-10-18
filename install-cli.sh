@@ -93,6 +93,12 @@ install_tobs() {
 		chmod +x "${dstfile}"
 		rm -f "${INSTALLROOT}/tobs"
 		ln -s "${dstfile}" "${INSTALLROOT}/tobs"
+
+		if [ ! -L "/usr/local/bin/tobs" ]; then
+			echo "Attempting to link ${INSTALLROOT}/tobs to /usr/local/bin to easier binary discovery."
+			# Following command shouldn't stop installation when sudo prompt is canceled
+			sudo ln -s "${INSTALLROOT}/tobs" "/usr/local/bin/tobs" || :
+		fi
 	)
 
 	rm -r "$tmpdir"
