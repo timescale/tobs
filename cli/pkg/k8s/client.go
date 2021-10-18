@@ -66,4 +66,7 @@ type Client interface {
 	// CR operations
 	CreateCustomResource(namespace, apiVersion, resourceName string, body []byte) error
 	DeleteCustomResource(namespace, apiVersion, resourceName, crName string) error
+
+	// Apply manifests
+	ApplyManifests(data []byte) error
 }

@@ -1,13 +1,17 @@
 package k8s
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -16,12 +20,20 @@ import (
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiext "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	"k8s.io/apimachinery/pkg/types"
+	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/client-go/discovery/cached/disk"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/tools/remotecommand"
@@ -649,17 +661,6 @@ func (c *clientImpl) GetJob(jobName, namespace string) (*batchv1.Job, error) {
 	return c.BatchV1().Jobs(namespace).Get(context.Background(), jobName, metav1.GetOptions{})
 }
 
-func CreateK8sManifests(crds []string) error {
-	for _, crd := range crds {
-		out := exec.Command("kubectl", "apply", "-f", crd)
-		output, err := out.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("failed to create CRD %s %s: %w", crd, output, err)
-		}
-	}
-	return nil
-}
-
 func (c *clientImpl) GetDeployment(name, namespace string) (*appsv1.Deployment, error) {
 	return c.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
 }
@@ -736,4 +737,128 @@ func (c *clientImpl) DeleteCustomResource(namespace, apiVersion, resourceName, c
 		AbsPath("/apis/" + apiVersion).Namespace(namespace).Resource(resourceName).Name(crName).
 		DoRaw(context.TODO())
 	return err
+}
+
+func (c *clientImpl) ApplyManifests(data []byte) error {
+	chanMes, chanErr := readYaml(data)
+	for {
+		select {
+		case dataBytes, ok := <-chanMes:
+			{
+				if !ok {
+					return nil
+				}
+
+				// Get obj and dr
+				obj, dr, err := c.buildDynamicResourceClient(dataBytes)
+				if err != nil {
+					continue
+				}
+
+				// Create or Update
+				_, err = dr.Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, dataBytes, metav1.PatchOptions{
+					FieldManager: "kubectl-golang",
+				})
+				if err != nil {
+					return fmt.Errorf("failed to apply manifest with error %v", err)
+				}
+			}
+		case _, ok := <-chanErr:
+			if !ok {
+				return nil
+			}
+		}
+	}
+}
+
+func readYaml(data []byte) (<-chan []byte, <-chan error) {
+	var (
+		chanErr        = make(chan error)
+		chanBytes      = make(chan []byte)
+		multidocReader = utilyaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(data)))
+	)
+
+	go func() {
+		defer close(chanErr)
+		defer close(chanBytes)
+
+		for {
+			buf, err := multidocReader.Read()
+			if err != nil {
+				if err == io.EOF {
+					return
+				}
+				chanErr <- fmt.Errorf("failed to read yaml data %v", err)
+				return
+			}
+			chanBytes <- buf
+		}
+	}()
+	return chanBytes, chanErr
+}
+
+func (c *clientImpl) buildDynamicResourceClient(data []byte) (obj *unstructured.Unstructured, dr dynamic.ResourceInterface, err error) {
+	// Decode YAML manifest into unstructured.Unstructured
+	obj = &unstructured.Unstructured{}
+	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+	_, gvk, err := decUnstructured.Decode(data, nil, obj)
+	if err != nil {
+		return obj, dr, fmt.Errorf("decode yaml failed %v", err)
+	}
+
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+
+	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		loadingRules,
+		&clientcmd.ConfigOverrides{}).ClientConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Some code to define this take from
+	// https://github.com/kubernetes/cli-runtime/blob/master/pkg/genericclioptions/config_flags.go#L215
+	cacheDir := "/var/kube/cache"
+	httpCacheDir := filepath.Join(cacheDir, "http")
+	discoveryCacheDir := computeDiscoverCacheDir(filepath.Join(cacheDir, "discovery"), config.Host)
+
+	// DiscoveryClient queries API server about the resources
+	cdc, err := disk.NewCachedDiscoveryClientForConfig(config, discoveryCacheDir, httpCacheDir, 10*time.Minute)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(cdc)
+
+	// Find GVR
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return obj, dr, fmt.Errorf("mapping kind with version failed %v", err)
+	}
+
+	// Prepare dynamic client
+	dynamicClient, err := dynamic.NewForConfig(c.Config)
+	if err != nil {
+		return obj, dr, fmt.Errorf("failed to create dynamic client %v", err)
+	}
+
+	// Obtain REST interface for the GVR
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		// namespaced resources should specify the namespace
+		dr = dynamicClient.Resource(mapping.Resource).Namespace(obj.GetNamespace())
+	} else {
+		// for cluster-wide resources
+		dr = dynamicClient.Resource(mapping.Resource)
+	}
+	return obj, dr, nil
+}
+
+// computeDiscoverCacheDir takes the parentDir and the host and comes up with a "usually non-colliding" name.
+func computeDiscoverCacheDir(parentDir, host string) string {
+	// strip the optional scheme from host if its there:
+	schemelessHost := strings.Replace(strings.Replace(host, "https://", "", 1), "http://", "", 1)
+	// now do a simple collapse of non-AZ09 characters.  Collisions are possible but unlikely.
+	// Even if we do collide the problem is short lived
+	var overlyCautiousIllegalFileCharacters = regexp.MustCompile(`[^(\w/\.)]`)
+	safeHost := overlyCautiousIllegalFileCharacters.ReplaceAllString(schemelessHost, "_")
+	return filepath.Join(parentDir, safeHost)
 }

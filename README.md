@@ -56,8 +56,6 @@ tobs install
 
 This will deploy all of the tobs components into your cluster and provide instructions as to next steps.
 
-__Dependencies__: [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
-
 ### Tracing support
 
 From `0.7.0` release tobs supports installation of tracing components. To install tracing components use 

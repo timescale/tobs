@@ -3,6 +3,8 @@ package otel
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/open-telemetry/opentelemetry-operator/api/v1alpha1"
 	"github.com/timescale/tobs/cli/pkg/helm"
@@ -42,12 +44,33 @@ func CreateCertManager(confirmActions bool) error {
 			if !confirmActions {
 				utils.ConfirmAction()
 			}
-			err = k8s.CreateK8sManifests([]string{CertManagerManifests})
+
+			res, err := http.Get(CertManagerManifests)
 			if err != nil {
+				fmt.Println("ERROR downloading.....")
+				return fmt.Errorf("failed to download %v", err)
+			}
+			defer res.Body.Close()
+
+			// Check server response
+			if res.StatusCode != http.StatusOK {
+				return fmt.Errorf("bad status: %s", res.Status)
+			}
+
+			// Writer the body to file
+			var out []byte
+			out, err = ioutil.ReadAll(res.Body)
+			if err != nil  {
 				return err
 			}
-			// verify cert-manager is up & running
+
 			k8sClient := k8s.NewClient()
+			err = k8sClient.ApplyManifests(out)
+			if err != nil {
+				return fmt.Errorf("failed to apply cert-manager %v", err)
+			}
+
+			// verify cert-manager is up & running
 			pods, err := k8sClient.KubeGetPods(CertManagerNamespace, map[string]string{"app.kubernetes.io/instance": "cert-manager"})
 			if err != nil {
 				return err
