@@ -47,7 +47,6 @@ func CreateCertManager(confirmActions bool) error {
 
 			res, err := http.Get(CertManagerManifests)
 			if err != nil {
-				fmt.Println("ERROR downloading.....")
 				return fmt.Errorf("failed to download %v", err)
 			}
 			defer res.Body.Close()

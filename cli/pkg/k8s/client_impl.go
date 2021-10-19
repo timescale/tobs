@@ -757,7 +757,7 @@ func (c *clientImpl) ApplyManifests(data []byte) error {
 
 				// Create or Update
 				_, err = dr.Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, dataBytes, metav1.PatchOptions{
-					FieldManager: "kubectl-golang",
+					FieldManager: "tobs",
 				})
 				if err != nil {
 					return fmt.Errorf("failed to apply manifest with error %v", err)
@@ -817,7 +817,7 @@ func (c *clientImpl) buildDynamicResourceClient(data []byte) (obj *unstructured.
 
 	// Some code to define this take from
 	// https://github.com/kubernetes/cli-runtime/blob/master/pkg/genericclioptions/config_flags.go#L215
-	cacheDir := "/var/kube/cache"
+	cacheDir := "$HOME/.cache/tobs"
 	httpCacheDir := filepath.Join(cacheDir, "http")
 	discoveryCacheDir := computeDiscoverCacheDir(filepath.Join(cacheDir, "discovery"), config.Host)
 
