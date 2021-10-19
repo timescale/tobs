@@ -472,18 +472,20 @@ func parsePgBackRestConf(data string) map[string]string {
 	return newData
 }
 
-var KubePrometheusCRDVersion = "v0.50.0"
-
-var kubePrometheusCRDs = map[string]string{
-	"alertmanagerconfigs.monitoring.coreos.com": "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
-	"alertmanagers.monitoring.coreos.com":       "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
-	"podmonitors.monitoring.coreos.com":         "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
-	"probes.monitoring.coreos.com":              "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
-	"prometheuses.monitoring.coreos.com":        "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
-	"servicemonitors.monitoring.coreos.com":     "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
-	"thanosrulers.monitoring.coreos.com":        "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
-	"prometheusrules.monitoring.coreos.com":     "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/" + KubePrometheusCRDVersion + "/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
-}
+var (
+	KubePrometheusCRDVersion     = "v0.50.0"
+	kubePrometheusCRDsPathPrefix = fmt.Sprintf("https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/%s/example/prometheus-operator-crd/monitoring.coreos.com", KubePrometheusCRDVersion)
+	kubePrometheusCRDs           = map[string]string{
+		"alertmanagerconfigs.monitoring.coreos.com": fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "alertmanagerconfigs"),
+		"alertmanagers.monitoring.coreos.com":       fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "alertmanagers"),
+		"podmonitors.monitoring.coreos.com":         fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "podmonitors"),
+		"probes.monitoring.coreos.com":              fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "probes"),
+		"prometheuses.monitoring.coreos.com":        fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "prometheuses"),
+		"servicemonitors.monitoring.coreos.com":     fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "servicemonitors"),
+		"thanosrulers.monitoring.coreos.com":        fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "thanosrulers"),
+		"prometheusrules.monitoring.coreos.com":     fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "prometheusrules"),
+	}
+)
 
 func (c *upgradeSpec) createCRDS() error {
 	for name, manifestURL := range kubePrometheusCRDs {
@@ -499,6 +501,7 @@ func (c *upgradeSpec) createCRDS() error {
 		// scan the response
 		var out []byte
 		out, err = ioutil.ReadAll(res.Body)
+		_ = res.Body.Close()
 		if err != nil {
 			return err
 		}
@@ -506,7 +509,6 @@ func (c *upgradeSpec) createCRDS() error {
 		if err != nil {
 			return fmt.Errorf("failed to apply manifest %s with error %v", name, err)
 		}
-		res.Body.Close()
 	}
 
 	fmt.Println("Successfully created CRDs: ", reflect.ValueOf(kubePrometheusCRDs).MapKeys())
