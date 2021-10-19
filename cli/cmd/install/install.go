@@ -294,16 +294,15 @@ timescaledb-single:
 			K8sClient:   k8sClient,
 			HelmClient:  helmClient,
 		}
-		config, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"opentelemetryOperator", "collector", "defaultConfig"})
+		config, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"opentelemetryOperator", "collector", "config"})
 		if err != nil {
 			return err
 		}
 		otelColConfig, ok := config.(string)
 		if !ok {
-			return fmt.Errorf("opentelemetryOperator.collector.defaultConfig is not a string")
+			return fmt.Errorf("opentelemetryOperator.collector.config is not a string")
 		}
-		err = otelCol.CreateDefaultCollector(otelColConfig)
-		if err != nil {
+		if err = otelCol.CreateDefaultCollector(otelColConfig); err != nil {
 			return err
 		}
 	}

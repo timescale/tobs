@@ -411,7 +411,7 @@ opentelemetryOperator:
   collector:
     # The default otel collector that will be deployed by CLI once
     # the otel operator is in running state
-    defaultConfig: |
+    config: |
       receivers:
         jaeger:
           protocols:
