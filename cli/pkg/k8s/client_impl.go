@@ -739,6 +739,9 @@ func (c *clientImpl) DeleteCustomResource(namespace, apiVersion, resourceName, c
 	return err
 }
 
+// Apply manifests helps to apply the k8s resources
+// to the cluster this is equivalent to
+// kubectl apply -f
 func (c *clientImpl) ApplyManifests(data []byte) error {
 	chanMes, chanErr := readYaml(data)
 	for {
@@ -763,9 +766,12 @@ func (c *clientImpl) ApplyManifests(data []byte) error {
 					return fmt.Errorf("failed to apply manifest with error %v", err)
 				}
 			}
-		case _, ok := <-chanErr:
+		case err, ok := <-chanErr:
 			if !ok {
 				return nil
+			}
+			if err != nil {
+				return fmt.Errorf("failed to read yaml %v", err)
 			}
 		}
 	}
