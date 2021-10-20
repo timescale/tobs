@@ -157,19 +157,32 @@ func (c *InstallSpec) InstallStack() error {
 	helmValues := `
 cli: true`
 
+	helmClient := helm.NewClient(cmd.Namespace)
+	defer helmClient.Close()
 	if c.dbURI != "" {
 		helmValues = appendDBURIValues(c.dbURI, helmValues)
 	} else {
-		// if db-uri is provided we do not need
-		// to create DB level secrets
-		err = c.createSecrets()
+		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
 		if err != nil {
-			return fmt.Errorf("failed to create secrets %v", err)
+			return err
 		}
-		if c.onlySecrets {
-			fmt.Println("Skipping tobs installation because of only-secrets flag.")
-			fmt.Println("Successfully created secrets for TimescaleDB.")
-			return nil
+		enableTimescaleDB, ok := e.(bool)
+		if !ok {
+			return fmt.Errorf("timescaledb-single.enabled was not a bool")
+		}
+
+		// if timescaledb is disabled we do not need
+		// to create DB level secrets
+		if enableTimescaleDB {
+			err = c.createSecrets()
+			if err != nil {
+				return fmt.Errorf("failed to create secrets %v", err)
+			}
+			if c.onlySecrets {
+				fmt.Println("Skipping tobs installation because of only-secrets flag.")
+				fmt.Println("Successfully created secrets for TimescaleDB.")
+				return nil
+			}
 		}
 	}
 
@@ -187,8 +200,6 @@ cli: true`
 		CreateNamespace: true,
 	}
 
-	helmClient := helm.NewClient(cmd.Namespace)
-	defer helmClient.Close()
 	// if custom helm chart is provided there is no point
 	// of adding & upgrading the default tobs helm chart
 	if c.Ref == utils.DEFAULT_CHART {

@@ -7,7 +7,7 @@
 {{- end }}
 {{- if index .Values "timescaledb-single" "enabled" }}
 🐯 TimescaleDB
-{{- else }}
+{{- else if index .Values "timescaledbExternal" "enabled" }}
 🐯 Connecting to an External TimescaleDB
 {{- end }}
 {{- if index .Values "promscale" "enabled" }}
@@ -103,7 +103,8 @@ WARNING! Persistence is disabled on AlertManager.
 {{- end }}
 
 {{- end }}
-{{- if or .Values "timescaledb-single" "enabled" .Values.timescaledbExternal.enabled }}
+
+{{- if or (index .Values "timescaledb-single" "enabled") (index .Values "timescaledbExternal" "enabled") }}
 {{- $tsEnv := (set (set (deepCopy .) "Values" (index .Values "timescaledb-single")) "Chart" (dict "Name" "timescaledb")) }}
 
 ###############################################################################
@@ -274,5 +275,4 @@ WARNING! Persistence is disabled!!! You will lose your data when
 {{- end }}
 
 🚀 Happy observing!
-
 
