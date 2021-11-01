@@ -159,6 +159,16 @@ cli: true`
 
 	helmClient := helm.NewClient(cmd.Namespace)
 	defer helmClient.Close()
+
+	// if custom helm chart is provided there is no point
+	// of adding & upgrading the default tobs helm chart
+	if c.Ref == utils.DEFAULT_CHART {
+		err = helmClient.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
+		if err != nil {
+			return fmt.Errorf("failed to add & update tobs helm chart: %w", err)
+		}
+	}
+
 	if c.dbURI != "" {
 		helmValues = appendDBURIValues(c.dbURI, helmValues)
 	} else {
@@ -198,15 +208,6 @@ cli: true`
 		// i.e. if a user wants to install tobs helm chart < 0.3.0
 		// this option creates the namespace.
 		CreateNamespace: true,
-	}
-
-	// if custom helm chart is provided there is no point
-	// of adding & upgrading the default tobs helm chart
-	if c.Ref == utils.DEFAULT_CHART {
-		err = helmClient.AddOrUpdateChartRepo(utils.DEFAULT_REGISTRY_NAME, utils.REPO_LOCATION)
-		if err != nil {
-			return fmt.Errorf("failed to add & update tobs helm chart: %w", err)
-		}
 	}
 
 	if c.ConfigFile != "" {
