@@ -3,6 +3,7 @@ package pgconn
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -79,7 +80,7 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 		}
 		local := int(ports[0].Local)
 
-		pool, err = pgxpool.Connect(context.Background(), fmt.Sprint("postgres://"+d.User+":"+pass+"@localhost:"+strconv.Itoa(local)+"/"+d.DBName))
+		pool, err = pgxpool.Connect(context.Background(), constructURI(d.User, pass, "localhost", local, d.DBName, "", 0))
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +91,11 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 				return nil, err
 			}
 		} else {
-			pool, err = pgxpool.Connect(context.Background(), fmt.Sprint("postgres://"+d.User+":"+pass+"@"+host+":"+port+"/"+d.DBName+"?sslmode="+sslmode))
+			iport, err := strconv.Atoi(port)
+			if err != nil {
+				return nil, err
+			}
+			pool, err = pgxpool.Connect(context.Background(), constructURI(d.User, pass, host, iport, d.DBName, sslmode, 0))
 			if err != nil {
 				return nil, err
 			}
@@ -112,12 +117,12 @@ func UpdatePasswordInDBURI(dburi, newpass string) (string, error) {
 	} else {
 		sslmode = "require"
 	}
-	port := strconv.Itoa(int(db.ConnConfig.Port))
-	connectTimeOut := ""
+	port := int(db.ConnConfig.Port)
+	connectTimeOut := 0
 	if db.ConnConfig.ConnectTimeout.String() != "0s" {
-		connectTimeOut = "&connect_timeout=" + fmt.Sprintf("%.f", db.ConnConfig.ConnectTimeout.Seconds())
+		connectTimeOut = int(db.ConnConfig.ConnectTimeout.Seconds())
 	}
-	res := fmt.Sprint("postgres://" + db.ConnConfig.User + ":" + newpass + "@" + db.ConnConfig.Host + ":" + port + "/" + db.ConnConfig.Database + "?sslmode=" + sslmode + connectTimeOut)
+	res := fmt.Sprint(constructURI(db.ConnConfig.User, newpass, db.ConnConfig.Host, port, db.ConnConfig.Database, sslmode, connectTimeOut))
 	return res, nil
 }
 
@@ -128,4 +133,25 @@ func ParseDBURI(dbURI string) (*pgxpool.Config, error) {
 	}
 
 	return db, nil
+}
+
+func constructURI(user, password, host string, port int, dbname, sslmode string, connectTimeout int) string {
+	c := new(url.URL)
+	c.Scheme = "postgres"
+	c.Host = fmt.Sprintf("%s:%d", host, port)
+	if password != "" {
+		c.User = url.UserPassword(user, password)
+	} else {
+		c.User = url.User(user)
+	}
+	c.Path = dbname
+	q := c.Query()
+	if sslmode != "" {
+		q.Set("sslmode", sslmode)
+	}
+	if connectTimeout != 0 {
+		q.Set("connect_timeout", strconv.Itoa(connectTimeout))
+	}
+	c.RawQuery = q.Encode()
+	return c.String()
 }
