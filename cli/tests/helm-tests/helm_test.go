@@ -86,10 +86,18 @@ func testHelmClientInstallOrUpgradeChart() {
 		log.Fatalf("Error installing tobs secrets %v:", err)
 	}
 
+	// download the dependent charts
+	out := exec.Command("helm", "dep", "up", LATEST_CHART)
+	output, err := out.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(output))
+		log.Fatal(err)
+	}
+
 	// Define the chart to be installed
 	chartSpec := helm.ChartSpec{
 		ReleaseName:     DEFAULT_TOBS_NAME,
-		ChartName:       CHART_NAME,
+		ChartName:       LATEST_CHART,
 		Namespace:       NAMESPACE,
 		Version:         tobsVersion,
 		CreateNamespace: true,

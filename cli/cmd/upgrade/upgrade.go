@@ -473,7 +473,7 @@ func parsePgBackRestConf(data string) map[string]string {
 }
 
 var (
-	KubePrometheusCRDVersion     = "v0.50.0"
+	KubePrometheusCRDVersion     = "v0.53.1"
 	kubePrometheusCRDsPathPrefix = fmt.Sprintf("https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/%s/example/prometheus-operator-crd/monitoring.coreos.com", KubePrometheusCRDVersion)
 	kubePrometheusCRDs           = map[string]string{
 		"alertmanagerconfigs.monitoring.coreos.com": fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "alertmanagerconfigs"),

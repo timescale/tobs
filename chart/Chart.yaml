@@ -6,7 +6,7 @@ type: application
 
 version: 0.7.0
 appVersion: 0.7.0
-kubeVersion: ">= 1.19.0 < 1.22.0"
+kubeVersion: ">= 1.21.0 < 1.24.0"
 
 dependencies:
   - name: timescaledb-single
@@ -19,9 +19,9 @@ dependencies:
     repository: https://charts.timescale.com
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
-    version: 18.0.0
+    version: 30.0.0
     repository: https://prometheus-community.github.io/helm-charts
   - name: opentelemetry-operator
     condition: opentelemetryOperator.enabled
-    version: 0.2.0
+    version: 0.5.1
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts

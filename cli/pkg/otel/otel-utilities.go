@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	CertManagerVersion    = "v1.5.2"
+	CertManagerVersion    = "v1.6.1"
 	CertManagerNamespace  = "cert-manager"
 	otelColKind           = "OpenTelemetryCollector"
 	otelColApiVersion     = "opentelemetry.io/v1alpha1"
