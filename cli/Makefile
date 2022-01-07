@@ -1,4 +1,4 @@
-KUBE_VERSION ?= 1.21
+KUBE_VERSION ?= 1.23
 KIND_CONFIG ?= ./tests/kind-$(KUBE_VERSION).yaml
 
 build:
