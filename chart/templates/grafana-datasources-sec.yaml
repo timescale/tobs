@@ -1,6 +1,6 @@
 {{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
 {{ if and $grafana.enabled $grafana.sidecar.datasources.enabled -}}
-{{- $tsdbExternalEnabled := .Values.timescaledbExternal.enabled -}}
+{{- $isDBURI := ternary true false (ne .Values.promscale.connection.uri "")}}
 {{- $tsdbDatasource := $grafana.timescale.datasource -}}
 {{- $promEnabled := $grafana.prometheus.datasource.enabled -}}
 {{- $anyDataSources := or $tsdbDatasource.enabled $promEnabled -}}
@@ -40,7 +40,7 @@ stringData:
 {{ if $tsdbDatasource.enabled -}}
 {{- $isDefault := not $promEnabled -}}
 {{- $hostURL := "" -}}
-{{ if $tsdbExternalEnabled -}}
+{{ if $isDBURI -}}
   {{- $hostURL = include "tobs.dburi.host" . -}}
 {{ else -}}
   {{- $host := tpl $grafana.timescale.database.host $ -}}
@@ -52,13 +52,13 @@ stringData:
         type: postgres
         isDefault: {{ $isDefault }}
         access: proxy
-        user: {{ ternary (include "tobs.dburi.user" . ) ($tsdbDatasource.user) ($tsdbExternalEnabled) }}
-        database: {{ ternary (include "tobs.dburi.dbname" . ) ($tsdbDatasource.dbName) ($tsdbExternalEnabled) }}
+        user: {{ ternary (include "tobs.dburi.user" . ) ($tsdbDatasource.user) ($isDBURI) }}
+        database: {{ ternary (include "tobs.dburi.dbname" . ) ($tsdbDatasource.dbName) ($isDBURI) }}
         editable: true
         secureJsonData:
-          password: {{ ternary (include "tobs.dburi.password" . ) ($tsdbDatasource.pass) ($tsdbExternalEnabled) }}
+          password: {{ ternary (include "tobs.dburi.password" . ) ($tsdbDatasource.pass) ($isDBURI) }}
         jsonData:
-          sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) ($tsdbDatasource.sslMode) ($tsdbExternalEnabled) }}
+          sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) ($tsdbDatasource.sslMode) ($isDBURI) }}
           postgresVersion: 1000
           timescaledb: true
 {{- end -}}

@@ -155,7 +155,7 @@ cli: true`
 	}
 
 	if c.dbURI != "" {
-		helmValues = appendDBURIValues(c.dbURI, helmValues)
+		helmValues = appendDBURIValues(helmValues)
 	} else {
 		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
 		if err != nil {
@@ -318,13 +318,10 @@ timescaledb-single:
 	return nil
 }
 
-func appendDBURIValues(dbURI, helmValues string) string {
+func appendDBURIValues(helmValues string) string {
 	helmValues = helmValues + fmt.Sprintf(`
 timescaledb-single:
-  enabled: false
-timescaledbExternal:
-  enabled: true
-  db_uri: %s`, dbURI)
+  enabled: false`)
 	return helmValues
 }
 
@@ -342,12 +339,8 @@ func appendPromscaleValues(enableOtel, promHA bool, dbURI string) string {
 promscale:`
 	if enableOtel {
 		config = config + `
-  image: timescale/promscale:0.7.0-beta.latest
-  tracing:
+  openTelemetry:
     enabled: true`
-
-		args = `
-  - -otlp-grpc-server-listen-address=:9202`
 	}
 
 	if promHA {
@@ -360,13 +353,12 @@ promscale:`
 	if dbURI != "" {
 		config = config + fmt.Sprintf(`
   connection:
-    uri: 
-      secretTemplate: %s-timescaledb-uri`, cmd.HelmReleaseName)
+    uri: %s`, dbURI)
 	}
 
 	if args != "" {
 		args = `
-  args:` + args
+  extraArgs:` + args
 	}
 	return config + args
 }

@@ -41,7 +41,7 @@ func CreateCertManager(confirmActions bool) error {
 	_, err := apiClient.GetCRD("certificates.cert-manager.io")
 	if err != nil {
 		if errors2.IsNotFound(err) {
-			fmt.Println("Couldn't find the cert-manager, Installing the cert-manager...")
+			fmt.Println("Couldn't find the cert-manager. The cert-manager is required to deploy OpenTelemetry. Do you want to install the cert-manager?")
 			if !confirmActions {
 				utils.ConfirmAction()
 			}
