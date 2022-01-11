@@ -76,7 +76,7 @@ CLI release name and namespace
 Extract the username from db uri
 */}}
 {{- define "tobs.dburi.user" -}}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $values := urlParse .Values.promscale.connection.uri }}
   {{- $userInfo := get $values "userinfo" }}
   {{- $userDetails :=  split ":" $userInfo }}
   {{- $user := $userDetails._0 }}
@@ -87,7 +87,7 @@ Extract the username from db uri
 Extract the password from db uri
 */}}
 {{- define "tobs.dburi.password" -}}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $values := urlParse .Values.promscale.connection.uri }}
   {{- $userInfo := get $values "userinfo" }}
   {{- $userDetails :=  split ":" $userInfo }}
   {{- $pwd := $userDetails._1 }}
@@ -98,7 +98,7 @@ Extract the password from db uri
 Extract the host from db uri
 */}}
 {{- define "tobs.dburi.host" -}}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $values := urlParse .Values.promscale.connection.uri }}
   {{- $hostURL := get $values "host" }}
   {{- printf $hostURL -}}
 {{- end -}}
@@ -107,7 +107,7 @@ Extract the host from db uri
 Extract the dbname from db uri
 */}}
 {{- define "tobs.dburi.dbname" -}}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $values := urlParse .Values.promscale.connection.uri }}
   {{- $dbDetails := get $values "path" }}
   {{- $dbName := trimPrefix "/" $dbDetails }}
   {{- printf $dbName -}}
@@ -117,7 +117,7 @@ Extract the dbname from db uri
 Extract the sslmode from db uri
 */}}
 {{- define "tobs.dburi.sslmode" -}}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $values := urlParse .Values.promscale.connection.uri }}
   {{- $queryInfo := get $values "query" }}
   {{- $sslInfo := regexFind "ssl[mM]ode=[^&]+" $queryInfo}}
   {{- $sslDetails := split "=" $sslInfo }}
@@ -129,7 +129,7 @@ Extract the sslmode from db uri
 Extract the port from db uri
 */}}
 {{- define "tobs.dburi.port" -}}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $values := urlParse .Values.promscale.connection.uri }}
   {{- $hostURL := get $values "host" }}
   {{- $hostDetails := split ":" $hostURL}}
   {{- $port := $hostDetails._1 | quote }}
@@ -140,7 +140,7 @@ Extract the port from db uri
 Extract the port from db uri
 */}}
 {{- define "tobs.dburi.hostwithoutport" -}}
-  {{- $values := urlParse .Values.timescaledbExternal.db_uri }}
+  {{- $values := urlParse .Values.promscale.connection.uri }}
   {{- $hostURL := get $values "host" }}
   {{- $hostDetails := split ":" $hostURL}}
   {{- $host := $hostDetails._0 | quote }}

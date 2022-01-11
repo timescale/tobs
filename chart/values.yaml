@@ -46,39 +46,35 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.6.1
+  image: timescale/promscale:0.7.1
   # needs to be enabled for tracing support in Promscale
-  # to expose traces port
-  tracing:
+  # to expose traces port, add tracing args to Promscale
+  openTelemetry:
     enabled: false
-  # by default Promscale isn't configured to accept traces
-  # to enable pass below arg
-  # arg:
-  # - -otlp-grpc-server-listen-address=:9202
+  # to pass extra args
+  # extraArgs: []
 
+  # selector used to provision your own Secret containing connection details
+  # Use this option with caution
+  connectionSecretName: &dbPassSecret "{{ .Release.Name }}-credentials"
+
+  # connection details to connect to a target db
   connection:
+    # Database connection settings. If `uri` is not
+    # set then the specific user, pass, host, port and
+    # sslMode properties are used.
+    uri: ""
     # the db name in which the metrics will be stored
     dbName: &metricDB postgres
     # user to connect to TimescaleDB with
     user: postgres
-    password:
-      # Name of a secret object (templated) containing the connection password
-      # Key must be value of promscale.connection.user
-      # Created by default if timescaledb-single.enabled=true
-      secretTemplate: &dbPassSecret "{{ .Release.Name }}-credentials"
-      timescaleDBSuperUserKey: PATRONI_SUPERUSER_PASSWORD
-    host:
-      # Host name (templated) of the database instance, default
-      # to service created in timescaledb-single
-      nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
+    password: ""
+    # Host name (templated) of the database instance, default
+    # to service created in timescaledb-single
+    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     port: 5432
+    sslMode: require
 
-  # configuration options for the service exposed by promscale
-  service:
-    # we disable the load balancer by default, only a ClusterIP service
-    # will get created
-    loadBalancer:
-      enabled: false
   # Promscale deployment resource requests
   resources:
     requests:
@@ -453,8 +449,3 @@ opentelemetryOperator:
     service:
       loadBalancer:
         enabled: false
-
-# Enable Promscale to connect to an existing database by providing the db-uri
-timescaledbExternal:
-  enabled: false
-  db_uri: ""

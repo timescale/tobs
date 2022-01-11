@@ -7,7 +7,7 @@
 {{- end }}
 {{- if index .Values "timescaledb-single" "enabled" }}
 🐯 TimescaleDB
-{{- else if index .Values "timescaledbExternal" "enabled" }}
+{{- else if index .Values "Promscale" "connection" "uri" }}
 🐯 Connecting to an External TimescaleDB
 {{- end }}
 {{- if index .Values "promscale" "enabled" }}
@@ -104,7 +104,7 @@ WARNING! Persistence is disabled on AlertManager.
 
 {{- end }}
 
-{{- if or (index .Values "timescaledb-single" "enabled") (index .Values "timescaledbExternal" "enabled") }}
+{{- if or (index .Values "timescaledb-single" "enabled") (index .Values "promscale" "connection" "uri") }}
 {{- $tsEnv := (set (set (deepCopy .) "Values" (index .Values "timescaledb-single")) "Chart" (dict "Name" "timescaledb")) }}
 
 ###############################################################################

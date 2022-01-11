@@ -1,4 +1,5 @@
 {{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
+{{- $isDBURI := ternary true false (ne .Values.promscale.connection.uri "")}}
 {{- if and $grafana.enabled $grafana.timescale.database.enabled -}}
 apiVersion: batch/v1
 kind: Job
@@ -22,17 +23,17 @@ spec:
           subPath: add-users.sql
         env:
         - name: PGPORT
-          value: {{ ternary (include "tobs.dburi.port" . ) ($grafana.timescale.database.port | quote ) (.Values.timescaledbExternal.enabled) }}
+          value: {{ ternary (include "tobs.dburi.port" . ) ($grafana.timescale.database.port | quote ) ($isDBURI) }}
         - name: PGUSER
-          value: {{ ternary (include "tobs.dburi.user" . ) ($grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
+          value: {{ ternary (include "tobs.dburi.user" . ) ($grafana.timescale.adminUser ) ($isDBURI) }}
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ tpl $grafana.timescale.adminPassSecret $ }}
               key: PATRONI_SUPERUSER_PASSWORD
         - name: PGHOST
-          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl $grafana.timescale.database.host $ ) (.Values.timescaledbExternal.enabled) }}
-        command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) ($grafana.timescale.database.dbName ) (.Values.timescaledbExternal.enabled) }}, '-f', '/add-users.sql' ]
+          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl $grafana.timescale.database.host $ ) ($isDBURI) }}
+        command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) ($grafana.timescale.database.dbName ) ($isDBURI) }}, '-f', '/add-users.sql' ]
         {{ if .Values.grafanaDBJob.resources }}
         resources:
           {{ toYaml .Values.grafanaDBJob.resources | nindent 14 }}
@@ -51,6 +52,6 @@ spec:
           subPath: wait-for-ts.sh
         env:
         - name: PGHOST
-          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl $grafana.timescale.database.host $ ) (.Values.timescaledbExternal.enabled) }}
+          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl $grafana.timescale.database.host $ ) ($isDBURI) }}
         command: [ 'sh', '/wait-for-ts.sh' ]
 {{- end -}}

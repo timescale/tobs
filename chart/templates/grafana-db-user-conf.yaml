@@ -1,4 +1,5 @@
 {{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
+{{- $isDBURI := ternary true false (ne .Values.promscale.connection.uri "")}}
 {{ if $grafana.enabled -}}
 {{- $timescaleAsDB := $grafana.timescale.database -}}
 {{- $timescaleAsDS := $grafana.timescale.datasource -}}
@@ -13,7 +14,7 @@ metadata:
    chart: {{ template "tobs.chart" . }}
    release: {{ .Release.Name }}
 data:
-  {{- $user := ternary (include "tobs.dburi.user" . ) ( index $grafana.timescale.adminUser ) (.Values.timescaledbExternal.enabled) }}
+  {{- $user := ternary (include "tobs.dburi.user" . ) ( index $grafana.timescale.adminUser ) ($isDBURI) }}
    add-users.sql: |-
     \set ON_ERROR_STOP on
     {{ if $timescaleAsDB.enabled -}}

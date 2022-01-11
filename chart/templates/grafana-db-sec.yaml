@@ -1,4 +1,5 @@
 {{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
+{{- $isDBURI := ternary true false (ne .Values.promscale.connection.uri "")}}
 {{ if and $grafana.enabled $grafana.timescale.database.enabled -}}
 apiVersion: v1
 kind: Secret
@@ -11,7 +12,7 @@ metadata:
     release: {{ .Release.Name }}
 type: Opaque
 data:
-{{ if .Values.timescaledbExternal.enabled }}
+{{ if $isDBURI}}
   GF_DATABASE_HOST: {{ include "tobs.dburi.host" . | b64enc }}
 {{ else }}
   {{- $host := tpl $grafana.timescale.database.host $ -}}
@@ -20,8 +21,8 @@ data:
   GF_DATABASE_HOST: {{ $fullhost | b64enc }}
 {{ end }}
   GF_DATABASE_TYPE: {{ "postgres" | b64enc }}
-  GF_DATABASE_NAME: {{ ternary (include "tobs.dburi.dbname" . | b64enc) ($grafana.timescale.database.dbName | b64enc) (.Values.timescaledbExternal.enabled) }}
-  GF_DATABASE_USER: {{ ternary (include "tobs.dburi.user" . | b64enc) ($grafana.timescale.database.user | b64enc) (.Values.timescaledbExternal.enabled) }}
-  GF_DATABASE_PASSWORD: {{ ternary (include "tobs.dburi.password" . | b64enc) ($grafana.timescale.database.pass | b64enc) (.Values.timescaledbExternal.enabled) }}
-  GF_DATABASE_SSL_MODE: {{ ternary (include "tobs.dburi.sslmode" . | b64enc) ($grafana.timescale.database.sslMode | b64enc) (.Values.timescaledbExternal.enabled) }}
+  GF_DATABASE_NAME: {{ ternary (include "tobs.dburi.dbname" . | b64enc) ($grafana.timescale.database.dbName | b64enc) ($isDBURI) }}
+  GF_DATABASE_USER: {{ ternary (include "tobs.dburi.user" . | b64enc) ($grafana.timescale.database.user | b64enc) ($isDBURI) }}
+  GF_DATABASE_PASSWORD: {{ ternary (include "tobs.dburi.password" . | b64enc) ($grafana.timescale.database.pass | b64enc) ($isDBURI) }}
+  GF_DATABASE_SSL_MODE: {{ ternary (include "tobs.dburi.sslmode" . | b64enc) ($grafana.timescale.database.sslMode | b64enc) ($isDBURI) }}
 {{- end -}}
