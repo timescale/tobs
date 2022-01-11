@@ -342,12 +342,12 @@ func appendPromscaleValues(enableOtel, promHA bool, dbURI string) string {
 promscale:`
 	if enableOtel {
 		config = config + `
-  image: timescale/promscale:0.7.0-beta.latest
   tracing:
     enabled: true`
 
 		args = `
-  - -otlp-grpc-server-listen-address=:9202`
+  - -otlp-grpc-server-listen-address=:9202
+  - -enable-feature=tracing`
 	}
 
 	if promHA {
