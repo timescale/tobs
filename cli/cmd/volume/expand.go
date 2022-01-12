@@ -98,11 +98,15 @@ func volumeExpand(cmd *cobra.Command, args []string) error {
 	}
 
 	if promStorage != "" {
-		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, promStorage, pvcPrometheus, common.PrometheusLabels)
+		pvcPrometheusName, err := pvcPrometheus(root.HelmReleaseName, root.Namespace)
+		if err != nil {
+			return fmt.Errorf("failed to prometheus pvc name %v", err)
+		}
+		results, err := k8sClient.ExpandPVCsForAllPods(root.Namespace, promStorage, pvcPrometheusName, common.PrometheusLabels)
 		if err != nil {
 			return fmt.Errorf("could not expand prometheus-storage: %w", err)
 		}
-		expandSuccessPrint(pvcPrometheus, results)
+		expandSuccessPrint(pvcPrometheusName, results)
 
 		if restartsPods {
 			err = restartPods(k8sClient, common.PrometheusLabels, forceKill)

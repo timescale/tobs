@@ -27,7 +27,7 @@ const (
 
 var (
 	TimescaleDBBackUpKeyForValuesYaml = []string{"timescaledb-single", "backup", "enabled"}
-	PrometheusLabels                  = map[string]string{"app.kubernetes.io/managed-by": "prometheus-operator", "prometheus": "tobs-kube-prometheus-prometheus"}
+	PrometheusLabels                  = map[string]string{"app.kubernetes.io/managed-by": "prometheus-operator", "app.kubernetes.io/name": "prometheus"}
 	DBSuperUserSecretKey              = "PATRONI_SUPERUSER_PASSWORD"
 	DBReplicationSecretKey            = "PATRONI_REPLICATION_PASSWORD"
 	DBAdminSecretKey                  = "PATRONI_admin_PASSWORD"
