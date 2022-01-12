@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
+	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
@@ -18,9 +19,8 @@ var volumeGetCmd = &cobra.Command{
 }
 
 var (
-	pvcStorage    = "storage-volume"
-	pvcWAL        = "wal-volume"
-	pvcPrometheus = "prometheus-tobs-kube-prometheus-prometheus-db"
+	pvcStorage = "storage-volume"
+	pvcWAL     = "wal-volume"
 )
 
 func init() {
@@ -68,11 +68,15 @@ func volumeGet(cmd *cobra.Command, args []string) error {
 	}
 
 	if promStorage {
-		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcPrometheus, common.PrometheusLabels)
+		pvcPrometheusName, err := pvcPrometheus(root.HelmReleaseName, root.Namespace)
+		if err != nil {
+			return fmt.Errorf("failed to prometheus pvc name %v", err)
+		}
+		results, err := k8sClient.GetPVCSizes(root.Namespace, pvcPrometheusName, common.PrometheusLabels)
 		if err != nil {
 			return fmt.Errorf("could not get prometheus-storage: %w", err)
 		}
-		volumeGetPrint(pvcPrometheus, results)
+		volumeGetPrint(pvcPrometheusName, results)
 	}
 
 	return nil
@@ -92,4 +96,17 @@ func volumeGetPrint(pvcPrefix string, results []*k8s.PVCData) {
 		}
 	}
 	fmt.Println()
+}
+
+func pvcPrometheus(release, namespace string) (string, error) {
+	helmClient := helm.NewClient(namespace)
+	defer helmClient.Close()
+
+	name, err := helmClient.ExportValuesFieldFromRelease(release, []string{"kube-prometheus-stack", "fullnameOverride"})
+	if err != nil {
+		return "", err
+	}
+
+	pvcName := "prometheus-" + fmt.Sprint(name) + "-prometheus-db"
+	return pvcName, nil
 }

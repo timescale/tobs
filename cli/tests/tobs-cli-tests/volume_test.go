@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 	v1 "k8s.io/api/core/v1"
@@ -203,12 +204,11 @@ func TestVolume(t *testing.T) {
 	}
 
 	timescaleDBLabels := map[string]string{"app": RELEASE_NAME + "-timescaledb", "release": RELEASE_NAME}
-	prometheusLabels := map[string]string{"app": "prometheus", "prometheus": "tobs-kube-prometheus-prometheus"}
 
 	// TESTCASE: Volume expand Prometheus storage and restart the pods
 
 	k8sClient := k8s.NewClient()
-	pods, err := k8sClient.KubeGetPods(NAMESPACE, prometheusLabels)
+	pods, err := k8sClient.KubeGetPods(NAMESPACE, common.PrometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +237,7 @@ func TestVolume(t *testing.T) {
 	}
 
 	var labels []map[string]string
-	labels = append(labels, prometheusLabels)
+	labels = append(labels, common.PrometheusLabels)
 	// pod restart takes sometime for Prometheus to start & to move to running state.
 	time.Sleep(1 * time.Minute)
 	verifyPodRestart(t, podsSet, labels, k8sClient)
@@ -246,7 +246,7 @@ func TestVolume(t *testing.T) {
 
 	// sleep between test executions
 	time.Sleep(30 * time.Second)
-	pods, err = k8sClient.KubeGetPods(NAMESPACE, prometheusLabels)
+	pods, err = k8sClient.KubeGetPods(NAMESPACE, common.PrometheusLabels)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -289,7 +289,7 @@ func TestVolume(t *testing.T) {
 		t.Fatal(errors.New("failed to verify volume expansion test-6"))
 	}
 
-	labels = append(labels, timescaleDBLabels, prometheusLabels)
+	labels = append(labels, timescaleDBLabels, common.PrometheusLabels)
 	// pod restart takes sometime for TimescaleDB to start & to move to running state.
 	time.Sleep(1 * time.Minute)
 	verifyPodRestart(t, podsSet, labels, k8sClient)
