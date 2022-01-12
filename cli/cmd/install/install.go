@@ -319,7 +319,7 @@ timescaledb-single:
 }
 
 func appendDBURIValues(helmValues string) string {
-	helmValues = helmValues + fmt.Sprintf(`
+	helmValues = helmValues + fmt.Sprint(`
 timescaledb-single:
   enabled: false`)
 	return helmValues
