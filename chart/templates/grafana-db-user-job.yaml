@@ -27,10 +27,7 @@ spec:
         - name: PGUSER
           value: {{ ternary (include "tobs.dburi.user" . ) ($grafana.timescale.adminUser ) ($isDBURI) }}
         - name: PGPASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ tpl $grafana.timescale.adminPassSecret $ }}
-              key: PATRONI_SUPERUSER_PASSWORD
+          value: {{ ternary (include "tobs.dburi.password" . ) ( .Values.promscale.connection.password )  ($isDBURI) }}
         - name: PGHOST
           value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl $grafana.timescale.database.host $ ) ($isDBURI) }}
         command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) ($grafana.timescale.database.dbName ) ($isDBURI) }}, '-f', '/add-users.sql' ]

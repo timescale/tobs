@@ -21,12 +21,14 @@ import (
 )
 
 type TSDBSecretsInfo struct {
-	ReleaseName    string
-	Namespace      string
-	EnableS3Backup bool
-	TlsCert        []byte
-	TlsKey         []byte
-	K8sClient      k8s.Client
+	ReleaseName               string
+	Namespace                 string
+	EnableS3Backup            bool
+	TlsCert                   []byte
+	TlsKey                    []byte
+	K8sClient                 k8s.Client
+	IsPromscaleSecretProvided bool
+	DBPassword                []byte
 }
 
 func (t *TSDBSecretsInfo) CreateTimescaleDBSecrets() error {
@@ -118,6 +120,7 @@ func (t *TSDBSecretsInfo) createTimescaleDBCredentials() error {
 		Type: "Opaque",
 	}
 
+	t.DBPassword = superUserPass
 	return t.K8sClient.CreateSecret(sec)
 }
 

@@ -3,6 +3,9 @@ package pgconn
 import (
 	"net/url"
 	"testing"
+	"time"
+
+	"github.com/jackc/pgconn"
 )
 
 func TestConstructURI(t *testing.T) {
@@ -78,7 +81,15 @@ func TestConstructURI(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		got := constructURI(tc.user, tc.password, tc.host, tc.port, tc.dbname, tc.sslmode, tc.connectTimeout)
+		connDetails := pgconn.Config{
+			Host:           tc.host,
+			Port:           uint16(tc.port),
+			Database:       tc.dbname,
+			User:           tc.user,
+			Password:       tc.password,
+			ConnectTimeout: time.Second * time.Duration(tc.connectTimeout),
+		}
+		got := ConstructURI(connDetails, tc.sslmode)
 		if tc.want != got {
 			t.Errorf("constructURI() got = %v, want %v", got, tc.want)
 			return

@@ -7,7 +7,7 @@
 {{- end }}
 {{- if index .Values "timescaledb-single" "enabled" }}
 🐯 TimescaleDB
-{{- else if index .Values "Promscale" "connection" "uri" }}
+{{- else if index .Values "promscale" "connection" "uri" }}
 🐯 Connecting to an External TimescaleDB
 {{- end }}
 {{- if index .Values "promscale" "enabled" }}

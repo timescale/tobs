@@ -14,7 +14,6 @@ import (
 	"github.com/timescale/tobs/cli/cmd/timescaledb"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
-	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
 // portForwardCmd represents the port-forward command
@@ -71,7 +70,7 @@ func portForward(cmd *cobra.Command, args []string) error {
 	// Port-forward TimescaleDB
 	// if db-uri exists skip the port-forwarding as it isn't the db within the cluster
 	k8sClient := k8s.NewClient()
-	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
+	uri, err := common.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
