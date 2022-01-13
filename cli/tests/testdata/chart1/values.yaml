@@ -48,24 +48,9 @@ promscale:
     dbName: &metricDB postgres
     # user to connect to TimescaleDB with
     user: postgres
-    password:
-      # Name of a secret object (templated) containing the connection password
-      # Key must be value of promscale.connection.user
-      # Created by default if timescaledb-single.enabled=true
-      secretTemplate: &dbPassSecret "{{ .Release.Name }}-credentials"
-      timescaleDBSuperUserKey: PATRONI_SUPERUSER_PASSWORD
-    host:
-      # Host name (templated) of the database instance, default
-      # to service created in timescaledb-single
-      nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
+    password: ""
+    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     port: 5432
-
-  # configuration options for the service exposed by promscale
-  service:
-    # we disable the load balancer by default, only a ClusterIP service
-    # will get created
-    loadBalancer:
-      enabled: false
 #  resources:
 #    requests:
 #      # By default this should be enough for a cluster
@@ -155,7 +140,7 @@ kube-prometheus-stack:
         host: *dbHost
         port: 5432
       adminUser: postgres
-      adminPassSecret: *dbPassSecret
+      adminPassSecret: "{{ .Release.Name }}-promscale"
 
 grafanaDBJob:
   resources: {}
@@ -171,8 +156,3 @@ promlens:
   defaultPrometheusUrl:  "http://localhost:9201"
   loadBalancer:
     enabled: false
-
-#Enable Promscale to connect to an existing database by providing the db-uri
-timescaledbExternal:
-  enabled: false
-  db_uri: ""
