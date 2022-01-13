@@ -57,6 +57,7 @@ type InstallSpec struct {
 	tsDBTlsCert        []byte
 	tsDBTlsKey         []byte
 	confirmActions     bool
+	dbPassword         string
 }
 
 func helmInstall(cmd *cobra.Command, args []string) error {
@@ -137,12 +138,15 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (c *InstallSpec) InstallStack() error {
-	var err error
-	helmValues := `
+var helmClient helm.Client
+var k8sClient k8s.Client
+var helmValues = `
 cli: true`
 
-	helmClient := helm.NewClient(cmd.Namespace)
+func (c *InstallSpec) InstallStack() error {
+	var err error
+
+	helmClient = helm.NewClient(cmd.Namespace)
 	defer helmClient.Close()
 
 	// if custom helm chart is provided there is no point
@@ -154,31 +158,15 @@ cli: true`
 		}
 	}
 
-	if c.dbURI != "" {
-		helmValues = appendDBURIValues(helmValues)
-	} else {
-		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
-		if err != nil {
-			return err
-		}
-		enableTimescaleDB, ok := e.(bool)
-		if !ok {
-			return fmt.Errorf("timescaledb-single.enabled was not a bool")
-		}
+	err = c.manageDBSecrets()
+	if err != nil {
+		return err
+	}
 
-		// if timescaledb is disabled we do not need
-		// to create DB level secrets
-		if enableTimescaleDB {
-			err = c.createSecrets()
-			if err != nil {
-				return fmt.Errorf("failed to create secrets %v", err)
-			}
-			if c.onlySecrets {
-				fmt.Println("Skipping tobs installation because of only-secrets flag.")
-				fmt.Println("Successfully created secrets for TimescaleDB.")
-				return nil
-			}
-		}
+	if c.onlySecrets {
+		fmt.Println("Skipping tobs installation because of only-secrets flag.")
+		fmt.Println("Successfully created secrets for TimescaleDB.")
+		return nil
 	}
 
 	helmValuesSpec := helm.ChartSpec{
@@ -199,6 +187,122 @@ cli: true`
 		helmValuesSpec.ValuesFiles = []string{c.ConfigFile}
 	}
 
+	err = c.enableTimescaleDBBackup()
+	if err != nil {
+		return err
+	}
+
+	if c.enablePrometheusHA {
+		helmValues = appendPrometheusHAValues(helmValues)
+	}
+
+	err = c.enableOtelOperator()
+	if err != nil {
+		return err
+	}
+
+	if c.enableOtel {
+		// opentelemetry operator needs cert-manager as a dependency as adding cert-manager isn't good practice and
+		// not recommended by the cert-manager maintainers. We are explicitly creating cert-manager with kubectl
+		// for more details on this refer: https://github.com/jetstack/cert-manager/issues/3616
+		err = otel.CreateCertManager(c.confirmActions)
+		if err != nil {
+			return fmt.Errorf("failed to create cert-manager %v", err)
+		}
+	}
+
+	if c.version != "" {
+		helmValuesSpec.Version = c.version
+	}
+
+	// As multiple times we are appending Promscale values the below func
+	// helps us to append by overriding the previous configs field by field
+	if c.enableOtel || c.enablePrometheusHA || c.dbURI != "" || c.dbPassword != "" {
+		promscaleConfig := appendPromscaleValues(c.enableOtel, c.enablePrometheusHA, c.dbURI, c.dbPassword)
+		helmValues = helmValues + promscaleConfig
+	}
+
+	helmValuesSpec.ValuesYaml = helmValues
+	fmt.Println("Installing The Observability Stack")
+	release, err := helmClient.InstallOrUpgradeChart(context.Background(), &helmValuesSpec)
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+
+	fmt.Println("Waiting for helm install to complete...")
+
+	time.Sleep(10 * time.Second)
+
+	k8sClient = k8s.NewClient()
+	err = c.waitForPods()
+	if err != nil {
+		return err
+	}
+
+	// create the default otelcol CR as operator should be is up & running by now....
+	err = c.deployOtelCollectorCR()
+	if err != nil {
+		return err
+	}
+
+	if release.Info == nil {
+		fmt.Println("failed to install tobs completely, release notes generation failed...")
+		return nil
+	}
+
+	fmt.Println(release.Info.Notes)
+	fmt.Println("The Observability Stack has been installed successfully")
+	return nil
+}
+
+func (c *InstallSpec) waitForPods() error {
+	if !c.skipWait {
+		fmt.Println("Waiting for pods to initialize...")
+		pods, err := k8sClient.KubeGetAllPods(cmd.Namespace, cmd.HelmReleaseName)
+		if err != nil {
+			return err
+		}
+
+		for _, pod := range pods {
+			err = k8sClient.KubeWaitOnPod(cmd.Namespace, pod.Name)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		fmt.Println("skipping the wait for pods to come to a running state because --skip-wait is enabled.")
+	}
+
+	return nil
+}
+
+func (c *InstallSpec) manageDBSecrets() error {
+	if c.dbURI != "" {
+		helmValues = appendDBURIValues(helmValues)
+	} else {
+		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
+		if err != nil {
+			return err
+		}
+		enableTimescaleDB, ok := e.(bool)
+		if !ok {
+			return fmt.Errorf("timescaledb-single.enabled was not a bool")
+		}
+
+		// if timescaledb is disabled we do not need
+		// to create DB level secrets
+		if enableTimescaleDB {
+			err = c.createSecrets()
+			if err != nil {
+				return fmt.Errorf("failed to create secrets %v", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c *InstallSpec) enableTimescaleDBBackup() error {
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
 	if !c.enableBackUp {
@@ -219,10 +323,10 @@ timescaledb-single:
     enabled: true`
 	}
 
-	if c.enablePrometheusHA {
-		helmValues = appendPrometheusHAValues(helmValues)
-	}
+	return nil
+}
 
+func (c *InstallSpec) enableOtelOperator() error {
 	if c.enableOtel {
 		helmValues = enableOtelInValues(helmValues)
 	} else {
@@ -236,58 +340,10 @@ timescaledb-single:
 			return fmt.Errorf("opentelemetryOperator.enabled is not a bool")
 		}
 	}
+	return nil
+}
 
-	if c.enableOtel {
-		// opentelemetry operator needs cert-manager as a dependency as adding cert-manager isn't good practice and
-		// not recommended by the cert-manager maintainers. We are explicitly creating cert-manager with kubectl
-		// for more details on this refer: https://github.com/jetstack/cert-manager/issues/3616
-		err = otel.CreateCertManager(c.confirmActions)
-		if err != nil {
-			return fmt.Errorf("failed to create cert-manager %v", err)
-		}
-	}
-
-	if c.version != "" {
-		helmValuesSpec.Version = c.version
-	}
-
-	// As multiple times we are appending Promscale values the below func
-	// helps us to append by overriding the previous configs field by field
-	if c.enableOtel || c.enablePrometheusHA || c.dbURI != "" {
-		promscaleConfig := appendPromscaleValues(c.enableOtel, c.enablePrometheusHA, c.dbURI)
-		helmValues = helmValues + promscaleConfig
-	}
-
-	helmValuesSpec.ValuesYaml = helmValues
-	fmt.Println("Installing The Observability Stack")
-	release, err := helmClient.InstallOrUpgradeChart(context.Background(), &helmValuesSpec)
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-
-	fmt.Println("Waiting for helm install to complete...")
-
-	time.Sleep(10 * time.Second)
-
-	k8sClient := k8s.NewClient()
-	if !c.skipWait {
-		fmt.Println("Waiting for pods to initialize...")
-		pods, err := k8sClient.KubeGetAllPods(cmd.Namespace, cmd.HelmReleaseName)
-		if err != nil {
-			return err
-		}
-
-		for _, pod := range pods {
-			err = k8sClient.KubeWaitOnPod(cmd.Namespace, pod.Name)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		fmt.Println("skipping the wait for pods to come to a running state because --skip-wait is enabled.")
-	}
-
-	// create the default otelcol CR as operator should be is up & running by now....
+func (c *InstallSpec) deployOtelCollectorCR() error {
 	if c.enableOtel {
 		otelCol := otel.OtelCol{
 			ReleaseName: cmd.HelmReleaseName,
@@ -308,20 +364,13 @@ timescaledb-single:
 		}
 	}
 
-	if release.Info == nil {
-		fmt.Println("failed to install tobs completely, release notes generation failed...")
-		return nil
-	}
-
-	fmt.Println(release.Info.Notes)
-	fmt.Println("The Observability Stack has been installed successfully")
 	return nil
 }
 
 func appendDBURIValues(helmValues string) string {
-	helmValues = helmValues + fmt.Sprint(`
+	helmValues = helmValues + `
 timescaledb-single:
-  enabled: false`)
+  enabled: false`
 	return helmValues
 }
 
@@ -333,7 +382,7 @@ opentelemetryOperator:
 	return helmValues
 }
 
-func appendPromscaleValues(enableOtel, promHA bool, dbURI string) string {
+func appendPromscaleValues(enableOtel, promHA bool, dbURI, dbPassword string) string {
 	var args string
 	config := `
 promscale:`
@@ -354,6 +403,11 @@ promscale:`
 		config = config + fmt.Sprintf(`
   connection:
     uri: %s`, dbURI)
+	} else {
+		config = config + fmt.Sprintf(`
+  connection:
+    password: %s
+    host: %s.%s.svc.cluster.local`, dbPassword, cmd.HelmReleaseName, cmd.Namespace)
 	}
 
 	if args != "" {
@@ -410,6 +464,7 @@ func (c *InstallSpec) createSecrets() error {
 		if err != nil {
 			return err
 		}
+		c.dbPassword = string(t.DBPassword)
 	}
 
 	return nil

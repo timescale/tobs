@@ -7,21 +7,21 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/timescale/tobs/cli/pkg/utils"
-
-	"github.com/timescale/tobs/cli/pkg/k8s"
-
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/timescale/tobs/cli/pkg/helm"
+	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 type DBDetails struct {
-	Namespace   string
-	ReleaseName string
-	DBName      string
-	User        string
-	SecretKey   string
-	Password    string
-	Remote      int
+	Namespace           string
+	ReleaseName         string
+	DBName              string
+	User                string
+	SecretKey           string
+	PromscaleSecretName string
+	Password            string
+	Remote              int
 }
 
 func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
@@ -34,34 +34,24 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 	defer func() { os.Stdout = stdout }()
 
 	k8sClient := k8s.NewClient()
-	tspromPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"app": d.ReleaseName + "-promscale"})
+
+	secName, err := getPromscaleSecretName(d.ReleaseName, d.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	promscaleSecret, err := k8sClient.KubeGetSecret(d.Namespace, secName)
 	if err != nil {
 		return nil, err
 	}
 
-	passBytes, err := utils.GetDBPassword(k8sClient, d.SecretKey, d.ReleaseName, d.Namespace)
-	if err != nil {
-		return nil, err
-	}
-	pass := string(passBytes)
+	secs := promscaleSecret.Data
 
-	envs := tspromPods[0].Spec.Containers[0].Env
-
-	var port, host, sslmode string
-	for _, env := range envs {
-		if env.Name == "TS_PROM_DB_PORT" {
-			port = env.Value
-		} else if env.Name == "TS_PROM_DB_HOST" {
-			host = env.Value
-		} else if env.Name == "TS_PROM_DB_SSL_MODE" {
-			sslmode = env.Value
-		}
-	}
-
-	dbURI, err := utils.GetTimescaleDBURI(k8sClient, d.Namespace, d.ReleaseName)
-	if err != nil {
-		return nil, err
-	}
+	var port, host, sslmode, dbURI, pass string
+	port = string(secs["PROM_DB_PORT"])
+	host = string(secs["PROMSCALE_DB_HOST"])
+	sslmode = string(secs["PROMSCALE_DB_SSL_MODE"])
+	dbURI = string(secs["PROMSCALE_DB_URI"])
+	pass = string(secs["PROMSCALE_DB_PASSWORD"])
 
 	tsdbPods, err := k8sClient.KubeGetPods(d.Namespace, map[string]string{"release": d.ReleaseName, "role": "master"})
 	if err != nil {
@@ -78,9 +68,15 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 		if err != nil {
 			return nil, err
 		}
-		local := int(ports[0].Local)
 
-		pool, err = pgxpool.Connect(context.Background(), constructURI(d.User, pass, "localhost", local, d.DBName, "", 0))
+		connDetails := pgconn.Config{
+			Host:     "localhost",
+			Port:     ports[0].Local,
+			Database: d.DBName,
+			User:     d.User,
+			Password: pass,
+		}
+		pool, err = pgxpool.Connect(context.Background(), ConstructURI(connDetails, sslmode))
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +91,15 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 			if err != nil {
 				return nil, err
 			}
-			pool, err = pgxpool.Connect(context.Background(), constructURI(d.User, pass, host, iport, d.DBName, sslmode, 0))
+
+			connDetails := pgconn.Config{
+				Host:     host,
+				Port:     uint16(iport),
+				Database: d.DBName,
+				User:     d.User,
+				Password: pass,
+			}
+			pool, err = pgxpool.Connect(context.Background(), ConstructURI(connDetails, sslmode))
 			if err != nil {
 				return nil, err
 			}
@@ -117,12 +121,8 @@ func UpdatePasswordInDBURI(dburi, newpass string) (string, error) {
 	} else {
 		sslmode = "require"
 	}
-	port := int(db.ConnConfig.Port)
-	connectTimeOut := 0
-	if db.ConnConfig.ConnectTimeout.String() != "0s" {
-		connectTimeOut = int(db.ConnConfig.ConnectTimeout.Seconds())
-	}
-	res := fmt.Sprint(constructURI(db.ConnConfig.User, newpass, db.ConnConfig.Host, port, db.ConnConfig.Database, sslmode, connectTimeOut))
+	db.ConnConfig.Config.Password = newpass
+	res := fmt.Sprint(ConstructURI(db.ConnConfig.Config, sslmode))
 	return res, nil
 }
 
@@ -135,23 +135,46 @@ func ParseDBURI(dbURI string) (*pgxpool.Config, error) {
 	return db, nil
 }
 
-func constructURI(user, password, host string, port int, dbname, sslmode string, connectTimeout int) string {
+func ConstructURI(connDetails pgconn.Config, sslmode string) string {
 	c := new(url.URL)
 	c.Scheme = "postgres"
-	c.Host = fmt.Sprintf("%s:%d", host, port)
-	if password != "" {
-		c.User = url.UserPassword(user, password)
+	c.Host = fmt.Sprintf("%s:%d", connDetails.Host, connDetails.Port)
+	if connDetails.Password != "" {
+		c.User = url.UserPassword(connDetails.User, connDetails.Password)
 	} else {
-		c.User = url.User(user)
+		c.User = url.User(connDetails.User)
 	}
-	c.Path = dbname
+	c.Path = connDetails.Database
 	q := c.Query()
 	if sslmode != "" {
 		q.Set("sslmode", sslmode)
 	}
-	if connectTimeout != 0 {
-		q.Set("connect_timeout", strconv.Itoa(connectTimeout))
+
+	if connDetails.ConnectTimeout != 0 {
+		q.Set("connect_timeout", strconv.Itoa(int(connDetails.ConnectTimeout.Seconds())))
 	}
 	c.RawQuery = q.Encode()
 	return c.String()
+}
+
+func getPromscaleSecretName(releaseName, namespace string) (string, error) {
+	helmClient := helm.NewClient(namespace)
+	defer helmClient.Close()
+	eS, err := helmClient.ExportValuesFieldFromRelease(releaseName, []string{"promscale", "connectionSecretName"})
+	if err != nil {
+		return "", err
+	}
+	secretProvided, ok := eS.(string)
+	if !ok {
+		return "", fmt.Errorf("promscale.connectionSecretName is not a string")
+	}
+
+	var secretName string
+	if secretProvided == "" {
+		secretName = releaseName + "-promscale"
+	} else {
+		secretName = secretProvided
+	}
+
+	return secretName, nil
 }

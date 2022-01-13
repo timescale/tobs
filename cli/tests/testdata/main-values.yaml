@@ -49,16 +49,8 @@ promscale:
     dbName: &metricDB postgres
     # user to connect to TimescaleDB with
     user: postgres
-    password:
-      # Name of a secret object (templated) containing the connection password
-      # Key must be value of promscale.connection.user
-      # Created by default if timescaledb-single.enabled=true
-      secretTemplate: &dbPassSecret "{{ .Release.Name }}-credentials"
-      timescaleDBSuperUserKey: PATRONI_SUPERUSER_PASSWORD
-    host:
-      # Host name (templated) of the database instance, default
-      # to service created in timescaledb-single
-      nameTemplate: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
+    password: ""
+    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     port: 5432
 
   # configuration options for the service exposed by promscale
@@ -349,7 +341,7 @@ kube-prometheus-stack:
         host: *dbHost
         port: 5432
       adminUser: postgres
-      adminPassSecret: *dbPassSecret
+      adminPassSecret: "{{ .Release.Name }}-promscale"
 
   # By default kube-state-metrics are scraped using
   # serviceMonitor disable annotation based scraping
@@ -389,8 +381,3 @@ opentelemetryOperator:
       promscale-tls: false
       promscale-grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
       connection-timeout: 1h
-
-#Enable Promscale to connect to an existing database by providing the db-uri
-timescaledbExternal:
-  enabled: false
-  db_uri: ""

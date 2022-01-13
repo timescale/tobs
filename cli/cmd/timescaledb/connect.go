@@ -8,10 +8,10 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
+	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/pgconn"
-	"github.com/timescale/tobs/cli/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -84,7 +84,7 @@ func PsqlConnect(k8sClient k8s.Client, dbDetails *pgconn.DBDetails, master bool)
 		return nil
 	}
 
-	uri, err := utils.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
+	uri, err := common.GetTimescaleDBURI(k8sClient, root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}

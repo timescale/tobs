@@ -54,28 +54,6 @@ func ConfirmAction() {
 	}
 }
 
-func GetTimescaleDBURI(k8sClient k8s.Client, namespace, name string) (string, error) {
-	secretName := name + "-timescaledb-uri"
-	secrets, err := k8sClient.KubeGetAllSecrets(namespace)
-	if err != nil {
-		return "", err
-	}
-
-	for _, s := range secrets.Items {
-		if s.Name == secretName {
-			if bytepass, exists := s.Data["db-uri"]; exists {
-				uriData := string(bytepass)
-				return uriData, nil
-			} else {
-				// found the secret but failed to find the value with indexed key.
-				return "", fmt.Errorf("could not get TimescaleDB URI with secret key index as db-uri from %s", secretName)
-			}
-		}
-	}
-
-	return "", nil
-}
-
 func GetDBPassword(k8sClient k8s.Client, secretKey, name, namespace string) ([]byte, error) {
 	secret, err := k8sClient.KubeGetSecret(namespace, name+"-credentials")
 	if err != nil {

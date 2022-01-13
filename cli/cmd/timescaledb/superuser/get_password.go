@@ -1,12 +1,10 @@
 package superuser
 
 import (
-	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 // timescaledbGetPasswordCmd represents the timescaledb get-password command
@@ -22,25 +20,11 @@ func init() {
 }
 
 func timescaledbGetPassword(cmd *cobra.Command, args []string) error {
-	k8sClient := k8s.NewClient()
-	secret, err := k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
-	if err != nil {
-		return fmt.Errorf("could not get TimescaleDB password: %w", err)
-	}
-
-	var pass string
-
 	d, err := common.GetSuperuserDBDetails(root.Namespace, root.HelmReleaseName)
 	if err != nil {
 		return err
 	}
 
-	if bytepass, exists := secret.Data[d.SecretKey]; exists {
-		pass = string(bytepass)
-	} else {
-		return fmt.Errorf("could not get TimescaleDB password: %w", errors.New("user not found"))
-	}
-	fmt.Println(pass)
-
+	fmt.Println(d.Password)
 	return nil
 }

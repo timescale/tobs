@@ -54,9 +54,19 @@ promscale:
   # to pass extra args
   # extraArgs: []
 
+  ## Note:
+
+  # If you are providing your own secret name, do
+  # not forget to configure at below connectionSecretName
+
   # selector used to provision your own Secret containing connection details
   # Use this option with caution
-  connectionSecretName: &dbPassSecret "{{ .Release.Name }}-credentials"
+  connectionSecretName: ""
+
+  ## Note:
+
+  # If you using tobs deploy TimescaleDB do not configure below
+  # any connection details below as tobs will take care of it.
 
   # connection details to connect to a target db
   connection:
@@ -370,7 +380,7 @@ kube-prometheus-stack:
         host: *dbHost
         port: 5432
       adminUser: postgres
-      adminPassSecret: *dbPassSecret
+      adminPassSecret: "{{ .Release.Name }}-promscale"
 
   # By default kube-state-metrics are scraped using
   # serviceMonitor disable annotation based scraping
