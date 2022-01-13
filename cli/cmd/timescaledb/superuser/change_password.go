@@ -95,7 +95,7 @@ func updateDBPwdSecrets(k8sClient k8s.Client, secretKey, user, password string) 
 	}
 
 	// Update Promscale connection details
-	promscaleSecretName, err :=  common.GetPromscaleSecretName(root.HelmReleaseName, root.Namespace)
+	promscaleSecretName, err :=  pgconn.GetPromscaleSecretName(root.HelmReleaseName, root.Namespace)
 	if err != nil {
 		return err
 	}

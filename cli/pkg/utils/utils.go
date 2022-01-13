@@ -5,8 +5,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-
-	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
 const (
@@ -52,19 +50,6 @@ func ConfirmAction() {
 			fmt.Println("confirmation doesn't match with expected key. please type \"y\" or \"yes\" and press enter\nHint: Press (ctrl+c) to exit")
 		}
 	}
-}
-
-func GetDBPassword(k8sClient k8s.Client, secretKey, name, namespace string) ([]byte, error) {
-	secret, err := k8sClient.KubeGetSecret(namespace, name+"-credentials")
-	if err != nil {
-		return nil, fmt.Errorf("could not get TimescaleDB password: %w", err)
-	}
-
-	if bytepass, exists := secret.Data[secretKey]; exists {
-		return bytepass, nil
-	}
-
-	return nil, fmt.Errorf("user not found")
 }
 
 func GetTimescaleDBsecretLabels(releaseName string) map[string]string {

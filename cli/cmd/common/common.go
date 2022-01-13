@@ -47,30 +47,8 @@ func GetSuperuserDBDetails(namespace, releaseName string) (*pgconn.DBDetails, er
 	return dbDetails, nil
 }
 
-func GetPromscaleSecretName(releaseName, namespace string) (string, error) {
-	helmClient := helm.NewClient(namespace)
-	defer helmClient.Close()
-	eS, err := helmClient.ExportValuesFieldFromRelease(releaseName, []string{"promscale", "connectionSecretName"})
-	if err != nil {
-		return "", err
-	}
-	secretProvided, ok := eS.(string)
-	if !ok {
-		return "", fmt.Errorf("promscale.connectionSecretName is not a string")
-	}
-
-	var secretName string
-	if secretProvided == "" {
-		secretName = releaseName + "-promscale"
-	} else {
-		secretName = secretProvided
-	}
-
-	return secretName, nil
-}
-
 func GetTimescaleDBURI(k8sClient k8s.Client, namespace, name string) (string, error) {
-	promscaleSecretName, err := GetPromscaleSecretName(name, namespace)
+	promscaleSecretName, err := pgconn.GetPromscaleSecretName(name, namespace)
 	if err != nil {
 		return "", err
 	}
@@ -115,7 +93,7 @@ func getDBDetails(helmClient helm.Client, dbDetails *pgconn.DBDetails) error {
 	}
 
 	if !enableTimescaleDB {
-		secretName, err := GetPromscaleSecretName(dbDetails.ReleaseName, dbDetails.Namespace)
+		secretName, err := pgconn.GetPromscaleSecretName(dbDetails.ReleaseName, dbDetails.Namespace)
 		if err != nil {
 			return err
 		}
