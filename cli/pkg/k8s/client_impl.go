@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	cmclient "github.com/jetstack/cert-manager/pkg/client/clientset/versioned"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -89,6 +91,25 @@ func NewAPIClient() apiClient {
 	}
 
 	return apiClient{client}
+}
+
+func newCMClient() *cmclient.Clientset {
+	var err error
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		loadingRules,
+		&clientcmd.ConfigOverrides{},
+	).ClientConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmClient, err := cmclient.NewForConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return cmClient
 }
 
 func (c *clientImpl) KubeGetPodName(namespace string, labelmap map[string]string) (string, error) {
@@ -674,6 +695,27 @@ func (c *clientImpl) UpdateDeployment(deployment *appsv1.Deployment) error {
 	return err
 }
 
+func (c *clientImpl) DeleteDeployment(labelmap map[string]string, namespace string) error {
+	labelSelector := metav1.LabelSelector{MatchLabels: labelmap}
+	listOptions := metav1.ListOptions{
+		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
+	}
+
+	dList, err := c.AppsV1().Deployments(namespace).List(context.Background(), listOptions)
+	if err != nil {
+		return err
+	}
+
+	for _, ind := range dList.Items {
+		dPolicy := metav1.DeletionPropagation("Foreground")
+		err = c.AppsV1().Deployments(namespace).Delete(context.Background(), ind.Name, metav1.DeleteOptions{PropagationPolicy: &dPolicy})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // This func helps to map the existing PV from a older PVC to new PVC
 func (c *clientImpl) UpdatePVToNewPVC(pvcName, newPVCName, namespace string, pvcLabels map[string]string) error {
 	pvc, err := c.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), pvcName, metav1.GetOptions{})
@@ -740,10 +782,223 @@ func (c *clientImpl) DeleteCustomResource(namespace, apiVersion, resourceName, c
 	return err
 }
 
+type ResourceDetails struct {
+	Name         string
+	Namespace    string
+	APIVersion   string
+	ResourceType string
+}
+
+func (c *clientImpl) ListCertManagerDeprecatedCRs() ([]ResourceDetails, error) {
+	var resources []ResourceDetails
+	client := newCMClient()
+
+	namespaces, err := c.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return resources, err
+	}
+
+	for _, namespace := range namespaces.Items {
+		// v1beta1 Certificates
+		certs1, err := client.CertmanagerV1beta1().Certificates(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce Certificates wih apiVersion: v1beta1 %v", err)
+		}
+		for _, c := range certs1.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1beta1 CertificateRequests
+		certsReq1, err := client.CertmanagerV1beta1().CertificateRequests(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce CertificateRequests wih apiVersion: v1beta1 %v", err)
+		}
+		for _, c := range certsReq1.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1beta1 ClusterIssuers
+		clusterIssuers1, err := client.CertmanagerV1beta1().ClusterIssuers().List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce ClusterIssuers wih apiVersion: v1beta1 %v", err)
+		}
+		for _, c := range clusterIssuers1.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1beta1 Issuers
+		issuers1, err := client.CertmanagerV1beta1().Issuers(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce Issuers wih apiVersion: v1beta1 %v", err)
+		}
+		for _, c := range issuers1.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha2 Certificates
+		certs2, err := client.CertmanagerV1alpha2().Certificates(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce Certificates with apiVersion: v1alpha2 %v", err)
+		}
+		for _, c := range certs2.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha2 CertificateRequests
+		certsReq2, err := client.CertmanagerV1alpha2().CertificateRequests(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce CertificateRequests with apiVersion: v1alpha2 %v", err)
+		}
+		for _, c := range certsReq2.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha2 ClusterIssuers
+		clusterIssuer2, err := client.CertmanagerV1alpha2().ClusterIssuers().List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce ClusterIssuers with apiVersion: v1alpha2 %v", err)
+		}
+		for _, c := range clusterIssuer2.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha2 Issuers
+		issuers2, err := client.CertmanagerV1alpha2().Issuers(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce Issuers with apiVersion: v1alpha2 %v", err)
+		}
+		for _, c := range issuers2.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha3 Certificates
+		certs3, err := client.CertmanagerV1alpha3().Certificates(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce Certificates with apiVersion: v1alpha3 %v", err)
+		}
+		for _, c := range certs3.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha3 CertificateRequests
+		certReq3, err := client.CertmanagerV1alpha3().CertificateRequests(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce CertificateRequests with apiVersion: v1alpha3 %v", err)
+		}
+		for _, c := range certReq3.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha3 ClusterIssuers
+		clusterIssuers3, err := client.CertmanagerV1alpha3().ClusterIssuers().List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce ClusterIssuers with apiVersion: v1alpha3 %v", err)
+		}
+		for _, c := range clusterIssuers3.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+
+		// v1alpha3 Issuers
+		issuers3, err := client.CertmanagerV1alpha3().Issuers(namespace.Name).List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			return resources, fmt.Errorf("failed to list custom reosurce Issuers with apiVersion: v1alpha3 %v", err)
+		}
+		for _, c := range issuers3.Items {
+			resources = append(resources, ResourceDetails{
+				Name:         c.Name,
+				Namespace:    c.Namespace,
+				APIVersion:   c.APIVersion,
+				ResourceType: c.Kind,
+			})
+		}
+	}
+
+	return resources, nil
+}
+
 // Apply manifests helps to apply the k8s resources
 // to the cluster this is equivalent to
 // kubectl apply -f
-func (c *clientImpl) ApplyManifests(data []byte) error {
+func (c *clientImpl) ApplyManifests(manifests map[string]string) error {
+	for name, manifestURL := range manifests {
+		res, err := http.Get(manifestURL)
+		if err != nil {
+			return fmt.Errorf("failed to download %s: %v", name, err)
+		}
+		// Check server response
+		if res.StatusCode != http.StatusOK {
+			return fmt.Errorf("bad status: %s", res.Status)
+		}
+
+		// scan the response
+		out, err := ioutil.ReadAll(res.Body)
+		_ = res.Body.Close()
+		if err != nil {
+			return err
+		}
+
+		if err = c.applyYaml(out); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *clientImpl) applyYaml(data []byte) error {
 	chanMes, chanErr := readYaml(data)
 	for {
 		select {
@@ -760,8 +1015,9 @@ func (c *clientImpl) ApplyManifests(data []byte) error {
 				}
 
 				// Create or Update
+				forceApply := true
 				_, err = dr.Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, dataBytes, metav1.PatchOptions{
-					FieldManager: "tobs",
+					FieldManager: "tobs", Force: &forceApply,
 				})
 				if err != nil {
 					return fmt.Errorf("failed to apply manifest with error %v", err)

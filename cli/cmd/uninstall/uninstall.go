@@ -96,13 +96,17 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 			fmt.Printf("ERROR: couldn't find the cert-manager status %v", err)
 		}
 		if certManagerInstalled {
+			cmVersion, err := otelCol.GetCertManagerVersion()
+			if err != nil {
+				return err
+			}
 			fmt.Printf(`
 WARNING: Cert-manager, version: %s  is installed by tobs, 
 As cert-manager can be used by other components running in the cluster.
 We are leaving the task of uninstalling cert-manager to the user.
 Steps to uninstall cert-manager is documented here: https://cert-manager.io/docs/installation/kubectl/#uninstalling
 
-`, otel.CertManagerVersion)
+`, cmVersion)
 		}
 	}
 
