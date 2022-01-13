@@ -22,6 +22,7 @@ type Client interface {
 	// deployment specific actions
 	GetDeployment(name, namespace string) (*appsv1.Deployment, error)
 	UpdateDeployment(deployment *appsv1.Deployment) error
+	DeleteDeployment(labels map[string]string, namespace string) error
 
 	// service specific actions
 	KubeGetServiceName(namespace string, labelmap map[string]string) (string, error)
@@ -67,6 +68,9 @@ type Client interface {
 	CreateCustomResource(namespace, apiVersion, resourceName string, body []byte) error
 	DeleteCustomResource(namespace, apiVersion, resourceName, crName string) error
 
+	// List cert-manager Certificate resources
+	ListCertManagerDeprecatedCRs() ([]ResourceDetails, error)
+
 	// Apply manifests
-	ApplyManifests(data []byte) error
+	ApplyManifests(map[string]string) error
 }

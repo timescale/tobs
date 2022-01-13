@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -17,7 +15,9 @@ import (
 	"github.com/timescale/tobs/cli/cmd/install"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
+	"github.com/timescale/tobs/cli/pkg/otel"
 	"github.com/timescale/tobs/cli/pkg/utils"
+	"gopkg.in/yaml.v2"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
@@ -51,6 +51,10 @@ type upgradeSpec struct {
 	newChartVersion      string
 	skipCrds             bool
 	k8sClient            k8s.Client
+	upgradeValues        string
+	chartRef             string
+	valuesFile           string
+	upgradeCertManager   bool
 }
 
 func upgradeTobs(cmd *cobra.Command, args []string) error {
@@ -197,17 +201,38 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 		newChartVersion:      latestChart.Version,
 		skipCrds:             skipCrds,
 		k8sClient:            k8s.NewClient(),
+		chartRef:             ref,
+		valuesFile:           file,
 	}
 
 	err = upgradeDetails.UpgradePathBasedOnVersion()
 	if err != nil {
 		return err
 	}
+	upgradeHelmSpec.ValuesYaml = upgradeDetails.upgradeValues
 
 	helmClient = helm.NewClient(root.Namespace)
 	_, err = helmClient.InstallOrUpgradeChart(context.Background(), upgradeHelmSpec)
 	if err != nil {
 		return fmt.Errorf("failed to upgrade %w", err)
+	}
+
+	// upgrade cert-manager post upgrade process as
+	// helm diff tries to evaluate resources with required APIVersions
+	// upgrading cert-manager prior to helm upgrade prompts the below error
+	//
+	// Error: failed to upgrade current release manifest contains removed kubernetes api(s)
+	// for this kubernetes version and it is therefore unable to build the kubernetes objects for performing the diff.
+	// error from kubernetes: [unable to recognize "": no matches for kind "Certificate" in version "cert-manager.io/v1alpha2",
+	// unable to recognize "": no matches for kind "Issuer" in version "cert-manager.io/v1alpha2"]
+	//
+	// This is expected as upgrade CM before helm upgrade doesn't support
+	// he deprecated API's tha helm expects to have.
+	if upgradeDetails.upgradeCertManager {
+		err = otel.UpgradeCertManager()
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Printf("Successfully upgraded %s to version: %s\n", root.HelmReleaseName, latestChart.Version)
@@ -232,15 +257,21 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 
 	version0_4_0, err := utils.ParseVersion(utils.Version_040, 3)
 	if err != nil {
-		return fmt.Errorf("failed to parse 0.2.2 version %w", err)
+		return fmt.Errorf("failed to parse 0.4.0 version %w", err)
+	}
+
+	version0_8_0, err := utils.ParseVersion("0.8.0", 3)
+	if err != nil {
+		return fmt.Errorf("failed to parse 0.8.0 version %w", err)
 	}
 
 	// kube-prometheus is introduced on tobs >= 0.4.0 release
 	// so create CRDs if version >= 0.4.0 and only create CRDs
 	// if version change is noticed in upgrades...
-	if nVersion >= version0_4_0 && nVersion != dVersion {
+	if nVersion >= version0_4_0 && dVersion <= version0_4_0 && nVersion != dVersion {
 		if !c.skipCrds {
-			err = c.createCRDS()
+			// Kube-Prometheus CRDs
+			err = c.applyCRDS(kubePrometheusCRDs)
 			if err != nil {
 				return err
 			}
@@ -288,6 +319,13 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 				return fmt.Errorf("failed to delete %s job %v", grafanaJob, err)
 			}
 		}
+
+	case dVersion < version0_8_0:
+		err = c.upgradeTo08X()
+		if err != nil {
+			return fmt.Errorf("failed to perform upgrade path to 0.8.0 %v", err)
+		}
+
 	default:
 		// if the upgrade doesn't match the above condition
 		// that means we do not have an upgrade path for the base version to new version
@@ -295,6 +333,242 @@ func (c *upgradeSpec) UpgradePathBasedOnVersion() error {
 		return nil
 	}
 
+	return nil
+}
+
+func (c *upgradeSpec) upgradeTo08X() error {
+	helmClient := helm.NewClient(root.Namespace)
+	defer helmClient.Close()
+	releaseValues, err := helmClient.GetReleaseValues(root.HelmReleaseName)
+	if err != nil {
+		return err
+	}
+
+	// capture existing TimescaleDB secret
+	isTSDBEnabled, err := common.IsTimescaleDBEnabled(root.HelmReleaseName, root.Namespace)
+	if err != nil {
+		return fmt.Errorf("failed to get is timescaledb enabled value %v", err)
+	}
+
+	var tsdbSecretValue string
+	if isTSDBEnabled {
+		tsdbSecret, err := c.k8sClient.KubeGetSecret(root.Namespace, root.HelmReleaseName+"-credentials")
+		if err != nil {
+			return fmt.Errorf("failed to get secret %v", err)
+		}
+		tsdbSecretValue = string(tsdbSecret.Data[common.DBSuperUserSecretKey])
+	}
+
+	// Delete kube-state-metrics as per kube-prometheus upgrade guide
+	err = c.k8sClient.DeleteDeployment(map[string]string{"app.kubernetes.io/instance": root.HelmReleaseName,
+		"app.kubernetes.io/name": "kube-state-metrics"}, root.Namespace)
+	if err != nil {
+		return fmt.Errorf("failed to delete kube-state-metrics deployment %v", err)
+	}
+
+	// Delete the grafana-db job to re-run the job on upgrade
+	// and the db job includes changes to spec in 0.8.0 version
+	grafanaJob := root.HelmReleaseName + "-grafana-db"
+	err = c.k8sClient.DeleteJob(grafanaJob, root.Namespace)
+	if err != nil && !errors2.IsNotFound(err) {
+		return fmt.Errorf("failed to delete %s job %v", grafanaJob, err)
+	}
+
+	// update Kube-Prometheus CRDs
+	err = c.applyCRDS(kubePrometheusCRDs)
+	if err != nil {
+		return err
+	}
+
+	// delete timescaledbExternal section in values.yaml
+	var externalDBURI string
+	_, tsdbExternalExists := releaseValues["timescaledbExternal"]
+	if tsdbExternalExists {
+		timescaleDBExternal, ok := releaseValues["timescaledbExternal"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("timescaledbExternal is not the expected type: %T", releaseValues["timescaledbExternal"])
+		}
+		if timescaleDBExternal != nil {
+			isExternalTsdbenabled, ok := timescaleDBExternal["enabled"].(bool)
+			if !ok {
+				return fmt.Errorf("timescaledbExternal.enabled is not the expected type: %T", timescaleDBExternal["enabled"])
+			}
+			if isExternalTsdbenabled {
+				externalDBURI, ok = timescaleDBExternal["db_uri"].(string)
+				if !ok {
+					return fmt.Errorf("timescaledbExternal.db_uri is not the expected type: %T", timescaleDBExternal["db_uri"])
+				}
+			}
+			delete(releaseValues, "timescaledbExternal")
+		}
+	}
+
+	// refactor promscale section in values.yaml
+	var isTracingEnabled, ok bool
+	var promscaleValues map[string]interface{}
+	_, promscaleExists := releaseValues["promscale"]
+	if promscaleExists {
+		promscaleValues, ok = releaseValues["promscale"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("promscale is not the expected type: %T", releaseValues["promscale"])
+		}
+	}
+
+	if !promscaleExists {
+		// promscale values is nil, construct the spec to
+		// assign db password/uri
+		releaseValues["promscale"] = make(map[string]interface{})
+		promscaleValues = releaseValues["promscale"].(map[string]interface{})
+		promscaleValues["connection"] = make(map[string]interface{})
+		connValues := promscaleValues["connection"].(map[string]interface{})
+		connValues["uri"] = externalDBURI
+		connValues["password"] = tsdbSecretValue
+	} else {
+		for k1, v1 := range promscaleValues {
+			if k1 == "tracing" {
+				traceMap, ok := v1.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("promscale.tracing is not the expected type: %T", v1)
+				}
+				isTracingEnabled, ok = traceMap["enabled"].(bool)
+				if !ok {
+					return fmt.Errorf("promscale.tracing.enabled is not the expected type: %T", traceMap["enabled"])
+				}
+
+				promscaleValues["openTelemetry"] = v1
+				// drop older tracing field which is no longer used
+				delete(promscaleValues, "tracing")
+			}
+
+			if k1 == "image" {
+				imageName, ok := v1.(string)
+				if !ok {
+					return fmt.Errorf("promscale.image is not the expected type: %T", v1)
+				}
+				// In tobs 0.7.0 release we hardcoded
+				// beta release if tracing is enabled, from 0.8.0 tobs
+				// release all default images will include out of the tracing support in
+				// all Promscale images.
+				if imageName == "timescale/promscale:0.7.0-beta.latest" {
+					delete(promscaleValues, "image")
+				}
+			}
+
+			if k1 == "args" {
+				aV, ok := v1.([]interface{})
+				if !ok {
+					return fmt.Errorf("promscale.args is not the expected type: %T", v1)
+				}
+				for in, value := range aV {
+					if value == "-otlp-grpc-server-listen-address=:9202" {
+						aV = append(aV[:in], aV[in+1:]...)
+					}
+					// if HA arg is found in Promscale
+					// change it to new HA arg.
+					if value == "--high-availability" {
+						aV[in] = "--metrics.high-availability"
+					}
+				}
+				promscaleValues["args"] = aV
+			}
+
+			if k1 == "connection" {
+				connectionValues, ok := v1.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("promscale.connection is not the expected type: %T", v1)
+				}
+
+				connectionValues["uri"] = externalDBURI
+
+				for k2, v2 := range connectionValues {
+					if k2 == "password" {
+						connectionValues["password"] = tsdbSecretValue
+					}
+
+					if k2 == "host" {
+						hostValues, ok := v2.(map[string]interface{})
+						if !ok {
+							return fmt.Errorf("promscale.connection.host is not the expected type: %T", v2)
+						}
+						hostValue := hostValues["nameTemplate"]
+						connectionValues["host"] = hostValue
+					}
+				}
+			}
+
+			if k1 == "service" {
+				promService, ok := v1.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("promscale.service is not the expected type: %T", v1)
+				}
+				lbValues := promService["loadBalancer"]
+				lb, ok := lbValues.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("promscale.service.loadBalancer is not the expected type: %T", lbValues)
+				}
+				lbEnabled := lb["enabled"]
+				if lbEnabled == "true" {
+					promService["type"] = "LoadBalancer"
+				} else {
+					promService["type"] = "ClusterIP"
+				}
+				delete(promService, "loadBalancer")
+			}
+		}
+	}
+
+	if isTracingEnabled {
+		otelCol := otel.OtelCol{
+			ReleaseName: root.HelmReleaseName,
+			Namespace:   root.Namespace,
+			K8sClient:   c.k8sClient,
+			HelmClient:  helmClient,
+		}
+
+		// apply OpenTelemetry CRDs
+		err = c.k8sClient.ApplyManifests(otel.OpenTelemetryCRDs)
+		if err != nil {
+			return err
+		}
+		fmt.Println("Successfully created CRDs: ", reflect.ValueOf(otel.OpenTelemetryCRDs).MapKeys())
+
+		config, err := helmClient.ExportValuesFieldFromChart(c.chartRef, c.valuesFile, []string{"opentelemetryOperator", "collector", "config"})
+		if err != nil {
+			return err
+		}
+		otelColConfig, ok := config.(string)
+		if !ok {
+			return fmt.Errorf("opentelemetryOperator.collector.config is not the expected type: %T", config)
+		}
+
+		err = otelCol.ValidateCertManager()
+		if err != nil {
+			return err
+		}
+		c.upgradeCertManager = otelCol.UpgradeCM
+
+		if err = otelCol.DeleteDefaultOtelCollector(); err != nil {
+			return err
+		}
+
+		if err = otelCol.CreateDefaultCollector(otelColConfig); err != nil {
+			return err
+		}
+		// re-structure jaeger values
+		otelValues, ok := releaseValues["opentelemetryOperator"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("opentelemetryOperator is not the expected type: %T", releaseValues["opentelemetryOperator"])
+		}
+		// delete jaegerPromscaleQuery as it's no-longer used in values.yaml
+		delete(otelValues, "jaegerPromscaleQuery")
+	}
+
+	d, err := yaml.Marshal(&releaseValues)
+	if err != nil {
+		return fmt.Errorf("failed to marshal release values %v", err)
+	}
+
+	c.upgradeValues = string(d)
 	return nil
 }
 
@@ -487,31 +761,13 @@ var (
 	}
 )
 
-func (c *upgradeSpec) createCRDS() error {
-	for name, manifestURL := range kubePrometheusCRDs {
-		res, err := http.Get(manifestURL)
-		if err != nil {
-			return fmt.Errorf("failed to download %s: %v", name, err)
-		}
-		// Check server response
-		if res.StatusCode != http.StatusOK {
-			return fmt.Errorf("bad status: %s", res.Status)
-		}
-
-		// scan the response
-		var out []byte
-		out, err = ioutil.ReadAll(res.Body)
-		_ = res.Body.Close()
-		if err != nil {
-			return err
-		}
-		err = c.k8sClient.ApplyManifests(out)
-		if err != nil {
-			return fmt.Errorf("failed to apply manifest %s with error %v", name, err)
-		}
+func (c *upgradeSpec) applyCRDS(crds map[string]string) error {
+	err := c.k8sClient.ApplyManifests(crds)
+	if err != nil {
+		return fmt.Errorf("failed to apply manifest with error %v", err)
 	}
 
-	fmt.Println("Successfully created CRDs: ", reflect.ValueOf(kubePrometheusCRDs).MapKeys())
+	fmt.Println("Successfully created CRDs: ", reflect.ValueOf(crds).MapKeys())
 	return nil
 }
 

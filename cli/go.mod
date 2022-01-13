@@ -5,12 +5,15 @@ go 1.17
 require (
 	github.com/jackc/pgconn v1.10.0
 	github.com/jackc/pgx/v4 v4.13.0
+	github.com/jetstack/cert-manager v1.6.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/open-telemetry/opentelemetry-operator v0.35.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.2.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
+	gopkg.in/yaml.v2 v2.4.0
 	helm.sh/helm/v3 v3.7.0
 	k8s.io/api v0.22.2
 	k8s.io/apiextensions-apiserver v0.22.2
@@ -121,6 +124,7 @@ require (
 	github.com/prometheus/common v0.31.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rodaine/table v1.0.1 // indirect
 	github.com/rubenv/sql-migrate v0.0.0-20210614095031-55d5740dbbcc // indirect
 	github.com/russross/blackfriday v1.6.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
@@ -136,8 +140,8 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect
 	go.starlark.net v0.0.0-20210901212718-87f333178d59 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20210610132358-84b48f89b13b // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
@@ -146,13 +150,12 @@ require (
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20211001223012-bfb93cce50d9 // indirect
+	google.golang.org/genproto v0.0.0-20211005153810-c76a74d43a8e // indirect
 	google.golang.org/grpc v1.41.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/gorp.v1 v1.7.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	k8s.io/apiserver v0.22.2 // indirect
 	k8s.io/component-base v0.22.2 // indirect
@@ -161,7 +164,7 @@ require (
 	k8s.io/kubectl v0.22.2 // indirect
 	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b // indirect
 	oras.land/oras-go v0.4.0 // indirect
-	sigs.k8s.io/controller-runtime v0.9.6 // indirect
+	sigs.k8s.io/controller-runtime v0.10.1 // indirect
 	sigs.k8s.io/kustomize/api v0.10.0 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.12.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect

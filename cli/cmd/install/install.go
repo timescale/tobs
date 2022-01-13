@@ -396,7 +396,7 @@ promscale:`
 		config = config + `
   replicaCount: 3`
 		args = args + `
-  - --high-availability`
+  - --metrics.high-availability`
 	}
 
 	if dbURI != "" {
