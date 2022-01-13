@@ -1,6 +1,6 @@
 {{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
 {{ if and $grafana.enabled $grafana.sidecar.datasources.enabled -}}
-{{- $isDBURI := ternary true false (ne .Values.promscale.connection.uri "")}}
+{{- $isDBURI := (ne .Values.promscale.connection.uri "")}}
 {{- $tsdbDatasource := $grafana.timescale.datasource -}}
 {{- $promEnabled := $grafana.prometheus.datasource.enabled -}}
 {{- $anyDataSources := or $tsdbDatasource.enabled $promEnabled -}}

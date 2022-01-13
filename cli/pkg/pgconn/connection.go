@@ -3,6 +3,7 @@ package pgconn
 import (
 	"context"
 	"fmt"
+
 	"net/url"
 	"os"
 	"strconv"
@@ -35,7 +36,7 @@ func (d *DBDetails) OpenConnectionToDB() (*pgxpool.Pool, error) {
 
 	k8sClient := k8s.NewClient()
 
-	secName, err := getPromscaleSecretName(d.ReleaseName, d.Namespace)
+	secName, err := GetPromscaleSecretName(d.ReleaseName, d.Namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +158,7 @@ func ConstructURI(connDetails pgconn.Config, sslmode string) string {
 	return c.String()
 }
 
-func getPromscaleSecretName(releaseName, namespace string) (string, error) {
+func GetPromscaleSecretName(releaseName, namespace string) (string, error) {
 	helmClient := helm.NewClient(namespace)
 	defer helmClient.Close()
 	eS, err := helmClient.ExportValuesFieldFromRelease(releaseName, []string{"promscale", "connectionSecretName"})
