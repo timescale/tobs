@@ -39,7 +39,7 @@ func jaegerPortForward(cmd *cobra.Command, args []string) error {
 
 func PortForwardJaeger(listenPort int) error {
 	k8sClient := k8s.NewClient()
-	serviceName, err := k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "jaeger-promscale-query"})
+	serviceName, err := k8sClient.KubeGetServiceName(root.Namespace, map[string]string{"release": root.HelmReleaseName, "app": "jaeger"})
 	if err != nil {
 		return fmt.Errorf("could not port-forward Jaeger: %w", err)
 	}

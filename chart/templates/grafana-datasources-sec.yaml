@@ -33,7 +33,7 @@ stringData:
 {{- if .Values.opentelemetryOperator.enabled }}
       - name: Promscale-Tracing
         type: jaeger
-        url: {{ tpl .Values.opentelemetryOperator.jaegerPromscaleQuery.endpoint . }}
+        url: {{ tpl .Values.opentelemetryOperator.jaeger.endpoint . }}
         editable: true
         access: proxy
 {{- end -}}

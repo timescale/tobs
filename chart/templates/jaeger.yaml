@@ -2,23 +2,23 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-jaeger-promscale
+  name: {{ .Release.Name }}-jaeger
   namespace: {{ template "tobs.namespace" . }}
   labels:
-    app: jaeger-promscale-query
+    app: jaeger
     chart: {{ template "tobs.chart" . }}
     release: {{ .Release.Name }}
 spec:
   selector:
     app: {{ template "tobs.fullname" . }}
-    component: jaeger-promscale-query
-{{- if .Values.opentelemetryOperator.jaegerPromscaleQuery.service.loadBalancer.enabled }}
+    component: jaeger
+{{- if .Values.opentelemetryOperator.jaeger.service.loadBalancer.enabled }}
   type: LoadBalancer
   {{- else }}
   type: ClusterIP
 {{- end }}
   ports:
-  - name: jaeger-promscale-port
+  - name: jaeger
     port: 16686
     targetPort: 16686
     protocol: TCP
