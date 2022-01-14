@@ -342,6 +342,8 @@ kube-prometheus-stack:
         port: 5432
       adminUser: postgres
       adminPassSecret: "{{ .Release.Name }}-promscale"
+    jaeger:
+      promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
 
   # By default kube-state-metrics are scraped using
   # serviceMonitor disable annotation based scraping
@@ -376,7 +378,6 @@ opentelemetryOperator:
   enabled: false
   jaeger:
     image: jaegertracing/jaeger-query:1.30
-    endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
     args:
       - --grpc-storage.server={{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202
       - --grpc-storage.tls.enabled=false
