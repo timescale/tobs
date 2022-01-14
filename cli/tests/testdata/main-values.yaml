@@ -374,10 +374,10 @@ promlens:
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
 opentelemetryOperator:
   enabled: false
-  jaegerPromscaleQuery:
-    # later will be chnaged to Jaeger query that includes Promscale plugin
-    image: vineeth97/promscale-jaeger-query
-    config: |
-      promscale-tls: false
-      promscale-grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
-      connection-timeout: 1h
+  jaeger:
+    image: jaegertracing/jaeger-query:1.30
+    endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
+    args:
+      - --grpc-storage.server={{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202
+      - --grpc-storage.tls.enabled=false
+      - --grpc-storage.connection-timeout=1h

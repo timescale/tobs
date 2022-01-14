@@ -205,7 +205,7 @@ To connect to your database, chose one of these options:
 {{- if .Values.cli }}
     tobs {{- template "tobs.cliOptions" . }} jaeger port-forward
 {{- else }}
-      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name }}-jaeger-promscale 16686:16686
+      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name }}-jaeger 16686:16686
 {{- end }}
 
     Then you can point your browser to http://127.0.0.1:16686/.

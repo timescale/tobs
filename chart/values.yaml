@@ -446,15 +446,13 @@ opentelemetryOperator:
             exporters: [logging, otlp]
             processors: [batch]
 
-  jaegerPromscaleQuery:
-    image: timescale/jaeger-query-proxy:0.0.1
-    endpoint: "{{ .Release.Name }}-jaeger-promscale.{{ .Release.Namespace }}.svc.cluster.local:16686"
+  jaeger:
+    image: jaegertracing/jaeger-query:1.30
+    endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
     args:
-      - --grpc-storage-plugin.configuration-file=/configs/jaeger-promscale-query.yaml
-    config: |
-      tls: false
-      grpc-server: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
-      connection-timeout: 1h
+      - --grpc-storage.server={{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202
+      - --grpc-storage.tls.enabled=false
+      - --grpc-storage.connection-timeout=1h
 
     service:
       loadBalancer:
