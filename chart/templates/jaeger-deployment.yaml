@@ -39,6 +39,5 @@ spec:
             - containerPort: 16686
               name: jaeger-ui
           env:
-            - name: SPAN_STORAGE_TYPE
-              value: grpc-plugin
+            {{- toYaml .Values.opentelemetryOperator.jaeger.env | nindent 12 }}
 {{- end -}}
