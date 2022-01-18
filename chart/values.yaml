@@ -13,7 +13,7 @@ namespaceOverride: ""
 # TimescaleDB single helm chart configuration
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
-  enabled: true
+  enabled: &dbEnabled "true"
   # TimescaleDB image tag
   image:
     tag: pg12-ts2.1-latest
@@ -50,9 +50,19 @@ promscale:
   # needs to be enabled for tracing support in Promscale
   # to expose traces port, add tracing args to Promscale
   openTelemetry:
-    enabled: false
+    enabled: &otelEnabled "false"
   # to pass extra args
   # extraArgs: []
+
+  extraEnv:
+    - name: "TOBS_TELEMETRY_INSTALLED_BY"
+      value: "helm"
+    - name: "TOBS_TELEMETRY_VERSION"
+      value: "{{ .Chart.Version }}"
+    - name: "TOBS_TELEMETRY_TRACING_ENABLED"
+      value: *otelEnabled
+    - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
+      value: *dbEnabled
 
   ## Note:
 
