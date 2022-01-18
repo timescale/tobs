@@ -222,6 +222,13 @@ func (c *InstallSpec) InstallStack() error {
 		helmValues = helmValues + promscaleConfig
 	}
 
+	enableTimescaleDB, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
+	if err != nil {
+		return err
+	}
+	promscaleTelemetry := appendTelemetryVariables(c.version, fmt.Sprint(enableTimescaleDB), c.enableOtel)
+	helmValues = helmValues + promscaleTelemetry
+
 	helmValuesSpec.ValuesYaml = helmValues
 	fmt.Println("Installing The Observability Stack")
 	release, err := helmClient.InstallOrUpgradeChart(context.Background(), &helmValuesSpec)
@@ -382,10 +389,26 @@ opentelemetryOperator:
 	return helmValues
 }
 
+func appendTelemetryVariables(version, timescaledb string, otel bool) string {
+	config := fmt.Sprintf(`
+promscale:
+  extraEnv:
+  - name: "TOBS_TELEMETRY_INSTALLED_BY"
+    value: "cli"
+  - name: "TOBS_TELEMETRY_VERSION"
+    value: "%s"
+  - name: "TOBS_TELEMETRY_TRACING_ENABLED"
+    value: %t
+  - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
+    value: %s`, version, otel, timescaledb)
+	return config
+}
+
 func appendPromscaleValues(enableOtel, promHA bool, dbURI, dbPassword string) string {
 	var args string
 	config := `
 promscale:`
+
 	if enableOtel {
 		config = config + `
   openTelemetry:
@@ -414,6 +437,7 @@ promscale:`
 		args = `
   extraArgs:` + args
 	}
+
 	return config + args
 }
 
