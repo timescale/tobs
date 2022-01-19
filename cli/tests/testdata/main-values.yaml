@@ -53,6 +53,16 @@ promscale:
     host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     port: 5432
 
+  extraEnv:
+    - name: "TOBS_TELEMETRY_INSTALLED_BY"
+      value: "helm"
+    - name: "TOBS_TELEMETRY_VERSION"
+      value: "0.8.0"
+    - name: "TOBS_TELEMETRY_TRACING_ENABLED"
+      value: "false"
+    - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
+      value: "true"
+
   # configuration options for the service exposed by promscale
   service:
     # we disable the load balancer by default, only a ClusterIP service
