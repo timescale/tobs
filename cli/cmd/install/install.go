@@ -226,9 +226,9 @@ func (c *InstallSpec) InstallStack() error {
 	if err != nil {
 		return err
 	}
-	enableTimescaleDB, ok := e.(bool)
-	if !ok {
-		return fmt.Errorf("timescaledb-single.enabled was not a bool")
+	enableTimescaleDB, err := utils.InterfaceToBool(e)
+	if err != nil {
+		return fmt.Errorf("cannot convert timescaledb-single.enabled to bool, %v", err)
 	}
 
 	promscaleTelemetry := appendTelemetryVariables(c.version, enableTimescaleDB, c.enableOtel)
@@ -296,9 +296,10 @@ func (c *InstallSpec) manageDBSecrets() error {
 		if err != nil {
 			return err
 		}
-		enableTimescaleDB, ok := e.(bool)
-		if !ok {
-			return fmt.Errorf("timescaledb-single.enabled was not a bool")
+
+		enableTimescaleDB, err := utils.InterfaceToBool(e)
+		if err != nil {
+			return fmt.Errorf("cannot convert timescaledb-single.enabled to bool, %v", err)
 		}
 
 		// if timescaledb is disabled we do not need
