@@ -215,13 +215,6 @@ func (c *InstallSpec) InstallStack() error {
 		helmValuesSpec.Version = c.version
 	}
 
-	// As multiple times we are appending Promscale values the below func
-	// helps us to append by overriding the previous configs field by field
-	if c.enableOtel || c.enablePrometheusHA || c.dbURI != "" || c.dbPassword != "" {
-		promscaleConfig := appendPromscaleValues(c.enableOtel, c.enablePrometheusHA, c.dbURI, c.dbPassword)
-		helmValues = helmValues + promscaleConfig
-	}
-
 	e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
 	if err != nil {
 		return err
@@ -231,8 +224,10 @@ func (c *InstallSpec) InstallStack() error {
 		return fmt.Errorf("cannot convert timescaledb-single.enabled to bool, %v", err)
 	}
 
-	promscaleTelemetry := appendTelemetryVariables(c.version, enableTimescaleDB, c.enableOtel)
-	helmValues = helmValues + promscaleTelemetry
+	// As multiple times we are appending Promscale values the below func
+	// helps us to append by overriding the previous configs field by field
+	promscaleConfig := appendPromscaleValues(c.enableOtel, enableTimescaleDB, c.enablePrometheusHA, c.dbURI, c.dbPassword, c.version)
+	helmValues = helmValues + promscaleConfig
 
 	helmValuesSpec.ValuesYaml = helmValues
 	fmt.Println("Installing The Observability Stack")
@@ -395,9 +390,10 @@ opentelemetryOperator:
 	return helmValues
 }
 
-func appendTelemetryVariables(version string, timescaledb, otel bool) string {
+func appendPromscaleValues(enableOtel, timescaledb, promHA bool, dbURI, dbPassword, version string) string {
+	var args string
 	config := fmt.Sprintf(`
-promscale:
+promscale:  
   extraEnv:
   - name: "TOBS_TELEMETRY_INSTALLED_BY"
     value: "cli"
@@ -406,14 +402,7 @@ promscale:
   - name: "TOBS_TELEMETRY_TRACING_ENABLED"
     value: "%t"
   - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
-    value: "%t"`, version, otel, timescaledb)
-	return config
-}
-
-func appendPromscaleValues(enableOtel, promHA bool, dbURI, dbPassword string) string {
-	var args string
-	config := `
-promscale:`
+    value: "%t"`, version, enableOtel, timescaledb)
 
 	if enableOtel {
 		config = config + `
