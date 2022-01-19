@@ -16,7 +16,7 @@ var RELEASE_NAME = "gg"
 var NAMESPACE = "ns"
 var PATH_TO_TOBS = "./../../bin/tobs"
 var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+var PATH_TO_TEST_VALUES = "./../testdata/e2e-values.yaml"
 
 func installObs() {
 	var err error

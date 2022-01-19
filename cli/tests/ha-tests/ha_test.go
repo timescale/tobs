@@ -16,7 +16,7 @@ var RELEASE_NAME = "tobs"
 var NAMESPACE = "default"
 var PATH_TO_TOBS = "./../../bin/tobs"
 var PATH_TO_CHART = "./../../../chart/"
-var PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+var PATH_TO_TEST_VALUES = "./../testdata/e2e-values.yaml"
 
 func TestHASetup(t *testing.T) {
 	if testing.Short() {

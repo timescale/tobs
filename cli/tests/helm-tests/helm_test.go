@@ -23,7 +23,7 @@ var (
 	CHART_NAME          = "timescale/tobs"
 	LATEST_CHART        = "./../../../chart"
 	PATH_TO_TOBS        = "./../../bin/tobs"
-	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+	PATH_TO_TEST_VALUES = "./../testdata/e2e-values.yaml"
 	PATH_TO_MAIN_VALUES = "./../../../chart/values.yaml"
 	DEFAULT_TOBS_NAME   = "tobs"
 )
