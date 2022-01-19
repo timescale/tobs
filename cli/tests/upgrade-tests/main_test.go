@@ -15,7 +15,7 @@ import (
 var (
 	PATH_TO_TOBS        = "./../../bin/tobs"
 	PATH_TO_CHART       = "./../../../chart/"
-	PATH_TO_TEST_VALUES = "./../testdata/main-values.yaml"
+	PATH_TO_TEST_VALUES = "./../testdata/e2e-values.yaml"
 	NAMESPACE           = "ns"
 	RELEASE_NAME        = "gg"
 	helmClient          helm.Client
