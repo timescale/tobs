@@ -404,9 +404,9 @@ promscale:
   - name: "TOBS_TELEMETRY_VERSION"
     value: "%s"
   - name: "TOBS_TELEMETRY_TRACING_ENABLED"
-    value: %t
+    value: "%t"
   - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
-    value: %t`, version, otel, timescaledb)
+    value: "%t"`, version, otel, timescaledb)
 	return config
 }
 
