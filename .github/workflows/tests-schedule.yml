@@ -38,4 +38,4 @@ jobs:
         env:
           KUBE_VERSION: ${{ matrix.kube-version }}
         run: |
-          make start-kind helm-tests e2e-tests external-db-tests upgrade-tests ha-tests install-tests delete-kind KUBE_VERSION=$KUBE_VERSION
+          make start-kind helm-tests e2e-tests external-db-tests ha-tests install-tests delete-kind KUBE_VERSION=$KUBE_VERSION
