@@ -56,7 +56,7 @@ func GetTimescaleDBURI(k8sClient k8s.Client, namespace, name string) (string, er
 
 	secret, err := k8sClient.KubeGetSecret(root.Namespace, promscaleSecretName)
 	if err != nil {
-		return "", fmt.Errorf("could not get secret with name %s: %w",promscaleSecretName, err)
+		return "", fmt.Errorf("could not get secret with name %s: %w", promscaleSecretName, err)
 	}
 
 	if bytepass, exists := secret.Data["PROMSCALE_DB_URI"]; exists && string(bytepass) != "" {
