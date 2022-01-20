@@ -6,6 +6,72 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart.  We 
 ```
 helm repo update
 ```
+## Upgrading to 0.8.0
+
+With tobs `0.8.0` release there are multiple steps which needs to be performed manually to upgrade the tobs helm chart.
+
+In tobs `0.8.0` we upgraded the CRDs of Prometheus-Operator that are part of Kube-Prometheus helm chart `30.0.0`. You need to manually upgrade the CRDs by following the instructions below.
+
+```
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.53.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+```
+
+### Re-structure the Promscale values section
+
+1. If you are using the default `values.yaml` from tobs helm chart, copy the `0.8.0` values.yaml so the default values are 
+structured as expected, assign the database password by reading it from `<release-name>-credentials` secret with key `PATRONI_SUPERUSER_PASSWORD` 
+decode the base64 encoded password and assign it to `promscale.connection.password` in the new `values.yaml` you can skip step 2.
+2. If you are using the custom `values.yaml` for tobs installation make the below suggested changes, 
+```
+    promscale:
+        # tracing field name has been changed to openTelemetry
+        openTelemetry:
+            enabled: <value>
+        # as this is your custom values.yaml
+        # do not forget to change Promscale image to 0.8.0 tag
+        image: timescale/promscale:0.8.0    
+        connection:
+            # assign the db-password here, the password should be in <release-name>-credentails secret from previous installation
+            # with key PATRONI_SUPERUSER_PASSWORD
+            password: <value>
+            # if you are using db-uri based auth assign the db-uri to below field
+            uri: <>
+        # change service section only if you enabling LoadBalancer type service for Promscale
+        service:
+            type: LoadBalancer  
+```
+4. If you want to enable tracing do not forget to enable `promscale.openTelemetry.enabled` to true and `openTelemetryOperator.enabled` to true.
+5. If you are using Promscale HA with Prometheus HA change the Promscale HA arg from `--high-availability` to `--metrics.high-availability` in `promscale.extraArgs`. 
+6. Drop `timescaledbExternal` section of `values.yaml` as the db-uri will be observed from `promscale.connection.db_uri` if configured any. 
+
+### Re-structure openTelemetryOperator values section (only if you have enabled tracing)
+
+1. Drop `jaegerPromscaleQuery` section in `openTelemetryOperator` as we have moved from Jaeger Promscale gRPC based plugin to integrating directly with upstream Jaeger query.
+2. Add the existing default openTelemetry collector config in `values.yaml` at `openTelemetryOperator.collector.config` as mentioned [here](https://github.com/timescale/tobs/blob/0.8.0/chart/values.yaml#L432).
+
+**Note**: If tracing is enabled upgrade the `cert-manager` to `v1.6.1` as the latest openTelemetryOperator expects the cert-manager of `v1.6.1` version.
+
+### Delete Kube-State-Metrics as per Kube-Prometheus stack upgrade docs
+
+1. With the upgrade the kube-state-metrics will be re-deployed. The existing deployment cannot be upgraded so delete it using `kubectl delete deployment/<tobs-release-name>-kube-state-metrics -n <namespace>`. 
+For more reference on kube-state-metrics deletion follow Kube-Prometheus docs [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#from-21x-to-22x).
+
+### Delete tobs-grafana-job 
+
+1. With the upgrade the tobs-grafana-job will be re-deployed. The existing job cannot be upgraded so delete it using `kubectl delete job/<tobs-release-name>-grafana-db`
+
+### Upgrade tobs
+
+```
+helm upgrade <release_name> timescale/tobs
+```
 
 ## Upgrading to 0.7.0:
 
