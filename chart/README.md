@@ -33,13 +33,12 @@ support helm deployments that do not use the CLI.
 
 By default, timescaledb helm chart doesn't create its own secrets. So please follow [these instructions][timescaledb-secrets] to create timescaledb-secrets. If you use tobs CLI this is taken care for you.
 
-You can also let the timescaledb-single helm chart create the secrets for you without running the above mentioned instruction by adding the configuration below to timescaledb-single in values.yaml
-**Note**: This isn't recommended by [timescaledb-single][timescaledb-helm-repo] helm chart.
+Create timescaledb secrets using `tobs` CLI. This creates database passwords and self-signed certificates.
 
 ```
-timescaledb-single:
-  unsafe: true
+tobs install --only-secrets -n <name> --namespace <namepsace>
 ```
+
 
 ## Installing the helm chart
 
@@ -48,8 +47,11 @@ into your Kubernetes cluster:
 ```
 helm repo add timescale https://charts.timescale.com/
 helm repo update
-helm install <release_name> timescale/tobs
+helm install <release_name> timescale/tobs promscale.connection.password=<password> 
 ```
+
+**Note:** Here the `<password>` should be captured from `<release>-credentials` secret with key `PATRONI_SUPERUSER_PASSWORD`. As the password is created from 
+the above `tobs install --only-secrets` step.
 
 # Uninstall
 
@@ -139,27 +141,20 @@ To configure tobs to connect with an external TimescaleDB you need to modify a f
 Below is the helm command to disable the TimescaleDB installation and set external db uri details:
 ```
 helm install <release-name> timescale/tobs \
---set timescaledb-single.enabled=false,timescaledbExternal.enabled=true,timescaledbExternal.db_uri=<timescaledb-uri>, \
-promscale.connection.uri.secretTemplate=<release-name>-timescaledb-uri
+--set timescaledb-single.enabled=false,promscale.connection.uri=<timescaledb-uri>
 ```
-
-#### External TimescaleDB related values
-| Parameter                           | Description                                           | Default     |
-|-------------------------------------|-------------------------------------------------------|-------------|
-| `timescaledbExternal.enabled`       | Enable external TimescaleDB                           | `false`     |
-| `timescaledbExternal.db_uri`        | Enable external TimescaleDB URI                       | ``          |
 
 ## Promscale
 | Parameter                                           | Description                                           | Default     |
 |-----------------------------------------------------|-------------------------------------------------------|-------------|
 | `promscale.enabled`                      | If false Promscale will not be started| `true` |
-| `promscale.image`                        | Docker image to use for the Promscale                 | `timescale/promscale:0.6.0` |
+| `promscale.image`                        | Docker image to use for the Promscale                 | `timescale/promscale:0.8.0` |
 | `promscale.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
 | `promscale.connection.user`              | User used for connection to db | `postgres` |
-| `promscale.connection.dbURI.secretTemplate` | The template for generating the name of a secret object which will hold the db URI | `` |
-| `promscale.connection.password.secretTemplate` | Name (templated) of secret object containing the connection password. Key must be value of `PATRONI_SUPERUSER_PASSWORD` as this is used in TimescaleDB helm chart as reference to user `postgres`. | `"{{ .Release.Name }}-credentials"` |
-| `promscale.connection.host.nameTemplate` | Host name (templated) of the database instance. Defaults to service created in `timescaledb-single` | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"` |
-| `promscale.service.loadBalancer.enabled` | Create a LB for the Promscale instead of a Cluster IP | `false`     |
+| `promscale.connection.uri`               | TimescaleDB URI | `` |
+| `promscale.connection.password`          | Assign the TimescaleDB password from `tobs-credentails` from key `PATRONI_SUPERUSER_PASSWORD` | `` |
+| `promscale.connection.host`              | TimescaleDB host address | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"` |
+| `promscale.service.type`                 | Configure the service type for Promscale | `ClusterIP`     |
 | `promscale.resources.requests.memory`    | Amount of memory for the Promscale pod                | `2Gi`       |
 | `promscale.resources.requests.cpu`       | Number of vCPUs for the Promscale pod                 | `1`         |
 

@@ -98,7 +98,7 @@ Users sometimes want to use our Helm charts as sub-charts for other project or i
 
 | Tobs                  | Kubernetes           |
 |-----------------------|----------------------|
-| 0.8.x (unreleased)    | v1.21 to v1.23       | 
+| 0.8.x                 | v1.21 to v1.23       | 
 | 0.7.x                 | v1.19 to v1.21       | 
 
 # ✏️ Contributing

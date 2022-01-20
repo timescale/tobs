@@ -26,7 +26,7 @@ Update the Promscale configuration to enable HA mode and increase the replicas t
 promscale:
   replicaCount: 3
   args:
-    - --high-availability
+    - --metrics.high-availability
 ```
 
 Update Prometheus configuration to send prometheus pod name with `__replica__` and prometheus cluster name as `cluster` labelSets in the form of external labels and run Prometheus as 3 replicas for HA. 
@@ -59,8 +59,7 @@ Steps to deploy data aggregation cluster
 ```
 promscale:
   service:
-    loadBalancer:
-      enabled: true
+    type: LoadBalancer
 ``` 
 
 * Add external cluster label to differentiate the visualisation in Grafana dashboards per cluster level. 
