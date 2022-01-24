@@ -71,6 +71,9 @@ promscale:
 
   # selector used to provision your own Secret containing connection details
   # Use this option with caution
+
+  # if you are adding a conn string here do not forget
+  # to add the same for kube-prometheus.grafana.timescale.adminPassSecret
   connectionSecretName: ""
 
   ## Note:
