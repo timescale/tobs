@@ -1,0 +1,138 @@
+name: CLI Tests
+
+on:
+  push:
+    branches: [master, main, force_test, release-*]
+    tags: ['*']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build:
+    name: Build and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Import environment variables
+        run: cat ".github/env" >> $GITHUB_ENV
+
+      - name: Set up Go ${{ env.golang-version }}
+        uses: actions/setup-go@v2.1.5
+        with:
+          go-version: ${{ env.golang-version }}
+        id: go
+
+      - name: Format
+        working-directory: cli
+        run: |
+          make go-fmt
+
+      - name: Vet
+        working-directory: cli
+        run: |
+          make go-vet
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: ${{ env.golangci-lint-version }}
+
+      - name: Build
+        working-directory: cli
+        run: |
+          make build
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Import environment variables
+        run: cat ".github/env" >> $GITHUB_ENV
+
+      - name: Set up Go ${{ env.golang-version }}
+        uses: actions/setup-go@v2.1.5
+        with:
+          go-version: ${{ env.golang-version }}
+
+      - name: Test static generation
+        working-directory: ./
+        run: |
+          ./generate-deploy-script.sh
+          git diff --exit-code
+
+      - name: Unit-Tests
+        working-directory: cli
+        run: |
+          make unit-tests
+
+      - name: Dependency-Tests
+        working-directory: cli
+        run: |
+          go test -v ./tests/dependency-tests
+
+  e2e:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        kube-version:
+          - "1.21"
+          - "1.22"
+          - "1.23"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Import environment variables
+        run: cat ".github/env" >> $GITHUB_ENV
+
+      - name: Set up Go ${{ env.golang-version }}
+        uses: actions/setup-go@v2.1.5
+        with:
+          go-version: ${{ env.golang-version }}
+
+      - name: Build
+        working-directory: cli
+        run: |
+          make build
+
+      - name: Start kuberenetes cluster
+        working-directory: cli
+        env:
+          KUBE_VERSION: ${{ matrix.kube-version }}
+        run: |
+          make start-kind
+
+      - name: Helm tests
+        working-directory: cli
+        env:
+          KUBE_VERSION: ${{ matrix.kube-version }}
+        run: |
+          make helm-tests
+
+      - name: E2E tests
+        working-directory: cli
+        env:
+          KUBE_VERSION: ${{ matrix.kube-version }}
+        run: |
+          make e2e-tests
+
+  # Added to summarize the matrix
+  tests-result:
+    name: e2e results
+    if: always()
+    needs:
+      - e2e
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the job as a success
+        if: needs.e2e.result == 'success'
+        run: exit 0
+      - name: Mark the job as a failure
+        if: needs.e2e.result != 'success'
+        run: exit 1

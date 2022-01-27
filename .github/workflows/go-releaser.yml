@@ -11,18 +11,18 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Import environment variables
+        run: cat ".github/env" >> $GITHUB_ENV
+
+      - name: Set up Go ${{ env.golang-version }}
+        uses: actions/setup-go@v2.1.5
         with:
-          fetch-depth: 0
-      -
-        name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
-      -
-        name: Run GoReleaser Test
+          go-version: ${{ env.golang-version }}
+      
+      - name: GoReleaser Test
         uses: goreleaser/goreleaser-action@v2
         if: "!startsWith(github.ref, 'refs/tags/')"
         with:
@@ -30,8 +30,8 @@ jobs:
           version: latest
           workdir: cli
           args: release --snapshot --skip-publish --rm-dist
-      -
-        name: GoReleaser Release
+      
+      - name: GoReleaser Release
         uses: goreleaser/goreleaser-action@v2
         #release only on tags
         if: startsWith(github.ref, 'refs/tags/')

@@ -5,8 +5,8 @@ on:
     branches: [master]
 
 jobs:
-  build:
-    name: Build
+  report:
+    name: Report
     runs-on: ubuntu-latest
     steps:
       - name: Request Report Update
