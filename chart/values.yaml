@@ -450,6 +450,10 @@ opentelemetryOperator:
           endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
           tls:
             insecure: true
+        prometheusremotewrite:
+          endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/write"
+          tls:
+            insecure: true
 
       processors:
         batch:
