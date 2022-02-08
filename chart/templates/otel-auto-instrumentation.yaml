@@ -1,0 +1,17 @@
+{{ if .Values.opentelemetryOperator.enabled -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: tobs-auto-instrumentation
+spec:
+  exporter:
+    # TODO(paulfantom): check if endpoint is correct
+    endpoint: http://{{ .Release.Name }}-otel-collector.{{ .Release.Namespace }}.svc:4317
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.25"
+{{- end -}}
