@@ -464,6 +464,10 @@ opentelemetryOperator:
             receivers: [jaeger, otlp]
             exporters: [logging, otlp]
             processors: [batch]
+          metrics:
+            receivers: [otlp]
+            processors: [batch]
+            exporters: [prometheusremotewrite]
 
   jaeger:
     image: jaegertracing/jaeger-query:1.30
