@@ -38,7 +38,7 @@ decode the base64 encoded password and assign it to `promscale.connection.passwo
         # do not forget to change Promscale image to 0.8.0 tag
         image: timescale/promscale:0.8.0    
         connection:
-            # assign the db-password here, the password should be in <release-name>-credentails secret from previous installation
+            # assign the db-password here, the password should be in <release-name>-credentials secret from previous installation
             # with key PATRONI_SUPERUSER_PASSWORD
             password: <value>
             # if you are using db-uri based auth assign the db-uri to below field
