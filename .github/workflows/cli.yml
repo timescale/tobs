@@ -63,13 +63,6 @@ jobs:
         with:
           go-version: ${{ env.golang-version }}
 
-      # TODO(paulfantom): Figure out better way to test it and ignore entries which are randomly generated and thus not reproducible in CI
-      #- name: Test static generation
-      #  working-directory: ../
-      #  run: |
-      #    ./generate-deploy-script.sh
-      #    git diff --exit-code
-
       - name: Unit-Tests
         working-directory: cli
         run: |
