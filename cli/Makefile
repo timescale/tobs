@@ -29,7 +29,7 @@ go-vet:
 		go vet ./...
 
 go-fmt:
-		gofmt -d .
+		gofmt -s -w .
 
 go-lint:
 		golangci-lint run

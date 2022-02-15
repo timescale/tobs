@@ -28,11 +28,13 @@ jobs:
         working-directory: cli
         run: |
           make go-fmt
+          git diff --exit-code
 
       - name: Vet
         working-directory: cli
         run: |
           make go-vet
+          git diff --exit-code
 
       # TODO(paulfantom): figure-out why golangci-lint action crashes
       #- name: Lint
