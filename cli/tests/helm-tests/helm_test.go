@@ -81,9 +81,9 @@ func testHelmClientAddOrUpdateChartRepoPublic() {
 func testHelmClientInstallOrUpgradeChart() {
 	log.Println("Installing Tobs secrets...")
 	runTsdb := exec.Command(PATH_TO_TOBS, "install", "--namespace", NAMESPACE, "--only-secrets")
-	_, err := runTsdb.CombinedOutput()
+	msg, err := runTsdb.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error installing tobs secrets %v:", err)
+		log.Fatalf("Error installing tobs secrets %v: %v", err, msg)
 	}
 
 	// download the dependent charts
