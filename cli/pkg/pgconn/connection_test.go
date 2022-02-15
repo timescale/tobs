@@ -30,8 +30,8 @@ func TestConstructURI(t *testing.T) {
 			want:           "postgres://bob%20has%20spaces%20in%20his%20username:%7B%40nd%20$p3ci%40L%20ch%40R$%201n%20h1$%20p%40$$w0rd%21%5E%27@localhost:5432/bob_has_a_database",
 		},
 		{
-			user:           "$b0b!",
-			password:       "$p3ci@L-ch@R$_1n\nh1$	p@$$w0rd!^'",
+			user: "$b0b!",
+			password: "$p3ci@L-ch@R$_1n\nh1$	p@$$w0rd!^'",
 			host:           "my.host.com",
 			port:           9999,
 			dbname:         "this-is a valid db nAm3 if double quoted",

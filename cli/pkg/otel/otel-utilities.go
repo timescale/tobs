@@ -143,7 +143,7 @@ func (c *OtelCol) ValidateCertManager() error {
 			// namespace this needs to be ignored as otel-operator helm-chart upgrades them
 			// Mote: Resource with name 'opentelemetry-operator-selfsigned-issuer` isn't part of
 			// any namespace so adding a check.
-			if resource.Namespace != "opentelemetry-operator-system"  {
+			if resource.Namespace != "opentelemetry-operator-system" {
 				if resource.Name != "opentelemetry-operator-selfsigned-issuer" {
 					onlyCertMResources = append(onlyCertMResources, resource)
 				}

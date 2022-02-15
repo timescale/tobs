@@ -65,7 +65,7 @@ func updateDBPwdSecrets(k8sClient k8s.Client, secretKey, user, password string) 
 	}
 
 	if tsdb {
-		secretName := root.HelmReleaseName+"-credentials"
+		secretName := root.HelmReleaseName + "-credentials"
 		tsdbSecret, err := k8sClient.KubeGetSecret(root.Namespace, secretName)
 		if err != nil {
 			return fmt.Errorf("could not get secret with name %s: %w", secretName, err)
@@ -79,7 +79,7 @@ func updateDBPwdSecrets(k8sClient k8s.Client, secretKey, user, password string) 
 	}
 
 	// Update Grafana DB creds
-	grafanaSecretName := root.HelmReleaseName+"-grafana-db"
+	grafanaSecretName := root.HelmReleaseName + "-grafana-db"
 	grafanaSecret, err := k8sClient.KubeGetSecret(root.Namespace, grafanaSecretName)
 	if err != nil {
 		return fmt.Errorf("could not get secret with name %s: %w", grafanaSecretName, err)
@@ -95,7 +95,7 @@ func updateDBPwdSecrets(k8sClient k8s.Client, secretKey, user, password string) 
 	}
 
 	// Update Promscale connection details
-	promscaleSecretName, err :=  pgconn.GetPromscaleSecretName(root.HelmReleaseName, root.Namespace)
+	promscaleSecretName, err := pgconn.GetPromscaleSecretName(root.HelmReleaseName, root.Namespace)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func updateDBPwdSecrets(k8sClient k8s.Client, secretKey, user, password string) 
 			return fmt.Errorf("failed to parse db-uri %v", err)
 		}
 		dbDetails.ConnConfig.Password = password
-		updatedDBURI, err  := pgconn.UpdatePasswordInDBURI(string(bytepass), password)
+		updatedDBURI, err := pgconn.UpdatePasswordInDBURI(string(bytepass), password)
 		if err != nil {
 			return fmt.Errorf("failed to update password in db-uri %v", err)
 		}

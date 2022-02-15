@@ -32,7 +32,6 @@ func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens st
 	// kubectl get pods -A
 	test_utils.ShowAllPods(t)
 
-
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	portforward := exec.Command(PATH_TO_TOBS, cmds...)
 
