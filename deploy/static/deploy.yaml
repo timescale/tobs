@@ -170,7 +170,7 @@ metadata:
 type: Opaque
 data:
   admin-user: "YWRtaW4="
-  admin-password: "SmU5S3hFZE51bVhveVpsOFdtMTJybGZTUW1VeDFzM2QzaW9qT3NpSw=="
+  admin-password: "b2dqNXV2dnEza3BIZ09GUUFndGczZ2w2QVY4M0xjNWFheHB4N2MwVg=="
   ldap-toml: ""
 ---
 # Source: tobs/charts/kube-prometheus-stack/templates/alertmanager/secret.yaml
@@ -43449,6 +43449,10 @@ spec:
     port: 9201
     targetPort: metrics-port
     protocol: TCP
+  - name: otel-port
+    port: 9202
+    targetPort: otel-port
+    protocol: TCP
 ---
 # Source: tobs/charts/timescaledb-single/templates/svc-timescaledb-config.yaml
 # This file and its contents are licensed under the Apache License 2.0.
@@ -43681,7 +43685,7 @@ spec:
         checksum/config: 6c66fbde35cd56d3df214ee81abcb178d25e011db6d5ea9f158a1644f2fba927
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
         checksum/sc-dashboard-provider-config: c09419b07debdae174cba4367188547aff84fe70823128e3ac33878f5591a65f
-        checksum/secret: 926d2f99598bd95c819402ad6f77856cb40be15f33ac3654ae3828598fc2e28d
+        checksum/secret: 90ae456eccd76909b94dd4ccbc1778b1d32d4303ba6b3427487698df571b7167
     spec:
       
       serviceAccountName: tobs-grafana
@@ -43997,6 +44001,18 @@ spec:
         - image: timescale/promscale:0.8.0
           imagePullPolicy: IfNotPresent
           name: promscale-connector
+          args:
+          - --enable-feature=tracing
+          - --otlp-grpc-server-listen-address=:9202
+          env:
+            - name: TOBS_TELEMETRY_INSTALLED_BY
+              value: helm
+            - name: TOBS_TELEMETRY_VERSION
+              value: '{{ .Chart.Version }}'
+            - name: TOBS_TELEMETRY_TRACING_ENABLED
+              value: "false"
+            - name: TOBS_TELEMETRY_TIMESCALEDB_ENABLED
+              value: "true"
           envFrom:
           - secretRef:
               name: tobs-promscale
@@ -44007,6 +44023,8 @@ spec:
           ports:
             - containerPort: 9201
               name: metrics-port
+            - containerPort: 9202
+              name: otel-port
       serviceAccountName: tobs-promscale
 ---
 # Source: tobs/templates/promlens-depoloyment.yaml
@@ -44452,8 +44470,13 @@ spec:
           value: "5432"
         - name: PGUSER
           value: postgres
+          
         - name: PGPASSWORD
-          value: 
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_PASSWORD
+          
         - name: PGHOST
           value: tobs.tobs.svc.cluster.local
         command: [ 'psql', '-d', postgres, '-f', '/add-users.sql' ]
@@ -48536,7 +48559,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "tobs-patroni-it"
+  name: "tobs-patroni-1g"
   labels:
     app: tobs-timescaledb
     chart: timescaledb-single-0.8.2
