@@ -62,14 +62,14 @@ func GetTimescaleDBsecretLabels(releaseName string) map[string]string {
 func InterfaceToBool(in interface{}) (bool, error) {
 	var out bool
 	var err error
-	switch in.(interface{}).(type) {
+	switch in := in.(type) {
 	case string:
-		out, err = strconv.ParseBool(in.(string))
+		out, err = strconv.ParseBool(in)
 		if err != nil {
 			return false, fmt.Errorf("cannot convert value to bool")
 		}
 	case bool:
-		out = in.(bool)
+		out = in
 	default:
 		return false, fmt.Errorf("value cannot be converted to bool")
 	}
