@@ -8,7 +8,7 @@ unit-tests:
 		go test ./pkg/...
 
 e2e-tests:
-		go test -v ./tests/tobs-cli-tests --timeout 20m
+		go test -v ./tests/tobs-cli-tests --timeout 30m
 
 external-db-tests:
 		go test -v ./tests/external-db-tests --timeout 30m
