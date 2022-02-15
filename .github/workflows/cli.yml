@@ -24,6 +24,13 @@ jobs:
           go-version: ${{ env.golang-version }}
         id: go
 
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: ${{ env.golangci-lint-version }}
+          working-directory: cli
+          args: --timeout=5m
+
       - name: Format
         working-directory: cli
         run: |
@@ -35,12 +42,6 @@ jobs:
         run: |
           make go-vet
           git diff --exit-code
-
-      # TODO(paulfantom): figure-out why golangci-lint action crashes
-      #- name: Lint
-      #  uses: golangci/golangci-lint-action@v2
-      #  with:
-      #    version: ${{ env.golangci-lint-version }}
 
       - name: Build
         working-directory: cli
