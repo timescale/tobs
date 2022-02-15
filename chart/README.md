@@ -152,7 +152,7 @@ helm install <release-name> timescale/tobs \
 | `promscale.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
 | `promscale.connection.user`              | User used for connection to db | `postgres` |
 | `promscale.connection.uri`               | TimescaleDB URI | `` |
-| `promscale.connection.password`          | Assign the TimescaleDB password from `tobs-credentails` from key `PATRONI_SUPERUSER_PASSWORD` | `` |
+| `promscale.connection.password`          | Assign the TimescaleDB password from `tobs-credentials` from key `PATRONI_SUPERUSER_PASSWORD` | `` |
 | `promscale.connection.host`              | TimescaleDB host address | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"` |
 | `promscale.service.type`                 | Configure the service type for Promscale | `ClusterIP`     |
 | `promscale.resources.requests.memory`    | Amount of memory for the Promscale pod                | `2Gi`       |
