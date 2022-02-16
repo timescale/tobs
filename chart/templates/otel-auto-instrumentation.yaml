@@ -5,7 +5,6 @@ metadata:
   name: tobs-auto-instrumentation
 spec:
   exporter:
-    # TODO(paulfantom): check if endpoint is correct
     endpoint: http://{{ .Release.Name }}-otel-collector.{{ .Release.Namespace }}.svc:4317
   propagators:
     - tracecontext
@@ -15,3 +14,4 @@ spec:
     type: parentbased_traceidratio
     argument: "0.25"
 {{- end -}}
+
