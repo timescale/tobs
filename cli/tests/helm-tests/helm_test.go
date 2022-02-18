@@ -83,7 +83,7 @@ func testHelmClientInstallOrUpgradeChart() {
 	runTsdb := exec.Command(PATH_TO_TOBS, "install", "--namespace", NAMESPACE, "--only-secrets")
 	msg, err := runTsdb.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error installing tobs secrets %v: %v", err, msg)
+		log.Fatalf("Error installing tobs secrets %v: %s", err, string(msg))
 	}
 
 	// download the dependent charts
