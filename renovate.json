@@ -1,5 +1,21 @@
 {
+  "timezone": "Etc/UTC",
   "extends": [
-    "config:base"
+    "config:base",
+    "schedule:daily"
+  ],
+  "packageRules": [
+    {
+      "labels": ["helm"],
+      "groupName": "helm charts",
+      "matchPaths": ["helm/**"],
+      "matchManagers": ["helmv3", "helm-values"]
+    },
+    {
+      "labels": ["cli"],
+      "groupName": "golang",
+      "matchManagers": ["gomod"],
+      "matchPaths": ["cli/**"]
+    }
   ]
 }
