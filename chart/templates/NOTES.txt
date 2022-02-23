@@ -120,6 +120,7 @@ TimescaleDB can be accessed via port 5432 on the following DNS name from within 
 Connecting to an external TimescaleDB, As external DB URI has been configured during the installation.
 {{- end }}
 
+{{- if not (index .Values "promscale" "connection" "uri") }}
 To get your password for superuser run:
 
 {{- if .Values.cli }}
@@ -159,6 +160,7 @@ To connect to your database, chose one of these options:
 {{- else }}
    MASTERPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l release={{ .Release.Name }},role=master)"
    kubectl exec -i --tty --namespace {{ .Release.Namespace }} ${MASTERPOD} -- psql -U postgres
+{{- end }}
 {{- end }}
 {{- end }}
 
