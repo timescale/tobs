@@ -13,7 +13,7 @@
     {
       "labels": ["cli"],
       "groupName": "golang",
-      "matchManagers": ["gomod"],
+      "matchManagers": ["gomod"]
     }
   ]
 }
