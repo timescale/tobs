@@ -449,7 +449,7 @@ timescaledb-single:
 kube-prometheus-stack:
   prometheus:
     prometheusSpec:
-      replicas: 3
+      replicas: 2
       prometheusExternalLabelName: cluster
       replicaExternalLabelName: __replica__
 `
