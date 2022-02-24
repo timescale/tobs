@@ -43,7 +43,7 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.8.0
+  image: timescale/promscale:0.10.0
   # needs to be enabled for tracing support in Promscale
   # to expose traces port, add tracing args to Promscale
   openTelemetry:
@@ -467,7 +467,7 @@ opentelemetryOperator:
             exporters: [prometheusremotewrite]
 
   jaeger:
-    image: jaegertracing/jaeger-query:1.30
+    image: jaegertracing/jaeger-query:1.31
     args:
       - --grpc-storage.server={{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202
       - --grpc-storage.tls.enabled=false
