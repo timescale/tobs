@@ -4,6 +4,9 @@
     "config:base",
     "schedule:daily"
   ],
+  "dependencyDashboardLabels": ["dependencies"],
+  "dependencyDashboardAutoclose": "true",
+  "labels": ["dependencies"],
   "packageRules": [
     {
       "labels": ["helm"],
