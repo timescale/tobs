@@ -17,7 +17,8 @@
     {
       "fileMatch": ".github/workflows/*.yml",
       "matchStrings": ["golang-version: (?<currentValue>.*?)\\n"],
-      "datasourceTemplate": "golang-version"
+      "datasourceTemplate": "golang-version",
+      "depNameTemplate": "golang"
     }
   ],
   "packageRules": [
