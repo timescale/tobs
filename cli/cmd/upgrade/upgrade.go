@@ -807,7 +807,7 @@ func (c *upgradeSpec) persistPrometheusDataDuringUpgrade() error {
 
 	// update existing prometheus PV to persist data and create a new PVC so the
 	// new prometheus mounts to the created PVC which binds to older prometheus PV.
-	err = c.k8sClient.UpdatePVToNewPVC(prometheus, utils.PrometheusPVCName, root.Namespace, map[string]string{"app": "prometheus", "prometheus": "tobs-kube-prometheus", "release": root.HelmReleaseName})
+	err = c.k8sClient.UpdatePVToNewPVC(prometheus, utils.PrometheusPVCName, root.Namespace, map[string]string{"prometheus": "tobs-kube-prometheus", "release": root.HelmReleaseName})
 	if err != nil {
 		return fmt.Errorf("failed to update prometheus persistent volume %v", err)
 	}
