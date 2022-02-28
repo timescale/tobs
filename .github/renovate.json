@@ -7,16 +7,23 @@
   "dependencyDashboardLabels": ["dependencies"],
   "dependencyDashboardAutoclose": "true",
   "labels": ["dependencies"],
+  "ignoreDeps": ["k8s.io/client-go"],
   "regexManagers": [
     {
-      "fileMatch": ".github/workflows/*.yml",
-      "matchStrings": ["golangci-lint-version: (?<currentValue>.*?)\\n"],
+      "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
+      "matchStrings": ["golangci-lint-version:\\s(?<currentValue>.*?)\\n"],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "golangci/golangci-lint"
     },
     {
-      "fileMatch": ".github/workflows/*.yml",
-      "matchStrings": ["golang-version: (?<currentValue>.*?)\\n"],
+      "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
+      "matchStrings": ["helm-version:\\s(?<currentValue>.*?)\\n"],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "helm/helm"
+    },
+    {
+      "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
+      "matchStrings": ["golang-version:\\s(?<currentValue>.*?)\\n"],
       "datasourceTemplate": "golang-version",
       "depNameTemplate": "golang"
     }
