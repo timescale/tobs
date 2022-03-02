@@ -29,7 +29,7 @@ promscale:
     - --metrics.high-availability
 ```
 
-Update Prometheus configuration to send prometheus pod name with `__replica__` and prometheus cluster name as `cluster` labelSets in the form of external labels and run Prometheus as 3 replicas for HA. 
+Update Prometheus configuration to send prometheus pod name with `__replica__` and prometheus cluster name as `cluster` labelSets in the form of external labels. 
 
 ```
 kube-prometheus-stack:
@@ -37,7 +37,6 @@ kube-prometheus-stack:
     prometheusSpec:
       replicaExternalLabelName: "__replica__"
       prometheusExternalLabelName: "cluster"
-      replicas: 3
 ```
 
 ## Multi-cluster support
