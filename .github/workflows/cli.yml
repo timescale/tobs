@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go ${{ env.golang-version }}
         uses: actions/setup-go@v3.0.0
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go ${{ env.golang-version }}
         uses: actions/setup-go@v3.0.0
@@ -82,7 +82,7 @@ jobs:
           - "1.23"
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go ${{ env.golang-version }}
         uses: actions/setup-go@v3.0.0
