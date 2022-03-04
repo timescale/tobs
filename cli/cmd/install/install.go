@@ -413,6 +413,17 @@ func (c *InstallSpec) deployOtelCollectorCR() error {
 	return nil
 }
 
+func appendDBSecretsValues(helmValues, replicationPass, adminPass, superUserPass string) string {
+	helmValues = helmValues + fmt.Sprintf(`
+timescaledb-single:
+  secrets:
+    credentials:
+	  PATRONI_SUPERUSER_PASSWORD: "%s"
+	  PATRONI_REPLICATION_PASSWORD: "%s"
+	  PATRONI_admin_PASSWORD: "%s"`, replicationPass, adminPass, superUserPass)
+	return helmValues
+}
+
 func appendDBURIValues(helmValues string) string {
 	helmValues = helmValues + `
 timescaledb-single:
