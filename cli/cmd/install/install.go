@@ -49,7 +49,7 @@ type InstallSpec struct {
 	Ref                string
 	dbURI              string
 	version            string
-	enableBackUp       bool
+	enableBackup       bool
 	enableOtel         bool
 	onlySecrets        bool
 	enablePrometheusHA bool
@@ -76,7 +76,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.enableBackUp, err = cmd.Flags().GetBool("enable-timescaledb-backup")
+	i.enableBackup, err = cmd.Flags().GetBool("enable-timescaledb-backup")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -314,13 +314,13 @@ func (c *InstallSpec) manageDBSecrets() error {
 func (c *InstallSpec) enableTimescaleDBBackup() error {
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
-	if !c.enableBackUp {
+	if !c.enableBackup {
 		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, common.TimescaleDBBackUpKeyForValuesYaml)
 		if err != nil {
 			return err
 		}
 		var ok bool
-		c.enableBackUp, ok = e.(bool)
+		c.enableBackup, ok = e.(bool)
 		if !ok {
 			return fmt.Errorf("enable Backup was not a bool")
 		}
@@ -475,7 +475,7 @@ func (c *InstallSpec) createSecrets() error {
 		t := timescaledb_secrets.TSDBSecretsInfo{
 			ReleaseName:    cmd.HelmReleaseName,
 			Namespace:      cmd.Namespace,
-			EnableS3Backup: c.enableBackUp,
+			EnableS3Backup: c.enableBackup,
 			TlsCert:        c.tsDBTlsCert,
 			TlsKey:         c.tsDBTlsKey,
 			K8sClient:      k8s.NewClient(),
