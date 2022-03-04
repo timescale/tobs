@@ -32,7 +32,7 @@ func init() {
 }
 
 func addInstallUtilitiesFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolP("only-secrets", "", false, "Option to create only TimescaleDB secrets")
+	cmd.Flags().BoolP("only-secrets", "", false, "[DEPRECATED] Option to create only TimescaleDB secrets")
 	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Option to enable TimescaleDB S3 backup")
 	cmd.Flags().StringP("timescaledb-tls-cert", "", "", "Option to provide your own tls certificate for TimescaleDB")
 	cmd.Flags().StringP("timescaledb-tls-key", "", "", "Option to provide your own tls key for TimescaleDB")
@@ -146,6 +146,11 @@ cli: true`
 func (c *InstallSpec) InstallStack() error {
 	var err error
 
+	if c.onlySecrets {
+		// TODO(paulfantom): Remove flag in 0.11.0
+		fmt.Println("only-secrets flag is deprecated and doesn't affect tobs in any way. Flag will be removed in next tobs version.")
+	}
+
 	helmClient = helm.NewClient(cmd.Namespace)
 	defer helmClient.Close()
 
@@ -156,17 +161,6 @@ func (c *InstallSpec) InstallStack() error {
 		if err != nil {
 			return fmt.Errorf("failed to add & update tobs helm chart: %w", err)
 		}
-	}
-
-	err = c.manageDBSecrets()
-	if err != nil {
-		return err
-	}
-
-	if c.onlySecrets {
-		fmt.Println("Skipping tobs installation because of only-secrets flag.")
-		fmt.Println("Successfully created secrets for TimescaleDB.")
-		return nil
 	}
 
 	helmValuesSpec := helm.ChartSpec{
@@ -187,6 +181,13 @@ func (c *InstallSpec) InstallStack() error {
 		helmValuesSpec.ValuesFiles = []string{c.ConfigFile}
 	}
 
+	// FIXME(paulfantom): This should manipulate helm values
+	err = c.manageDBSecrets()
+	if err != nil {
+		return err
+	}
+
+	// FIXME(paulfantom): This should manipulate helm values
 	err = c.enableTimescaleDBBackup()
 	if err != nil {
 		return err
