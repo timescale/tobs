@@ -44,20 +44,38 @@ func addInstallUtilitiesFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP("confirm", "y", false, "Confirmation for all user input prompts")
 }
 
-type InstallSpec struct {
-	ConfigFile         string
-	Ref                string
-	dbURI              string
-	version            string
-	enableBackup       bool
-	enableOtel         bool
-	onlySecrets        bool
+type TimescaleDBConfig struct {
+	tlsCert         []byte
+	tlsKey          []byte
+	enableBackup    bool
+	adminPass       string
+	replicationPass string
+	superUserPass   string
+}
+
+type PromscaleConfig struct {
+	URI string
+}
+
+type KubePrometheusConfig struct {
 	enablePrometheusHA bool
-	skipWait           bool
-	tsDBTlsCert        []byte
-	tsDBTlsKey         []byte
-	confirmActions     bool
-	dbPassword         string
+}
+
+type OpenTelemetryConfig struct {
+	enable bool
+}
+
+type InstallSpec struct {
+	ConfigFile           string
+	Ref                  string
+	version              string
+	skipWait             bool
+	confirmActions       bool
+	onlySecrets          bool
+	timescaleDBConfig    TimescaleDBConfig
+	promscaleConfig      PromscaleConfig
+	kubePrometheusConfig KubePrometheusConfig
+	openTelemetryConfig  OpenTelemetryConfig
 }
 
 func helmInstall(cmd *cobra.Command, args []string) error {
@@ -72,31 +90,11 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.dbURI, err = cmd.Flags().GetString("external-timescaledb-uri")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-	i.enableBackup, err = cmd.Flags().GetBool("enable-timescaledb-backup")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-	i.enableOtel, err = cmd.Flags().GetBool("tracing")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
 	i.version, err = cmd.Flags().GetString("version")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.onlySecrets, err = cmd.Flags().GetBool("only-secrets")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
 	i.skipWait, err = cmd.Flags().GetBool("skip-wait")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-	i.enablePrometheusHA, err = cmd.Flags().GetBool("enable-prometheus-ha")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -105,30 +103,62 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	certFile, err := cmd.Flags().GetString("timescaledb-tls-cert")
+	i.kubePrometheusConfig.enablePrometheusHA, err = cmd.Flags().GetBool("enable-prometheus-ha")
+	if err != nil {
+		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	}
+	i.openTelemetryConfig.enable, err = cmd.Flags().GetBool("tracing")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	keyFile, err := cmd.Flags().GetString("timescaledb-tls-key")
+	i.promscaleConfig.URI, err = cmd.Flags().GetString("external-timescaledb-uri")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	if certFile != "" && keyFile != "" {
-		i.tsDBTlsCert, err = ioutil.ReadFile(certFile)
+	{
+		// TODO(paulfantom): Remove flag in 0.11.0
+		i.onlySecrets, err = cmd.Flags().GetBool("only-secrets")
 		if err != nil {
-			return fmt.Errorf("failed to read file %s: %v", certFile, err)
+			return fmt.Errorf("could not install The Observability Stack: %w", err)
+		}
+		if i.onlySecrets {
+			fmt.Println("only-secrets flag is deprecated and doesn't affect tobs in any way. Flag will be removed in next tobs version.")
+		}
+	}
+
+	{
+		i.timescaleDBConfig.enableBackup, err = cmd.Flags().GetBool("enable-timescaledb-backup")
+		if err != nil {
+			return fmt.Errorf("could not install The Observability Stack: %w", err)
 		}
 
-		i.tsDBTlsKey, err = ioutil.ReadFile(keyFile)
+		certFile, err := cmd.Flags().GetString("timescaledb-tls-cert")
 		if err != nil {
-			return fmt.Errorf("failed to read file %s: %v", keyFile, err)
+			return fmt.Errorf("could not install The Observability Stack: %w", err)
 		}
-	} else if certFile != "" && keyFile == "" {
-		return fmt.Errorf("receieved only TLS certificate, please provide TLS key in --timescaledb-tls-key")
-	} else if certFile == "" && keyFile != "" {
-		return fmt.Errorf("receieved only TLS key, please provide TLS certificate in --timescaledb-tls-cert")
+
+		keyFile, err := cmd.Flags().GetString("timescaledb-tls-key")
+		if err != nil {
+			return fmt.Errorf("could not install The Observability Stack: %w", err)
+		}
+
+		if certFile != "" && keyFile != "" {
+			i.timescaleDBConfig.tlsCert, err = ioutil.ReadFile(certFile)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s: %v", certFile, err)
+			}
+
+			i.timescaleDBConfig.tlsKey, err = ioutil.ReadFile(keyFile)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s: %v", keyFile, err)
+			}
+		} else if certFile != "" && keyFile == "" {
+			return fmt.Errorf("receieved only TLS certificate, please provide TLS key in --timescaledb-tls-key")
+		} else if certFile == "" && keyFile != "" {
+			return fmt.Errorf("receieved only TLS key, please provide TLS certificate in --timescaledb-tls-cert")
+		}
 	}
 
 	err = i.InstallStack()
@@ -145,11 +175,6 @@ cli: true`
 
 func (c *InstallSpec) InstallStack() error {
 	var err error
-
-	if c.onlySecrets {
-		// TODO(paulfantom): Remove flag in 0.11.0
-		fmt.Println("only-secrets flag is deprecated and doesn't affect tobs in any way. Flag will be removed in next tobs version.")
-	}
 
 	helmClient = helm.NewClient(cmd.Namespace)
 	defer helmClient.Close()
@@ -187,13 +212,12 @@ func (c *InstallSpec) InstallStack() error {
 		return err
 	}
 
-	// FIXME(paulfantom): This should manipulate helm values
 	err = c.enableTimescaleDBBackup()
 	if err != nil {
 		return err
 	}
 
-	if c.enablePrometheusHA {
+	if c.kubePrometheusConfig.enablePrometheusHA {
 		helmValues = appendPrometheusHAValues(helmValues)
 	}
 
@@ -202,7 +226,7 @@ func (c *InstallSpec) InstallStack() error {
 		return err
 	}
 
-	if c.enableOtel {
+	if c.openTelemetryConfig.enable {
 		// opentelemetry operator needs cert-manager as a dependency as adding cert-manager isn't good practice and
 		// not recommended by the cert-manager maintainers. We are explicitly creating cert-manager with kubectl
 		// for more details on this refer: https://github.com/jetstack/cert-manager/issues/3616
@@ -227,7 +251,14 @@ func (c *InstallSpec) InstallStack() error {
 
 	// As multiple times we are appending Promscale values the below func
 	// helps us to append by overriding the previous configs field by field
-	promscaleConfig := appendPromscaleValues(c.enableOtel, enableTimescaleDB, c.enablePrometheusHA, c.dbURI, c.dbPassword, c.version)
+	promscaleConfig := appendPromscaleValues(
+		c.openTelemetryConfig.enable,
+		enableTimescaleDB,
+		c.kubePrometheusConfig.enablePrometheusHA,
+		c.promscaleConfig.URI,
+		c.timescaleDBConfig.superUserPass,
+		c.version,
+	)
 	helmValues = helmValues + promscaleConfig
 
 	helmValuesSpec.ValuesYaml = helmValues
@@ -254,7 +285,7 @@ func (c *InstallSpec) InstallStack() error {
 	}
 
 	if release.Info == nil {
-		fmt.Println("failed to install tobs completely, release notes generation failed...")
+		fmt.Println("failed to install tobs completely, release npromscaleConfigtes generation failed...")
 		return nil
 	}
 
@@ -285,7 +316,7 @@ func (c *InstallSpec) waitForPods() error {
 }
 
 func (c *InstallSpec) manageDBSecrets() error {
-	if c.dbURI != "" {
+	if c.promscaleConfig.URI != "" {
 		helmValues = appendDBURIValues(helmValues)
 	} else {
 		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
@@ -301,10 +332,12 @@ func (c *InstallSpec) manageDBSecrets() error {
 		// if timescaledb is disabled we do not need
 		// to create DB level secrets
 		if enableTimescaleDB {
-			err = c.createSecrets()
+			err = c.manageTimescaleDBSecrets()
 			if err != nil {
 				return fmt.Errorf("failed to create secrets %v", err)
 			}
+
+			//helmValues = appendDBCredentialsValues(helmValues, replicationPass, adminPass, superUserPass)
 		}
 	}
 
@@ -314,13 +347,13 @@ func (c *InstallSpec) manageDBSecrets() error {
 func (c *InstallSpec) enableTimescaleDBBackup() error {
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
-	if !c.enableBackup {
+	if !c.timescaleDBConfig.enableBackup {
 		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, common.TimescaleDBBackUpKeyForValuesYaml)
 		if err != nil {
 			return err
 		}
 		var ok bool
-		c.enableBackup, ok = e.(bool)
+		c.timescaleDBConfig.enableBackup, ok = e.(bool)
 		if !ok {
 			return fmt.Errorf("enable Backup was not a bool")
 		}
@@ -336,7 +369,7 @@ timescaledb-single:
 }
 
 func (c *InstallSpec) enableOtelOperator() error {
-	if c.enableOtel {
+	if c.openTelemetryConfig.enable {
 		helmValues = enableOtelInValues(helmValues)
 	} else {
 		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"opentelemetryOperator", "enabled"})
@@ -344,7 +377,7 @@ func (c *InstallSpec) enableOtelOperator() error {
 			return err
 		}
 		var ok bool
-		c.enableOtel, ok = e.(bool)
+		c.openTelemetryConfig.enable, ok = e.(bool)
 		if !ok {
 			return fmt.Errorf("opentelemetryOperator.enabled is not a bool")
 		}
@@ -353,14 +386,18 @@ func (c *InstallSpec) enableOtelOperator() error {
 }
 
 func (c *InstallSpec) deployOtelCollectorCR() error {
-	if c.enableOtel {
+	if c.openTelemetryConfig.enable {
 		otelCol := otel.OtelCol{
 			ReleaseName: cmd.HelmReleaseName,
 			Namespace:   cmd.Namespace,
 			K8sClient:   k8sClient,
 			HelmClient:  helmClient,
 		}
-		config, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"opentelemetryOperator", "collector", "config"})
+		config, err := helmClient.ExportValuesFieldFromChart(
+			c.Ref,
+			c.ConfigFile,
+			[]string{"opentelemetryOperator", "collector", "config"},
+		)
 		if err != nil {
 			return err
 		}
@@ -457,7 +494,7 @@ kube-prometheus-stack:
 	return helmValues
 }
 
-func (c *InstallSpec) createSecrets() error {
+func (c *InstallSpec) manageTimescaleDBSecrets() error {
 	var i int64
 	var err error
 	if c.version != "" {
@@ -475,16 +512,16 @@ func (c *InstallSpec) createSecrets() error {
 		t := timescaledb_secrets.TSDBSecretsInfo{
 			ReleaseName:    cmd.HelmReleaseName,
 			Namespace:      cmd.Namespace,
-			EnableS3Backup: c.enableBackup,
-			TlsCert:        c.tsDBTlsCert,
-			TlsKey:         c.tsDBTlsKey,
+			EnableS3Backup: c.timescaleDBConfig.enableBackup,
+			TlsCert:        c.timescaleDBConfig.tlsCert,
+			TlsKey:         c.timescaleDBConfig.tlsKey,
 			K8sClient:      k8s.NewClient(),
 		}
 		err := t.CreateTimescaleDBSecrets()
 		if err != nil {
 			return err
 		}
-		c.dbPassword = string(t.DBPassword)
+		c.timescaleDBConfig.superUserPass = string(t.DBPassword)
 	}
 
 	return nil

@@ -21,14 +21,13 @@ import (
 )
 
 type TSDBSecretsInfo struct {
-	ReleaseName               string
-	Namespace                 string
-	EnableS3Backup            bool
-	TlsCert                   []byte
-	TlsKey                    []byte
-	K8sClient                 k8s.Client
-	IsPromscaleSecretProvided bool
-	DBPassword                []byte
+	ReleaseName    string
+	Namespace      string
+	EnableS3Backup bool
+	TlsCert        []byte
+	TlsKey         []byte
+	K8sClient      k8s.Client
+	DBPassword     []byte
 }
 
 func (t *TSDBSecretsInfo) CreateTimescaleDBSecrets() error {
