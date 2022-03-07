@@ -11,7 +11,7 @@ defaults:
     working-directory: cli
 
 env:
-  golang-version: 1.17.7
+  golang-version: 1.17.8
 
 jobs:
   golang:
