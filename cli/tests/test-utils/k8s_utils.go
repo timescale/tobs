@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -171,7 +173,7 @@ func CreateTimescaleDBNodePortService(namespace string) (string, error) {
 	return ip + ":30007", nil
 }
 
-func GetTSDBBackUpSecret(releaseName, namespace string) (*v1.Secret, error) {
+func GetTSDBBackupSecret(releaseName, namespace string) (*v1.Secret, error) {
 	client, _ := kubeInit()
 	secret, err := client.CoreV1().Secrets(namespace).Get(context.Background(), releaseName+"-pgbackrest", metav1.GetOptions{})
 	if err != nil {
@@ -208,4 +210,49 @@ func DeleteWebhooks() error {
 	}
 
 	return nil
+}
+
+func WaitForPodsReady(ctx context.Context, namespace string, timeout time.Duration, expectedReplicas int, opts metav1.ListOptions) error {
+	return wait.Poll(time.Second, timeout, func() (bool, error) {
+		client, _ := kubeInit()
+		pl, err := client.CoreV1().Pods(namespace).List(ctx, opts)
+		if err != nil {
+			return false, err
+		}
+
+		runningAndReady := 0
+		for _, p := range pl.Items {
+			isRunningAndReady, err := PodRunningAndReady(p)
+			if err != nil {
+				return false, err
+			}
+
+			if isRunningAndReady {
+				runningAndReady++
+			}
+		}
+
+		if runningAndReady == expectedReplicas {
+			return true, nil
+		}
+		return false, nil
+	})
+}
+
+// PodRunningAndReady returns whether a pod is running and each container has
+// passed it's ready state.
+func PodRunningAndReady(pod v1.Pod) (bool, error) {
+	switch pod.Status.Phase {
+	case v1.PodFailed, v1.PodSucceeded:
+		return false, fmt.Errorf("pod completed")
+	case v1.PodRunning:
+		for _, cond := range pod.Status.Conditions {
+			if cond.Type != v1.PodReady {
+				continue
+			}
+			return cond.Status == v1.ConditionTrue, nil
+		}
+		return false, fmt.Errorf("pod ready condition not found")
+	}
+	return false, nil
 }

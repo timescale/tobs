@@ -230,6 +230,7 @@ func (c *TestInstallSpec) TestInstall(t testing.TB) {
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
 	install := exec.Command(PATH_TO_TOBS, cmds...)
 
+	// FIXME(paulfantom): For some reason this is hiding output of the command and thus complicating tests debugging
 	out, err := install.CombinedOutput()
 	if err != nil {
 		t.Logf(string(out))

@@ -12,7 +12,7 @@ type backupDetails struct {
 	value string
 }
 
-func testBackUpEnabledInstallation(t *testing.T) {
+func testBackupEnabledInstallation(t *testing.T) {
 	t.Log("performing backup enabled tests....")
 	releaseName := "testbackup"
 	namespace := "testbackup"
@@ -56,7 +56,7 @@ func testBackUpEnabledInstallation(t *testing.T) {
 		OnlySecrets:  false,
 	}
 	i.TestInstall(t)
-	sec, err := test_utils.GetTSDBBackUpSecret(releaseName, namespace)
+	sec, err := test_utils.GetTSDBBackupSecret(releaseName, namespace)
 	if err != nil {
 		t.Logf("Error while finding timescaleDB backup secret. After installting tobs with backup enabled.")
 		t.Fatal(err)
@@ -75,7 +75,7 @@ func testBackUpEnabledInstallation(t *testing.T) {
 	}
 	u.TestUninstall(t)
 
-	_, err = test_utils.GetTSDBBackUpSecret(releaseName, namespace)
+	_, err = test_utils.GetTSDBBackupSecret(releaseName, namespace)
 	// here we expect an error after uninstalling the pgbackrest secret shouldn't be found
 	if err == nil {
 		t.Fatal("Uninstalling backup enabled tobs deployment failed to delete pgbackrest secret")

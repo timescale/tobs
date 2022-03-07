@@ -1,6 +1,7 @@
 package tobs_cli_tests
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 )
 
 var RELEASE_NAME = "gg"
@@ -50,16 +53,25 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// tests on backEnabled tobs
+	// tests on backupEnabled tobs
 	// runs it prior to other tests as
 	// the tobs installation itself is different
-	testBackUpEnabledInstallation(&testing.T{})
+	testBackupEnabledInstallation(&testing.T{})
 
 	log.Println("successfully performed backup install tests...")
 
 	installObs()
 
-	time.Sleep(3 * time.Minute)
+	err = test_utils.WaitForPodsReady(context.Background(), NAMESPACE, 10*time.Minute, 3,
+		metav1.ListOptions{
+			LabelSelector: fields.SelectorFromSet(fields.Set(map[string]string{
+				"app.kubernetes.io/name": "promscale-connector",
+			})).String(),
+		},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println("starting e2e tests post tobs deployment....")
 	code := m.Run()
@@ -71,11 +83,17 @@ func TestMain(m *testing.M) {
 
 	uninstallsObs()
 
-	// wait for the uninstall to succeed
-	// this takes 3 mins because in HA mode
-	// we have three 3 Prometheus instances to gracefully shutdown
-	// and to avoid flakiness.
-	time.Sleep(3 * time.Minute)
+	// Wait untill all pods are removed
+	err = test_utils.WaitForPodsReady(context.Background(), NAMESPACE, 15*time.Minute, 0,
+		metav1.ListOptions{
+			LabelSelector: fields.SelectorFromSet(fields.Set(map[string]string{
+				"release": RELEASE_NAME,
+			})).String(),
+		},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = test_utils.CheckPVCSExist(RELEASE_NAME, NAMESPACE)
 	if err != nil {

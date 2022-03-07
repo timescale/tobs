@@ -775,6 +775,7 @@ func (c *upgradeSpec) persistPrometheusDataDuringUpgrade() error {
 	// scale down prometheus replicas to 0
 	fmt.Println("Migrating the underlying prometheus persistent volume to new prometheus instance...")
 	prometheus := root.HelmReleaseName + "-prometheus-server"
+	// FIXME(paulfantom): Test if this even working as Prometheus is not deployed with Deployment object but with CRD.
 	prometheusDeployment, err := c.k8sClient.GetDeployment(prometheus, root.Namespace)
 	if err != nil {
 		return fmt.Errorf("failed to get %s %v", prometheus, err)
