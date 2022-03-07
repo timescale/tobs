@@ -18,9 +18,9 @@ dependencies:
     repository: https://charts.timescale.com
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
-    version: 33.1.0
+    version: 33.2.0
     repository: https://prometheus-community.github.io/helm-charts
   - name: opentelemetry-operator
     condition: opentelemetryOperator.enabled
-    version: 0.6.1
+    version: 0.6.3
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
