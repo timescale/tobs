@@ -9,7 +9,8 @@ import (
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
-const tobsVersion = "0.8.0"
+// TODO(paulfantom): read this from VERSION file in the the repository TLD
+const tobsVersion = "0.9.0"
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
