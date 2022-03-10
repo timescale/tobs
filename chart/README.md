@@ -36,9 +36,8 @@ By default, timescaledb helm chart doesn't create its own secrets. So please fol
 Create timescaledb secrets using `tobs` CLI. This creates database passwords and self-signed certificates.
 
 ```
-tobs install --only-secrets -n <name> --namespace <namepsace>
+tobs install --only-secrets --namespace <namepsace>
 ```
-
 
 ## Installing the helm chart
 
