@@ -67,6 +67,12 @@ promscale:
     - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
       value: *dbEnabled
 
+  serviceMonitor:
+    enabled: true
+
+  prometheus:
+    annotations: {}
+
   ## Note:
 
   # If you are providing your own secret name, do
