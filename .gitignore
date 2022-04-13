@@ -2,3 +2,4 @@
 .idea/
 cli/bin
 chart/Chart.lock
+tmp/
