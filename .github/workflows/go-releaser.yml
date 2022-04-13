@@ -8,7 +8,7 @@ on:
     branches: ['**']
 
 env:
-  golang-version: 1.17.8
+  golang-version: 1.18.1
 
 jobs:
   goreleaser:
