@@ -39,7 +39,7 @@ See a demo of tobs in action by clicking the video below:
 To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
+curl --proto '=https' -A 'tobs' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
 ```
 
 Alternatively, you can download the CLI directly via [our releases page](https://github.com/timescale/tobs/releases/latest)
