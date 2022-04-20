@@ -187,12 +187,25 @@ func (c *TestUnInstallSpec) TestUninstall(t testing.TB) {
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	uninstall := exec.Command(PATH_TO_TOBS, cmds...)
-
-	out, err := uninstall.CombinedOutput()
+	// FIXME(paulfantom): Convert this to function execution
+	cmd := exec.Command(PATH_TO_TOBS, cmds...)
+	stdout, err := cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
 	if err != nil {
-		t.Logf(string(out))
 		t.Fatal(err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+
+	for {
+		tmp := make([]byte, 1024)
+		_, err := stdout.Read(tmp)
+		t.Logf(string(tmp))
+		if err != nil {
+			break
+		}
 	}
 }
 
@@ -220,24 +233,35 @@ func (c *TestInstallSpec) TestInstall(t testing.TB) {
 	if c.SkipWait {
 		cmds = append(cmds, "--skip-wait")
 	}
-	if c.OnlySecrets {
-		cmds = append(cmds, "--only-secrets")
-	}
 	if c.PathToValues != "" {
 		cmds = append(cmds, "-f", c.PathToValues)
 	}
 
 	t.Logf("Running '%v'", "tobs "+strings.Join(cmds, " "))
-	install := exec.Command(PATH_TO_TOBS, cmds...)
-
-	out, err := install.CombinedOutput()
+	// FIXME(paulfantom): Convert this to function execution
+	cmd := exec.Command(PATH_TO_TOBS, cmds...)
+	stdout, err := cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
 	if err != nil {
-		t.Logf(string(out))
 		t.Fatal(err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+
+	for {
+		tmp := make([]byte, 1024)
+		_, err := stdout.Read(tmp)
+		t.Logf(string(tmp))
+		if err != nil {
+			break
+		}
 	}
 }
 
 func ShowAllPods(t testing.TB) {
+	// FIXME(paulfantom): Use kubernetes client instead of shelling out
 	out := exec.Command("kubectl", "get", "pods", "-A")
 	output, err := out.CombinedOutput()
 	log.Println(string(output))
@@ -247,6 +271,7 @@ func ShowAllPods(t testing.TB) {
 }
 
 func ShowAllPVCs(t testing.TB) {
+	// FIXME(paulfantom): Use kubernetes client instead of shelling out
 	out := exec.Command("kubectl", "get", "pvc", "-A")
 	output, err := out.CombinedOutput()
 	t.Log(string(output))
