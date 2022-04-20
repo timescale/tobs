@@ -12,7 +12,6 @@ import (
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/otel"
-	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
 
@@ -32,7 +31,7 @@ func init() {
 }
 
 func addInstallUtilitiesFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolP("only-secrets", "", false, "Option to create only TimescaleDB secrets")
+	cmd.Flags().BoolP("only-secrets", "", false, "[DEPRECATED] Option to create only TimescaleDB secrets")
 	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Option to enable TimescaleDB S3 backup")
 	cmd.Flags().StringP("timescaledb-tls-cert", "", "", "Option to provide your own tls certificate for TimescaleDB")
 	cmd.Flags().StringP("timescaledb-tls-key", "", "", "Option to provide your own tls key for TimescaleDB")
@@ -158,17 +157,6 @@ func (c *InstallSpec) InstallStack() error {
 		}
 	}
 
-	err = c.manageDBSecrets()
-	if err != nil {
-		return err
-	}
-
-	if c.onlySecrets {
-		fmt.Println("Skipping tobs installation because of only-secrets flag.")
-		fmt.Println("Successfully created secrets for TimescaleDB.")
-		return nil
-	}
-
 	helmValuesSpec := helm.ChartSpec{
 		ReleaseName: cmd.HelmReleaseName,
 		ChartName:   c.Ref,
@@ -283,33 +271,6 @@ func (c *InstallSpec) waitForPods() error {
 	return nil
 }
 
-func (c *InstallSpec) manageDBSecrets() error {
-	if c.dbURI != "" {
-		helmValues = appendDBURIValues(helmValues)
-	} else {
-		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
-		if err != nil {
-			return err
-		}
-
-		enableTimescaleDB, err := utils.InterfaceToBool(e)
-		if err != nil {
-			return fmt.Errorf("cannot convert timescaledb-single.enabled to bool, %v", err)
-		}
-
-		// if timescaledb is disabled we do not need
-		// to create DB level secrets
-		if enableTimescaleDB {
-			err = c.createSecrets()
-			if err != nil {
-				return fmt.Errorf("failed to create secrets %v", err)
-			}
-		}
-	}
-
-	return nil
-}
-
 func (c *InstallSpec) enableTimescaleDBBackup() error {
 	// If enable backup is disabled by flag check the backup option
 	// from values.yaml as a second option
@@ -373,13 +334,6 @@ func (c *InstallSpec) deployOtelCollectorCR() error {
 	}
 
 	return nil
-}
-
-func appendDBURIValues(helmValues string) string {
-	helmValues = helmValues + `
-timescaledb-single:
-  enabled: false`
-	return helmValues
 }
 
 func enableOtelInValues(helmValues string) string {
@@ -454,37 +408,4 @@ kube-prometheus-stack:
       replicaExternalLabelName: __replica__
 `
 	return helmValues
-}
-
-func (c *InstallSpec) createSecrets() error {
-	var i int64
-	var err error
-	if c.version != "" {
-		i, err = utils.ParseVersion(c.version, 3)
-		if err != nil {
-			return fmt.Errorf("failed to parse version %s %v", c.version, err)
-		}
-	}
-
-	// here 3000 represent version
-	// equal to or greater than 0.3.0
-	// if version isn't provided new
-	// installations needs secrets
-	if i >= 3000 || c.version == "" {
-		t := timescaledb_secrets.TSDBSecretsInfo{
-			ReleaseName:    cmd.HelmReleaseName,
-			Namespace:      cmd.Namespace,
-			EnableS3Backup: c.enableBackUp,
-			TlsCert:        c.tsDBTlsCert,
-			TlsKey:         c.tsDBTlsKey,
-			K8sClient:      k8s.NewClient(),
-		}
-		err := t.CreateTimescaleDBSecrets()
-		if err != nil {
-			return err
-		}
-		c.dbPassword = string(t.DBPassword)
-	}
-
-	return nil
 }
