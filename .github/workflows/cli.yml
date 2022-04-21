@@ -8,8 +8,8 @@ on:
     branches: ['**']
 
 env:
-  golang-version: 1.17.8
-  golangci-lint-version: v1.44.2
+  golang-version: 1.18.1
+  golangci-lint-version: v1.45.2
 
 jobs:
   build:
