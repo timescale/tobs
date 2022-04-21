@@ -37,11 +37,6 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	// tests on backEnabled tobs
-	// runs it prior to other tests as
-	// the tobs installation itself is different
-	testBackUpEnabledInstallation(&testing.T{})
-
 	log.Println("successfully performed backup install tests...")
 
 	installObs()

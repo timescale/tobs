@@ -21,7 +21,11 @@ var (
 	helmClient          helm.Client
 )
 
-const upgradeFromVersion = "0.2.2"
+// TODO(paulfantom): Figure out how to use only previous tobs version to upgrade from.
+// As in `master` should be upgradable from previous release
+// release X.Y.Z should be upgradable from release X.(Y-1)
+// Maybe VERSION file could help in this
+const upgradeFromVersion = "0.7.0"
 
 func TestMain(m *testing.M) {
 	// Signal handling
