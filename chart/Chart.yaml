@@ -22,5 +22,5 @@ dependencies:
     repository: https://prometheus-community.github.io/helm-charts
   - name: opentelemetry-operator
     condition: opentelemetryOperator.enabled
-    version: 0.6.6
+    version: 0.6.7
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
