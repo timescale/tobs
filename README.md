@@ -70,7 +70,7 @@ The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#us
 
 # Configuring the stack
 
-All configuration for all components happens through the helm values.yml file.
+All configuration for all components happens through the helm values.yaml file.
 You can view the self-documenting [default values.yaml](chart/values.yaml) in the repo.
 We also have additional documentation about individual configuration settings in our
 [Helm chart docs](chart/README.md#configuring-helm-chart).
