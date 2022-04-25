@@ -7,7 +7,7 @@ TOBS_VERSION=${TOBS_VERSION:-0.9.0}
 
 happyexit() {
 	local symlink_msg=""
-	if [ "$1" == "1" ]; then
+	if [ "$1" = "1" ]; then
 		symlink_msg=" and for your coinvenience linked to /usr/local/bin/tobs"
 	fi
 	cat <<-EOF
