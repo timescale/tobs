@@ -3,7 +3,6 @@ package install
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -31,13 +30,13 @@ func init() {
 }
 
 func addInstallUtilitiesFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolP("only-secrets", "", false, "[DEPRECATED] Option to create only TimescaleDB secrets")
+	cmd.Flags().BoolP("only-secrets", "", false, "[DEPRECATED] Defunct flag historically used to create TimescaleDB secrets")
+	cmd.Flags().StringP("timescaledb-tls-cert", "", "", "[DEPRECATED] Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
+	cmd.Flags().StringP("timescaledb-tls-key", "", "", "[DEPRECATED] Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Option to enable TimescaleDB S3 backup")
-	cmd.Flags().StringP("timescaledb-tls-cert", "", "", "Option to provide your own tls certificate for TimescaleDB")
-	cmd.Flags().StringP("timescaledb-tls-key", "", "", "Option to provide your own tls key for TimescaleDB")
 	cmd.Flags().StringP("version", "", "", "Option to provide tobs helm chart version, if not provided will install the latest tobs chart available")
 	cmd.Flags().BoolP("skip-wait", "", false, "Option to do not wait for pods to get into running state (useful for faster tobs installation)")
-	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 3 replicas")
+	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 2 replicas")
 	cmd.Flags().BoolP("tracing", "", false, "Option to enable OpenTelemetry and Jaeger components")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 	cmd.Flags().BoolP("confirm", "y", false, "Confirmation for all user input prompts")
@@ -50,11 +49,8 @@ type InstallSpec struct {
 	version            string
 	enableBackUp       bool
 	enableOtel         bool
-	onlySecrets        bool
 	enablePrometheusHA bool
 	skipWait           bool
-	tsDBTlsCert        []byte
-	tsDBTlsKey         []byte
 	confirmActions     bool
 	dbPassword         string
 }
@@ -87,10 +83,6 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.onlySecrets, err = cmd.Flags().GetBool("only-secrets")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
 	i.skipWait, err = cmd.Flags().GetBool("skip-wait")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
@@ -104,30 +96,16 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	certFile, err := cmd.Flags().GetString("timescaledb-tls-cert")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
+	// TODO(paulfantom): Remove deprecated flags post 0.11.0 release
+	if cmd.Flags().Changed("only-secrets") {
+		fmt.Println("DEPRECATED flag used: 'only-secrets'. This flag will be removed in future versions of tobs.")
+	}
+	if cmd.Flags().Changed("timescaledb-tls-cert") {
+		fmt.Println("DEPRECATED flag used: 'timescaledb-tls-cert'. This flag will be removed in future versions of tobs. Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	}
 
-	keyFile, err := cmd.Flags().GetString("timescaledb-tls-key")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-
-	if certFile != "" && keyFile != "" {
-		i.tsDBTlsCert, err = ioutil.ReadFile(certFile)
-		if err != nil {
-			return fmt.Errorf("failed to read file %s: %v", certFile, err)
-		}
-
-		i.tsDBTlsKey, err = ioutil.ReadFile(keyFile)
-		if err != nil {
-			return fmt.Errorf("failed to read file %s: %v", keyFile, err)
-		}
-	} else if certFile != "" && keyFile == "" {
-		return fmt.Errorf("receieved only TLS certificate, please provide TLS key in --timescaledb-tls-key")
-	} else if certFile == "" && keyFile != "" {
-		return fmt.Errorf("receieved only TLS key, please provide TLS certificate in --timescaledb-tls-cert")
+	if cmd.Flags().Changed("timescaledb-tls-key") {
+		fmt.Println("DEPRECATED flag used: 'timescaledb-tls-key'. This flag will be removed in future versions of tobs. Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	}
 
 	err = i.InstallStack()
