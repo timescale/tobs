@@ -71,6 +71,7 @@ promscale:
     enabled: true
 
   prometheus:
+    # turn off annotation-based scraping of promscale itself, user the serviceMonitor instead.
     annotations: {}
 
   ## Note:
