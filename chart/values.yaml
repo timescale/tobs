@@ -483,6 +483,11 @@ opentelemetryOperator:
     env:
       - name: SPAN_STORAGE_TYPE
         value: grpc-plugin
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    resources: {}
     service:
       loadBalancer:
         enabled: false
+    
