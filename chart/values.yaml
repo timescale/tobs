@@ -453,6 +453,7 @@ opentelemetryOperator:
         logging:
         otlp:
           endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202"
+          compression: none
           tls:
             insecure: true
         prometheusremotewrite:
