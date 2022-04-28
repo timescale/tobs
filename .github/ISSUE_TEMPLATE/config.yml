@@ -1,0 +1,5 @@
+blank_issues_enabled: false # Show or hide the Create a blank issue choice when users select New issue.
+contact_links:
+  - name: "Questions via timescale community support on timescale slack - #promscale"
+    url: https://timescaledb.slack.com/archives/C011FC0PPC5
+    about: "Join us for questions, answers or tobs related chat. Please do create issues on Github for better collaboration."
