@@ -53,6 +53,9 @@ promscale:
     host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
     port: 5432
 
+  openTelemetry:
+    enabled: true
+
   extraEnv:
     - name: "TOBS_TELEMETRY_INSTALLED_BY"
       value: "helm"
@@ -385,7 +388,7 @@ promlens:
 # Enable OpenTelemetry Operator
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
 opentelemetryOperator:
-  enabled: false
+  enabled: true
   jaeger:
     image: jaegertracing/jaeger-query:1.30
     args:

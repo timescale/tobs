@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/timescale/tobs/cli/pkg/helm"
@@ -94,6 +95,8 @@ func testHelmClientInstallOrUpgradeChart() {
 		Namespace:       NAMESPACE,
 		Version:         tobsVersion,
 		CreateNamespace: true,
+		Wait:            true,
+		Timeout:         15 * time.Minute,
 		ValuesFiles:     []string{PATH_TO_TEST_VALUES},
 	}
 

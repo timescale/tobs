@@ -9,7 +9,6 @@ import (
 	"github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/helm"
-	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/otel"
 	"github.com/timescale/tobs/cli/pkg/utils"
 )
@@ -35,7 +34,7 @@ func addInstallUtilitiesFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("timescaledb-tls-key", "", "", "[DEPRECATED] Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Option to enable TimescaleDB S3 backup")
 	cmd.Flags().StringP("version", "", "", "Option to provide tobs helm chart version, if not provided will install the latest tobs chart available")
-	cmd.Flags().BoolP("skip-wait", "", false, "Option to do not wait for pods to get into running state (useful for faster tobs installation)")
+	cmd.Flags().BoolP("skip-wait", "", false, "[DEPRECATED] flag is not functional as tobs installation requires waiting for pods to be in running state due to opentelemetry prerequisities")
 	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 2 replicas")
 	cmd.Flags().BoolP("tracing", "", false, "Option to enable OpenTelemetry and Jaeger components")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
@@ -48,9 +47,7 @@ type InstallSpec struct {
 	dbURI              string
 	version            string
 	enableBackUp       bool
-	enableOtel         bool
 	enablePrometheusHA bool
-	skipWait           bool
 	confirmActions     bool
 	dbPassword         string
 }
@@ -75,15 +72,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.enableOtel, err = cmd.Flags().GetBool("tracing")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
 	i.version, err = cmd.Flags().GetString("version")
-	if err != nil {
-		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-	i.skipWait, err = cmd.Flags().GetBool("skip-wait")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -97,13 +86,18 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	}
 
 	// TODO(paulfantom): Remove deprecated flags post 0.11.0 release
+	if cmd.Flags().Changed("tracing") {
+		fmt.Println("DEPRECATED flag used: 'tracing'. This flag will be removed in future versions of tobs. Feature is now enabled by default and if you want to disable deployment of opentelemetry-operator, change value of opentelemetryOperator.enabled")
+	}
+	if cmd.Flags().Changed("skip-wait") {
+		fmt.Println("DEPRECATED flag used: 'skip-wait'. This flag will be removed in future versions of tobs. Feature is now disabled by default to allow smooth installation of opentelemetry components")
+	}
 	if cmd.Flags().Changed("only-secrets") {
 		fmt.Println("DEPRECATED flag used: 'only-secrets'. This flag will be removed in future versions of tobs.")
 	}
 	if cmd.Flags().Changed("timescaledb-tls-cert") {
 		fmt.Println("DEPRECATED flag used: 'timescaledb-tls-cert'. This flag will be removed in future versions of tobs. Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	}
-
 	if cmd.Flags().Changed("timescaledb-tls-key") {
 		fmt.Println("DEPRECATED flag used: 'timescaledb-tls-key'. This flag will be removed in future versions of tobs. Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	}
@@ -116,7 +110,6 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 }
 
 var helmClient helm.Client
-var k8sClient k8s.Client
 var helmValues = `
 cli: true`
 
@@ -147,6 +140,8 @@ func (c *InstallSpec) InstallStack() error {
 		// i.e. if a user wants to install tobs helm chart < 0.3.0
 		// this option creates the namespace.
 		CreateNamespace: true,
+		Wait:            true,
+		Timeout:         15 * time.Minute,
 	}
 
 	if c.ConfigFile != "" {
@@ -162,60 +157,48 @@ func (c *InstallSpec) InstallStack() error {
 		helmValues = appendPrometheusHAValues(helmValues)
 	}
 
-	err = c.enableOtelOperator()
+	// opentelemetry operator needs cert-manager as a dependency as adding cert-manager isn't good practice and
+	// not recommended by the cert-manager maintainers. We are explicitly creating cert-manager with kubectl
+	// for more details on this refer: https://github.com/jetstack/cert-manager/issues/3616
+	err = otel.CreateCertManager(c.confirmActions)
 	if err != nil {
-		return err
-	}
-
-	if c.enableOtel {
-		// opentelemetry operator needs cert-manager as a dependency as adding cert-manager isn't good practice and
-		// not recommended by the cert-manager maintainers. We are explicitly creating cert-manager with kubectl
-		// for more details on this refer: https://github.com/jetstack/cert-manager/issues/3616
-		err = otel.CreateCertManager(c.confirmActions)
-		if err != nil {
-			return fmt.Errorf("failed to create cert-manager %v", err)
-		}
+		return fmt.Errorf("failed to create cert-manager %v", err)
 	}
 
 	if c.version != "" {
 		helmValuesSpec.Version = c.version
 	}
 
-	e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
+	v, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"promscale", "openTelemetry", "enabled"})
 	if err != nil {
 		return err
 	}
-	enableTimescaleDB, err := utils.InterfaceToBool(e)
+	enabledOTEL, err := utils.InterfaceToBool(v)
+	if err != nil {
+		return fmt.Errorf("cannot convert promscale.openTelemetry.enabled to bool, %v", err)
+	}
+	// waiting for helm install completion is necessary only for applying otel CRs. This is an opentelemetry-operator prerequiste
+	//helmValuesSpec.Wait = enabledOTEL
+
+	v, err = helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"timescaledb-single", "enabled"})
+	if err != nil {
+		return err
+	}
+	enableTimescaleDB, err := utils.InterfaceToBool(v)
 	if err != nil {
 		return fmt.Errorf("cannot convert timescaledb-single.enabled to bool, %v", err)
 	}
 
 	// As multiple times we are appending Promscale values the below func
 	// helps us to append by overriding the previous configs field by field
-	promscaleConfig := appendPromscaleValues(c.enableOtel, enableTimescaleDB, c.enablePrometheusHA, c.dbURI, c.dbPassword, c.version)
+	promscaleConfig := appendPromscaleValues(enabledOTEL, enableTimescaleDB, c.enablePrometheusHA, c.dbURI, c.dbPassword, c.version)
 	helmValues = helmValues + promscaleConfig
 
 	helmValuesSpec.ValuesYaml = helmValues
-	fmt.Println("Installing The Observability Stack")
+	fmt.Println("Installing The Observability Stack, this can take a few minutes")
 	release, err := helmClient.InstallOrUpgradeChart(context.Background(), &helmValuesSpec)
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-
-	fmt.Println("Waiting for helm install to complete...")
-
-	time.Sleep(10 * time.Second)
-
-	k8sClient = k8s.NewClient()
-	err = c.waitForPods()
-	if err != nil {
-		return err
-	}
-
-	// create the default otelcol CR as operator should be is up & running by now....
-	err = c.deployOtelCollectorCR()
-	if err != nil {
-		return err
 	}
 
 	if release.Info == nil {
@@ -225,27 +208,6 @@ func (c *InstallSpec) InstallStack() error {
 
 	fmt.Println(release.Info.Notes)
 	fmt.Println("The Observability Stack has been installed successfully")
-	return nil
-}
-
-func (c *InstallSpec) waitForPods() error {
-	if !c.skipWait {
-		fmt.Println("Waiting for pods to initialize...")
-		pods, err := k8sClient.KubeGetAllPods(cmd.Namespace, cmd.HelmReleaseName)
-		if err != nil {
-			return err
-		}
-
-		for _, pod := range pods {
-			err = k8sClient.KubeWaitOnPod(cmd.Namespace, pod.Name)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		fmt.Println("skipping the wait for pods to come to a running state because --skip-wait is enabled.")
-	}
-
 	return nil
 }
 
@@ -271,55 +233,6 @@ timescaledb-single:
 	}
 
 	return nil
-}
-
-func (c *InstallSpec) enableOtelOperator() error {
-	if c.enableOtel {
-		helmValues = enableOtelInValues(helmValues)
-	} else {
-		e, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"opentelemetryOperator", "enabled"})
-		if err != nil {
-			return err
-		}
-		var ok bool
-		c.enableOtel, ok = e.(bool)
-		if !ok {
-			return fmt.Errorf("opentelemetryOperator.enabled is not a bool")
-		}
-	}
-	return nil
-}
-
-func (c *InstallSpec) deployOtelCollectorCR() error {
-	if c.enableOtel {
-		otelCol := otel.OtelCol{
-			ReleaseName: cmd.HelmReleaseName,
-			Namespace:   cmd.Namespace,
-			K8sClient:   k8sClient,
-			HelmClient:  helmClient,
-		}
-		config, err := helmClient.ExportValuesFieldFromChart(c.Ref, c.ConfigFile, []string{"opentelemetryOperator", "collector", "config"})
-		if err != nil {
-			return err
-		}
-		otelColConfig, ok := config.(string)
-		if !ok {
-			return fmt.Errorf("opentelemetryOperator.collector.config is not a string")
-		}
-		if err = otelCol.CreateDefaultCollector(otelColConfig); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func enableOtelInValues(helmValues string) string {
-	helmValues = helmValues + `
-opentelemetryOperator:
-  enabled: true
-`
-	return helmValues
 }
 
 func appendPromscaleValues(enableOtel, timescaledb, promHA bool, dbURI, dbPassword, version string) string {
