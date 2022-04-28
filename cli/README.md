@@ -67,14 +67,6 @@ Documentation about Helm configuration can be found in the [Helm chart directory
 |--------------------------------|---------------------------------------------------|--------------------------------------|
 | `tobs prometheus port-forward` | Port-forwards the Prometheus server to localhost. | `--port`, `-p` : port to listen from |
 
-### Jaeger Commands
-
-Jaeger cmds are only supported if tracing is enabled in tobs installation
-
-| Command                        | Description                                       | Flags                                |
-|--------------------------------|---------------------------------------------------|--------------------------------------|
-| `tobs jaeger port-forward`     | Port-forwards the jaeger query to localhost.      | `--port`, `-p` : port to listen from |
-
 ### Metrics Commands
 
 | Command                                   | Description                                                                          | Flags |

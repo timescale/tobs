@@ -196,24 +196,6 @@ To connect to your database, chose one of these options:
 
 {{- end -}}
 
-{{- if .Values.opentelemetryOperator.enabled }}
-###############################################################################
-🎯 JAEGER NOTES:
-###############################################################################
-
-    Jaeger visualizes traces.
-
-    You can access Jaeger via a local browser by executing:
-{{- if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} jaeger port-forward
-{{- else }}
-      kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name }}-jaeger 16686:16686
-{{- end }}
-
-    Then you can point your browser to http://127.0.0.1:16686/.
-
-{{- end -}}
-
 {{ if and $kubePrometheus.enabled $kubePrometheus.grafana.enabled }}
 ###############################################################################
 📈 GRAFANA NOTES:
