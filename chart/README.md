@@ -31,25 +31,27 @@ support helm deployments that do not use the CLI.
 
 ## Prerequisites
 
-Using tobs to install full observability stack with openTelemetry support currently requires installation of cert-manager. To do this please follow [cert-manager documentation](https://cert-manager.io/docs/installation/).
+Using tobs to install full observability stack with openTelemetry support currently requires installation of cert-manager. To do install it please follow [cert-manager documentation](https://cert-manager.io/docs/installation/).
 
-_Note_: Using tobs with opentelemetry support disabled doesn't require cert-manager.
+*Note*: cert-manager is not required when using tobs with opentelemetry support disabled.
 
 ## Installing the helm chart
 
 The following command will install Kube-Prometheus, TimescaleDB, and Promscale
 into your Kubernetes cluster:
+
 ```
 helm repo add timescale https://charts.timescale.com/
 helm repo update
 helm install --wait <release_name> timescale/tobs
 ```
 
-_Note_: `--wait` flag is necessary for successfull installation as tobs helm chart can create opentelemetry Custom Resources only after opentelemetry-operator is up and running. This flag can be omited when using tobs without opentelemetry support.
+*Note*: `--wait` flag is necessary for successfull installation as tobs helm chart can create opentelemetry Custom Resources only after opentelemetry-operator is up and running. This flag can be omited when using tobs without opentelemetry support.
 
 # Uninstall
 
 To uninstall a release you can run:
+
 ```
 helm uninstall <release_name>
 ```
