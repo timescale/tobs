@@ -6,11 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 	root "github.com/timescale/tobs/cli/cmd"
-	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 	"github.com/timescale/tobs/cli/pkg/otel"
-	"github.com/timescale/tobs/cli/pkg/timescaledb_secrets"
 	"github.com/timescale/tobs/cli/pkg/utils"
 	k8sApiErrors "k8s.io/apimachinery/pkg/api/errors"
 )
@@ -39,20 +37,6 @@ func helmUninstall(cmd *cobra.Command, args []string) error {
 
 	helmClient := helm.NewClient(root.Namespace)
 	defer helmClient.Close()
-	r, err := helmClient.GetAllReleaseValues(root.HelmReleaseName)
-	if err != nil {
-		return err
-	}
-
-	e, err := helm.FetchValue(r, common.TimescaleDBBackUpKeyForValuesYaml)
-	if err != nil {
-		return fmt.Errorf("failed to get timescaledb backup field value from values.yaml: %w", err)
-	}
-
-	enableBackUp, ok := e.(bool)
-	if !ok {
-		return fmt.Errorf("enable Backup was not a bool")
-	}
 
 	fmt.Println("Uninstalling The Observability Stack")
 
@@ -155,11 +139,6 @@ Steps to uninstall cert-manager is documented here: https://cert-manager.io/docs
 	}
 
 	if deleteData {
-		// delete TimescaleDB secrets only if data is being deleted
-		// as TimescaleDB can be authenticated only with this secrets
-		// do not delete them until data is deleted.
-		timescaledb_secrets.DeleteTimescaleDBSecrets(k8sClient, root.HelmReleaseName, root.Namespace, enableBackUp)
-
 		err = deletePVCData(&cobra.Command{}, []string{})
 		if err != nil {
 			fmt.Println(err, ", failed to delete pvc's")

@@ -19,12 +19,6 @@ timescaledb-single:
     enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
-  secrets:
-    # tobs cli will populate those Secrets
-    # if you don't use CLI, you need to provision them yourself
-    credentialsSecretName: "{{ .Release.Name }}-connection"
-    certificateSecretName: "{{ .Release.Name }}-certificate"
-    pgbackrestSecretName: "{{ .Release.Name }}-pgbackrest"
   # backup is disabled by default, enable it
   # if you want to backup timescaleDB to s3
   # you can provide the s3 details on tobs install
@@ -101,6 +95,7 @@ promscale:
     dbName: &metricDB postgres
     # user to connect to TimescaleDB with
     user: postgres
+    # empty password string will be populated automatically with a database password
     password: ""
     # Host name (templated) of the database instance, default
     # to service created in timescaledb-single

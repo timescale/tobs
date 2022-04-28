@@ -1,7 +1,6 @@
 package tobs_cli_tests
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -18,21 +17,6 @@ var PATH_TO_TOBS = "./../../bin/tobs"
 var PATH_TO_CHART = "./../../../chart/"
 var PATH_TO_TEST_VALUES = "./../testdata/e2e-values.yaml"
 
-func installObs() {
-	var err error
-
-	log.Println("Installing The Observability Stack")
-
-	test_utils.ShowAllPods(&testing.T{})
-
-	obsinstall := exec.Command(PATH_TO_TOBS, "install", "--name", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--enable-prometheus-ha")
-	err = obsinstall.Run()
-	if err != nil {
-		log.Println("Error installing The Observability Stack:", err)
-		os.Exit(1)
-	}
-}
-
 func TestMain(m *testing.M) {
 
 	// Signal handling
@@ -45,23 +29,22 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}()
 
+	// TODO(paulfantom): Consider moving this out of test suite
+	log.Println("Updating helm charts...")
 	out := exec.Command("helm", "dep", "up", PATH_TO_CHART)
 	_, err := out.CombinedOutput()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// tests on backEnabled tobs
-	// runs it prior to other tests as
-	// the tobs installation itself is different
-	testBackUpEnabledInstallation(&testing.T{})
 
 	log.Println("successfully performed backup install tests...")
 
 	installObs()
 
+	// FIXME(paulfantom): This should be converted into polling for instances
 	time.Sleep(3 * time.Minute)
 
-	fmt.Println("starting e2e tests post tobs deployment....")
+	log.Println("starting e2e tests post tobs deployment....")
 	code := m.Run()
 
 	err = test_utils.CheckPodsRunning(NAMESPACE)
@@ -73,10 +56,12 @@ func TestMain(m *testing.M) {
 
 	// wait for the uninstall to succeed
 	// this takes 3 mins because in HA mode
-	// we have three 3 Prometheus instances to gracefully shutdown
+	// we have 2 Prometheus instances to gracefully shutdown
 	// and to avoid flakiness.
+	// FIXME(paulfantom): This should be converted into polling for instances
 	time.Sleep(3 * time.Minute)
 
+	// TODO(paulfantom): This should be a part of TestUninstall()
 	err = test_utils.CheckPVCSExist(RELEASE_NAME, NAMESPACE)
 	if err != nil {
 		log.Fatal(err)
@@ -85,10 +70,27 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+func installObs() {
+	var err error
+
+	log.Println("Installing The Observability Stack")
+
+	test_utils.ShowAllPods(&testing.T{})
+
+	obsinstall := exec.Command(PATH_TO_TOBS, "install", "--name", RELEASE_NAME, "--namespace", NAMESPACE, "--chart-reference", PATH_TO_CHART, "-f", PATH_TO_TEST_VALUES, "--enable-prometheus-ha")
+	out, err := obsinstall.CombinedOutput()
+	log.Println(string(out))
+	if err != nil {
+		log.Println("Error installing The Observability Stack:", err)
+		os.Exit(1)
+	}
+}
+
 func uninstallsObs() {
 	log.Println("Uninstalling The Observability Stack")
 	obsinstall := exec.Command(PATH_TO_TOBS, "uninstall", "--name", RELEASE_NAME, "--namespace", NAMESPACE, "--delete-data")
-	err := obsinstall.Run()
+	out, err := obsinstall.CombinedOutput()
+	log.Println(string(out))
 	if err != nil {
 		log.Println("Error installing The Observability Stack:", err)
 		os.Exit(1)
