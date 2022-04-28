@@ -29,15 +29,11 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
 The recommended way to deploy tobs is through the [CLI tool](/cli). However, we also
 support helm deployments that do not use the CLI.
 
-## Creating Secrets
+## Prerequisites
 
-By default, timescaledb helm chart doesn't create its own secrets. So please follow [these instructions][timescaledb-secrets] to create timescaledb-secrets. If you use tobs CLI this is taken care for you.
+Using tobs to install full observability stack with openTelemetry support currently requires installation of cert-manager. To do this please follow [cert-manager documentation](https://cert-manager.io/docs/installation/).
 
-Create timescaledb secrets using `tobs` CLI. This creates database passwords and self-signed certificates.
-
-```
-tobs install --only-secrets --namespace <namepsace>
-```
+_Note_: Using tobs with opentelemetry support disabled doesn't require cert-manager.
 
 ## Installing the helm chart
 
@@ -46,11 +42,10 @@ into your Kubernetes cluster:
 ```
 helm repo add timescale https://charts.timescale.com/
 helm repo update
-helm install <release_name> timescale/tobs promscale.connection.password=<password> 
+helm install --wait <release_name> timescale/tobs
 ```
 
-**Note:** Here the `<password>` should be captured from `<release>-credentials` secret with key `PATRONI_SUPERUSER_PASSWORD`. As the password is created from 
-the above `tobs install --only-secrets` step.
+_Note_: `--wait` flag is necessary for successfull installation as tobs helm chart can create opentelemetry Custom Resources only after opentelemetry-operator is up and running. This flag can be omited when using tobs without opentelemetry support.
 
 # Uninstall
 
@@ -107,7 +102,7 @@ helm show values timescale/tobs > my_values.yml
 You can then edit `my_values.yml` and deploy the release with the following command:
 
 ```
-helm upgrade --install <release_name> --values my_values.yml timescale/tobs
+helm upgrade --wait --install <release_name> --values my_values.yml timescale/tobs
 ```
 
 The properties described in the tables below are only those that this chart overrides for each of the sub-charts it depends on.
@@ -139,7 +134,7 @@ To configure tobs to connect with an external TimescaleDB you need to modify a f
 
 Below is the helm command to disable the TimescaleDB installation and set external db uri details:
 ```
-helm install <release-name> timescale/tobs \
+helm install --wait <release-name> timescale/tobs \
 --set timescaledb-single.enabled=false,promscale.connection.uri=<timescaledb-uri>
 ```
 
