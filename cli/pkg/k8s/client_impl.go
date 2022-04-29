@@ -1080,7 +1080,11 @@ func (c *clientImpl) buildDynamicResourceClient(data []byte) (obj *unstructured.
 
 	// Some code to define this take from
 	// https://github.com/kubernetes/cli-runtime/blob/master/pkg/genericclioptions/config_flags.go#L215
-	cacheDir := "$HOME/.cache/tobs"
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cacheDir := homeDir + "/.cache/tobs"
 	httpCacheDir := filepath.Join(cacheDir, "http")
 	discoveryCacheDir := computeDiscoverCacheDir(filepath.Join(cacheDir, "discovery"), config.Host)
 

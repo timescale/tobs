@@ -215,7 +215,6 @@ type TestInstallSpec struct {
 	Namespace    string
 	PathToValues string
 	EnableBackUp bool
-	SkipWait     bool
 	OnlySecrets  bool
 }
 
@@ -229,9 +228,6 @@ func (c *TestInstallSpec) TestInstall(t testing.TB) {
 	cmds := []string{"install", "--chart-reference", c.PathToChart, "--name", c.ReleaseName, "--namespace", c.Namespace}
 	if c.EnableBackUp {
 		cmds = append(cmds, "--enable-timescaledb-backup")
-	}
-	if c.SkipWait {
-		cmds = append(cmds, "--skip-wait")
 	}
 	if c.PathToValues != "" {
 		cmds = append(cmds, "-f", c.PathToValues)

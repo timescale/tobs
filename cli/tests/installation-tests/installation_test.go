@@ -66,7 +66,6 @@ func TestInstallation(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: PATH_TO_TEST_VALUES,
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  false,
 	}
 	abcInstall.TestInstall(t)
@@ -86,7 +85,6 @@ func TestInstallation(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: PATH_TO_TEST_VALUES,
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  false,
 	}
 	defInstall.TestInstall(t)
@@ -114,7 +112,6 @@ func TestInstallation(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: "./../testdata/f1.yaml",
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  false,
 	}
 	f1Install.TestInstall(t)
@@ -134,7 +131,6 @@ func TestInstallation(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: "./../testdata/f2.yaml",
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  false,
 	}
 	f2Install.TestInstall(t)
@@ -153,7 +149,6 @@ func TestInstallation(t *testing.T) {
 		Namespace:    "secrets",
 		PathToValues: PATH_TO_TEST_VALUES,
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  true,
 	}
 	f5Install.TestInstall(t)
@@ -179,7 +174,6 @@ func TestInstallation(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: PATH_TO_TEST_VALUES,
 		EnableBackUp: false,
-		SkipWait:     false,
 		OnlySecrets:  false,
 	}
 	dInstall.TestInstall(t)

@@ -47,7 +47,7 @@ promscale:
   # needs to be enabled for tracing support in Promscale
   # to expose traces port, add tracing args to Promscale
   openTelemetry:
-    enabled: &otelEnabled false
+    enabled: &otelEnabled true
   # to pass extra args
   # extraArgs: []
 
@@ -433,7 +433,7 @@ promlens:
 # Enable OpenTelemetry Operator
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
 opentelemetryOperator:
-  enabled: false
+  enabled: *otelEnabled
   collector:
     # The default otel collector that will be deployed by CLI once
     # the otel operator is in running state

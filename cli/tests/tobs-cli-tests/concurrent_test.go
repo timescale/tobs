@@ -55,7 +55,6 @@ func TestConcurrent(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: PATH_TO_TEST_VALUES,
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  false,
 	}
 	i1.TestInstall(t)
@@ -67,7 +66,6 @@ func TestConcurrent(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: PATH_TO_TEST_VALUES,
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  false,
 	}
 	i2.TestInstall(t)
@@ -108,7 +106,6 @@ func TestConcurrent(t *testing.T) {
 		Namespace:    NAMESPACE,
 		PathToValues: PATH_TO_TEST_VALUES,
 		EnableBackUp: false,
-		SkipWait:     true,
 		OnlySecrets:  false,
 	}
 	i3.TestInstall(t)

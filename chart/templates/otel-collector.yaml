@@ -1,0 +1,13 @@
+{{ if and (.Values.opentelemetryOperator.enabled) (.Values.opentelemetryOperator.collector.config) -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Release.Name }}-tobs-opentelemetry
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade,pre-delete
+    "helm.sh/hook-weight": "0"
+spec:
+  config:
+    {{ tpl (toYaml .Values.opentelemetryOperator.collector.config) $ | nindent 4 }}
+{{- end -}}
+
