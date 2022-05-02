@@ -23,7 +23,7 @@ install-tests:
 		go test -v ./tests/installation-tests --timeout 30m
 
 helm-tests:
-		go test -v ./tests/helm-tests
+		go test -v ./tests/helm-tests --timeout 20m
 
 go-vet:
 		go vet ./...
