@@ -19,7 +19,6 @@ stack into a Kubernetes cluster. Currently this stack includes:
  * [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL. 
  * [Promlens](https://promlens.com/) tool to build and analyse promql queries with ease.
  * [Opentelemetry-Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-operator-for-kubernetes) to manage the lifecycle of OpenTelemetryCollector Custom Resource Definition (CRDs)
- * [Jaeger Query](https://github.com/jaegertracing/jaeger) to visualise the traces 
  
 We plan to expand this stack over time and welcome contributions.
 

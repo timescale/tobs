@@ -7,12 +7,10 @@ import (
 	root "github.com/timescale/tobs/cli/cmd"
 	"github.com/timescale/tobs/cli/cmd/common"
 	"github.com/timescale/tobs/cli/cmd/grafana"
-	"github.com/timescale/tobs/cli/cmd/jaeger"
 	"github.com/timescale/tobs/cli/cmd/prometheus"
 	"github.com/timescale/tobs/cli/cmd/promlens"
 	"github.com/timescale/tobs/cli/cmd/promscale"
 	"github.com/timescale/tobs/cli/cmd/timescaledb"
-	"github.com/timescale/tobs/cli/pkg/helm"
 	"github.com/timescale/tobs/cli/pkg/k8s"
 )
 
@@ -62,11 +60,6 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not port-forward: %w", err)
 	}
 
-	jaegerPort, err := cmd.Flags().GetInt("jaeger")
-	if err != nil {
-		return fmt.Errorf("could not port-forward: %w", err)
-	}
-
 	// Port-forward TimescaleDB
 	// if db-uri exists skip the port-forwarding as it isn't the db within the cluster
 	k8sClient := k8s.NewClient()
@@ -101,22 +94,5 @@ func portForward(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// As Jaeger isn't part of default install, check whether
-	// Jaeger is enabled
-	helmClient := helm.NewClient(root.Namespace)
-	e, err := helmClient.ExportValuesFieldFromRelease(root.HelmReleaseName, []string{"opentelemetryOperator", "enabled"})
-	if err != nil {
-		return err
-	}
-	enableOtel, ok := e.(bool)
-	if !ok {
-		return fmt.Errorf("timescaledb-single.enabled was not a bool")
-	}
-	// Port-forward Jaeger
-	if enableOtel {
-		if err := jaeger.PortForwardJaeger(jaegerPort); err != nil {
-			return err
-		}
-	}
 	select {}
 }

@@ -473,16 +473,3 @@ opentelemetryOperator:
             receivers: [otlp]
             processors: [batch]
             exporters: [prometheusremotewrite]
-
-  jaeger:
-    image: jaegertracing/jaeger-query:1.33
-    args:
-      - --grpc-storage.server={{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9202
-      - --grpc-storage.tls.enabled=false
-      - --grpc-storage.connection-timeout=1h
-    env:
-      - name: SPAN_STORAGE_TYPE
-        value: grpc-plugin
-    service:
-      loadBalancer:
-        enabled: false
