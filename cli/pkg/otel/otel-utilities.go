@@ -26,7 +26,7 @@ const (
 
 var (
 	certManagerManifests = map[string]string{
-		"cert-manager": fmt.Sprintf("https://github.com/jetstack/cert-manager/releases/download/%s/cert-manager.yaml", CertManagerVersion),
+		"cert-manager": fmt.Sprintf("https://github.com/cert-manager/cert-manager/releases/download/%s/cert-manager.yaml", CertManagerVersion),
 	}
 
 	otelColCRD = fmt.Sprintf("%s.opentelemetry.io", otelColResourceName)
