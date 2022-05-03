@@ -35,7 +35,7 @@ promscale:
     # user to connect to TimescaleDB with
     user: postgres
     password: ""
-    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local"
+    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
 
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
@@ -51,13 +51,13 @@ kube-prometheus-stack:
       ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
         # - {protocol}://{host}:{port}/{endpoint}
-        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/read"
+        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/read"
           readRecent: true
 
       ## The remote_write spec configuration for Prometheus.
       ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
-        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201/write"
+        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
 
       ## Prometheus pod storage spec
       storageSpec:
@@ -96,7 +96,7 @@ kube-prometheus-stack:
         # By default url of data source is set to ts-prom connector instance
         # deployed with this chart. If a connector isn't used this should be
         # set to the prometheus-server.
-        url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc.cluster.local:9201"
+        url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
     timescale:
       database:
         enabled: true

@@ -270,7 +270,7 @@ promscale:
 		config = config + fmt.Sprintf(`
   connection:
     password: %s
-    host: %s.%s.svc.cluster.local`, dbPassword, cmd.HelmReleaseName, cmd.Namespace)
+    host: %s.%s.svc`, dbPassword, cmd.HelmReleaseName, cmd.Namespace)
 	}
 
 	if args != "" {
