@@ -124,7 +124,7 @@ Connecting to an external TimescaleDB, As external DB URI has been configured du
 To get your password for superuser run:
 
 {{- if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} timescaledb get-password -U <user>
+    tobs {{- template "tobs.cliOptions" . }} timescaledb superuser get-password <user>
 {{- else }}
     # superuser password
     PGPASSWORD_POSTGRES=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "timescaledb.fullname" $tsEnv }}-passwords -o jsonpath="{.data.postgres}" | base64 --decode)
@@ -138,7 +138,7 @@ To connect to your database, chose one of these options:
 1. Run a postgres pod and connect using the psql cli:
 
 {{- if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} timescaledb connect -U <user>
+    tobs {{- template "tobs.cliOptions" . }} timescaledb superuser connect <user>
 {{- else }}
     # login as superuser
     kubectl run -i --tty --rm psql --image=postgres \
@@ -156,7 +156,7 @@ To connect to your database, chose one of these options:
 2. Directly execute a psql session on the master node
 
 {{- if .Values.cli }}
-   tobs {{- template "tobs.cliOptions" . }} timescaledb connect -m
+   tobs {{- template "tobs.cliOptions" . }} timescaledb superuser connect
 {{- else }}
    MASTERPOD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l release={{ .Release.Name }},role=master)"
    kubectl exec -i --tty --namespace {{ .Release.Namespace }} ${MASTERPOD} -- psql -U postgres
