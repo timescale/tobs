@@ -32,7 +32,7 @@
 ###############################################################################
 {{ if $prometheus.enabled }}
 Prometheus can be accessed via port {{ $prometheus.service.port }} on the following DNS name from within your cluster:
-{{ $kubePrometheus.fullnameOverride }}-prometheus.{{ .Release.Namespace }}.svc.cluster.local
+{{ $kubePrometheus.fullnameOverride }}-prometheus.{{ .Release.Namespace }}.svc
 {{ if $prometheus.ingress.enabled -}}
 Server URL(s) from outside the cluster:
 {{- range $prometheus.ingress.hosts }}
@@ -70,7 +70,7 @@ WARNING! Persistence is disabled on Prometheus server
 
 {{ if $kubePrometheus.alertmanager.enabled }}
 The Prometheus alertmanager can be accessed via port {{ $kubePrometheus.alertmanager.service.port }} on the following DNS name from within your cluster:
-{{ $kubePrometheus.fullnameOverride }}-alertmanager.{{ .Release.Namespace }}.svc.cluster.local
+{{ $kubePrometheus.fullnameOverride }}-alertmanager.{{ .Release.Namespace }}.svc
 
 {{ if $kubePrometheus.alertmanager.ingress.enabled -}}
 From outside the cluster, the alertmanager URL(s) are:
@@ -114,7 +114,7 @@ WARNING! Persistence is disabled on AlertManager.
 {{- if index .Values "timescaledb-single" "enabled" }}
 
 TimescaleDB can be accessed via port 5432 on the following DNS name from within your cluster:
-{{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc
 {{- else }}
 
 Connecting to an external TimescaleDB, As external DB URI has been configured during the installation.
@@ -144,13 +144,13 @@ To connect to your database, chose one of these options:
     kubectl run -i --tty --rm psql --image=postgres \
       --env "PGPASSWORD=$PGPASSWORD_POSTGRES" \
       --command -- psql -U postgres \
-      -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc.cluster.local postgres
+      -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc postgres
 
     # login as admin
     kubectl run -i --tty --rm psql --image=postgres \
       --env "PGPASSWORD=$PGPASSWORD_ADMIN" \
       --command -- psql -U admin \
-      -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc.cluster.local postgres
+      -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc postgres
 {{- end }}
 
 2. Directly execute a psql session on the master node
@@ -192,7 +192,7 @@ To connect to your database, chose one of these options:
     The OpenTelemetry collector is deployed to collect traces.
 
     OpenTelemetry collector can be accessed with the following DNS name from within your cluster:
-    {{ .Release.Name }}-opentelemetry-collector.{{ .Release.Namespace }}.svc.cluster.local
+    {{ .Release.Name }}-opentelemetry-collector.{{ .Release.Namespace }}.svc
 
 {{- end -}}
 
@@ -204,7 +204,7 @@ To connect to your database, chose one of these options:
 
 1. The Grafana server can be accessed via port {{ $grafana.service.port }} on
    the following DNS name from within your cluster:
-   {{ .Release.Name }}-grafana.{{ .Release.Namespace  }}.svc.cluster.local
+   {{ .Release.Name }}-grafana.{{ .Release.Namespace  }}.svc
 
    You can access grafana locally by executing:
 {{- if .Values.cli }}

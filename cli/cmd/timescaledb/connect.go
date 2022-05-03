@@ -89,7 +89,7 @@ func PsqlConnect(k8sClient k8s.Client, dbDetails *pgconn.DBDetails, master bool)
 		return err
 	}
 	if uri == "" {
-		host = root.HelmReleaseName + "." + root.Namespace + ".svc.cluster.local"
+		host = root.HelmReleaseName + "." + root.Namespace + ".svc"
 		psqlCMD = "psql -U " + dbDetails.User + " -h " + host + " " + dbDetails.DBName
 	} else {
 		psqlCMD = "psql " + uri
