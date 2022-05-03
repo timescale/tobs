@@ -3,22 +3,22 @@ module github.com/timescale/tobs/cli
 go 1.17
 
 require (
-	github.com/jackc/pgconn v1.10.0
-	github.com/jackc/pgx/v4 v4.13.0
-	github.com/jetstack/cert-manager v1.6.1
+	github.com/jackc/pgconn v1.12.0
+	github.com/jackc/pgx/v4 v4.16.0
+	github.com/jetstack/cert-manager v1.8.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/open-telemetry/opentelemetry-operator v0.39.0
+	github.com/open-telemetry/opentelemetry-operator v0.49.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.2.0
-	github.com/spf13/cobra v1.2.1
-	github.com/spf13/viper v1.9.0
+	github.com/spf13/cobra v1.4.0
+	github.com/spf13/viper v1.11.0
 	gopkg.in/yaml.v2 v2.4.0
-	helm.sh/helm/v3 v3.7.0
-	k8s.io/api v0.22.4
-	k8s.io/apiextensions-apiserver v0.22.4
-	k8s.io/apimachinery v0.22.4
-	k8s.io/cli-runtime v0.22.4
+	helm.sh/helm/v3 v3.8.2
+	k8s.io/api v0.23.6
+	k8s.io/apiextensions-apiserver v0.23.6
+	k8s.io/apimachinery v0.23.6
+	k8s.io/cli-runtime v0.23.6
 	k8s.io/client-go v0.22.4
 	sigs.k8s.io/yaml v1.3.0
 )
