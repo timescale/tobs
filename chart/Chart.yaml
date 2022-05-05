@@ -14,7 +14,7 @@ dependencies:
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
-    version: 0.10.0
+    version: 0.11.0-alpha.1
     repository: https://charts.timescale.com
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
