@@ -356,7 +356,7 @@ kube-prometheus-stack:
       adminUser: postgres
       adminPassSecret: "{{ .Release.Name }}-promscale"
     jaeger:
-      promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9202"
+      promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
 
   # By default kube-state-metrics are scraped using
   # serviceMonitor disable annotation based scraping
