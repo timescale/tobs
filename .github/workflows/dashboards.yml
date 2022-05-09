@@ -1,0 +1,22 @@
+name: dashboards
+
+on:
+  push:
+    paths:
+    - chart/dashboards/**
+  pull_request:
+    paths:
+    - chart/dashboards/**
+
+jobs:
+  dashboard-sync:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Run Dashboard synchronizer
+      run: |
+        ./scripts/sync-dashboards.sh && git diff --exit-code
