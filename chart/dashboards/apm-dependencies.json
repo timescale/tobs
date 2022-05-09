@@ -54,7 +54,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -167,7 +167,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
@@ -203,7 +203,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "description": "This maps shows all services sending traces and the interactions between them.\nEach arrow represents a service calling a specific operation in another service. The legend in the arrows includes the requests per second for that interaction.  If you are downsampling your traces before sending them to Promscale, then the number of requests per second will not be accurate but you'll be able to see how it compares to other operations.",
       "gridPos": {
@@ -217,7 +217,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
@@ -249,7 +249,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
