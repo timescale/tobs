@@ -368,6 +368,12 @@ kube-prometheus-stack:
         files:
           - dashboards/k8s-cluster.json
           - dashboards/k8s-hardware.json
+          - dashboards/apm-dependencies.json
+          - dashboards/apm-home.json
+          - dashboards/apm-service-dependencies-downstream.json
+          - dashboards/apm-service-dependencies-upstream.json
+          - dashboards/apm-service-overview.json
+          - dashboards/promscale.json
     adminPassword: ""
     envFromSecret: "{{ .Release.Name }}-grafana-db"
     prometheus:
