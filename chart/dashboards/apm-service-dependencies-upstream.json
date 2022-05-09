@@ -7,14 +7,6 @@
       "type": "datasource",
       "pluginId": "postgres",
       "pluginName": "PostgreSQL"
-    },
-    {
-      "name": "DS_PROMSCALE_JAEGER",
-      "label": "Promscale Jaeger Tracing data source",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "jaeger",
-      "pluginName": "Jaeger"
     }
   ],
   "annotations": {
@@ -36,11 +28,12 @@
       }
     ]
   },
+  "description": "Map of upstream service dependencies for a specific service and operation",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "graphTooltip": 2,
-  "id": 9,
-  "iteration": 1647523274899,
+  "graphTooltip": 0,
+  "id": 12,
+  "iteration": 1647519937731,
   "links": [
     {
       "asDropdown": false,
@@ -65,397 +58,14 @@
         "type": "postgres",
         "uid": "${DS_TIMESCALEDB}"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
+      "description": "A.K.A. \"Who called me?\"",
       "gridPos": {
-        "h": 11,
-        "w": 8,
+        "h": 26,
+        "w": 24,
         "x": 0,
         "y": 0
       },
       "id": 2,
-      "interval": "1s",
-      "maxDataPoints": 300,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.3.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
-          },
-          "format": "time_series",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket_gapfill('$__interval', start_time) AS time,\n    coalesce(count(*)::numeric / (EXTRACT(epoch FROM '$__interval'::interval)), 0) AS \"Requests\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
-          "refId": "A",
-          "select": [],
-          "table": "event",
-          "timeColumn": "\"time\"",
-          "timeColumnType": "timestamp",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
-        }
-      ],
-      "title": "Requests",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 8,
-        "y": 0
-      },
-      "id": 3,
-      "interval": "1s",
-      "maxDataPoints": 300,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.3.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
-          },
-          "format": "time_series",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket_gapfill('$__interval', start_time) AS time,\n    COALESCE(ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3), 0) as \"p99\",\n    COALESCE(ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3), 0) as \"p90\",\n    COALESCE(ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3), 0) as \"p50\",\n    COALESCE(AVG(duration_ms), 0) as \"Average\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
-          "refId": "A",
-          "select": [],
-          "table": "event",
-          "timeColumn": "\"time\"",
-          "timeColumnType": "timestamp",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
-        }
-      ],
-      "title": "Duration",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMax": 1,
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 0
-      },
-      "id": 4,
-      "interval": "1s",
-      "maxDataPoints": 300,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
-          },
-          "format": "time_series",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket('$__interval', start_time) as time,\n    coalesce(count(*) filter (where status_code = 'error')::numeric / count(*), 0) as \"Error rate\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
-          "refId": "A",
-          "select": [],
-          "table": "event",
-          "timeColumn": "\"time\"",
-          "timeColumnType": "timestamp",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
-        }
-      ],
-      "title": "Error Rate",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Requests"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "reqps"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Avg Duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "ms"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Error rate"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "percentunit"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 8,
-        "x": 0,
-        "y": 11
-      },
-      "id": 10,
-      "options": {
-        "footer": {
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "8.3.3",
       "targets": [
         {
           "datasource": {
@@ -466,9 +76,18 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    span_name as \"Operation\",\n    count(*)::numeric / (${__to:date:seconds} - ${__from:date:seconds}) AS \"Requests\",\n    sum(duration_ms) / count(*)::numeric as \"Avg Duration\",\n    coalesce((count(*) filter (where status_code = 'error')::numeric / count(*)), 0) as \"Error rate\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        trace_id,\n        span_id,\n        parent_span_id,\n        service_name,\n        span_name\n    FROM ps_trace.span\n    WHERE start_time > NOW() - INTERVAL '10 minutes'\n    AND service_name = '${service}'\n    AND span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.parent_span_id = s.span_id)\n    AND s.start_time > NOW() - INTERVAL '10 minutes'\n)\nSELECT\n    md5(service_name || '-' || span_name) as id,\n    span_name as title,\n    service_name as \"subTitle\",\n    count(*) as \"mainStat\"\nFROM x\nGROUP BY service_name, span_name",
           "refId": "A",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
           "table": "event",
           "timeColumn": "\"time\"",
           "timeColumnType": "timestamp",
@@ -479,129 +98,7 @@
               "type": "macro"
             }
           ]
-        }
-      ],
-      "title": "Statistics by Operation",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "ms"
-              },
-              {
-                "id": "decimals",
-                "value": 2
-              },
-              {
-                "id": "custom.width",
-                "value": 143
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Trace ID"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 282
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "targetBlank": true,
-                    "title": "View trace details",
-                    "url": "/explore?left=%5B%22${__from}%22,%22${__to}%22,%22${DS_PROMSCALE_JAEGER}%22,%7B\"query\":\"${__value.raw}\"%7D%5D"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "start_time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 182
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Trace ID"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 94
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 8,
-        "x": 8,
-        "y": 11
-      },
-      "id": 7,
-      "options": {
-        "footer": {
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "8.3.3",
-      "targets": [
         {
           "datasource": {
             "type": "postgres",
@@ -609,89 +106,21 @@
           },
           "format": "table",
           "group": [],
+          "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  replace(trace_id::text, '-'::text, ''::text) as \"Trace ID\",\n  span_name as \"Operation\",\n  start_time as \"Time\",\n  duration_ms as \"Duration\"\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nORDER BY duration_ms DESC\nLIMIT 50\n;",
-          "refId": "A",
-          "select": [],
-          "table": "event",
-          "timeColumn": "\"time\"",
-          "timeColumnType": "timestamp",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
-        }
-      ],
-      "title": "Slowest Operation Executions",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        trace_id,\n        span_id,\n        parent_span_id,\n        service_name,\n        span_name,\n        null::text as id,\n        null::text as target,\n        null::text as source\n    FROM ps_trace.span\n    WHERE start_time > NOW() - INTERVAL '10 minutes'\n    AND service_name = '${service}'\n    AND span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        md5(s.service_name || '-' || s.span_name || '-' || x.service_name || '-' || x.span_name) as id,\n        md5(x.service_name || '-' || x.span_name) as target,\n        md5(s.service_name || '-' || s.span_name) as source\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.parent_span_id = s.span_id)\n    AND s.start_time > NOW() - INTERVAL '10 minutes'\n)\nSELECT DISTINCT\n    x.id,\n    x.target,\n    x.source \nFROM x\nWHERE id is not null",
+          "refId": "B",
+          "select": [
+            [
               {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
               }
             ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 8,
-        "x": 16,
-        "y": 11
-      },
-      "id": 9,
-      "options": {
-        "footer": {
-          "fields": "",
-          "reducer": [
-            "sum"
           ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "8.3.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
-          },
-          "format": "table",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  status_message as \"Error\",\n  count(*) as \"Occurrences\"\nFROM ps_trace.span\nWHERE $__timeFilter(start_time) AND\nstatus_code = 'error' AND\nservice_name = '${service}'\nGROUP BY 1\nORDER BY 2 DESC\n;",
-          "refId": "A",
-          "select": [],
           "table": "event",
           "timeColumn": "\"time\"",
           "timeColumnType": "timestamp",
@@ -704,11 +133,11 @@
           ]
         }
       ],
-      "title": "Most Common Errors",
-      "type": "table"
+      "title": "Map of Upstream Depencies (last 10 minutes)",
+      "transformations": [],
+      "type": "nodeGraph"
     }
   ],
-  "refresh": "",
   "schemaVersion": 34,
   "style": "dark",
   "tags": [
@@ -722,15 +151,36 @@
           "type": "postgres",
           "uid": "${DS_TIMESCALEDB}"
         },
-        "definition": "SELECT \n   distinct(service_name)\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\n",
+        "allValue": "ALL",
+        "definition": "SELECT DISTINCT service_name FROM ps_trace.span WHERE start_time > NOW() - INTERVAL '10 minutes'\n",
         "hide": 0,
         "includeAll": false,
         "label": "Service",
         "multi": false,
         "name": "service",
         "options": [],
-        "query": "SELECT \n   distinct(service_name)\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\n",
+        "query": "SELECT DISTINCT service_name FROM ps_trace.span WHERE start_time > NOW() - INTERVAL '10 minutes'\n",
         "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TIMESCALEDB}"
+        },
+        "allValue": "ALL",
+        "definition": "SELECT DISTINCT span_name FROM ps_trace.span WHERE service_name = ${service:sqlstring} AND start_time > NOW() - INTERVAL '10 minutes'\n)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Operation",
+        "multi": false,
+        "name": "operation",
+        "options": [],
+        "query": "SELECT DISTINCT span_name FROM ps_trace.span WHERE service_name = ${service:sqlstring} AND start_time > NOW() - INTERVAL '10 minutes'\n",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
@@ -742,10 +192,12 @@
     "from": "now-1h",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "hidden": true
+  },
   "timezone": "",
-  "title": "[2] Service Details",
-  "uid": "YWfN6wL7z",
-  "version": 36,
+  "title": "[5] Upstream Dependencies",
+  "uid": "o4PPTDPnz",
+  "version": 14,
   "weekStart": ""
 }
