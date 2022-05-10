@@ -63,7 +63,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -140,13 +140,13 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "time_series",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket_gapfill('$__interval', start_time) AS time,\n    coalesce(count(*)::numeric / (EXTRACT(epoch FROM '$__interval'::interval)), 0) AS \"Requests\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'SPAN_KIND_SERVER' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n    time_bucket_gapfill('$__interval', start_time) AS time,\n    coalesce(count(*)::numeric / (EXTRACT(epoch FROM '$__interval'::interval)), 0) AS \"Requests\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
           "refId": "A",
           "select": [],
           "table": "event",
@@ -167,7 +167,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -244,13 +244,13 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "time_series",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket_gapfill('$__interval', start_time) AS time,\n    COALESCE(ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3), 0) as \"p99\",\n    COALESCE(ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3), 0) as \"p90\",\n    COALESCE(ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3), 0) as \"p50\",\n    COALESCE(AVG(duration_ms), 0) as \"Average\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'SPAN_KIND_SERVER' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n    time_bucket_gapfill('$__interval', start_time) AS time,\n    COALESCE(ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3), 0) as \"p99\",\n    COALESCE(ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3), 0) as \"p90\",\n    COALESCE(ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3), 0) as \"p50\",\n    COALESCE(AVG(duration_ms), 0) as \"Average\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
           "refId": "A",
           "select": [],
           "table": "event",
@@ -271,7 +271,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -345,13 +345,13 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "time_series",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket('$__interval', start_time) as time,\n    coalesce(count(*) filter (where status_code = 'STATUS_CODE_ERROR')::numeric / count(*), 0) as \"Error rate\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'SPAN_KIND_SERVER' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n    time_bucket('$__interval', start_time) as time,\n    coalesce(count(*) filter (where status_code = 'error')::numeric / count(*), 0) as \"Error rate\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
           "refId": "A",
           "select": [],
           "table": "event",
@@ -372,7 +372,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -460,13 +460,13 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    span_name as \"Operation\",\n    count(*)::numeric / (${__to:date:seconds} - ${__from:date:seconds}) AS \"Requests\",\n    sum(duration_ms) / count(*)::numeric as \"Avg Duration\",\n    coalesce((count(*) filter (where status_code = 'STATUS_CODE_ERROR')::numeric / count(*)), 0) as \"Error rate\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'SPAN_KIND_SERVER' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n    span_name as \"Operation\",\n    count(*)::numeric / (${__to:date:seconds} - ${__from:date:seconds}) AS \"Requests\",\n    sum(duration_ms) / count(*)::numeric as \"Avg Duration\",\n    coalesce((count(*) filter (where status_code = 'error')::numeric / count(*)), 0) as \"Error rate\"\nFROM ps_trace.span s\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nGROUP BY 1\nORDER BY 1",
           "refId": "A",
           "select": [],
           "table": "event",
@@ -487,7 +487,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -550,7 +550,7 @@
                   {
                     "targetBlank": true,
                     "title": "View trace details",
-                    "url": "/explore?left=%5B%22${__from}%22,%22${__to}%22,%22${DS_PROMSCALE_JAEGER}%22,%7B\"query\":\"${__value.raw}\"%7D%5D"
+                    "url": "/explore?left=%5B%22${__from}%22,%22${__to}%22,%22f78291126102e0f2e841734d1e90250257543042%22,%7B\"query\":\"${__value.raw}\"%7D%5D"
                   }
                 ]
               }
@@ -605,13 +605,13 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  replace(trace_id::text, '-'::text, ''::text) as \"Trace ID\",\n  span_name as \"Operation\",\n  start_time as \"Time\",\n  duration_ms as \"Duration\"\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'SPAN_KIND_SERVER' OR parent_span_id is NULL)\nAND service_name = '${service}'\nORDER BY duration_ms DESC\nLIMIT 50\n;",
+          "rawSql": "SELECT\n  replace(trace_id::text, '-'::text, ''::text) as \"Trace ID\",\n  span_name as \"Operation\",\n  start_time as \"Time\",\n  duration_ms as \"Duration\"\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\nAND (span_kind = 'server' OR parent_span_id is NULL)\nAND service_name = '${service}'\nORDER BY duration_ms DESC\nLIMIT 50\n;",
           "refId": "A",
           "select": [],
           "table": "event",
@@ -632,7 +632,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -683,13 +683,13 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  status_message as \"Error\",\n  count(*) as \"Occurrences\"\nFROM ps_trace.span\nWHERE $__timeFilter(start_time) AND\nstatus_code = 'STATUS_CODE_ERROR' AND\nservice_name = '${service}'\nGROUP BY 1\nORDER BY 2 DESC\n;",
+          "rawSql": "SELECT\n  status_message as \"Error\",\n  count(*) as \"Occurrences\"\nFROM ps_trace.span\nWHERE $__timeFilter(start_time) AND\nstatus_code = 'error' AND\nservice_name = '${service}'\nGROUP BY 1\nORDER BY 2 DESC\n;",
           "refId": "A",
           "select": [],
           "table": "event",
@@ -720,7 +720,7 @@
       {
         "datasource": {
           "type": "postgres",
-          "uid": "${DS_TIMESCALEDB}"
+          "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
         },
         "definition": "SELECT \n   distinct(service_name)\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\n",
         "hide": 0,

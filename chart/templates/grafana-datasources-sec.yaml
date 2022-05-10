@@ -29,6 +29,8 @@ stringData:
         isDefault: true
         editable: true
         access: proxy
+        # SHA256 of datasource name cut to 40 chars as in: `sha256sum <<< Promscale-PromQL | cut -c1-40`
+        uid: dc08d25c8f267b054f12002f334e6d3d32a853e4
 {{- end -}}
 {{- if .Values.opentelemetryOperator.enabled }}
       - name: Promscale-Tracing
@@ -36,6 +38,8 @@ stringData:
         url: {{ tpl $grafana.jaeger.promscaleTracesQueryEndPoint . }}
         editable: true
         access: proxy
+        # SHA256 of datasource name cut to 40 chars as in: `sha256sum <<< Promscale-Tracing | cut -c1-40`
+        uid: f78291126102e0f2e841734d1e90250257543042
 {{- end -}}
 {{ if $tsdbDatasource.enabled -}}
 {{- $isDefault := not $promEnabled -}}
@@ -52,6 +56,8 @@ stringData:
         type: postgres
         isDefault: {{ $isDefault }}
         access: proxy
+        # SHA256 of datasource name cut to 40 chars as in: `sha256sum <<< Promscale-SQL | cut -c1-40`
+        uid: c4729dfb8ceeaa0372ef27403a3932695eee995d
         user: {{ ternary (include "tobs.dburi.user" . ) ($tsdbDatasource.user) ($isDBURI) }}
         database: {{ ternary (include "tobs.dburi.dbname" . ) ($tsdbDatasource.dbName) ($isDBURI) }}
         editable: true

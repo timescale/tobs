@@ -55,7 +55,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "description": "A.K.A. \"Who do I call?\"",
       "gridPos": {
@@ -69,7 +69,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
@@ -101,7 +101,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
@@ -148,7 +148,7 @@
       {
         "datasource": {
           "type": "postgres",
-          "uid": "${DS_TIMESCALEDB}"
+          "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
         },
         "allValue": "ALL",
         "definition": "SELECT DISTINCT service_name FROM ps_trace.span WHERE start_time > NOW() - INTERVAL '10 minutes'\n",
@@ -168,7 +168,7 @@
       {
         "datasource": {
           "type": "postgres",
-          "uid": "${DS_TIMESCALEDB}"
+          "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
         },
         "allValue": "ALL",
         "definition": "SELECT DISTINCT span_name FROM ps_trace.span WHERE service_name = ${service:sqlstring} AND start_time > NOW() - INTERVAL '10 minutes'\n)",

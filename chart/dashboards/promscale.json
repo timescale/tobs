@@ -130,7 +130,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
           },
           "exemplar": false,
           "expr": "count by (version, branch, instance, job) (promscale_build_info)",
@@ -252,7 +252,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
           },
           "exemplar": true,
           "expr": "sum by (kind) (rate(promscale_ingest_items_total[$__rate_interval]))",
@@ -338,7 +338,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
           },
           "exemplar": true,
           "expr": "min(promscale_sql_database_compression_status)",
@@ -435,7 +435,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "sum by (type) (rate(promscale_ingest_requests_total[$__rate_interval]))",
@@ -522,7 +522,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "sum by (type) (rate(promscale_ingest_requests_total{code=~\"5..\"}[$__rate_interval]))",
@@ -610,7 +610,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(promscale_ingest_duration_seconds_bucket[$__rate_interval]))",
@@ -621,7 +621,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.90, rate(promscale_ingest_duration_seconds_bucket[$__rate_interval]))",
@@ -633,7 +633,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.90, rate(promscale_ingest_duration_seconds_bucket[$__rate_interval]))",
@@ -722,7 +722,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "rate(grpc_server_handled_total{grpc_service=~\"opentelemetry.proto.collector.trace.v1.TraceService\",grpc_method=~\"Export\"}[$__rate_interval]) > 0",
@@ -810,7 +810,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "rate(grpc_server_handled_total{grpc_service=~\"opentelemetry.proto.collector.trace.v1.TraceService\",grpc_code=~\"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss\",grpc_method=~\"Export\"}[$__rate_interval])",
@@ -898,7 +898,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(grpc_server_handling_seconds_bucket{grpc_service=\"opentelemetry.proto.collector.trace.v1.TraceService\",grpc_method=~\"Export\"}[$__rate_interval]))",
@@ -909,7 +909,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(grpc_server_handling_seconds_bucket{grpc_service=\"opentelemetry.proto.collector.trace.v1.TraceService\",grpc_method=~\"Export\"}[$__rate_interval]))",
@@ -921,7 +921,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(grpc_server_handling_seconds_bucket{grpc_service=\"opentelemetry.proto.collector.trace.v1.TraceService\",grpc_method=~\"Export\"}[$__rate_interval]))",
@@ -1023,7 +1023,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "sum by (type) (rate(promscale_query_requests_total[$__rate_interval]))",
@@ -1110,7 +1110,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "sum by (type) (rate(promscale_query_requests_total{code=~\"5..\"}[$__rate_interval]))",
@@ -1198,7 +1198,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, sum by (le, instance, job) (rate(promscale_query_duration_seconds_bucket[$__rate_interval])))",
@@ -1209,7 +1209,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.90, sum by (le, instance, job) (rate(promscale_query_duration_seconds_bucket[$__rate_interval])))",
@@ -1309,7 +1309,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "max(promscale_sql_database_worker_maintenance_job_failed)",
@@ -1397,7 +1397,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "min by (job, instance) (promscale_sql_database_chunks_compressed_count)\n/\nmax by (job, instance)(promscale_sql_database_chunks_count)",
@@ -1485,7 +1485,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "1 - promscale_sql_database_health_check_errors_total / promscale_sql_database_health_check_total",
@@ -1543,7 +1543,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "max(promscale_sql_database_worker_maintenance_job_start_timestamp_seconds) * 1000",
@@ -1630,7 +1630,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "rate(promscale_database_requests_total[$__rate_interval])",
@@ -1717,7 +1717,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(promscale_database_requests_duration_seconds_bucket{method=~\"query.*\"}[$__rate_interval]))",
@@ -1728,7 +1728,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.9, rate(promscale_database_requests_duration_seconds_bucket{method=~\"query.*\"}[$__rate_interval]))",
@@ -1740,7 +1740,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.95, rate(promscale_database_requests_duration_seconds_bucket{method=~\"query.*\"}[$__rate_interval]))",
@@ -1828,7 +1828,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(promscale_database_requests_duration_seconds_bucket{method!~\"query.*\"}[$__rate_interval]))",
@@ -1839,7 +1839,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.9, rate(promscale_database_requests_duration_seconds_bucket{method!~\"query.*\"}[$__rate_interval]))",
@@ -1851,7 +1851,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.95, rate(promscale_database_requests_duration_seconds_bucket{method!~\"query.*\"}[$__rate_interval]))",
@@ -1953,7 +1953,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "promscale_cache_query_hits_total{type=\"metric\"} / promscale_cache_queries_total{type=\"metric\"}",
@@ -2040,7 +2040,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "promscale_cache_query_hits_total{type=\"trace\"} / promscale_cache_queries_total{type=\"trace\"}",
@@ -2126,7 +2126,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "sum by (type, name) (rate(promscale_cache_evictions_total[$__rate_interval]))",
@@ -2214,7 +2214,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(promscale_cache_query_latency_microseconds_bucket{type=\"metric\"}[$__rate_interval]))",
@@ -2225,7 +2225,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.90, rate(promscale_cache_query_latency_microseconds_bucket{type=\"metric\"}[$__rate_interval]))",
@@ -2314,7 +2314,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.5, rate(promscale_cache_query_latency_microseconds_bucket{type=\"trace\"}[$__rate_interval]))",
@@ -2325,7 +2325,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "histogram_quantile(0.90, rate(promscale_cache_query_latency_microseconds_bucket{type=\"trace\"}[$__rate_interval]))",
@@ -2413,7 +2413,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
               },
               "exemplar": true,
               "expr": "promscale_cache_elements / promscale_cache_capacity_elements",

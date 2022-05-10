@@ -74,7 +74,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -196,7 +196,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
@@ -233,7 +233,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -296,7 +296,7 @@
                   {
                     "targetBlank": true,
                     "title": "View trace details",
-                    "url": "/explore?left=%5B%22${__from}%22,%22${__to}%22,%22${DS_PROMSCALE_JAEGER}%22,%7B\"query\":\"${__value.raw}\"%7D%5D"
+                    "url": "/explore?left=%5B%22${__from}%22,%22${__to}%22,%22f78291126102e0f2e841734d1e90250257543042%22,%7B\"query\":\"${__value.raw}\"%7D%5D"
                   }
                 ]
               }
@@ -368,7 +368,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
@@ -404,7 +404,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "${DS_TIMESCALEDB}"
+        "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
       },
       "fieldConfig": {
         "defaults": {
@@ -473,7 +473,7 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "${DS_TIMESCALEDB}"
+            "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
           },
           "format": "table",
           "group": [],
