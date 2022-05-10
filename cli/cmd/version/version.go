@@ -10,7 +10,7 @@ import (
 )
 
 // TODO(paulfantom): read this from VERSION file in the the repository TLD
-const tobsVersion = "0.9.0"
+const tobsVersion = "0.10.0-alpha"
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
