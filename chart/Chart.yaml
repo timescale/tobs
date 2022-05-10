@@ -10,11 +10,11 @@ appVersion: 0.9.0
 dependencies:
   - name: timescaledb-single
     condition: timescaledb-single.enabled
-    version: 0.11.0
+    version: 0.12.0
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
-    version: 0.11.0-alpha.1
+    version: 0.11.0-alpha.2
     repository: https://charts.timescale.com
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
