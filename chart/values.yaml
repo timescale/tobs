@@ -76,7 +76,9 @@ promscale:
 
   prometheus:
     # turn off annotation-based scraping of promscale itself, user the serviceMonitor instead.
-    annotations: {}
+    annotations:
+      # TODO(paulfantom): this can be removed when https://github.com/timescale/promscale/issues/1344 is fixed
+      prometheus.io/scrape: "false"
 
   ## Note:
 
