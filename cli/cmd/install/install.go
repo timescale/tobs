@@ -36,7 +36,7 @@ func addInstallUtilitiesFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("version", "", "", "Option to provide tobs helm chart version, if not provided will install the latest tobs chart available")
 	cmd.Flags().BoolP("skip-wait", "", false, "[DEPRECATED] flag is not functional as tobs installation requires waiting for pods to be in running state due to opentelemetry prerequisities")
 	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 2 replicas")
-	cmd.Flags().BoolP("tracing", "", false, "Option to enable OpenTelemetry and Jaeger components")
+	cmd.Flags().BoolP("tracing", "", false, "[DEPRECATED] flag is not functional as tobs is installing tracing support by default")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 	cmd.Flags().BoolP("confirm", "y", false, "Confirmation for all user input prompts")
 }
@@ -85,7 +85,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 
-	// TODO(paulfantom): Remove deprecated flags post 0.11.0 release
+	// TODO(paulfantom): Remove deprecated flags post 0.10.0 release
 	if cmd.Flags().Changed("tracing") {
 		fmt.Println("DEPRECATED flag used: 'tracing'. This flag will be removed in future versions of tobs. Feature is now enabled by default and if you want to disable deployment of opentelemetry-operator, change value of opentelemetryOperator.enabled")
 	}
