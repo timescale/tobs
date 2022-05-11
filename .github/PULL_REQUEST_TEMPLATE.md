@@ -1,13 +1,11 @@
 ## Description
 
 <!-- Describe the big picture of your changes here to communicate to the maintainers why we should accept this pull request.
-If it fixes a bug or resolves a feature request, be sure to link to that issue. -->
-
-
+-->
 
 ## Type of change
 
-_What type of changes does your code introduce to the Prometheus operator? Put an `x` in the box that apply._
+*What type of changes does your code introduce to the Prometheus operator? Put an `x` in the box that apply.*
 
 - [ ] `CHANGE` (fix or feature that would cause existing functionality to not work as expected)
 - [ ] `FEATURE` (non-breaking change which adds functionality)
@@ -17,7 +15,7 @@ _What type of changes does your code introduce to the Prometheus operator? Put a
 
 ## Changelog entry
 
-_Please put a one-line changelog entry below. This will be copied to the changelog file during the release process._
+*Please put a one-line changelog entry below. This will be copied to the changelog file during the release process.*
 
 <!-- 
 Your release note should be written in clear and straightforward sentences. Most often, users aren't familiar with

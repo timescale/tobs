@@ -10,11 +10,11 @@ helm repo update
 
 ## Upgrading to 0.10.0
 
-With tobs `0.10.0` release we are starting a process of redesigning tobs. Most notable changes that may require user interaction are listed below
+With tobs `0.10.0` release we are starting a process of redesigning tobs. Most notable changes that may require user interaction are listed below.
 
 ### Open-telemetry by default and cert-manager requirement
 
-This release enables opentelemetry support by default and as such it also requires cert-manager to be preinstalled. Please follow https://cert-manager.io/docs/installation/ to get more information on how to install cert-manager. If you cannot use cert-manager, you still can use tobs but with opentelemetry support disabled. We are working to get rid of this limitation and allow installing opentelemetry-operator without cert-manager ((issue#198)[https://github.com/timescale/tobs/issues/198]).
+This release enables opentelemetry support by default and as such it also requires cert-manager to be preinstalled. Please follow https://cert-manager.io/docs/installation/ to get more information on how to install cert-manager. If you cannot use cert-manager, you still can use tobs but with opentelemetry support disabled. We are working to remove this limitation and allow installing opentelemetry-operator without cert-manager ((issue#198)[https://github.com/timescale/tobs/issues/198]).
 
 ### TimescaleDB secrets management
 
@@ -23,8 +23,7 @@ Starting with tobs `0.10.0` we moved timescaledb secrets (certificates and crede
 ### Removal of jaeger-query
 
 Jaeger ui and query endpoints are removed in this tobs release. This is done because grafana already offers similar UI
-while promscale `0.11.0` has an integrated jaeger query endpoint. As such jaeger qeury is no longer needed and helm values located in
-`openTelemetry.jaeger` have to be removed to continue with installation.
+while promscale `0.11.0` has an integrated jaeger query endpoint. As such jaeger qeury is no longer needed and helm values located in``openTelemetry.jaeger` have to be removed to continue with installation.
 
 ## Upgrading to 0.8.0
 

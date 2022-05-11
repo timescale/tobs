@@ -4,11 +4,10 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
 
 ### Table of contents
 * **[Install](#install)**
-  * [Creating Secrets](#install-create-secrets)
   * [Installing the helm chart](#installing-the-helm-chart)
 * **[Configuring Helm Chart](#configuring-helm-chart)**
   * **[TimescaleDB](#timescaledb)**
-    * [Configuring an external TimescaleDB](#timescaledb-external-integration)
+    * [Configuring an external TimescaleDB](#configuring-an-external-timescaledb)
     * [Additional configuration for TimescaleDB](#additional-configuration-for-timescaledb)
   * **[Promscale](#promscale)**
     * [Additional configuration for Promscale](#additional-configuration-for-promscale)
@@ -19,10 +18,10 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
     * [Additional configuration for Grafana](#additional-configuration-for-grafana)
 * **[Upgrading Helm Chart](./docs/upgrades.md)**
 * **[Uninstall](#uninstall)**
-    * [TimescaleDB secrets](#timescaledb-secrets)
-    * [Kube-Prometheus secret](#kube-prometheus-secret)
-    * [TimescaleDB PVCs and Backup](#timescaledb-pvcs-and-backup)
-    * [Prometheus PVCs](#prometheus-pvc)
+  * [TimescaleDB secrets](#timescaledb-secrets)
+  * [Kube-Prometheus secret](#kube-prometheus-secret)
+  * [TimescaleDB PVCs and Backup](#timescaledb-pvcs-and-backup)
+  * [Prometheus PVCs](#prometheus-pvcs)
 
 # Install
 
@@ -77,17 +76,19 @@ kubectl delete secret <release_name>-kube-prometheus-admission
 
 Removing the deployment does not remove the Persistent Volume
 Claims (pvc) belonging to the release. For a full cleanup run:
+
 ```
 RELEASE=<release_name>
 kubectl delete $(kubectl get pvc -l release=$RELEASE -o name)
 ```
 
-If you had TimescaleDB backups enabled please check the guide for cleaning them at the [TimescaleDB Helm Chart repo][timescaledb-helm-cleanup]
+If you had TimescaleDB backups enabled please check the guide for cleaning them at the [TimescaleDB Helm Chart repo](https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#optional-delete-the-s3-backups)
 
 ### Prometheus PVCs
 
 Removing the deployment does not remove the Persistent Volume
 Claims (pvc) of Prometheus belonging to the release. For a full cleanup run:
+
 ```
 RELEASE=<release_name>
 kubectl delete $(kubectl get pvc -l operator.prometheus.io/name=$RELEASE-kube-prometheus-prometheus -o name)
@@ -113,20 +114,20 @@ You can additionally change any of the configurable properties of each sub-chart
 The chart has the following properties in the `values.yaml` file:
 
 ## TimescaleDB
-| Parameter                                           | Description                                           | Default     |
-|-----------------------------------------------------|-------------------------------------------------------|-------------|
-| `timescaledb-single.enabled`                        | If false TimescaleDB will not be created              | `true`      |
-| `timescaledb-single.image.tag`                      | Docker image tag to use for TimescaleDB               | `pg12-ts2.1-latest`|
-| `timescaledb-single.loadBalancer.enabled`           | Create a LB for the DB instead of a ClusterIP         | `false`     |
-| `timescaledb-single.replicaCount`                   | Number of pods for DB, set to 3 for HA                | `1`         |
-| `timescaledb-single.backup.enabled`                 | TimescaleDB backup option by default set to false     | `false`     |
 
+| Parameter                                 | Description                                       | Default             |
+|-------------------------------------------|---------------------------------------------------|---------------------|
+| `timescaledb-single.enabled`              | If false TimescaleDB will not be created          | `true`              |
+| `timescaledb-single.image.tag`            | Docker image tag to use for TimescaleDB           | `pg12-ts2.1-latest` |
+| `timescaledb-single.loadBalancer.enabled` | Create a LB for the DB instead of a ClusterIP     | `false`             |
+| `timescaledb-single.replicaCount`         | Number of pods for DB, set to 3 for HA            | `1`                 |
+| `timescaledb-single.backup.enabled`       | TimescaleDB backup option by default set to false | `false`             |
 
 ### Additional configuration for TimescaleDB
 
 By default, the `tobs` Helm chart sets up a single-instance of TimescaleDB; if you are
 interested in a replicated setup for high-availability with automated backups, please see
-[this github repo][timescaledb-helm-repo] for additional instructions.
+[this github repo](https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single) for additional instructions.
 
 You can set up the credentials, nodeSelector, volume sizes (default volumes created are 1GB for WAL and 2GB for storage).
 
@@ -135,50 +136,52 @@ You can set up the credentials, nodeSelector, volume sizes (default volumes crea
 To configure tobs to connect with an external TimescaleDB you need to modify a few fields in the default values.yaml while performing the installation
 
 Below is the helm command to disable the TimescaleDB installation and set external db uri details:
+
 ```
 helm install --wait <release-name> timescale/tobs \
 --set timescaledb-single.enabled=false,promscale.connection.uri=<timescaledb-uri>
 ```
 
 ## Promscale
-| Parameter                                           | Description                                           | Default     |
-|-----------------------------------------------------|-------------------------------------------------------|-------------|
-| `promscale.enabled`                      | If false Promscale will not be started| `true` |
-| `promscale.image`                        | Docker image to use for the Promscale                 | `timescale/promscale:0.8.0` |
-| `promscale.connection.dbName`            | Database to store the metrics in                      | `postgres`  |
-| `promscale.connection.user`              | User used for connection to db | `postgres` |
-| `promscale.connection.uri`               | TimescaleDB URI | `` |
-| `promscale.connection.password`          | Assign the TimescaleDB password from `tobs-credentials` from key `PATRONI_SUPERUSER_PASSWORD` | `` |
-| `promscale.connection.host`              | TimescaleDB host address | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc"` |
-| `promscale.service.type`                 | Configure the service type for Promscale | `ClusterIP`     |
-| `promscale.resources.requests.memory`    | Amount of memory for the Promscale pod                | `2Gi`       |
-| `promscale.resources.requests.cpu`       | Number of vCPUs for the Promscale pod                 | `1`         |
+
+| Parameter                             | Description                                                                                   | Default                                              |
+|---------------------------------------|-----------------------------------------------------------------------------------------------|------------------------------------------------------|
+| `promscale.enabled`                   | If false Promscale will not be started                                                        | `true`                                               |
+| `promscale.image`                     | Docker image to use for the Promscale                                                         | `timescale/promscale:0.8.0`                          |
+| `promscale.connection.dbName`         | Database to store the metrics in                                                              | `postgres`                                           |
+| `promscale.connection.user`           | User used for connection to db                                                                | `postgres`                                           |
+| `promscale.connection.uri`            | TimescaleDB URI                                                                               | ``                                                   |
+| `promscale.connection.password`       | Assign the TimescaleDB password from `tobs-credentials` from key `PATRONI_SUPERUSER_PASSWORD` | ``                                                   |
+| `promscale.connection.host`           | TimescaleDB host address                                                                      | `"{{ .Release.Name }}.{{ .Release.Namespace }}.svc"` |
+| `promscale.service.type`              | Configure the service type for Promscale                                                      | `ClusterIP`                                          |
+| `promscale.resources.requests.memory` | Amount of memory for the Promscale pod                                                        | `2Gi`                                                |
+| `promscale.resources.requests.cpu`    | Number of vCPUs for the Promscale pod                                                         | `1`                                                  |
 
 ### Additional configuration for Promscale
 
 The Promscale is configured to connect to the TimescaleDB instance deployed with this chart.
-But it can be configured to connect to [any TimescaleDB host](./README.md/#timescaledb-external-integration), and expose whichever port you like.
+But it can be configured to connect to [any TimescaleDB host](#configuring-an-external-timescaledb), and expose whichever port you like.
 For more details about how to configure the Promscale please see the
-[Helm chart directory][promscale-helm] of the [Promscale][promscale-repo] repo.
+[Helm chart directory](https://github.com/timescale/promscale/tree/master/deploy/helm-chart) of the [Promscale](https://github.com/timescale/promscale) repo.
 
-## Kube-Prometheus 
+## Kube-Prometheus
 
 ### Prometheus
 
-| Parameter                                           | Description                                           | Default     |
-|-----------------------------------------------------|-------------------------------------------------------|-------------|
-| `kube-prometheus-stack.enabled`                     | If false, none of the Kube-Prometheus resources will be created | `true` |
-| `kube-prometheus-stack.alertManager.enabled` | Enable AlertManager  |      `true` |
-| `kube-prometheus-stack.alertManager.config` | AlertManager config, By default the alert manager config is from Kube-Prometheus |      `` |
-| `kube-prometheus-stack.fullnameOverride`            | If false, none of the Kube-Prometheus resources will be created | `true` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.scrapeInterval` | Prometheus scrape interval |      `1m` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.scrapeTimeout` | Prometheus scrape timeout |      `10s` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.evaluationInterval` | Prometheus evaluation interval |    `1m` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.retention` | Prometheus data retention |    `1d` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.remoteRead` | Prometheus remote read config |  `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/read` and `readRecent: true` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite` | Prometheus remote write config |  `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage` | Prometheus persistent volume storage |  `8Gi` |
-| `kube-prometheus-stack.prometheus.prometheusSpec.additionalScrapeConfigs` | Prometheus additional scrape config, By default additional scrape config is set scrape all pods, services and endpoint with prometheus annotations  |   |
+| Parameter                                                                                                         | Description                                                                                                                                        | Default                                                                                                             |
+|-------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `kube-prometheus-stack.enabled`                                                                                   | If false, none of the Kube-Prometheus resources will be created                                                                                    | `true`                                                                                                              |
+| `kube-prometheus-stack.alertManager.enabled`                                                                      | Enable AlertManager                                                                                                                                | `true`                                                                                                              |
+| `kube-prometheus-stack.alertManager.config`                                                                       | AlertManager config, By default the alert manager config is from Kube-Prometheus                                                                   | ``                                                                                                                  |
+| `kube-prometheus-stack.fullnameOverride`                                                                          | If false, none of the Kube-Prometheus resources will be created                                                                                    | `true`                                                                                                              |
+| `kube-prometheus-stack.prometheus.prometheusSpec.scrapeInterval`                                                  | Prometheus scrape interval                                                                                                                         | `1m`                                                                                                                |
+| `kube-prometheus-stack.prometheus.prometheusSpec.scrapeTimeout`                                                   | Prometheus scrape timeout                                                                                                                          | `10s`                                                                                                               |
+| `kube-prometheus-stack.prometheus.prometheusSpec.evaluationInterval`                                              | Prometheus evaluation interval                                                                                                                     | `1m`                                                                                                                |
+| `kube-prometheus-stack.prometheus.prometheusSpec.retention`                                                       | Prometheus data retention                                                                                                                          | `1d`                                                                                                                |
+| `kube-prometheus-stack.prometheus.prometheusSpec.remoteRead`                                                      | Prometheus remote read config                                                                                                                      | `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/read` and `readRecent: true` |
+| `kube-prometheus-stack.prometheus.prometheusSpec.remoteWrite`                                                     | Prometheus remote write config                                                                                                                     | `url: http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write`                       |
+| `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage` | Prometheus persistent volume storage                                                                                                               | `8Gi`                                                                                                               |
+| `kube-prometheus-stack.prometheus.prometheusSpec.additionalScrapeConfigs`                                         | Prometheus additional scrape config, By default additional scrape config is set scrape all pods, services and endpoint with prometheus annotations |                                                                                                                     |
 
 #### Additional configuration for Prometheus
 
@@ -193,37 +196,37 @@ Prometheus in the same release. If you specify more endpoints in `prometheus.ser
 They will be added additionally.
 
 For all the properties that can be configured and more details on how to set up the Prometheus
-deployment see the [Kube Prometheus Community Chart Repo][kube-prometheus-helm-hub].
+deployment see the [Kube Prometheus Community Chart Repo](https://prometheus-community.github.io/helm-charts).
 
 For more information about the `remote_write` configuration that can be set with
-`kube-prometheus-stack.prometheus.prometheusSpec.` visit the Prometheus [Remote Write Tuning][prometheus-remote-tune] guide.
+`kube-prometheus-stack.prometheus.prometheusSpec.` visit the Prometheus [Remote Write Tuning](https://prometheus.io/docs/practices/remote_write/) guide.
 
 ### Grafana
 
-| Parameter                                                           | Description                                           | Default     |
-|---------------------------------------------------------------------|-------------------------------------------------------|-------------|
-| `kube-prometheus-stack.grafana.enabled`                             | If false, Grafana will not be created                 | `true`      |
-| `kube-prometheus-stack.grafana.sidecar.datasources.enabled`         | If false, no data sources will be provisioned         | `true`      |
-| `kube-prometheus-stack.grafana.sidecar.dashboards.enabled`          | If false, no dashboards will be provisioned by default | `true`     |
-| `kube-prometheus-stack.grafana.sidecar.dashboards.files`            | Files with dashboard definitions (in JSON) to be provisioned | `['dashboards/k8s-cluster.json','dashboards/k8s-hardware.json']` |
-| `kube-prometheus-stack.grafana.prometheus.datasource.enabled`       | If false, a Prometheus data source will not be provisioned | true |
-| `kube-prometheus-stack.grafana.prometheus.datasource.url`           | Template parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart  | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc` |
-| `kube-prometheus-stack.grafana.timescale.database.enabled`          | If false, TimescaleDB will not be configured as a database, default sqllite will be used | `true` |
-| `kube-prometheus-stack.grafana.timescale.database.host`             | Hostname (templated) of database, defaults to db deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc` |
-| `kube-prometheus-stack.grafana.timescale.database.user`             | User to connect to the db with (will be created ) | `grafanadb` |
-| `kube-prometheus-stack.grafana.timescale.database.pass`             | Password for the user | `grafanadb` |
-| `kube-prometheus-stack.grafana.timescale.database.dbName`           | Database where to store the data | `postgres` |
-| `kube-prometheus-stack.grafana.timescale.database.schema`           | Schema to use (will be created) | `grafanadb` |
-| `kube-prometheus-stack.grafana.timescale.database.sslMode`          | SSL mode for connection | `require` |
-| `kube-prometheus-stack.grafana.timescale.datasource.host`           | Hostname (templated) of database, defaults to host deployed with this chart | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc` |
-| `kube-prometheus-stack.grafana.timescale.datasource.enabled`        | If false a TimescaleDB data source will not be provisioned | `true` |
-| `kube-prometheus-stack.grafana.timescale.datasource.user`           | User to connect with | `grafana` |
-| `kube-prometheus-stack.grafana.timescale.datasource.pass`           | Pass for user | `grafana` |
-| `kube-prometheus-stack.grafana.timescale.datasource.dbName`         | Database storing the metrics (Should be same with `promscale.connection.dbName`) | `postgres` |
-| `kube-prometheus-stack.grafana.timescale.datasource.sslMode`        | SSL mode for connection | `require` |
-| `kube-prometheus-stack.grafana.timescale.adminUser`                 | Admin user to create the users and schemas with | `postgres` |
-| `kube-prometheus-stack.grafana.timescale.adminPassSecret`           | Name (templated) of secret containing password for admin user | `"{{ .Release.Name }}-credentials"` |
-| `kube-prometheus-stack.grafana.adminPassword`                       | Grafana admin password, By default generates a random password | `` |
+| Parameter                                                     | Description                                                                                       | Default                                                                      |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
+| `kube-prometheus-stack.grafana.enabled`                       | If false, Grafana will not be created                                                             | `true`                                                                       |
+| `kube-prometheus-stack.grafana.sidecar.datasources.enabled`   | If false, no data sources will be provisioned                                                     | `true`                                                                       |
+| `kube-prometheus-stack.grafana.sidecar.dashboards.enabled`    | If false, no dashboards will be provisioned by default                                            | `true`                                                                       |
+| `kube-prometheus-stack.grafana.sidecar.dashboards.files`      | Files with dashboard definitions (in JSON) to be provisioned                                      | `['dashboards/k8s-cluster.json','dashboards/k8s-hardware.json']`             |
+| `kube-prometheus-stack.grafana.prometheus.datasource.enabled` | If false, a Prometheus data source will not be provisioned                                        | true                                                                         |
+| `kube-prometheus-stack.grafana.prometheus.datasource.url`     | Template parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc` |
+| `kube-prometheus-stack.grafana.timescale.database.enabled`    | If false, TimescaleDB will not be configured as a database, default sqllite will be used          | `true`                                                                       |
+| `kube-prometheus-stack.grafana.timescale.database.host`       | Hostname (templated) of database, defaults to db deployed with this chart                         | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc`                           |
+| `kube-prometheus-stack.grafana.timescale.database.user`       | User to connect to the db with (will be created )                                                 | `grafanadb`                                                                  |
+| `kube-prometheus-stack.grafana.timescale.database.pass`       | Password for the user                                                                             | `grafanadb`                                                                  |
+| `kube-prometheus-stack.grafana.timescale.database.dbName`     | Database where to store the data                                                                  | `postgres`                                                                   |
+| `kube-prometheus-stack.grafana.timescale.database.schema`     | Schema to use (will be created)                                                                   | `grafanadb`                                                                  |
+| `kube-prometheus-stack.grafana.timescale.database.sslMode`    | SSL mode for connection                                                                           | `require`                                                                    |
+| `kube-prometheus-stack.grafana.timescale.datasource.host`     | Hostname (templated) of database, defaults to host deployed with this chart                       | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc`                           |
+| `kube-prometheus-stack.grafana.timescale.datasource.enabled`  | If false a TimescaleDB data source will not be provisioned                                        | `true`                                                                       |
+| `kube-prometheus-stack.grafana.timescale.datasource.user`     | User to connect with                                                                              | `grafana`                                                                    |
+| `kube-prometheus-stack.grafana.timescale.datasource.pass`     | Pass for user                                                                                     | `grafana`                                                                    |
+| `kube-prometheus-stack.grafana.timescale.datasource.dbName`   | Database storing the metrics (Should be same with `promscale.connection.dbName`)                  | `postgres`                                                                   |
+| `kube-prometheus-stack.grafana.timescale.datasource.sslMode`  | SSL mode for connection                                                                           | `require`                                                                    |
+| `kube-prometheus-stack.grafana.timescale.adminUser`           | Admin user to create the users and schemas with                                                   | `postgres`                                                                   |
+| `kube-prometheus-stack.grafana.timescale.adminPassSecret`     | Name (templated) of secret containing password for admin user                                     | `"{{ .Release.Name }}-credentials"`                                          |
+| `kube-prometheus-stack.grafana.adminPassword`                 | Grafana admin password, By default generates a random password                                    | ``                                                                           |
 
 #### TimescaleDB user for the Grafana Database
 
@@ -249,6 +252,7 @@ The Kube-Prometheus Community chart is used as a dependency for deploying Grafan
 sets up the Prometheus Server and TimescaleDB as provisioned data sources (if they are enabled).
 
 To get the initial password for the `admin` user after deployment execute
+
 ```
 kubectl get secret --namespace <namespace> <release_name>-grafana -o jsonpath="{.data.admin-password}" | base64 --decode
 ```
@@ -262,14 +266,4 @@ kubectl port-forward svc/<release_name>-grafana 8080:80
 
 And then navigate to http://localhost:8080.
 
-For all the properties that can be configured and more details on how to set up the Grafana deployment see the [Grafana Community Chart Repo][grafana-helm-hub]
-
-[design-doc]: https://tsdb.co/prom-design-doc
-[timescaledb-helm-cleanup]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#optional-delete-the-s3-backups
-[timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
-[promscale-repo]: https://github.com/timescale/promscale
-[promscale-helm]: https://github.com/timescale/promscale/tree/master/helm-chart
-[kube-prometheus-helm-hub]: https://prometheus-community.github.io/helm-charts
-[prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
-[grafana-helm-hub]: https://grafana.github.io/helm-charts
-[timescaledb-secrets]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#creating-the-secrets
+For all the properties that can be configured and more details on how to set up the Grafana deployment see the [Grafana Community Chart Repo](https://grafana.github.io/helm-charts)

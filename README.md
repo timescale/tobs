@@ -8,18 +8,18 @@ stack into a Kubernetes cluster. Currently this stack includes:
 
 <img src="docs/assets/tobs-arch.png" alt="Tobs Architecture Diagram" width="800"/>
 
- * [Kube-Prometheus](https://github.com/prometheus-operator/kube-prometheus#kube-prometheus) the Kubernetes monitoring stack
-    * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
-    * [AlertManager](https://github.com/prometheus/alertmanager#alertmanager-) to fire the alerts
-    * [Grafana](https://github.com/grafana/grafana) to visualize what's going on
-    * [Node-Exporter](https://github.com/prometheus/node_exporter) to export metrics from the nodes
-    * [Kube-State-Metrics](https://github.com/kubernetes/kube-state-metrics) to get metrics from kubernetes api-server
-    * [Prometheus-Operator](https://github.com/prometheus-operator/prometheus-operator#prometheus-operator) to manage the life-cycle of Prometheus and AlertManager custom resource definitions (CRDs)
- * [Promscale](https://github.com/timescale/promscale) ([design doc][design-doc]) to store metrics for the long-term and allow analysis with both PromQL and SQL.
- * [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL. 
- * [Promlens](https://promlens.com/) tool to build and analyse promql queries with ease.
- * [Opentelemetry-Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-operator-for-kubernetes) to manage the lifecycle of OpenTelemetryCollector Custom Resource Definition (CRDs)
- 
+* [Kube-Prometheus](https://github.com/prometheus-operator/kube-prometheus#kube-prometheus) the Kubernetes monitoring stack
+  * [Prometheus](https://github.com/prometheus/prometheus) to collect metrics
+  * [AlertManager](https://github.com/prometheus/alertmanager#alertmanager-) to fire the alerts
+  * [Grafana](https://github.com/grafana/grafana) to visualize what's going on
+  * [Node-Exporter](https://github.com/prometheus/node_exporter) to export metrics from the nodes
+  * [Kube-State-Metrics](https://github.com/kubernetes/kube-state-metrics) to get metrics from kubernetes api-server
+  * [Prometheus-Operator](https://github.com/prometheus-operator/prometheus-operator#prometheus-operator) to manage the life-cycle of Prometheus and AlertManager custom resource definitions (CRDs)
+* [Promscale](https://github.com/timescale/promscale) ([design doc](https://tsdb.co/prom-design-doc)) to store metrics for the long-term and allow analysis with both PromQL and SQL.
+* [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL.
+* [Promlens](https://promlens.com/) tool to build and analyse promql queries with ease.
+* [Opentelemetry-Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-operator-for-kubernetes) to manage the lifecycle of OpenTelemetryCollector Custom Resource Definition (CRDs)
+
 We plan to expand this stack over time and welcome contributions.
 
 Tobs provides a CLI tool to make deployment and operations easier. We also provide
@@ -57,10 +57,12 @@ This will deploy all of the tobs components into your cluster and provide instru
 
 ### Tracing support
 
-From `0.7.0` release tobs supports installation of tracing components. To install tracing components use 
+From `0.7.0` release tobs supports installation of tracing components. To install tracing components use
+
 ```
 tobs install --tracing
 ```
+
 For more details on tracing support visit [Promscale tracing docs](https://github.com/timescale/promscale/blob/master/docs/tracing.md).
 
 ## Using the tobs CLI tool
@@ -75,12 +77,14 @@ We also have additional documentation about individual configuration settings in
 [Helm chart docs](chart/README.md#configuring-helm-chart).
 
 To modify the settings, first create a values.yaml file:
+
 ```bash
 tobs helm show-values > values.yaml
 ```
 
 Then modify the values.yaml file using your favorite editor.
 Finally, deploy with the new settings using:
+
 ```bash
 tobs install -f values.yaml
 ```
@@ -95,27 +99,17 @@ Users sometimes want to use our Helm charts as sub-charts for other project or i
 
 ## Tobs vs. Kubernetes
 
-| Tobs                  | Kubernetes           |
-|-----------------------|----------------------|
-| 0.8.x                 | v1.21 to v1.23       | 
-| 0.7.x                 | v1.19 to v1.21       | 
+| Tobs  | Kubernetes     |
+|-------|----------------|
+| 0.8.x | v1.21 to v1.23 |
+| 0.7.x | v1.19 to v1.21 |
 
 # ✏️ Contributing
 
 We welcome contributions to tobs, which is
 licensed and released under the open-source Apache License, Version 2.  The
 same [Contributor's
-Agreement](//github.com/timescale/timescaledb/blob/master/CONTRIBUTING.md)
+Agreement](https://github.com/timescale/timescaledb/blob/master/CONTRIBUTING.md)
 applies as in TimescaleDB; please sign the [Contributor License
 Agreement](https://cla-assistant.io/timescale/tobs) (CLA) if
 you're a new contributor.
-
-
-[design-doc]: https://tsdb.co/prom-design-doc
-[timescaledb-helm-cleanup]: https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md#optional-delete-the-s3-backups
-[timescaledb-helm-repo]: https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
-[promscale-repo]: https://github.com/timescale/promscale
-[promscale-helm]: https://github.com/timescale/promscale/tree/master/helm-chart
-[prometheus-helm-hub]: https://prometheus-community.github.io/helm-charts
-[prometheus-remote-tune]: https://prometheus.io/docs/practices/remote_write/
-[grafana-helm-hub]: https://grafana.github.io/helm-charts
