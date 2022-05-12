@@ -2,10 +2,29 @@
 
 The following steps are necessary if using helm without the tobs CLI. The tobs CLI will handle these upgrade tasks automatically for you.
 
-Firstly upgrade the helm repo to pull the latest available tobs helm chart.  We always recommend upgrading to the [latest](https://github.com/timescale/tobs/releases/latest) tobs stack available. 
+Firstly upgrade the helm repo to pull the latest available tobs helm chart. We always recommend upgrading to the [latest](https://github.com/timescale/tobs/releases/latest) tobs stack available.
+
 ```
 helm repo update
 ```
+
+## Upgrading to 0.10.0
+
+With tobs `0.10.0` release we are starting a process of redesigning tobs. Most notable changes that may require user interaction are listed below.
+
+### Open-telemetry by default and cert-manager requirement
+
+This release enables opentelemetry support by default and as such it also requires cert-manager to be preinstalled. Please follow https://cert-manager.io/docs/installation/ to get more information on how to install cert-manager. If you cannot use cert-manager, you still can use tobs but with opentelemetry support disabled. We are working to remove this limitation and allow installing opentelemetry-operator without cert-manager ((issue#198)[https://github.com/timescale/tobs/issues/198]).
+
+### TimescaleDB secrets management
+
+Starting with tobs `0.10.0` we moved timescaledb secrets (certificates and credentials) management into helm. As such `tobs` cli no longer offers abilities to set those secrets. Side effect of this change is that you are no longer required to provide any secret in helm values or on tobs cli. TimescaleDB helm chart with generate new credentials on first run (and only on first run!) and kubernetes Job will copy it to promscale.
+
+### Removal of jaeger-query
+
+Jaeger ui and query endpoints are removed in this tobs release. This is done because grafana already offers similar UI
+while promscale `0.11.0` has an integrated jaeger query endpoint. As such jaeger qeury is no longer needed and helm values located in``openTelemetry.jaeger` have to be removed to continue with installation.
+
 ## Upgrading to 0.8.0
 
 With tobs `0.8.0` release there are multiple steps which needs to be performed manually to upgrade the tobs helm chart.
@@ -25,10 +44,11 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
 
 ### Re-structure the Promscale values section
 
-1. If you are using the default `values.yaml` from tobs helm chart, copy the `0.8.0` values.yaml so the default values are 
-structured as expected, assign the database password by reading it from `<release-name>-credentials` secret with key `PATRONI_SUPERUSER_PASSWORD` 
-decode the base64 encoded password and assign it to `promscale.connection.password` in the new `values.yaml` you can skip step 2.
-2. If you are using the custom `values.yaml` for tobs installation make the below suggested changes, 
+1. If you are using the default `values.yaml` from tobs helm chart, copy the `0.8.0` values.yaml so the default values are
+   structured as expected, assign the database password by reading it from `<release-name>-credentials` secret with key `PATRONI_SUPERUSER_PASSWORD`
+   decode the base64 encoded password and assign it to `promscale.connection.password` in the new `values.yaml` you can skip step 2.
+2. If you are using the custom `values.yaml` for tobs installation make the below suggested changes,
+
 ```
     promscale:
         # tracing field name has been changed to openTelemetry
@@ -48,8 +68,8 @@ decode the base64 encoded password and assign it to `promscale.connection.passwo
             type: LoadBalancer  
 ```
 4. If you want to enable tracing do not forget to enable `promscale.openTelemetry.enabled` to true and `openTelemetryOperator.enabled` to true.
-5. If you are using Promscale HA with Prometheus HA change the Promscale HA arg from `--high-availability` to `--metrics.high-availability` in `promscale.extraArgs`. 
-6. Drop `timescaledbExternal` section of `values.yaml` as the db-uri will be observed from `promscale.connection.db_uri` if configured any. 
+5. If you are using Promscale HA with Prometheus HA change the Promscale HA arg from `--high-availability` to `--metrics.high-availability` in `promscale.extraArgs`.
+6. Drop `timescaledbExternal` section of `values.yaml` as the db-uri will be observed from `promscale.connection.db_uri` if configured any.
 
 ### Re-structure openTelemetryOperator values section (only if you have enabled tracing)
 
@@ -60,10 +80,10 @@ decode the base64 encoded password and assign it to `promscale.connection.passwo
 
 ### Delete Kube-State-Metrics as per Kube-Prometheus stack upgrade docs
 
-1. With the upgrade the kube-state-metrics will be re-deployed. The existing deployment cannot be upgraded so delete it using `kubectl delete deployment/<tobs-release-name>-kube-state-metrics -n <namespace>`. 
-For more reference on kube-state-metrics deletion follow Kube-Prometheus docs [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#from-21x-to-22x).
+1. With the upgrade the kube-state-metrics will be re-deployed. The existing deployment cannot be upgraded so delete it using `kubectl delete deployment/<tobs-release-name>-kube-state-metrics -n <namespace>`.
+   For more reference on kube-state-metrics deletion follow Kube-Prometheus docs [here](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#from-21x-to-22x).
 
-### Delete tobs-grafana-job 
+### Delete tobs-grafana-job
 
 1. With the upgrade the tobs-grafana-job will be re-deployed. The existing job cannot be upgraded so delete it using `kubectl delete job/<tobs-release-name>-grafana-db`
 
@@ -76,13 +96,14 @@ helm upgrade <release_name> timescale/tobs
 ## Upgrading to 0.7.0:
 
 Upgrade tobs:
+
 ```
 helm upgrade <release_name> timescale/tobs
 ```
 
 ## Upgrading to 0.6.1:
 
-In tobs `0.6.1` we upgraded the CRDs of Prometheus-Operator that are part of Kube-Prometheus helm chart. You need to manually upgrade the CRDs by following the instructions below. 
+In tobs `0.6.1` we upgraded the CRDs of Prometheus-Operator that are part of Kube-Prometheus helm chart. You need to manually upgrade the CRDs by following the instructions below.
 
 ```
 kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.50.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
@@ -96,6 +117,7 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
 ```
 
 Upgrade tobs:
+
 ```
 helm upgrade <release_name> timescale/tobs
 ```
@@ -103,6 +125,7 @@ helm upgrade <release_name> timescale/tobs
 ## Upgrading to 0.6.x:
 
 Upgrade tobs:
+
 ```
 helm upgrade <release_name> timescale/tobs
 ```
@@ -110,6 +133,7 @@ helm upgrade <release_name> timescale/tobs
 ## Upgrading to 0.5.x:
 
 Upgrade tobs:
+
 ```
 helm upgrade <release_name> timescale/tobs
 ```
@@ -129,13 +153,13 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
 kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.47.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
 ```
 
-The tobs `0.4.x` installation uses the node-exporter daemonset & node-exporter service from the Kube-Prometheus stack. This requires manual deletion of these resources. The upgrade flow will recreate these resources. 
+The tobs `0.4.x` installation uses the node-exporter daemonset & node-exporter service from the Kube-Prometheus stack. This requires manual deletion of these resources. The upgrade flow will recreate these resources.
 
 Delete `tobs-node-exporter` daemonset:
 
 ```
 kubectl delete daemonset <RELEASE_NAME>-prometheus-node-exporter -n <NAMESPACE>
-``` 
+```
 
 Delete `tobs-node-exporter` service:
 
@@ -145,11 +169,12 @@ kubectl delete svc <RELEASE_NAME>-prometheus-node-exporter -n <NAMESPACE>
 
 To migrate data from an old Prometheus instance to a new one follow the steps below:
 
-Scale down the existing Prometheus replicas to 0 so that all the in-memory data is stored in Prometheus persistent volume. 
+Scale down the existing Prometheus replicas to 0 so that all the in-memory data is stored in Prometheus persistent volume.
 
 ```
 kubectl scale --replicas=0 deploy/tobs-prometheus-server 
 ```
+
 **Note**: Wait for the Prometheus pod to gracefully shut down.
 
 Find the Persistent Volume (PV) name that is claimed by the Persistent Volume Claim (PVC):
@@ -164,7 +189,7 @@ Patch the PVC reference to null so that new PVC created for the Kube-Prometheus 
 kubectl edit pv/<PERSISTENT_VOLUME>
 ```
 
-Now update the PVC reference field to `null` i.e. `spec.claimRef: null` so that new PVC will mount to this PV. 
+Now update the PVC reference field to `null` i.e. `spec.claimRef: null` so that new PVC will mount to this PV.
 
 Create a new PVC and mount its volumeName to the PV released in the previous step:
 
@@ -238,8 +263,8 @@ Create the job from the code snippet defined above:
 kubectl create -f job-file-name.yaml
 ```
 
-
 Now upgrade tobs:
+
 ```
 helm upgrade <release_name> timescale/tobs
 ```
@@ -252,9 +277,10 @@ Delete the `grafana-db` job as the upgrade re-creates the same job for the upgra
 
 ```
 kubectl delete job/<RELEASE_NAME>-grafana-db -n <NAMESPACE>
-``` 
+```
 
 Now upgrade tobs:
+
 ```
 helm upgrade <release_name> timescale/tobs
 ```
