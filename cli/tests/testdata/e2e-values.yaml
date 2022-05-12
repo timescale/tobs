@@ -3,17 +3,24 @@
 #    https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
 # Check out the various configuration options (administration guide) at:
 #    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
+
+# Indicates if tobs helm chart is installed using the tobs CLI
 cli: false
 
 # Override the deployment namespace
 namespaceOverride: ""
 
+# TimescaleDB single helm chart configuration
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
-  enabled: true
+  enabled: &dbEnabled true
+  
+  # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
-    tag: pg12-ts2.1-latest
+    tag: pg14.2-ts2.6.1-p4
+    pullPolicy: IfNotPresent
+
   # create only a ClusterIP service
   loadBalancer:
     enabled: false
@@ -31,47 +38,81 @@ timescaledb-single:
   # PGBACKREST_REPO1_S3_KEY_SECRET
   backup:
     enabled: false
+  # TimescaleDB PVC sizes
   persistentVolumes:
     data:
       size: 150Gi
     wal:
       size: 20Gi
 
-# Values for configuring the deployment of the Promscale Connector
+# Values for configuring the deployment of the Promscale
 # The charts README is at:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:latest
-  # connection options
-  connection:
-    # the db name in which the metrics will be stored
-    dbName: &metricDB postgres
-    # user to connect to TimescaleDB with
-    user: postgres
-    password: ""
-    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
-    port: 5432
-
+  image: timescale/promscale:0.11.0
+  # needs to be enabled for tracing support in Promscale
+  # to expose traces port, add tracing args to Promscale
   openTelemetry:
-    enabled: true
+    enabled: &otelEnabled true
+  # to pass extra args
+  extraArgs: []
 
   extraEnv:
     - name: "TOBS_TELEMETRY_INSTALLED_BY"
       value: "helm"
     - name: "TOBS_TELEMETRY_VERSION"
-      value: "0.8.0"
+      value: "{{ .Chart.Version }}"
     - name: "TOBS_TELEMETRY_TRACING_ENABLED"
-      value: "false"
+      value: *otelEnabled
     - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
-      value: "true"
+      value: *dbEnabled
 
-  # configuration options for the service exposed by promscale
-  service:
-    # we disable the load balancer by default, only a ClusterIP service
-    # will get created
-    loadBalancer:
-      enabled: false
+  serviceMonitor:
+    enabled: true
+
+  prometheus:
+    # turn off annotation-based scraping of promscale itself, user the serviceMonitor instead.
+    annotations:
+      # TODO(paulfantom): this can be removed when https://github.com/timescale/promscale/issues/1344 is fixed
+      prometheus.io/scrape: "false"
+
+  ## Note:
+
+  # If you are providing your own secret name, do
+  # not forget to configure at below connectionSecretName
+
+  # selector used to provision your own Secret containing connection details
+  # Use this option with caution
+
+  # if you are adding a conn string here do not forget
+  # to add the same for kube-prometheus.grafana.timescale.adminPassSecret
+  connectionSecretName: ""
+
+  ## Note:
+
+  # If you using tobs deploy TimescaleDB do not configure below
+  # any connection details below as tobs will take care of it.
+
+  # connection details to connect to a target db
+  connection:
+    # Database connection settings. If `uri` is not
+    # set then the specific user, pass, host, port and
+    # sslMode properties are used.
+    uri: ""
+    # the db name in which the metrics will be stored
+    dbName: &metricDB postgres
+    # user to connect to TimescaleDB with
+    user: postgres
+    # empty password string will be populated automatically with a database password
+    password: ""
+    # Host name (templated) of the database instance, default
+    # to service created in timescaledb-single
+    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
+    port: 5432
+    sslMode: require
+
+  # Promscale deployment resource requests
   resources:
     requests:
       # By default this should be enough for a cluster
@@ -85,29 +126,29 @@ promscale:
 kube-prometheus-stack:
   enabled: true
   fullnameOverride: "tobs-kube-prometheus"
-  prometheusOperator:
-    configReloaderCpu: "10m"
-    configReloaderMemory: "20Mi"
   prometheus:
     prometheusSpec:
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
-      ## The remote_read spec configuration for Prometheus.
-      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
+      # Prometheus metric retention
+      retention: 1d
+      # The remote_read spec configuration for Prometheus.
+      # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
         # - {protocol}://{host}:{port}/{endpoint}
         - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/read"
           readRecent: true
 
-      ## The remote_write spec configuration for Prometheus.
-      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
+      # The remote_write spec configuration for Prometheus.
+      # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
         - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
 
-      ## Prometheus pod storage spec
+      # Prometheus pod storage spec
       storageSpec:
-        ## Using PersistentVolumeClaim
+        # Using PersistentVolumeClaim
+        # disable mount sub path, use the root directory of pvc
         disableMountSubPath: true
         volumeClaimTemplate:
           spec:
@@ -117,6 +158,11 @@ kube-prometheus-stack:
               requests:
                 storage: 8Gi
 
+      # We've enabled annotation-based scraping by default for backward-compatibility
+      # and to support the largest number of use-cases out-of-the-box.
+      # We encourage people to use ServiceMonitors and PodMonitors for new components.
+      # See discussion in: https://github.com/prometheus-operator/prometheus-operator/issues/1547
+      # and more info: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
       additionalScrapeConfigs:
         - job_name: kubernetes-service-endpoints
           kubernetes_sd_configs:
@@ -318,12 +364,25 @@ kube-prometheus-stack:
         enabled: true
         label: tobs_datasource
         labelValue: "true"
+        # Disable Prometheus datasource by default as
+        # Promscale is the default datasource
         defaultDatasourceEnabled: false
       dashboards:
+        # option to enable multi-cluster support
+        # in Grafana dashboards by default disabled
+        multicluster:
+          global:
+            enabled: false
         enabled: true
         files:
           - dashboards/k8s-cluster.json
           - dashboards/k8s-hardware.json
+          - dashboards/apm-dependencies.json
+          - dashboards/apm-home.json
+          - dashboards/apm-service-dependencies-downstream.json
+          - dashboards/apm-service-dependencies-upstream.json
+          - dashboards/apm-service-overview.json
+          - dashboards/promscale.json
     adminPassword: ""
     envFromSecret: "{{ .Release.Name }}-grafana-db"
     prometheus:
@@ -356,6 +415,7 @@ kube-prometheus-stack:
       adminUser: postgres
       adminPassSecret: "{{ .Release.Name }}-promscale"
     jaeger:
+      # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
       promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
 
   # By default kube-state-metrics are scraped using
@@ -370,11 +430,12 @@ kube-prometheus-stack:
       annotations:
         prometheus.io/scrape: "false"
 
+# GrafanaDB job config this job pre-configures Grafana with datasources and dashbaords
 grafanaDBJob:
   resources: {}
 
-#Enable PromLens  https://promlens.com/
-#PromLens is a PromQL query builder, analyzer, and visualizer
+# Enable PromLens  https://promlens.com/
+# PromLens is a PromQL query builder, analyzer, and visualizer
 promlens:
   enabled: true
   image: "promlabs/promlens:latest"
@@ -388,13 +449,44 @@ promlens:
 # Enable OpenTelemetry Operator
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
 opentelemetryOperator:
-  enabled: true
-  jaeger:
-    image: jaegertracing/jaeger-query:1.30
-    args:
-      - --grpc-storage.server={{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9202
-      - --grpc-storage.tls.enabled=false
-      - --grpc-storage.connection-timeout=1h
-    env:
-      - name: SPAN_STORAGE_TYPE
-        value: grpc-plugin
+  enabled: *otelEnabled
+  collector:
+    # The default otel collector that will be deployed by CLI once
+    # the otel operator is in running state
+    config: |
+      receivers:
+        jaeger:
+          protocols:
+            grpc:
+            thrift_http:
+
+        otlp:
+          protocols:
+            grpc:
+            http:
+
+      exporters:
+        logging:
+        otlp:
+          endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9202"
+          compression: none
+          tls:
+            insecure: true
+        prometheusremotewrite:
+          endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
+          tls:
+            insecure: true
+
+      processors:
+        batch:
+
+      service:
+        pipelines:
+          traces:
+            receivers: [jaeger, otlp]
+            exporters: [logging, otlp]
+            processors: [batch]
+          metrics:
+            receivers: [otlp]
+            processors: [batch]
+            exporters: [prometheusremotewrite]

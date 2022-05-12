@@ -4,8 +4,8 @@ description: A Helm chart for tobs, The Observability Stack for Kubernetes
 
 type: application
 
-version: 0.10.0-alpha
-appVersion: 0.10.0-alpha
+version: 0.10.0
+appVersion: 0.10.0
 
 dependencies:
   - name: timescaledb-single
@@ -14,7 +14,7 @@ dependencies:
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
-    version: 0.11.0-alpha.3
+    version: 0.11.0
     repository: https://charts.timescale.com
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
