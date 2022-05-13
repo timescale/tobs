@@ -15,7 +15,7 @@ jobs:
     if: github.event_name == 'issues'
     steps:
     - name: Assign NEW issues to project O11y Applications
-      uses: actions/add-to-project@0.0.3
+      uses: actions/add-to-project@main
       with:
         project-url: 'https://github.com/orgs/timescale/projects/30'
         # PAT token is managed by @paulfantom
