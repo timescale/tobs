@@ -2,7 +2,7 @@ name: Project Management
 
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened]
   release:
     types: [published]
   schedule:
