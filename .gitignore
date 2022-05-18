@@ -1,5 +1,6 @@
 .vscode/
 .idea/
 cli/bin
+cli/tobs
 chart/Chart.lock
 tmp/

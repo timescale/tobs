@@ -8,11 +8,17 @@ metadata:
     "helm.sh/hook-weight": "0"
 spec:
   exporter:
-    endpoint: http://{{ .Release.Name }}-otel-collector.{{ .Release.Namespace }}.svc:4317
+    endpoint: http://{{ .Release.Name }}-opentelemetry-collector.{{ .Release.Namespace }}.svc:4318
   propagators:
     - tracecontext
     - baggage
     - b3
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
   sampler:
     type: parentbased_traceidratio
     argument: "0.25"
