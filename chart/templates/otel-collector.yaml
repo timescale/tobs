@@ -2,7 +2,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Release.Name }}-tobs-opentelemetry
+  name: {{ .Release.Name }}-opentelemetry
   annotations:
     "helm.sh/hook": post-install,post-upgrade,pre-delete
     "helm.sh/hook-weight": "0"
