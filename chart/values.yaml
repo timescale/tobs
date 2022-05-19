@@ -359,6 +359,11 @@ kube-prometheus-stack:
   #   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
   grafana:
     enabled: true
+    # TODO(paulfantom): remove with kube-prometheus bump
+    image:
+      repository: grafana/grafana
+      tag: 8.5.2
+      pullPolicy: IfNotPresent
     sidecar:
       datasources:
         enabled: true
