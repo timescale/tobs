@@ -48,7 +48,7 @@ type InstallSpec struct {
 	version            string
 	enableBackUp       bool
 	enablePrometheusHA bool
-	confirmActions     bool
+	ConfirmActions     bool
 	dbPassword         string
 }
 
@@ -80,7 +80,7 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.confirmActions, err = cmd.Flags().GetBool("confirm")
+	i.ConfirmActions, err = cmd.Flags().GetBool("confirm")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
@@ -160,7 +160,7 @@ func (c *InstallSpec) InstallStack() error {
 	// opentelemetry operator needs cert-manager as a dependency as adding cert-manager isn't good practice and
 	// not recommended by the cert-manager maintainers. We are explicitly creating cert-manager with kubectl
 	// for more details on this refer: https://github.com/jetstack/cert-manager/issues/3616
-	err = otel.CreateCertManager(c.confirmActions)
+	err = otel.CreateCertManager(c.ConfirmActions)
 	if err != nil {
 		return fmt.Errorf("failed to create cert-manager %v", err)
 	}
