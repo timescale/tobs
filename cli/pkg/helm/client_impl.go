@@ -273,6 +273,10 @@ func (c *clientImpl) InstallOrUpgradeChart(ctx context.Context, spec *ChartSpec)
 		return releaseInfo, err
 	}
 
+	if spec.DryRun {
+		return c.install(spec)
+	}
+
 	if installed {
 		return releaseInfo, c.upgrade(ctx, spec)
 	}
