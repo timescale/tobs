@@ -21,7 +21,6 @@
 {{- end }}
 {{- if index .Values "opentelemetryOperator" "enabled" }}
 🚀 OpenTelemetry
-🎯 Jaeger
 {{- end }}
 
 {{- $prometheus := index .Values "kube-prometheus-stack" "prometheus" }}
