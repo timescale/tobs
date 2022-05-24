@@ -478,7 +478,7 @@ opentelemetryOperator:
           tls:
             insecure: true
         prometheusremotewrite:
-          endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
+          endpoint: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
           tls:
             insecure: true
 
