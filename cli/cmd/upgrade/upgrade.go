@@ -121,8 +121,9 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 				utils.ConfirmAction()
 			}
 			s := install.InstallSpec{
-				ConfigFile: file,
-				Ref:        ref,
+				ConfigFile:     file,
+				Ref:            ref,
+				ConfirmActions: confirm,
 			}
 			err = s.InstallStack()
 			if err != nil {
