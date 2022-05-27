@@ -99,10 +99,13 @@ Users sometimes want to use our Helm charts as sub-charts for other project or i
 
 ## Tobs vs. Kubernetes
 
-| Tobs  | Kubernetes     |
-|-------|----------------|
-| 0.8.x | v1.21 to v1.23 |
-| 0.7.x | v1.19 to v1.21 |
+| Tobs   | Kubernetes     |
+|--------|----------------|
+| 0.11.x | v1.23 to v1.24 |
+| 0.10.x | v1.21 to v1.23 |
+| 0.9.x  | v1.21 to v1.23 |
+| 0.8.x  | v1.21 to v1.23 |
+| 0.7.x  | v1.19 to v1.21 |
 
 # ✏️ Contributing
 
