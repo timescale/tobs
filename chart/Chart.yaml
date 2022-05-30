@@ -6,6 +6,7 @@ type: application
 
 version: 0.10.0
 appVersion: 0.10.0
+kubeVersion: ">= 1.23.0"
 
 dependencies:
   - name: timescaledb-single
