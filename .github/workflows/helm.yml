@@ -8,6 +8,9 @@ on:
     paths:
     - chart/**
 
+env:
+  kube-version: "v1.23.0"
+
 jobs:
   template-test:
     name: Run helm template
@@ -39,6 +42,8 @@ jobs:
     - name: Test templating
       working-directory: chart
       run: |
-        helm template --generate-name . \
+        helm template \
+          --kube-version ${{ env.kube-version }} \
+          --generate-name . \
           --set 'timescaledb-single.enabled=${{ matrix.timescaledb }}' \
           --set '${{ matrix.promscale }}'
