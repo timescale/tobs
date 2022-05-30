@@ -59,11 +59,7 @@ NOTE: It may take a few minutes for the LoadBalancer IP to be available.
       )
     echo http://$SERVICE_IP:{{ $prometheus.service.port }}
 {{-     else if contains "ClusterIP"  $prometheus.service.type }}
-{{-       if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} prometheus port-forward
-{{-       else }}
     kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ $kubePrometheus.fullnameOverride }}-prometheus 9090:{{ $prometheus.service.port }}
-{{-       end }}
 {{-     end }}
 {{-   end }}
 {{   if not $prometheus.prometheusSpec.storageSpec -}}
@@ -133,9 +129,6 @@ during the installation.
 {{-   end }}
 {{ if not (index .Values "promscale" "connection" "uri") }}
 To get your password for superuser run:
-{{-   if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} timescaledb superuser get-password <user>
-{{-   else }}
     # superuser password
     PGPASSWORD_POSTGRES=$(
       kubectl get secret --namespace {{ .Release.Namespace }} \
@@ -153,14 +146,10 @@ To get your password for superuser run:
       base64 --decode \
     )
     echo $PGPASSWORD_ADMIN
-{{-   end }}
 
 To connect to your database, chose one of these options:
 
 1. Run a postgres pod and connect using the psql cli:
-{{-   if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} timescaledb superuser connect <user>
-{{-   else }}
     # login as superuser
     kubectl run -it --rm psql --image=postgres --env "PGPASSWORD=$PGPASSWORD_POSTGRES" --command --\
       psql -U postgres -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc postgres
@@ -168,17 +157,12 @@ To connect to your database, chose one of these options:
     # login as admin
     kubectl run -it --rm psql --image=postgres --env "PGPASSWORD=$PGPASSWORD_ADMIN" --command --\
       psql -U admin -h {{ template "clusterName" $tsEnv }}.{{ .Release.Namespace }}.svc postgres
-{{-   end }}
 
 2. Directly execute a psql session on the master node
-{{-     if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} timescaledb superuser connect
-{{-     else }}
     MASTER_POD=$(\
       kubectl get pod -o name --namespace {{ .Release.Namespace }} -l release={{ .Release.Name }},role=master \
     )
     kubectl exec -it --namespace {{ .Release.Namespace }} ${MASTERPOD} -- psql -U postgres
-{{-     end }}
 {{-   end }}
 {{- end }}
 {{ if .Values.opentelemetryOperator.enabled }}
@@ -202,11 +186,7 @@ The Grafana server can be accessed via port {{ $grafana.service.port }} on the f
    {{ .Release.Name }}-grafana.{{ .Release.Namespace  }}.svc
 
 You can access grafana locally by executing:
-{{-   if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} grafana port-forward
-{{-   else }}
     kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ .Release.Name}}-grafana 8080:{{ $grafana.service.port }}
-{{-   end }}
 
    Then you can point your browser to http://127.0.0.1:8080/.
 
@@ -219,20 +199,12 @@ Persistence is enabled, and you did an upgrade. If you don't have the password
 for '{{ $grafana.adminUser }}', it can not be retrieved again, you need to reset it (see next paragraph).
 {{-   else }}
 Get your '{{ $grafana.adminUser }}' user password by running:
-{{-     if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} grafana get-password
-{{-     else }}
     kubectl get secret --namespace {{ .Release.Namespace }} {{ .Release.Name }}-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-{{-     end }}
 {{-   end }}
 
 To reset the admin user password you can use grafana-cli from inside the pod by executing:
-{{-   if .Values.cli }}
-    tobs {{- template "tobs.cliOptions" . }} grafana change-password <password-you-want-to-set>
-{{-   else }}
     GRAFANA_POD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana)"
     kubectl exec -it ${GRAFANA_POD} -c grafana -- grafana-cli admin reset-admin-password <password-you-want-to-set>
-{{-   end }}
 {{- end }}
 
 🚀 Happy observing!
