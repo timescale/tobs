@@ -442,7 +442,7 @@ grafanaDBJob:
 # Enable PromLens  https://promlens.com/
 # PromLens is a PromQL query builder, analyzer, and visualizer
 promlens:
-  enabled: true
+  enabled: false
   image: "promlabs/promlens:latest"
   # This default URL assumes access via port-forwarding to the connector. If using
   # a load balancer for the connector, change as appropriate
