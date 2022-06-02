@@ -11,7 +11,7 @@ kubeVersion: ">= 1.23.0"
 dependencies:
   - name: timescaledb-single
     condition: timescaledb-single.enabled
-    version: 0.12.0
+    version: 0.13.0
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
@@ -20,7 +20,7 @@ dependencies:
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
     # With each major bump make sure prometheus-operator CRD version matches version specified in cli/pkg/upgrade/upgrade.go#KubePrometheusCRDVersion
-    version: 35.4.2
+    version: 35.5.1
     repository: https://prometheus-community.github.io/helm-charts
   - name: opentelemetry-operator
     condition: opentelemetryOperator.enabled
