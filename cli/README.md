@@ -4,6 +4,38 @@ This is a CLI tool for installing and managing the The Observability Stack for K
 
 ## Quick Start
 
+### Installing the CLI tool
+
+To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
+
+```bash
+curl --proto '=https' -A 'tobs' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
+```
+
+Alternatively, you can download the CLI directly via [our releases page](https://github.com/timescale/tobs/releases/latest)
+
+Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
+
+### Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
+
+After setting up tobs run the following to install the tobs helm charts into your Kubernetes cluster
+
+```bash
+tobs install
+```
+
+This will deploy all of the tobs components into your cluster and provide instructions as to next steps.
+
+#### Tracing support
+
+From `0.7.0` release tobs supports installation of tracing components. To install tracing components use
+
+```
+tobs install --tracing
+```
+
+For more details on tracing support visit [Promscale tracing docs](https://github.com/timescale/promscale/blob/master/docs/tracing.md).
+
 ### Getting started by viewing your metrics in Grafana
 
 To see your Grafana dashboards after installation run

@@ -22,52 +22,31 @@ stack into a Kubernetes cluster. Currently this stack includes:
 
 We plan to expand this stack over time and welcome contributions.
 
-Tobs provides a CLI tool to make deployment and operations easier. We also provide
-Helm charts that can be used directly or as sub-charts for other projects.
+Tobs provides a helm chart to make deployment and operations easier. It can be used directly or as a sub-chart for other projects.
 
-See a demo of tobs in action by clicking the video below:
+# Quick start
 
-<p align="center">
-<a href="https://www.youtube.com/watch?v=MSvBsXOI1ks"> <img src="https://media.giphy.com/media/e8y7Lq7V5F0K9zQs20/giphy.gif"> </a>
-</p>
+## Prerequisites
 
-# 🔥 Quick start
+Using tobs to install full observability stack with openTelemetry support currently requires installation of cert-manager.
+To do install it please follow [cert-manager documentation](https://cert-manager.io/docs/installation/).
 
-## Installing the CLI tool
+*Note*: cert-manager is not required when using tobs with opentelemetry support disabled.
 
-To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
+## Installing the helm chart
 
-```bash
-curl --proto '=https' -A 'tobs' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
-```
-
-Alternatively, you can download the CLI directly via [our releases page](https://github.com/timescale/tobs/releases/latest)
-
-Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
-
-## Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
-
-After setting up tobs run the following to install the tobs helm charts into your Kubernetes cluster
-
-```bash
-tobs install
-```
-
-This will deploy all of the tobs components into your cluster and provide instructions as to next steps.
-
-### Tracing support
-
-From `0.7.0` release tobs supports installation of tracing components. To install tracing components use
+The following command will install Kube-Prometheus, OpenTelemetry Operator, TimescaleDB, and Promscale
+into your Kubernetes cluster:
 
 ```
-tobs install --tracing
+helm repo add timescale https://charts.timescale.com/
+helm repo update
+helm install --wait <release_name> timescale/tobs
 ```
 
-For more details on tracing support visit [Promscale tracing docs](https://github.com/timescale/promscale/blob/master/docs/tracing.md).
+*Note*: `--wait` flag is necessary for successfull installation as tobs helm chart can create opentelemetry Custom Resources only after opentelemetry-operator is up and running. This flag can be omitted when using tobs without opentelemetry support.
 
-## Using the tobs CLI tool
-
-The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#usage-guide)) provides the most seamless experience for interacting with tobs.
+For detailed configuration and usage instructions, take a look at the [helm chart's README](/chart/README.md).
 
 # Configuring the stack
 
@@ -76,24 +55,13 @@ You can view the self-documenting [default values.yaml](chart/values.yaml) in th
 We also have additional documentation about individual configuration settings in our
 [Helm chart docs](chart/README.md#configuring-helm-chart).
 
-To modify the settings, first create a values.yaml file:
+# Alternative deployment methods
 
-```bash
-tobs helm show-values > values.yaml
-```
+## Using the `tobs` CLI tool
 
-Then modify the values.yaml file using your favorite editor.
-Finally, deploy with the new settings using:
+We also provide a CLI tool to deploy tobs on a Kubernetes cluster. The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#usage-guide)) provides detailed instructions on how to use the CLI for managing tobs.
 
-```bash
-tobs install -f values.yaml
-```
-
-# 🛠Alternative deployment methods
-
-## Using the Helm charts without the CLI tool
-
-Users sometimes want to use our Helm charts as sub-charts for other project or integrate them into their infrastructure without using our CLI tool. This is a supported use-case and instructions on using the Helm charts can be found [here](/chart/README.md).
+*NOTE*: At this point, the CLI tool is just a thin wrapper around the helm chart, and hence it's set to be removed in future releases.
 
 # Compatibility matrix
 
@@ -107,7 +75,7 @@ Users sometimes want to use our Helm charts as sub-charts for other project or i
 | 0.8.x  | v1.21 to v1.23 |
 | 0.7.x  | v1.19 to v1.21 |
 
-# ✏️ Contributing
+# Contributing
 
 We welcome contributions to tobs, which is
 licensed and released under the open-source Apache License, Version 2.  The

@@ -25,9 +25,6 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
 
 # Install
 
-The recommended way to deploy tobs is through the [CLI tool](/cli). However, we also
-support helm deployments that do not use the CLI.
-
 ## Prerequisites
 
 Using tobs to install full observability stack with openTelemetry support currently requires installation of cert-manager. To do install it please follow [cert-manager documentation](https://cert-manager.io/docs/installation/).
@@ -36,7 +33,7 @@ Using tobs to install full observability stack with openTelemetry support curren
 
 ## Installing the helm chart
 
-The following command will install Kube-Prometheus, TimescaleDB, and Promscale
+The following command will install Kube-Prometheus, TimescaleDB, OpenTelemetry Operator, and Promscale
 into your Kubernetes cluster:
 
 ```
