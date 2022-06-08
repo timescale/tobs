@@ -24,17 +24,12 @@ We plan to expand this stack over time and welcome contributions.
 
 Tobs provides a helm chart to make deployment and operations easier. It can be used directly or as a sub-chart for other projects.
 
-See a demo of tobs in action by clicking the video below:
-
-<p align="center">
-<a href="https://www.youtube.com/watch?v=MSvBsXOI1ks"> <img src="https://media.giphy.com/media/e8y7Lq7V5F0K9zQs20/giphy.gif"> </a>
-</p>
-
-# 🔥 Quick start
+# Quick start
 
 ## Prerequisites
 
-Using tobs to install full observability stack with openTelemetry support currently requires installation of cert-manager. To do install it please follow [cert-manager documentation](https://cert-manager.io/docs/installation/).
+Using tobs to install full observability stack with openTelemetry support currently requires installation of cert-manager.
+To do install it please follow [cert-manager documentation](https://cert-manager.io/docs/installation/).
 
 *Note*: cert-manager is not required when using tobs with opentelemetry support disabled.
 
@@ -49,7 +44,7 @@ helm repo update
 helm install --wait <release_name> timescale/tobs
 ```
 
-*Note*: `--wait` flag is necessary for successfull installation as tobs helm chart can create opentelemetry Custom Resources only after opentelemetry-operator is up and running. This flag can be omited when using tobs without opentelemetry support.
+*Note*: `--wait` flag is necessary for successfull installation as tobs helm chart can create opentelemetry Custom Resources only after opentelemetry-operator is up and running. This flag can be omitted when using tobs without opentelemetry support.
 
 For detailed configuration and usage instructions, take a look at the [helm chart's README](/chart/README.md).
 
@@ -60,49 +55,13 @@ You can view the self-documenting [default values.yaml](chart/values.yaml) in th
 We also have additional documentation about individual configuration settings in our
 [Helm chart docs](chart/README.md#configuring-helm-chart).
 
-# 🛠Alternative deployment methods
+# Alternative deployment methods
 
-## [DEPRECATED] Using the `tobs` CLI tool
+## Using the `tobs` CLI tool
 
-We also provide a CLI tool to deploy tobs on a Kubernetes cluster. 
+We also provide a CLI tool to deploy tobs on a Kubernetes cluster. The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#usage-guide)) provides detailed instructions on how to use the CLI for managing tobs.
 
-*NOTE*: At this point, the CLI tool is just a thin wrapper around the helm chart, and hence it's set to be removed in future releases. 
-
-### Installing the CLI tool
-
-To download and install tobs, run the following in your terminal, then follow the on-screen instructions.
-
-```bash
-curl --proto '=https' -A 'tobs' --tlsv1.2 -sSLf  https://tsdb.co/install-tobs-sh |sh
-```
-
-Alternatively, you can download the CLI directly via [our releases page](https://github.com/timescale/tobs/releases/latest)
-
-Getting started with the CLI tool is a two-step process: First you install the CLI tool locally, then you use the CLI tool to install the tobs stack into your Kubernetes cluster.
-
-### Using the tobs CLI tool to deploy the stack into your Kubernetes cluster
-
-After setting up tobs run the following to install the tobs helm charts into your Kubernetes cluster
-
-```bash
-tobs install
-```
-
-This will deploy all of the tobs components into your cluster and provide instructions as to next steps.
-
-#### Tracing support
-
-From `0.7.0` release tobs supports installation of tracing components. To install tracing components use
-
-```
-tobs install --tracing
-```
-
-For more details on tracing support visit [Promscale tracing docs](https://github.com/timescale/promscale/blob/master/docs/tracing.md).
-
-### Using the tobs CLI tool
-
-The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#usage-guide)) provides the most seamless experience for interacting with tobs.
+*NOTE*: At this point, the CLI tool is just a thin wrapper around the helm chart, and hence it's set to be removed in future releases.
 
 # Compatibility matrix
 
@@ -116,7 +75,7 @@ The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#us
 | 0.8.x  | v1.21 to v1.23 |
 | 0.7.x  | v1.19 to v1.21 |
 
-# ✏️ Contributing
+# Contributing
 
 We welcome contributions to tobs, which is
 licensed and released under the open-source Apache License, Version 2.  The
