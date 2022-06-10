@@ -126,6 +126,12 @@ promscale:
 kube-prometheus-stack:
   enabled: true
   fullnameOverride: "tobs-kube-prometheus"
+
+  prometheusOperator:
+    admissionWebhooks:
+      certManager:
+        enabled: true
+
   prometheus:
     prometheusSpec:
       scrapeInterval: "1m"
