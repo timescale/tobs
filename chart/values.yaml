@@ -61,7 +61,7 @@ promscale:
 
   extraEnv:
     - name: "TOBS_TELEMETRY_INSTALLED_BY"
-      value: "helm"
+      value: "tobs"
     - name: "TOBS_TELEMETRY_VERSION"
       value: "{{ .Chart.Version }}"
     - name: "TOBS_TELEMETRY_TRACING_ENABLED"
