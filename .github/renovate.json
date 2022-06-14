@@ -22,8 +22,8 @@
       "depNameTemplate": "helm/helm"
     },
     {
-      "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
-      "matchStrings": ["cert-manager-version:\\s(?<currentValue>.*?)\\n"],
+      "fileMatch": ["^Makefile$"],
+      "matchStrings": ["CERT_MANAGER_VERSION\\s?=\\s(?<currentValue>.*?)\\n"],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "cert-manager/cert-manager"
     },

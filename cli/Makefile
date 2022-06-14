@@ -1,5 +1,6 @@
-KUBE_VERSION ?= 1.24
-KIND_CONFIG ?= ./tests/kind-$(KUBE_VERSION).yaml
+include ../Makefile
+
+all: build start-kind e2e-tests external-db-tests go-vet go-fmt go-lint
 
 build:
 		go build -o bin/tobs .
@@ -34,13 +35,5 @@ go-fmt:
 go-lint:
 		golangci-lint run
 
-start-kind:
-		kind create cluster --name tobs --config $(KIND_CONFIG)
-
 uninstall-tobs:
 		./bin/tobs uninstall
-
-delete-kind:
-		kind delete cluster --name tobs
-
-all: build start-kind e2e-tests external-db-tests go-vet go-fmt go-lint
