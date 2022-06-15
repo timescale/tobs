@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 	installObs()
 
 	// FIXME(paulfantom): This should be converted into polling for instances
-	time.Sleep(3 * time.Minute)
+	time.Sleep(5 * time.Minute)
 
 	log.Println("starting e2e tests post tobs deployment....")
 	code := m.Run()
@@ -55,11 +55,11 @@ func TestMain(m *testing.M) {
 	uninstallsObs()
 
 	// wait for the uninstall to succeed
-	// this takes 3 mins because in HA mode
+	// this takes 5 mins because in HA mode
 	// we have 2 Prometheus instances to gracefully shutdown
 	// and to avoid flakiness.
 	// FIXME(paulfantom): This should be converted into polling for instances
-	time.Sleep(3 * time.Minute)
+	time.Sleep(5 * time.Minute)
 
 	// TODO(paulfantom): This should be a part of TestUninstall()
 	err = test_utils.CheckPVCSExist(RELEASE_NAME, NAMESPACE)
