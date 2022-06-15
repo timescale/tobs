@@ -368,7 +368,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 8.5.6
+      tag: 9.0.0
       pullPolicy: IfNotPresent
     sidecar:
       datasources:
