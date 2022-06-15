@@ -32,14 +32,9 @@ func init() {
 }
 
 func addInstallUtilitiesFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolP("only-secrets", "", false, "[DEPRECATED] Defunct flag historically used to create TimescaleDB secrets")
-	cmd.Flags().StringP("timescaledb-tls-cert", "", "", "[DEPRECATED] Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
-	cmd.Flags().StringP("timescaledb-tls-key", "", "", "[DEPRECATED] Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	cmd.Flags().BoolP("enable-timescaledb-backup", "b", false, "Option to enable TimescaleDB S3 backup")
 	cmd.Flags().StringP("version", "", "", "Option to provide tobs helm chart version, if not provided will install the latest tobs chart available")
-	cmd.Flags().BoolP("skip-wait", "", false, "[DEPRECATED] flag is not functional as tobs installation requires waiting for pods to be in running state due to opentelemetry prerequisities")
 	cmd.Flags().BoolP("enable-prometheus-ha", "", false, "Option to enable prometheus and promscale high-availability, by default scales to 2 replicas")
-	cmd.Flags().BoolP("tracing", "", false, "[DEPRECATED] flag is not functional as tobs is installing tracing support by default")
 	cmd.Flags().StringP("external-timescaledb-uri", "e", "", "Connect to an existing db using the provided URI")
 	cmd.Flags().BoolP("confirm", "y", false, "Confirmation for all user input prompts")
 	cmd.Flags().StringP("export", "", "", "export kubernetes manifests to a yaml file instead of actually installing")
@@ -52,7 +47,7 @@ type InstallSpec struct {
 	version            string
 	enableBackUp       bool
 	enablePrometheusHA bool
-	confirmActions     bool
+	ConfirmActions     bool
 	dbPassword         string
 	exportFile         string
 }
@@ -85,30 +80,13 @@ func helmInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
-	i.confirmActions, err = cmd.Flags().GetBool("confirm")
+	i.ConfirmActions, err = cmd.Flags().GetBool("confirm")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
 	}
 	i.exportFile, err = cmd.Flags().GetString("export")
 	if err != nil {
 		return fmt.Errorf("could not install The Observability Stack: %w", err)
-	}
-
-	// TODO(paulfantom): Remove deprecated flags post 0.10.0 release
-	if cmd.Flags().Changed("tracing") {
-		fmt.Println("DEPRECATED flag used: 'tracing'. This flag will be removed in future versions of tobs. Feature is now enabled by default and if you want to disable deployment of opentelemetry-operator, change value of opentelemetryOperator.enabled")
-	}
-	if cmd.Flags().Changed("skip-wait") {
-		fmt.Println("DEPRECATED flag used: 'skip-wait'. This flag will be removed in future versions of tobs. Feature is now disabled by default to allow smooth installation of opentelemetry components")
-	}
-	if cmd.Flags().Changed("only-secrets") {
-		fmt.Println("DEPRECATED flag used: 'only-secrets'. This flag will be removed in future versions of tobs.")
-	}
-	if cmd.Flags().Changed("timescaledb-tls-cert") {
-		fmt.Println("DEPRECATED flag used: 'timescaledb-tls-cert'. This flag will be removed in future versions of tobs. Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
-	}
-	if cmd.Flags().Changed("timescaledb-tls-key") {
-		fmt.Println("DEPRECATED flag used: 'timescaledb-tls-key'. This flag will be removed in future versions of tobs. Use helm values file to configure TLS certificate. This option can be configured with either 'timescaledb-single.secrets.certificate' or 'timescaledb-single.secrets.certificateSecretName'")
 	}
 
 	err = i.InstallStack()
@@ -169,7 +147,7 @@ func (c *InstallSpec) InstallStack() error {
 	// opentelemetry operator needs cert-manager as a dependency as adding cert-manager isn't good practice and
 	// not recommended by the cert-manager maintainers. We are explicitly creating cert-manager with kubectl
 	// for more details on this refer: https://github.com/jetstack/cert-manager/issues/3616
-	err = otel.CreateCertManager(c.confirmActions)
+	err = otel.CreateCertManager(c.ConfirmActions)
 	if err != nil {
 		return fmt.Errorf("failed to create cert-manager %v", err)
 	}

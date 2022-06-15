@@ -12,6 +12,10 @@ namespaceOverride: ""
 
 # TimescaleDB single helm chart configuration
 timescaledb-single:
+  env:
+  - name: "TIMESCALEDB_TELEMETRY"
+    value: "off"
+
   # disable the chart if an existing TimescaleDB instance is used
   enabled: &dbEnabled true
   

@@ -1,0 +1,29 @@
+{{ if .Values.opentelemetryOperator.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-otel-operator
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/component: opentelemetry-collector
+    app.kubernetes.io/instance: {{ .Release.Namespace }}.{{ .Release.Name }}-opentelemetry
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: tobs
+spec:
+  endpoints:
+  - interval: 30s
+    scheme: https
+    port: https
+    # otel-operator /metrics endpoint is protected with kube-rbac-proxy thus authentication is required
+    # It is also using a self-signed certificate, so skipping cert validation is crucial.
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    tlsConfig:
+      insecureSkipVerify: true
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: opentelemetry-operator
+      control-plane: controller-manager
+{{- end }}

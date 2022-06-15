@@ -121,8 +121,9 @@ func upgradeTobs(cmd *cobra.Command, args []string) error {
 				utils.ConfirmAction()
 			}
 			s := install.InstallSpec{
-				ConfigFile: file,
-				Ref:        ref,
+				ConfigFile:     file,
+				Ref:            ref,
+				ConfirmActions: confirm,
 			}
 			err = s.InstallStack()
 			if err != nil {
@@ -559,7 +560,7 @@ func (c *upgradeSpec) upgradeTo08X() error {
 var (
 	// FIXME(paulfantom): if CRDs would contain label with version, we could deduct this value
 	// Needs https://github.com/prometheus-operator/prometheus-operator/issues/4344 to be completed
-	KubePrometheusCRDVersion     = "v0.56.2"
+	KubePrometheusCRDVersion     = "v0.57.0"
 	kubePrometheusCRDsPathPrefix = fmt.Sprintf("https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/%s/example/prometheus-operator-crd/monitoring.coreos.com", KubePrometheusCRDVersion)
 	kubePrometheusCRDs           = map[string]string{
 		"alertmanagerconfigs.monitoring.coreos.com": fmt.Sprintf("%s_%s.yaml", kubePrometheusCRDsPathPrefix, "alertmanagerconfigs"),

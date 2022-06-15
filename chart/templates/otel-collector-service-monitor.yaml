@@ -1,0 +1,29 @@
+{{ if and (.Values.opentelemetryOperator.enabled) (.Values.opentelemetryOperator.collector.config) -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-otel-collector
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade,pre-delete
+    "helm.sh/hook-weight": "0"
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/component: opentelemetry-collector
+    app.kubernetes.io/instance: {{ .Release.Namespace }}.{{ .Release.Name }}-opentelemetry
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: tobs
+spec:
+  endpoints:
+  - interval: 30s
+    port: monitoring
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: opentelemetry-collector
+      app.kubernetes.io/instance: default.{{ .Release.Name }}-opentelemetry
+      app.kubernetes.io/managed-by: opentelemetry-operator
+      app.kubernetes.io/name: {{ .Release.Name }}-opentelemetry-collector-monitoring
+      app.kubernetes.io/part-of: opentelemetry
+{{- end }}

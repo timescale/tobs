@@ -10,8 +10,6 @@ on:
 env:
   golang-version: 1.18.1
   golangci-lint-version: v1.45.2
-  # cert-manager-version needs to be also updated in cli/pkg/otel-utilities.go
-  cert-manager-version: v1.6.1
 
 jobs:
   docs:
@@ -95,9 +93,8 @@ jobs:
     strategy:
       matrix:
         kube-version:
-          - "1.21"
-          - "1.22"
           - "1.23"
+          - "1.24"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -108,16 +105,14 @@ jobs:
           go-version: ${{ env.golang-version }}
 
       - name: Start kuberenetes cluster
-        working-directory: cli
         env:
           KUBE_VERSION: ${{ matrix.kube-version }}
         run: |
           make start-kind
 
       - name: Install cert-manager
-        working-directory: cli
         run: |
-          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/${{ env.cert-manager-version }}/cert-manager.yaml
+          make cert-manager
 
       - name: Build
         working-directory: cli
