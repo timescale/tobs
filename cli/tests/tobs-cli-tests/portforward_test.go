@@ -11,7 +11,7 @@ import (
 	test_utils "github.com/timescale/tobs/cli/tests/test-utils"
 )
 
-func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens string) {
+func testpf(t testing.TB, timescale, grafana, prometheus, promscale string) {
 	cmds := []string{"port-forward", "--name", RELEASE_NAME, "--namespace", NAMESPACE}
 	if timescale != "" {
 		cmds = append(cmds, "-t", timescale)
@@ -24,9 +24,6 @@ func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens st
 	}
 	if promscale != "" {
 		cmds = append(cmds, "-c", promscale)
-	}
-	if promlens != "" {
-		cmds = append(cmds, "-l", promlens)
 	}
 
 	// kubectl get pods -A
@@ -53,9 +50,6 @@ func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens st
 	if promscale == "" {
 		promscale = "9201"
 	}
-	if promlens == "" {
-		promlens = "8081"
-	}
 
 	_, err = net.DialTimeout("tcp", "localhost:"+timescale, 2*time.Second)
 	if err != nil {
@@ -73,10 +67,6 @@ func testpf(t testing.TB, timescale, grafana, prometheus, promscale, promlens st
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = net.DialTimeout("tcp", "localhost:"+promlens, 2*time.Second)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	err = portforward.Process.Signal(syscall.SIGINT)
 	if err != nil {
@@ -89,13 +79,12 @@ func TestPortForward(t *testing.T) {
 		t.Skip("Skipping port-forwarding tests")
 	}
 
-	testpf(t, "", "", "", "", "")
-	testpf(t, "3932", "", "", "", "")
-	testpf(t, "", "4893", "", "", "")
-	testpf(t, "", "", "2312", "", "")
-	testpf(t, "4792", "4073", "", "", "")
-	testpf(t, "", "5343", "9763", "", "")
-	testpf(t, "9697", "6972", "", "", "")
-	testpf(t, "1275", "4378", "1702", "", "")
-	testpf(t, "4857", "2489", "3478", "8080", "4659")
+	testpf(t, "3932", "", "", "")
+	testpf(t, "", "4893", "", "")
+	testpf(t, "", "", "2312", "")
+	testpf(t, "4792", "4073", "", "")
+	testpf(t, "", "5343", "9763", "")
+	testpf(t, "9697", "6972", "", "")
+	testpf(t, "1275", "4378", "1702", "")
+	testpf(t, "4857", "2489", "3478", "8080")
 }
