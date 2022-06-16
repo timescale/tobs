@@ -187,6 +187,8 @@ func (c *InstallSpec) InstallStack() error {
 		fmt.Println("enabled dry-run mode for helm")
 		helmValuesSpec.DryRun = true
 		helmValuesSpec.Replace = true
+		helmValuesSpec.Force = true
+		helmValuesSpec.Recreate = true
 	}
 
 	fmt.Println("Installing The Observability Stack, this can take a few minutes")

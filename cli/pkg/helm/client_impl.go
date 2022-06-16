@@ -331,6 +331,9 @@ func (c *clientImpl) UninstallRelease(spec *ChartSpec) error {
 func (c *clientImpl) install(spec *ChartSpec) (*release.Release, error) {
 	release := &release.Release{}
 	client := action.NewInstall(c.actionConfig)
+	if spec.DryRun {
+		client.ClientOnly = true // for export/template
+	}
 	setInstallOptions(spec, client)
 	helmChart, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
 	if err != nil {
