@@ -18,11 +18,11 @@ timescaledb-single:
 
   # disable the chart if an existing TimescaleDB instance is used
   enabled: &dbEnabled true
-  
+
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
-    tag: pg14.2-ts2.6.1-p4
+    tag: pg14.3-ts2.7.0-p0
     pullPolicy: IfNotPresent
 
   # create only a ClusterIP service
@@ -60,7 +60,8 @@ promscale:
   openTelemetry:
     enabled: &otelEnabled true
   # to pass extra args
-  extraArgs: []
+  extraArgs:
+    - "--metrics.high-availability=true"
 
   extraEnv:
     - name: "TOBS_TELEMETRY_INSTALLED_BY"
@@ -121,7 +122,7 @@ promscale:
     requests:
       # By default this should be enough for a cluster
       # with only a few pods
-      memory: 50Mi
+      memory: 2Gi
       cpu: 10m
 
 # Enabling Kube-Prometheus will install
@@ -137,6 +138,11 @@ kube-prometheus-stack:
       evaluationInterval: "1m"
       # Prometheus metric retention
       retention: 1d
+      # Number of replicas of each shard to deploy for a Prometheus deployment.
+      replicas: 2
+      replicaExternalLabelName: "__replica__"
+      # Promscale requires a cluster label to be present for high availability mode.
+      prometheusExternalLabelName: "cluster"
       # The remote_read spec configuration for Prometheus.
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
@@ -363,6 +369,11 @@ kube-prometheus-stack:
   #   https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
   grafana:
     enabled: true
+    # TODO(paulfantom): remove with kube-prometheus bump
+    image:
+      repository: grafana/grafana
+      tag: 8.5.5
+      pullPolicy: IfNotPresent
     sidecar:
       datasources:
         enabled: true
@@ -387,8 +398,14 @@ kube-prometheus-stack:
           - dashboards/apm-service-dependencies-upstream.json
           - dashboards/apm-service-overview.json
           - dashboards/promscale.json
+    adminUser: admin
+    # To configure password externally refer to https://github.com/grafana/helm-charts/blob/6578497320d3c4672bab3a3c7fd38dffba1c9aba/charts/grafana/values.yaml#L340-L345
     adminPassword: ""
-    envFromSecret: "{{ .Release.Name }}-grafana-db"
+    persistence:
+      type: pvc
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
     prometheus:
       datasource:
         enabled: true
@@ -398,7 +415,7 @@ kube-prometheus-stack:
         url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
     timescale:
       database:
-        enabled: true
+        enabled: false
         host: *dbHost
         port: 5432
         user: grafanadb
@@ -477,7 +494,7 @@ opentelemetryOperator:
           tls:
             insecure: true
         prometheusremotewrite:
-          endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
+          endpoint: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
           tls:
             insecure: true
 
