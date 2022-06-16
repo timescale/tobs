@@ -147,7 +147,7 @@ func TestExportValueFromChart(t *testing.T) {
 	if !ok {
 		t.Fatal("failed to get expected value string from export chart value field")
 	}
-	if v != "50Mi" {
+	if v != "2Gi" {
 		t.Fatal("failed to verify exportChartValue")
 	}
 }

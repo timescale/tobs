@@ -6,6 +6,7 @@
 {{- $anyDataSources := or $tsdbDatasource.enabled $promEnabled -}}
 {{ if $anyDataSources -}}
 apiVersion: v1
+{{ if $grafana.enabled -}}
 kind: Secret
 metadata:
   name: {{ .Release.Name }}-grafana-datasources
@@ -47,8 +48,8 @@ stringData:
 {{ if $isDBURI -}}
   {{- $hostURL = include "tobs.dburi.host" . -}}
 {{ else -}}
-  {{- $host := tpl $grafana.timescale.database.host $ -}}
-  {{- $port := $grafana.timescale.database.port | int -}}
+  {{- $host := tpl $grafana.timescale.datasource.host $ -}}
+  {{- $port := $grafana.timescale.datasource.port | int -}}
   {{- $hostURL = printf "%s:%d" $host $port -}}
 {{ end }}
       - name: Promscale-SQL
@@ -67,6 +68,7 @@ stringData:
           sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) ($tsdbDatasource.sslMode) ($isDBURI) }}
           postgresVersion: 1000
           timescaledb: true
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

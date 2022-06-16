@@ -8,6 +8,20 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 helm repo update
 ```
 
+## Upgrading to 0.11.0
+
+Starting with tobs `0.11.0` we are tackling mostly reliability improvements. One of such improvements is switching grafana database back to dedicated sqlite3 instead of sharing TimescaleDB between grafana and promscale. Sadly this change requires manual intervention from end-users. If you wish to temporarily still use TimescaleDB as a grafana backend, you need to change following value:
+
+```yaml
+kube-prometheus-stack:
+  grafana:
+    timescale:
+      database:
+        enabled: true
+```
+
+Bear in mind that next tobs release will not support TimescaleDB as a grafana backend and you will need to migrate either to sqlite3 or to separate grafana instance.
+
 ## Upgrading to 0.10.0
 
 With tobs `0.10.0` release we are starting a process of redesigning tobs. Most notable changes that may require user interaction are listed below.
