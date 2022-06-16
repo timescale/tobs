@@ -1,6 +1,5 @@
 {{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
-{{- $isDBURI := (ne .Values.promscale.connection.uri "")}}
-{{ if and $grafana.enabled $grafana.timescale.database.enabled -}}
+{{ if $grafana.enabled -}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -10,15 +9,19 @@ metadata:
     app: {{ template "tobs.fullname" . }}
     chart: {{ template "tobs.chart" . }}
     release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/resource-policy": keep
 type: Opaque
+{{- if (($grafana.timescale).database).enabled }}
 data:
-{{ if $isDBURI}}
+  {{- $isDBURI := (ne .Values.promscale.connection.uri "")}}
+  {{- if $isDBURI}}
   GF_DATABASE_HOST: {{ include "tobs.dburi.host" . | b64enc }}
   GF_DATABASE_NAME: {{ include "tobs.dburi.dbname" . | b64enc }}
   GF_DATABASE_USER: {{ include "tobs.dburi.user" . | b64enc }}
   GF_DATABASE_PASSWORD: {{ include "tobs.dburi.password" . | b64enc }}
   GF_DATABASE_SSL_MODE: {{ include "tobs.dburi.sslmode" . | b64enc }}
-{{ else }}
+  {{- else }}
   {{- $host := tpl $grafana.timescale.database.host $ -}}
   {{- $port := $grafana.timescale.database.port | int -}}
   {{- $fullhost := printf "%s:%d" $host $port }}
@@ -27,6 +30,10 @@ data:
   GF_DATABASE_USER: {{ $grafana.timescale.database.user | b64enc }}
   GF_DATABASE_PASSWORD: {{ $grafana.timescale.database.pass | b64enc }}
   GF_DATABASE_SSL_MODE: {{ $grafana.timescale.database.sslMode | b64enc }}
-{{ end }}
+  {{- end }}
   GF_DATABASE_TYPE: {{ "postgres" | b64enc }}
-{{- end -}}
+{{- else }}
+data:
+  GF_DATABASE_TYPE: {{ "sqlite3" | b64enc }}
+{{- end }}
+{{- end }}

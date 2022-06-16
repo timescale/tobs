@@ -394,8 +394,14 @@ kube-prometheus-stack:
           - dashboards/apm-service-dependencies-upstream.json
           - dashboards/apm-service-overview.json
           - dashboards/promscale.json
+    adminUser: admin
+    # To configure password externally refer to https://github.com/grafana/helm-charts/blob/6578497320d3c4672bab3a3c7fd38dffba1c9aba/charts/grafana/values.yaml#L340-L345
     adminPassword: ""
-    envFromSecret: "{{ .Release.Name }}-grafana-db"
+    persistence:
+      type: pvc
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
     prometheus:
       datasource:
         enabled: true
@@ -405,7 +411,7 @@ kube-prometheus-stack:
         url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
     timescale:
       database:
-        enabled: true
+        enabled: false
         host: *dbHost
         port: 5432
         user: grafanadb
