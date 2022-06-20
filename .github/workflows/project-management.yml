@@ -17,7 +17,7 @@ jobs:
     - name: Assign NEW issues to project O11y Applications
       uses: actions/add-to-project@main
       with:
-        project-url: 'https://github.com/orgs/timescale/projects/30'
+        project-url: 'https://github.com/orgs/timescale/projects/54'
         # PAT token is managed by @paulfantom
         github-token: ${{ secrets.ORG_PROJECT_PAT }}
 
