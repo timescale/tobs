@@ -5,7 +5,7 @@ on:
     tags: ['*']
 
 env:
-  helm-version: v3.8.2
+  helm-version: v3.9.0
 
 jobs:
   publish-chart:
