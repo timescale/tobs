@@ -225,16 +225,6 @@ For more information about the `remote_write` configuration that can be set with
 | `kube-prometheus-stack.grafana.timescale.adminPassSecret`     | Name (templated) of secret containing password for admin user                                     | `"{{ .Release.Name }}-credentials"`                                          |
 | `kube-prometheus-stack.grafana.adminPassword`                 | Grafana admin password, By default generates a random password                                    | ``                                                                           |
 
-#### TimescaleDB user for the Grafana Database
-
-This chart is configured to deploy Grafana so that it uses a TimescaleDB/PostgreSQL instance for it's database.
-This is controlled with the `kube-prometheus-stack.grafana.timescale.database.enabled` value. If enabled it will run a Job that creates
-a user (as specified with `kube-prometheus-stack.grafana.timescale.database.user`) and a separate schema (`kube-prometheus-stack.grafana.timescale.database.schema`).
-This user is created as the owner of the schema, and will not have access to any other schemas/tables in the specified
-database (`kube-prometheus-stack.grafana.timescale.database.dbName`). In order for the user and schema to be created, the `kube-prometheus-stack.grafana.timescale.adminUser`
-must be set to a db user with the ability to do so (e.g. postgres), and `kube-prometheus-stack.grafana.timescale.adminPassSecret` must be
-the name of a secret that contains the password for this user.
-
 #### TimescaleDB user for a provisioned Data Source in Grafana
 
 The chart is configured to provision a TimescaleDB data source. This is controlled with the `grafana.timescale.datasource.enabled`
