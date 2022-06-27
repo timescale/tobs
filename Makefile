@@ -43,3 +43,6 @@ load-images:
 helm-install: cert-manager load-images
 	helm dep up chart/
 	helm upgrade --install --wait --timeout 15m test chart/
+
+.PHONY: check-datasources
+	./scripts/check-datasources.sh

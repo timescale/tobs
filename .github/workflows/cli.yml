@@ -136,6 +136,9 @@ jobs:
         run: |
           make e2e-tests
 
+      - name: Check datasources
+        run: make check-datasources
+
   # Added to summarize the matrix
   tests-result:
     name: e2e results
