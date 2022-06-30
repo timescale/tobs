@@ -1,25 +1,25 @@
-{{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
+{{- $kubePrometheus := index .Values "kube-prometheus-stack" -}}
 {{- $tsdb := index .Values "timescaledb-single" -}}
-{{ if $tsdb.enabled -}}
+{{ if and $tsdb.enabled $kubePrometheus.grafana.enabled ((($kubePrometheus.grafana).timescale).datasource).enabled -}}
 apiVersion: v1
 kind: Secret
 metadata:
   name: custom-init-scripts
   namespace: {{ template "tobs.namespace" . }}
   labels:
-   app: {{ template "tobs.fullname" . }}
-   chart: {{ template "tobs.chart" . }}
-   release: {{ .Release.Name }}
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
   annotations:
     "helm.sh/hook": pre-install,post-delete
     "helm.sh/hook-weight": "0"
     "helm.sh/resource-policy": keep
 {{- if .Release.IsUpgrade }}
 data: {{ (lookup "v1" "Secret" .Release.Namespace "custom-init-scripts").data }}
-{{- else }}
+{{ else }}
 stringData:
-{{- $pass := ternary ($grafana.datasource.pass) (randAlphaNum 16) (ne $grafana.datasource.pass "") -}}
-  GRAFANA_PASSWORD: {{ $pass | quote }}
+{{- $pass := ternary (((($kubePrometheus.grafana).timescale).datasource).pass) (randAlphaNum 16) (ne ((($kubePrometheus.grafana).timescale).datasource).pass "") }}
+  GRAFANA_PASSWORD: {{ $pass | quote}}
   grafana-datasource-user.sql: |
     \set ON_ERROR_STOP on
     DO $$
@@ -31,11 +31,11 @@ stringData:
     $$;
     DO $$
       BEGIN
-        CREATE ROLE {{ grafana.timescale.datasource.user }} WITH LOGIN PASSWORD '{{ $pass }}';
+        CREATE ROLE {{ $kubePrometheus.grafana.timescale.datasource.user }} WITH LOGIN PASSWORD '{{ $pass }}';
       EXCEPTION WHEN duplicate_object THEN
-        RAISE NOTICE 'role {{ $grafana.timescale.datasource.user }} already exists, skipping create';
+        RAISE NOTICE 'role {{ $kubePrometheus.grafana.timescale.datasource.user }} already exists, skipping create';
       END
     $$;
-    GRANT prom_reader TO {{ $grafana.timescale.datasource.user }};
+    GRANT prom_reader TO {{ $kubePrometheus.grafana.timescale.datasource.user }};
 {{- end -}}
 {{- end -}}
