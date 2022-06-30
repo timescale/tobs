@@ -3,7 +3,7 @@
 set -eu
 
 INSTALLROOT=${INSTALLROOT:-"${HOME}/.local/bin"}
-TOBS_VERSION=${TOBS_VERSION:-0.11.2}
+TOBS_VERSION=${TOBS_VERSION:-0.11.3}
 
 happyexit() {
 	local symlink_msg=""

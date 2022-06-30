@@ -1,0 +1,62 @@
+{{- $grafana := index .Values "kube-prometheus-stack" "grafana" -}}
+{{- $isDBURI := (ne .Values.promscale.connection.uri "")}}
+{{- if and $grafana.enabled $grafana.timescale.datasource.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-grafana-db
+  namespace: {{ template "tobs.namespace" . }}
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ $.Chart.Name }}-grafana-db
+        image: postgres:12-alpine
+        volumeMounts:
+        - name: sql-volume
+          mountPath: /add-users.sql
+          subPath: add-users.sql
+        env:
+        - name: PGPORT
+          value: {{ ternary (include "tobs.dburi.port" . ) ($grafana.timescale.database.port | quote ) ($isDBURI) }}
+        - name: PGUSER
+          value: {{ ternary (include "tobs.dburi.user" . ) ($grafana.timescale.adminUser ) ($isDBURI) }}
+          {{ if $isDBURI }}
+        - name: PGPASSWORD
+          value: {{ include "tobs.dburi.password" . }}
+          {{ else }}
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ tpl $grafana.timescale.adminPassSecret $ }}
+              key: PROMSCALE_DB_PASSWORD
+          {{ end }}
+        - name: PGHOST
+          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl $grafana.timescale.database.host $ ) ($isDBURI) }}
+        command: [ 'psql', '-d', {{ ternary (include "tobs.dburi.dbname" . ) ($grafana.timescale.database.dbName ) ($isDBURI) }}, '-f', '/add-users.sql' ]
+        {{ if .Values.grafanaDBJob.resources }}
+        resources:
+          {{ toYaml .Values.grafanaDBJob.resources | nindent 14 }}
+        {{ end }}
+      restartPolicy: OnFailure
+      volumes:
+      - name: sql-volume
+        configMap:
+          name: {{ $.Release.Name }}-grafana-db
+      initContainers:
+      - name: init-db
+        image: busybox:1.28
+        volumeMounts:
+        - name: sql-volume
+          mountPath: /wait-for-ts.sh
+          subPath: wait-for-ts.sh
+        env:
+        - name: PGHOST
+          value: {{ ternary (include "tobs.dburi.hostwithoutport" . ) ( tpl $grafana.timescale.database.host $ ) ($isDBURI) }}
+        command: [ 'sh', '/wait-for-ts.sh' ]
+{{- end -}}
