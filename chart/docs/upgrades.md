@@ -8,6 +8,44 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 helm repo update
 ```
 
+## Upgrading to 0.12.0
+
+### SQL Datasource credential handling improvements
+
+Starting with tobs `0.12.0` we are deprecating old way of setting up SQL datasource in grafana with kubernetes `Job` object and we are moving this to database initialization script. This in turn has a few consequences:
+1) there is no longer a need to set timescaledb admin credentials in helm (options `kube-prometheus-stack.grafana.timescale.adminPassSecret` and `kube-prometheus-stack.grafana.timescale.adminUser`)
+2) For new installations password will be created automatically, so there is no need to store it in helm values
+3) If you are using external DB, you now need to create a user that will be used by grafana to access data from promscale and set proper values in:
+
+```yaml
+kube-prometheus-stack:
+  grafana:
+    timescale:
+      user: "<<USERNAME>>"
+      pass: "<<PASSWORD>>"
+```
+
+Adding user to the database can be done by executing a following SQL script:
+
+```sql
+\set ON_ERROR_STOP on
+DO $$
+  BEGIN
+    CREATE ROLE prom_reader;
+  EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'role prom_reader already exists, skipping create';
+  END
+$$;
+DO $$
+  BEGIN
+    CREATE ROLE <<USERNAME>> WITH LOGIN PASSWORD '<<PASSWORD>>';
+  EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'role <<USER>> already exists, skipping create';
+  END
+$$;
+GRANT prom_reader TO <<USERNAME>>;
+```
+
 ## Upgrading to 0.11.0
 
 Starting with tobs `0.11.0` we are tackling mostly reliability improvements. One of such improvements is switching grafana database back to dedicated sqlite3 instead of sharing TimescaleDB between grafana and promscale. Sadly this change requires manual intervention from end-users. If you wish to temporarily still use TimescaleDB as a grafana backend, you need to change following value:

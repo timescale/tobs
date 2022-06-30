@@ -208,40 +208,21 @@ For more information about the `remote_write` configuration that can be set with
 | `kube-prometheus-stack.grafana.sidecar.dashboards.files`      | Files with dashboard definitions (in JSON) to be provisioned                                      | `['dashboards/k8s-cluster.json','dashboards/k8s-hardware.json']`             |
 | `kube-prometheus-stack.grafana.prometheus.datasource.enabled` | If false, a Prometheus data source will not be provisioned                                        | true                                                                         |
 | `kube-prometheus-stack.grafana.prometheus.datasource.url`     | Template parsed to the url of the Prometheus API. Defaults to Prometheus deployed with this chart | `http://{{ .Release.Name }}-prometheus-service.{{ .Release.Namespace }}.svc` |
-| `kube-prometheus-stack.grafana.timescale.database.enabled`    | If false, TimescaleDB will not be configured as a database, default sqllite will be used          | `true`                                                                       |
-| `kube-prometheus-stack.grafana.timescale.database.host`       | Hostname (templated) of database, defaults to db deployed with this chart                         | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc`                           |
-| `kube-prometheus-stack.grafana.timescale.database.user`       | User to connect to the db with (will be created )                                                 | `grafanadb`                                                                  |
-| `kube-prometheus-stack.grafana.timescale.database.pass`       | Password for the user                                                                             | `grafanadb`                                                                  |
-| `kube-prometheus-stack.grafana.timescale.database.dbName`     | Database where to store the data                                                                  | `postgres`                                                                   |
-| `kube-prometheus-stack.grafana.timescale.database.schema`     | Schema to use (will be created)                                                                   | `grafanadb`                                                                  |
-| `kube-prometheus-stack.grafana.timescale.database.sslMode`    | SSL mode for connection                                                                           | `require`                                                                    |
 | `kube-prometheus-stack.grafana.timescale.datasource.host`     | Hostname (templated) of database, defaults to host deployed with this chart                       | `"{{ .Release.Name }}.{{ .Release.Namespace}}.svc`                           |
 | `kube-prometheus-stack.grafana.timescale.datasource.enabled`  | If false a TimescaleDB data source will not be provisioned                                        | `true`                                                                       |
 | `kube-prometheus-stack.grafana.timescale.datasource.user`     | User to connect with                                                                              | `grafana`                                                                    |
 | `kube-prometheus-stack.grafana.timescale.datasource.pass`     | Pass for user                                                                                     | `grafana`                                                                    |
 | `kube-prometheus-stack.grafana.timescale.datasource.dbName`   | Database storing the metrics (Should be same with `promscale.connection.dbName`)                  | `postgres`                                                                   |
 | `kube-prometheus-stack.grafana.timescale.datasource.sslMode`  | SSL mode for connection                                                                           | `require`                                                                    |
-| `kube-prometheus-stack.grafana.timescale.adminUser`           | Admin user to create the users and schemas with                                                   | `postgres`                                                                   |
-| `kube-prometheus-stack.grafana.timescale.adminPassSecret`     | Name (templated) of secret containing password for admin user                                     | `"{{ .Release.Name }}-credentials"`                                          |
 | `kube-prometheus-stack.grafana.adminPassword`                 | Grafana admin password, By default generates a random password                                    | ``                                                                           |
-
-#### TimescaleDB user for the Grafana Database
-
-This chart is configured to deploy Grafana so that it uses a TimescaleDB/PostgreSQL instance for it's database.
-This is controlled with the `kube-prometheus-stack.grafana.timescale.database.enabled` value. If enabled it will run a Job that creates
-a user (as specified with `kube-prometheus-stack.grafana.timescale.database.user`) and a separate schema (`kube-prometheus-stack.grafana.timescale.database.schema`).
-This user is created as the owner of the schema, and will not have access to any other schemas/tables in the specified
-database (`kube-prometheus-stack.grafana.timescale.database.dbName`). In order for the user and schema to be created, the `kube-prometheus-stack.grafana.timescale.adminUser`
-must be set to a db user with the ability to do so (e.g. postgres), and `kube-prometheus-stack.grafana.timescale.adminPassSecret` must be
-the name of a secret that contains the password for this user.
 
 #### TimescaleDB user for a provisioned Data Source in Grafana
 
 The chart is configured to provision a TimescaleDB data source. This is controlled with the `grafana.timescale.datasource.enabled`
-If enabled it will run a Job that creates a user (as specified with `kube-prometheus-stack.grafana.timescale.datasource.user`) and grant read-only
-access to the promscale schemas. In order for the user and schema to be created, the `kube-prometheus-stack.grafana.timescale.adminUser`
-must be set to a db user with the ability to do so (e.g. postgres), and `kube-prometheus-stack.grafana.timescale.adminPassSecret` must be
-the name of a secret that contains the password for this user.
+If enabled it will add timescaleDB SQL initialization script that creates a user (as specified with `kube-prometheus-stack.grafana.timescale.datasource.user`) and grant read-only
+access to the promscale schemas.
+
+*Note: For security reasons this feature works only with TimescaleDB provisioned with tobs. For external DB you need to provision that user and password by yourself using instructions from [docs/upgrades.md#SQL-Datasource-credential-handling-improvements](docs/upgrades.md#sql-datasource-credential-handling-improvements)*
 
 #### Additional configuration for Grafana
 
