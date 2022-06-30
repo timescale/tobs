@@ -414,27 +414,17 @@ kube-prometheus-stack:
         # set to the prometheus-server.
         url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
     timescale:
-      database:
-        enabled: false
-        host: *dbHost
-        port: 5432
-        user: grafanadb
-        pass: grafanadb
-        dbName: *metricDB
-        schema: grafanadb
-        sslMode: require
       datasource:
         enabled: true
         user: grafana
-        pass: grafana
+        # leaving password empty will cause helm to generate a random password
+        pass: ""
         dbName: *metricDB
         sslMode: require
         # By default the url/host is set to the db instance deployed
         # with this chart
         host: *dbHost
         port: 5432
-      adminUser: postgres
-      adminPassSecret: "{{ .Release.Name }}-promscale"
     jaeger:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
       promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
@@ -450,10 +440,6 @@ kube-prometheus-stack:
     service:
       annotations:
         prometheus.io/scrape: "false"
-
-# GrafanaDB job config this job pre-configures Grafana with datasources and dashbaords
-grafanaDBJob:
-  resources: {}
 
 # Enable PromLens  https://promlens.com/
 # PromLens is a PromQL query builder, analyzer, and visualizer
