@@ -134,7 +134,8 @@ jobs:
         env:
           KUBE_VERSION: ${{ matrix.kube-version }}
         run: |
-          make e2e-tests
+          make e2e-tests || :
+          kubectl get pods -A -o wide
 
       - name: Check datasources
         run: make check-datasources
