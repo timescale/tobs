@@ -2,7 +2,7 @@ KUBE_VERSION ?= 1.23
 KIND_CONFIG ?= ./cli/tests/kind-$(KUBE_VERSION).yaml
 CERT_MANAGER_VERSION ?= 1.6.1
 
-KUBESCAPE_THRESHOLD=28
+KUBESCAPE_THRESHOLD=29
 
 MDOX_BIN=mdox
 MDOX_VALIDATE_CONFIG?=.mdox.validate.yaml
@@ -54,7 +54,7 @@ manifests.yaml:
 
 .PHONY: kubescape
 kubescape: manifests.yaml  ## Runs a security analysis on generated manifests - failing if risk score is above threshold percentage 'KUBESCAPE_THRESHOLD'
-	kubescape scan -s framework -t $(KUBESCAPE_THRESHOLD) nsa manifests.yaml --exceptions 'kubescape-exceptions.json'
+	kubescape scan --verbose framework -t $(KUBESCAPE_THRESHOLD) nsa manifests.yaml --exceptions 'kubescape-exceptions.json'
 
 help: ## Displays help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-z0-9A-Z_-]+:.*?##/ { printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)

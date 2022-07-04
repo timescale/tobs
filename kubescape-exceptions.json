@@ -1,0 +1,108 @@
+[
+    {
+      "name": "exclude-automountServiceAccountToken-checks",
+      "policyType": "postureExceptionPolicy",
+      "actions": [
+        "alertOnly"
+      ],
+      "resources": [
+        {
+          "designatorType": "Attributes",
+          "attributes": {
+            "kind": "DaemonSet",
+            "name": "test-prometheus-node-exporter"
+          }
+        },
+        {
+          "designatorType": "Attributes",
+          "attributes": {
+            "kind": "Deployment",
+            "name": "test-kube-state-metrics"
+          }
+        },
+        {
+          "designatorType": "Attributes",
+          "attributes": {
+            "kind": "Deployment",
+            "name": "tobs-kube-prometheus-operator"
+          }
+        }
+      ],
+      "posturePolicies": [
+        {
+          "controlName": "Automatic mapping of service account"
+        }
+      ]
+    },
+    {
+        "name": "exclude-resource-limits-checks",
+        "policyType": "postureExceptionPolicy",
+        "actions": [
+          "alertOnly"
+        ],
+        "resources": [
+          {
+            "designatorType": "Attributes",
+            "attributes": {
+              "kind": "DaemonSet"
+            }
+          },
+          {
+            "designatorType": "Attributes",
+            "attributes": {
+              "kind": "StatefulSet"
+            }
+          },
+          {
+            "designatorType": "Attributes",
+            "attributes": {
+              "kind": "Deployment"
+            }
+          },
+          {
+            "designatorType": "Attributes",
+            "attributes": {
+              "kind": "Job"
+            }
+          },
+          {
+            "designatorType": "Attributes",
+            "attributes": {
+              "kind": "Pod"
+            }
+          }
+        ],
+        "posturePolicies": [
+          {
+            "controlName": "Resource policies"
+          }
+        ]
+    },
+    {
+      "name": "exclude-node-exporter-host-access-checks",
+      "policyType": "postureExceptionPolicy",
+      "actions": [
+        "alertOnly"
+      ],
+      "resources": [
+        {
+          "designatorType": "Attributes",
+          "attributes": {
+            "kind": "DaemonSet",
+            "name": "test-prometheus-node-exporter"
+          }
+        }
+      ],
+      "posturePolicies": [
+        {
+          "controlName": "Container hostPort"
+        },
+        {
+          "controlName": "Host PID/IPC privileges"
+        },
+        {
+          "controlName": "HostNetwork access"
+        }
+      ]
+    }
+  ]

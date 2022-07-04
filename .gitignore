@@ -5,3 +5,4 @@ cli/tobs
 chart/Chart.lock
 chart/charts/*
 tmp/
+manifests.yaml
