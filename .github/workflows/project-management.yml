@@ -21,6 +21,20 @@ jobs:
         # PAT token is managed by @paulfantom
         github-token: ${{ secrets.ORG_PROJECT_PAT }}
 
+  stale-issues-handler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v5
+        with:
+          any-of-labels: 'needs-more-info,question'
+          stale-pr-label: 'stale'
+          exempt-all-milestones: true
+          days-before-stale: 30
+          days-before-close: 30
+          stale-issue-message: |
+            This issue went stale because it was not updated in a month. Please consider updating it to improve the quality of the project.
+          close-issue-message: 'This issue was closed because it has been stalled for 30 days with no activity.'
+
   update_milestone_on_release:
     runs-on: ubuntu-latest
     if: github.event_name == 'release' 
