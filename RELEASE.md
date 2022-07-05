@@ -24,8 +24,6 @@ Maintaining the release branches for older minor releases happens on a best effo
 
 Dependencies are updated automatically by using renovatebot. Few days before release check if there are any not merged renovate PRs and check issue called "Dependency Dashboard" to see if there are no issues with renovate.
 
-While updating helm chart dependencies remember to update prometheus-operator CRD versions locked as `KubePrometheusCRDVersion` in `cli/cmd/upgrade/upgrade.go`
-
 ## Update image versions
 
 Helm charts shipped with tobs lock image versions in `chart/values.yaml`. Before doing release it is important to check and update those image versions.
@@ -36,10 +34,6 @@ For a new major or minor release, work from the `main` branch. For a patch relea
 
 Update version information in multiple places:
 - `version` and `appVersion` in `chart/Chart.yml`
-- `tobsVersion` in `cli/cmd/version/version.go`
-- `TOBS_VERSION` in `install-cli.sh`
-
-Next, run `cp chart/values.yaml cli/tests/testdata/e2e-values.yaml` to sync testing data and remember to re-apply code part responsible for disabling telemetry (as seen in [PR#412](https://github.com/timescale/tobs/pull/412/files)).
 
 After those steps, create a release commit with: `git commit -a -m "Prepare for the X.Y.Z release"` and create a PR for the changes to be reviewed.
 

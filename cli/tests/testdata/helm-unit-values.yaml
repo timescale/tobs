@@ -1,8 +1,0 @@
-# This skeleton values file is used by helm unit tests
-
-promscale:
-  enabled: true
-  resources:
-    requests:
-      memory: 50Mi
-      cpu: 10m
