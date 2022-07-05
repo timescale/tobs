@@ -1,0 +1,41 @@
+{{- $kubePrometheus := index .Values "kube-prometheus-stack" -}}
+{{- $tsdb := index .Values "timescaledb-single" -}}
+{{ if and $tsdb.enabled $kubePrometheus.grafana.enabled ((($kubePrometheus.grafana).timescale).datasource).enabled -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: custom-init-scripts
+  namespace: {{ template "tobs.namespace" . }}
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": pre-install,post-delete
+    "helm.sh/hook-weight": "0"
+    "helm.sh/resource-policy": keep
+{{- if .Release.IsUpgrade }}
+data: {{ (lookup "v1" "Secret" .Release.Namespace "custom-init-scripts").data }}
+{{ else }}
+stringData:
+{{- $pass := ternary (((($kubePrometheus.grafana).timescale).datasource).pass) (randAlphaNum 16) (ne ((($kubePrometheus.grafana).timescale).datasource).pass "") }}
+  GRAFANA_PASSWORD: {{ $pass | quote}}
+  grafana-datasource-user.sql: |
+    \set ON_ERROR_STOP on
+    DO $$
+      BEGIN
+        CREATE ROLE prom_reader;
+      EXCEPTION WHEN duplicate_object THEN
+        RAISE NOTICE 'role prom_reader already exists, skipping create';
+      END
+    $$;
+    DO $$
+      BEGIN
+        CREATE ROLE {{ $kubePrometheus.grafana.timescale.datasource.user }} WITH LOGIN PASSWORD '{{ $pass }}';
+      EXCEPTION WHEN duplicate_object THEN
+        RAISE NOTICE 'role {{ $kubePrometheus.grafana.timescale.datasource.user }} already exists, skipping create';
+      END
+    $$;
+    GRANT prom_reader TO {{ $kubePrometheus.grafana.timescale.datasource.user }};
+{{- end -}}
+{{- end -}}
