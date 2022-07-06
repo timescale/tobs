@@ -1,0 +1,45 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [master, main, release-*]
+    tags: ['*']
+  pull_request:
+    branches: ['**']
+
+env:
+  golang-version: 1.18.3
+  helm-version: v3.7.1
+  kubescape-version: v2.0.160
+
+jobs:      
+  security-audit:
+    runs-on: ubuntu-latest
+    name: Analyse kubernetes manifests
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        persist-credentials: false  
+      
+    - uses: actions/setup-go@v3
+      with:
+        go-version: ${{ env.golang-version }}
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v2.1
+      with:
+        version: ${{ env.helm-version }}
+    
+    - name: Download chart dependencies
+      run: |
+        helm dep up chart/
+
+    - name: Download kubescape
+      run: |
+        wget https://raw.githubusercontent.com/armosec/kubescape/master/install.sh
+        chmod +x install.sh
+        /bin/bash install.sh -v ${{ env.kubescape-version }}
+    #- name: Download kubescape
+    #  run: curl -s https://raw.githubusercontent.com/armosec/kubescape/master/install.sh | /bin/bash
+
+    - run: make --always-make kubescape

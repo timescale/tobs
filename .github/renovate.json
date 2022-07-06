@@ -22,6 +22,12 @@
       "depNameTemplate": "helm/helm"
     },
     {
+      "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
+      "matchStrings": ["kubescape-version:\\s(?<currentValue>.*?)\\n"],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "armo/kubescape"
+    },
+    {
       "fileMatch": ["^Makefile$"],
       "matchStrings": ["CERT_MANAGER_VERSION\\s?=\\s(?<currentValue>.*?)\\n"],
       "datasourceTemplate": "github-tags",
