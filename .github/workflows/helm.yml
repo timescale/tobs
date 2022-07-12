@@ -10,6 +10,7 @@ on:
 
 env:
   kube-version: "v1.23.0"
+  helm-version: v3.9.0
 
 jobs:
   template-test:
@@ -32,7 +33,7 @@ jobs:
     - name: Set up Helm
       uses: azure/setup-helm@v3.1
       with:
-        version: v3.7.1
+        version: ${{ env.helm-version }}
     
     - name: Get helm dependencies
       working-directory: chart
