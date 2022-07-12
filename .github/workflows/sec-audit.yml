@@ -8,7 +8,7 @@ on:
     branches: ['**']
 
 env:
-  golang-version: 1.18.3
+  golang-version: 1.18.4
   helm-version: v3.9.0
   kubescape-version: v2.0.160
 
