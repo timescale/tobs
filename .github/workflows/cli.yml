@@ -8,7 +8,7 @@ on:
     branches: ['**']
 
 env:
-  golang-version: 1.18.3
+  golang-version: 1.18.4
   golangci-lint-version: v1.46.2
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up Go ${{ env.golang-version }}
-      uses: actions/setup-go@v3.2.0
+      uses: actions/setup-go@v3.2.1
       with:
         go-version: ${{ env.golang-version }}
 
@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Go ${{ env.golang-version }}
-        uses: actions/setup-go@v3.2.0
+        uses: actions/setup-go@v3.2.1
         with:
           go-version: ${{ env.golang-version }}
         id: go
@@ -73,7 +73,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Go ${{ env.golang-version }}
-        uses: actions/setup-go@v3.2.0
+        uses: actions/setup-go@v3.2.1
         with:
           go-version: ${{ env.golang-version }}
 
@@ -100,7 +100,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Go ${{ env.golang-version }}
-        uses: actions/setup-go@v3.2.0
+        uses: actions/setup-go@v3.2.1
         with:
           go-version: ${{ env.golang-version }}
 
