@@ -20,7 +20,7 @@ dependencies:
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
     # With each major bump make sure prometheus-operator CRD version matches version specified in cli/pkg/upgrade/upgrade.go#KubePrometheusCRDVersion
-    version: 36.6.2
+    version: 37.1.0
     repository: https://prometheus-community.github.io/helm-charts
   - name: opentelemetry-operator
     condition: opentelemetryOperator.enabled
