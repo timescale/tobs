@@ -1,9 +1,14 @@
 {
   "timezone": "Etc/UTC",
   "extends": [
-    "config:base",
-    "schedule:daily"
+    "config:base"
   ],
+  "schedule": [
+    "every 4 hours"
+  ],
+  "automerge": "true",
+  "automergeType": "pr",
+  "platformAutomerge": "true",
   "dependencyDashboardLabels": ["dependencies"],
   "dependencyDashboardAutoclose": "true",
   "labels": ["dependencies"],
