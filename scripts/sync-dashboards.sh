@@ -19,6 +19,9 @@ cp -r tmp/promscale/docs/mixin/dashboards/*.json chart/dashboards/
 # replace all `${DS_TIMESCALEDB}` with timescaledb datasource UID
 # replace all `${DS_PROMSCALE_JAEGER}` with promscale tracing datasource UID
 # replace all `${DS_PROMETHEUS}` with promscale prometheus datasource UID
-find chart/dashboards/ \( -type d -name .json -prune \) -o -type f -print0 | xargs -0 sed -i 's/${DS_TIMESCALEDB}/c4729dfb8ceeaa0372ef27403a3932695eee995d/g'
-find chart/dashboards/ \( -type d -name .json -prune \) -o -type f -print0 | xargs -0 sed -i 's/${DS_PROMSCALE_JAEGER}/f78291126102e0f2e841734d1e90250257543042/g'
-find chart/dashboards/ \( -type d -name .json -prune \) -o -type f -print0 | xargs -0 sed -i 's/${DS_PROMETHEUS}/dc08d25c8f267b054f12002f334e6d3d32a853e4/g'
+find chart/dashboards/ \( -type d -name '*.json' -prune \) -o -type f -print0 | xargs -0 sed -i.orig 's/${DS_TIMESCALEDB}/c4729dfb8ceeaa0372ef27403a3932695eee995d/g'
+find chart/dashboards/ -name '*.orig' -exec rm -f {} \;
+find chart/dashboards/ \( -type d -name '*.json' -prune \) -o -type f -print0 | xargs -0 sed -i.orig 's/${DS_PROMSCALE_JAEGER}/f78291126102e0f2e841734d1e90250257543042/g'
+find chart/dashboards/ -name '*.orig' -exec rm -f {} \;
+find chart/dashboards/ \( -type d -name '*.json' -prune \) -o -type f -print0 | xargs -0 sed -i.orig 's/${DS_PROMETHEUS}/dc08d25c8f267b054f12002f334e6d3d32a853e4/g'
+find chart/dashboards/ -name '*.orig' -exec rm -f {} \;
