@@ -35,7 +35,7 @@ cert-manager: start-kind
 	# Give enough time for a cluster to register new Pods
 	sleep 7
 	# Wait for pods to be up and running
-	kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager
+	kubectl wait --timeout=120s --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager
 
 .PHONY: load-images
 load-images:  ## Load images into the local kubernetes kind cluster.
