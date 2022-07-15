@@ -56,7 +56,7 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.12.1
+  image: timescale/promscale:0.13.0
   # needs to be enabled for tracing support in Promscale
   # to expose traces port, add tracing args to Promscale
   openTelemetry:
