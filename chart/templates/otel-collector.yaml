@@ -1,4 +1,4 @@
-{{ if and (.Values.opentelemetryOperator.enabled) (.Values.opentelemetryOperator.collector.config) -}}
+{{ if and (index .Values "opentelemetry-operator" "enabled") (index .Values "opentelemetry-operator" "collector" "config") -}}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
@@ -8,6 +8,6 @@ metadata:
     "helm.sh/hook-weight": "0"
 spec:
   config:
-    {{ tpl (toYaml .Values.opentelemetryOperator.collector.config) $ | nindent 4 }}
+    {{ tpl (toYaml (index .Values "opentelemetry-operator" "collector" "config")) $ | nindent 4 }}
 {{- end -}}
 

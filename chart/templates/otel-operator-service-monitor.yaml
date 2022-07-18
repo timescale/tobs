@@ -1,4 +1,4 @@
-{{ if .Values.opentelemetryOperator.enabled }}
+{{ if (index .Values "opentelemetry-operator" "enabled") }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

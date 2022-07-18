@@ -14,7 +14,7 @@ namespaceOverride: ""
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
   enabled: &dbEnabled true
-  
+
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
@@ -135,6 +135,9 @@ kube-prometheus-stack:
   fullnameOverride: "tobs-kube-prometheus"
   alertmanager:
     alertmanagerSpec:
+      image:
+        repository: quay.io/prometheus/alertmanager
+        tag: v0.24.0
       replicas: 3
       ## AlertManager resource requests
       resources:
@@ -145,9 +148,24 @@ kube-prometheus-stack:
           memory: 50Mi
           cpu: 4m
   prometheusOperator:
-    ## Prometheus sidecar config reloader container resource limits
-    configReloaderCpu: 100m
-    configReloaderMemory: 50Mi
+    image:
+      repository: quay.io/prometheus-operator/prometheus-operator
+      tag: v0.57.0
+      pullPolicy: IfNotPresent
+    ## Prometheus config reloader configuration
+    prometheusConfigReloader:
+      # image to use for config and rule reloading
+      image:
+        repository: quay.io/prometheus-operator/prometheus-config-reloader
+        tag: v0.57.0
+      # resource config for prometheusConfigReloader
+      resources:
+        requests:
+          cpu: 100m
+          memory: 50Mi
+        limits:
+          cpu: 200m
+          memory: 50Mi
     ## Prometheus Operator resource requests
     resources:
       limits:
@@ -158,6 +176,9 @@ kube-prometheus-stack:
         cpu: 10m
   prometheus:
     prometheusSpec:
+      image:
+        repository: quay.io/prometheus/prometheus
+        tag: v2.36.1
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -468,6 +489,10 @@ kube-prometheus-stack:
       promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
 
   kube-state-metrics:
+    image:
+      repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+      tag: v2.5.0
+      pullPolicy: IfNotPresent
     # By default kube-state-metrics are scraped using
     # serviceMonitor disable annotation based scraping
     prometheusScrape: false
@@ -480,6 +505,10 @@ kube-prometheus-stack:
         memory: 30Mi
 
   prometheus-node-exporter:
+    image:
+      repository: quay.io/prometheus/node-exporter
+      tag: v1.3.1
+      pullPolicy: IfNotPresent
     # By default node-exporter are scraped using
     # serviceMonitor disable annotation based scraping
     service:
@@ -507,15 +536,19 @@ promlens:
 
 # Enable OpenTelemetry Operator
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
-opentelemetryOperator:
-  enabled: *otelEnabled
-  resources:
-    limits:
-      cpu: 50m
-      memory: 260Mi
-    requests:
-      cpu: 5m
-      memory: 130Mi
+opentelemetry-operator:
+  enabled: true
+  manager:
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+      tag: v0.54.0
+    resources:
+      limits:
+        cpu: 50m
+        memory: 260Mi
+      requests:
+        cpu: 5m
+        memory: 130Mi
   collector:
     # The default otel collector that will be deployed by helm once
     # the otel operator is in running state

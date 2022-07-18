@@ -1,4 +1,4 @@
-{{ if .Values.opentelemetryOperator.enabled -}}
+{{ if (index .Values "opentelemetry-operator" "enabled") }}
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
