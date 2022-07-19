@@ -50,7 +50,7 @@ GRANT prom_reader TO <<USERNAME>>;
 
 Starting with tobs `0.12.0` the configuration of Open-telemetry has changed
 from `opentelemetryOperator` to `opentelemetry-operator`. If you are using the
-default values in `values.yaml` nothing should be needed.  If you are
+default values in `values.yaml` nothing should be needed. If you are
 customizing values please make sure you have updated name.
 
 ## Upgrading to 0.11.0
