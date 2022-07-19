@@ -9,7 +9,7 @@ on:
 
 env:
   golang-version: 1.18.4
-  golangci-lint-version: v1.46.2
+  golangci-lint-version: v1.47.1
 
 jobs:
   docs:
