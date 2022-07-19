@@ -46,6 +46,13 @@ $$;
 GRANT prom_reader TO <<USERNAME>>;
 ```
 
+### Open-telemetry configuration change in values.yaml
+
+Starting with tobs `0.12.0` the configuration of Open-telemetry has changed
+from `opentelemetryOperator` to `opentelemetry-operator`. If you are using the
+default values in `values.yaml` nothing should be needed.  If you are
+customizing values please make sure you have updated name.
+
 ## Upgrading to 0.11.0
 
 Starting with tobs `0.11.0` we are tackling mostly reliability improvements. One of such improvements is switching grafana database back to dedicated sqlite3 instead of sharing TimescaleDB between grafana and promscale. Sadly this change requires manual intervention from end-users. If you wish to temporarily still use TimescaleDB as a grafana backend, you need to change following value:
@@ -108,7 +115,7 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
             enabled: <value>
         # as this is your custom values.yaml
         # do not forget to change Promscale image to 0.8.0 tag
-        image: timescale/promscale:0.8.0    
+        image: timescale/promscale:0.8.0
         connection:
             # assign the db-password here, the password should be in <release-name>-credentials secret from previous installation
             # with key PATRONI_SUPERUSER_PASSWORD
@@ -117,7 +124,7 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
             uri: <>
         # change service section only if you enabling LoadBalancer type service for Promscale
         service:
-            type: LoadBalancer  
+            type: LoadBalancer
 ```
 4. If you want to enable tracing do not forget to enable `promscale.openTelemetry.enabled` to true and `openTelemetryOperator.enabled` to true.
 5. If you are using Promscale HA with Prometheus HA change the Promscale HA arg from `--high-availability` to `--metrics.high-availability` in `promscale.extraArgs`.
@@ -224,7 +231,7 @@ To migrate data from an old Prometheus instance to a new one follow the steps be
 Scale down the existing Prometheus replicas to 0 so that all the in-memory data is stored in Prometheus persistent volume.
 
 ```
-kubectl scale --replicas=0 deploy/tobs-prometheus-server 
+kubectl scale --replicas=0 deploy/tobs-prometheus-server
 ```
 
 **Note**: Wait for the Prometheus pod to gracefully shut down.
