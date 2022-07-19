@@ -14,11 +14,11 @@ spec:
     - baggage
     - b3
   python:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+    image: {{ index .Values "opentelemetry-operator" "instrumentation" "pythonImage" }}
   java:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+    image: {{ index .Values "opentelemetry-operator" "instrumentation" "javaImage" }}
   nodejs:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+    image: {{ index .Values "opentelemetry-operator" "instrumentation" "nodejsImage" }}
   sampler:
     type: parentbased_traceidratio
     argument: "0.25"

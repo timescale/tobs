@@ -549,6 +549,10 @@ opentelemetry-operator:
       requests:
         cpu: 5m
         memory: 130Mi
+  instrumentation:
+    pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.15.0
+    nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.27.0
   collector:
     # The default otel collector that will be deployed by helm once
     # the otel operator is in running state
