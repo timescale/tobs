@@ -42,6 +42,7 @@ stringData:
 
 {{ if $kubePrometheus.grafana.timescale.datasource.enabled -}}
 {{- $isDBURI := (ne .Values.promscale.connection.uri "")}}
+{{- $passwd := ternary (include "tobs.dburi.password" . ) ($kubePrometheus.grafana.timescale.datasource.pass) ($isDBURI) }}
 {{- $hostURL := "" -}}
 {{ if $isDBURI -}}
   {{- $hostURL = include "tobs.dburi.host" . -}}
@@ -61,7 +62,11 @@ stringData:
         database: {{ ternary (include "tobs.dburi.dbname" . ) ($kubePrometheus.grafana.timescale.datasource.dbName) ($isDBURI) }}
         editable: true
         secureJsonData:
-          password: {{ ternary (include "tobs.dburi.password" . ) ($kubePrometheus.grafana.timescale.datasource.pass) ($isDBURI) }}
+          {{ if ne ($passwd) "" -}}
+          password: {{ $passwd }}
+          {{- else -}}
+          password: ${GRAFANA_PASSWORD}
+          {{- end }}
         jsonData:
           sslmode: {{ ternary (include "tobs.dburi.sslmode" . ) ($kubePrometheus.grafana.timescale.datasource.sslMode) ($isDBURI) }}
           postgresVersion: 1000
