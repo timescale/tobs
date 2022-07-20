@@ -30,6 +30,7 @@ timescaledb-single:
     enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
+  resources: null
   # backup is disabled by default, enable it
   # if you want to backup timescaleDB to s3
   # you can provide the s3 details on tobs install
@@ -54,7 +55,7 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.11.0
+  image: timescale/promscale:0.12.1
   # needs to be enabled for tracing support in Promscale
   # to expose traces port, add tracing args to Promscale
   openTelemetry:
@@ -118,12 +119,7 @@ promscale:
     sslMode: require
 
   # Promscale deployment resource requests
-  resources:
-    requests:
-      # By default this should be enough for a cluster
-      # with only a few pods
-      memory: 2Gi
-      cpu: 10m
+  resources: null
 
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
@@ -140,6 +136,7 @@ kube-prometheus-stack:
       retention: 1d
       # Number of replicas of each shard to deploy for a Prometheus deployment.
       replicas: 2
+      resources: null
       replicaExternalLabelName: "__replica__"
       # Promscale requires a cluster label to be present for high availability mode.
       prometheusExternalLabelName: "cluster"
@@ -374,6 +371,7 @@ kube-prometheus-stack:
       repository: grafana/grafana
       tag: 8.5.5
       pullPolicy: IfNotPresent
+    resources: null
     sidecar:
       datasources:
         enabled: true
@@ -443,6 +441,7 @@ kube-prometheus-stack:
   # serviceMonitor disable annotation based scraping
   kube-state-metrics:
     prometheusScrape: false
+    resources: null
 
   # By default node-exporter are scraped using
   # serviceMonitor disable annotation based scraping
@@ -450,15 +449,25 @@ kube-prometheus-stack:
     service:
       annotations:
         prometheus.io/scrape: "false"
+    resources: null
+  
+  prometheusOperator:
+    resources: null
+    prometheusConfigReloader:
+      resources: null
+
+  alertmanager:
+    alertmanagerSpec:
+      resources: null
 
 # GrafanaDB job config this job pre-configures Grafana with datasources and dashbaords
 grafanaDBJob:
-  resources: {}
+  resources: null
 
 # Enable PromLens  https://promlens.com/
 # PromLens is a PromQL query builder, analyzer, and visualizer
 promlens:
-  enabled: true
+  enabled: false
   image: "promlabs/promlens:latest"
   # This default URL assumes access via port-forwarding to the connector. If using
   # a load balancer for the connector, change as appropriate
