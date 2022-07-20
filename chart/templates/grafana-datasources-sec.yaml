@@ -30,7 +30,7 @@ stringData:
         uid: dc08d25c8f267b054f12002f334e6d3d32a853e4
 {{- end -}}
 
-{{- if .Values.opentelemetryOperator.enabled }}
+{{- if index .Values "opentelemetry-operator" "enabled" }}
       - name: Promscale-Tracing
         type: jaeger
         url: {{ tpl $kubePrometheus.grafana.jaeger.promscaleTracesQueryEndPoint . }}

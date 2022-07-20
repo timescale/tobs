@@ -19,7 +19,7 @@
 {{- if index .Values "kube-prometheus-stack" "grafana" "enabled" }}
 📈 Grafana
 {{- end }}
-{{- if index .Values "opentelemetryOperator" "enabled" }}
+{{- if index .Values "opentelemetry-operator" "enabled" }}
 🚀 OpenTelemetry
 {{- end }}
 
@@ -64,7 +64,7 @@ NOTE: It may take a few minutes for the LoadBalancer IP to be available.
 {{-   end }}
 {{   if not $prometheus.prometheusSpec.storageSpec -}}
 WARNING! Persistence is disabled on Prometheus server. You will lose your data
-         when the Server pod is terminated. (Data will be persisted in 
+         when the Server pod is terminated. (Data will be persisted in
          TimescaleDB.)
 {{-   end }}
 {{- end }}
@@ -165,7 +165,7 @@ To connect to your database, chose one of these options:
     kubectl exec -it --namespace {{ .Release.Namespace }} ${MASTERPOD} -- psql -U postgres
 {{-   end }}
 {{- end }}
-{{ if .Values.opentelemetryOperator.enabled }}
+{{ if index .Values "opentelemetry-operator" "enabled"}}
 #######################################################################################################################
 🚀  OPENTELEMETRY NOTES:
 #######################################################################################################################
