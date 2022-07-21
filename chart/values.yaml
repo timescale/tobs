@@ -554,6 +554,10 @@ opentelemetry-operator:
       requests:
         cpu: 5m
         memory: 130Mi
+    serviceMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
   instrumentation:
     pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
     javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.15.0
