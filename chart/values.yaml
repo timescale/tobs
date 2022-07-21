@@ -150,14 +150,14 @@ kube-prometheus-stack:
   prometheusOperator:
     image:
       repository: quay.io/prometheus-operator/prometheus-operator
-      tag: v0.57.0
+      tag: v0.58.0
       pullPolicy: IfNotPresent
     ## Prometheus config reloader configuration
     prometheusConfigReloader:
       # image to use for config and rule reloading
       image:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
-        tag: v0.57.0
+        tag: v0.58.0
       # resource config for prometheusConfigReloader
       resources:
         requests:
@@ -178,7 +178,7 @@ kube-prometheus-stack:
     prometheusSpec:
       image:
         repository: quay.io/prometheus/prometheus
-        tag: v2.36.1
+        tag: v2.37.0
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -424,7 +424,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.0.3
+      tag: 9.0.4
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -541,7 +541,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.54.0
+      tag: v0.55.0
     resources:
       limits:
         cpu: 50m
