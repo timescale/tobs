@@ -157,3 +157,17 @@ Allow the release namespace to be overridden
     {{- .Release.Namespace -}}
   {{- end -}}
 {{- end -}}
+
+{{/*
+Set Grafana Datasource Connection Password
+*/}}
+{{- define "tobs.grafana.datasource.connection.password" -}}
+{{- $kubePrometheus := index .Values "kube-prometheus-stack" -}}
+{{- $isDBURI := ne .Values.promscale.connection.uri "" -}}
+{{- $grafanaDatasourcePasswd := ternary (include "tobs.dburi.password" . ) ($kubePrometheus.grafana.timescale.datasource.pass) ($isDBURI) -}}
+  {{- if ne $grafanaDatasourcePasswd "" -}}
+    {{- printf $grafanaDatasourcePasswd -}}
+  {{- else -}}
+    {{- printf "${GRAFANA_PASSWORD}" -}}
+  {{- end -}}
+{{- end -}}

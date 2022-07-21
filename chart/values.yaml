@@ -433,6 +433,11 @@ kube-prometheus-stack:
       requests:
         cpu: 50m
         memory: 250Mi
+    envValueFrom:
+      GRAFANA_PASSWORD:
+        secretKeyRef:
+          name: custom-secret-scripts
+          key: GRAFANA_PASSWORD
     sidecar:
       datasources:
         enabled: true
