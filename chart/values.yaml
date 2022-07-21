@@ -56,11 +56,7 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.12.1
-  # needs to be enabled for tracing support in Promscale
-  # to expose traces port, add tracing args to Promscale
-  openTelemetry:
-    enabled: &otelEnabled true
+  image: timescale/promscale:0.13.0
   # to pass extra args
   extraArgs:
     - "--metrics.high-availability=true"
@@ -71,18 +67,12 @@ promscale:
     - name: "TOBS_TELEMETRY_VERSION"
       value: "{{ .Chart.Version }}"
     - name: "TOBS_TELEMETRY_TRACING_ENABLED"
-      value: *otelEnabled
+      value: "true"
     - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
       value: *dbEnabled
 
   serviceMonitor:
     enabled: true
-
-  prometheus:
-    # turn off annotation-based scraping of promscale itself, user the serviceMonitor instead.
-    annotations:
-      # TODO(paulfantom): this can be removed when https://github.com/timescale/promscale/issues/1344 is fixed
-      prometheus.io/scrape: "false"
 
   ## Note:
 
