@@ -45,10 +45,7 @@ timescaledb-single:
     wal:
       size: 20Gi
   ## TimescaleDB resource requests
-  resources:
-    requests:
-      cpu: 100m
-      memory: 2Gi
+  resources: null
 
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
@@ -109,12 +106,7 @@ promscale:
     sslMode: require
 
   # Promscale deployment resource requests
-  resources:
-    requests:
-      # By default this should be enough for a cluster
-      # with only a few pods
-      memory: 500Mi
-      cpu: 30m
+  resources: null
 
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
@@ -129,13 +121,7 @@ kube-prometheus-stack:
         tag: v0.24.0
       replicas: 3
       ## AlertManager resource requests
-      resources:
-        limits:
-          memory: 100Mi
-          cpu: 100m
-        requests:
-          memory: 50Mi
-          cpu: 4m
+      resources: null
   prometheusOperator:
     image:
       repository: quay.io/prometheus-operator/prometheus-operator
@@ -148,21 +134,9 @@ kube-prometheus-stack:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
         tag: v0.58.0
       # resource config for prometheusConfigReloader
-      resources:
-        requests:
-          cpu: 100m
-          memory: 50Mi
-        limits:
-          cpu: 200m
-          memory: 50Mi
+      resources: null
     ## Prometheus Operator resource requests
-    resources:
-      limits:
-        memory: 200Mi
-        cpu: 100m
-      requests:
-        memory: 100Mi
-        cpu: 10m
+    resources: null
   prometheus:
     prometheusSpec:
       image:
@@ -176,10 +150,7 @@ kube-prometheus-stack:
       # Number of replicas of each shard to deploy for a Prometheus deployment.
       replicas: 2
       ## Prometheus container retention
-      resources:
-        requests:
-          memory: 400Mi
-          cpu: 40m
+      resources: null
 
       replicaExternalLabelName: "__replica__"
       # Promscale requires a cluster label to be present for high availability mode.
@@ -415,13 +386,7 @@ kube-prometheus-stack:
       repository: grafana/grafana
       tag: 9.0.4
       pullPolicy: IfNotPresent
-    resources:
-      limits:
-        cpu: 200m
-        memory: 400Mi
-      requests:
-        cpu: 50m
-        memory: 250Mi
+    resources: null
     envValueFrom:
       GRAFANA_PASSWORD:
         secretKeyRef:
@@ -490,13 +455,7 @@ kube-prometheus-stack:
     # By default kube-state-metrics are scraped using
     # serviceMonitor disable annotation based scraping
     prometheusScrape: false
-    resources:
-      limits:
-        cpu: 100m
-        memory: 200Mi
-      requests:
-        cpu: 10m
-        memory: 30Mi
+    resources: null
 
   prometheus-node-exporter:
     image:
@@ -508,13 +467,7 @@ kube-prometheus-stack:
     service:
       annotations:
         prometheus.io/scrape: "false"
-    resources:
-      limits:
-        cpu: 250m
-        memory: 180Mi
-      requests:
-        cpu: 30m
-        memory: 50Mi
+    resources: null
 
 # Enable PromLens  https://promlens.com/
 # PromLens is a PromQL query builder, analyzer, and visualizer
@@ -536,13 +489,7 @@ opentelemetry-operator:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
       tag: v0.55.0
-    resources:
-      limits:
-        cpu: 50m
-        memory: 260Mi
-      requests:
-        cpu: 5m
-        memory: 130Mi
+    resources: null
     serviceMonitor:
       enabled: true
     prometheusRule:
