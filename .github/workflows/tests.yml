@@ -46,6 +46,9 @@ jobs:
       - name: Wait for cluster to finish bootstraping
         run: kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
 
+      - name: Create namespace for installing the chart
+        run: kubectl create namespace tobs-test
+
       - name: Run chart-testing (install)
         run: ct install --config ct.yaml --upgrade
 
