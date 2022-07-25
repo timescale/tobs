@@ -14,9 +14,9 @@ We use [Semantic Versioning](http://semver.org/).
 
 We maintain a separate branch for each minor release, named `release-<major>.<minor>`, e.g. `release-1.1`, `release-2.0`.
 
-The usual flow is to merge new features and changes into the `master` branch and to merge bug fixes into the latest release branch. Bug fixes are then merged into `master` from the latest release branch. The `master` branch should always contain all commits from the latest release branch.
+The usual flow is to merge new features and changes into the `main` branch and to merge bug fixes into the latest release branch. Bug fixes are then merged into `main` from the latest release branch. The `main` branch should always contain all commits from the latest release branch.
 
-If a bug fix got accidentally merged into `master`, cherry-pick commits have to be created in the latest release branch, which then have to be merged back into `master`. Try to avoid that situation.
+If a bug fix got accidentally merged into `main`, cherry-pick commits have to be created in the latest release branch, which then have to be merged back into `main`. Try to avoid that situation.
 
 Maintaining the release branches for older minor releases happens on a best effort basis.
 
@@ -32,7 +32,7 @@ Helm charts shipped with tobs lock image versions in `chart/values.yaml`. Before
 
 ## Prepare your release
 
-For a new major or minor release, work from the `master` branch. For a patch release, work in the branch of the minor release you want to patch (e.g. `release-0.11` if you're releasing `v0.11.1`).
+For a new major or minor release, work from the `main` branch. For a patch release, work in the branch of the minor release you want to patch (e.g. `release-0.11` if you're releasing `v0.11.1`).
 
 Update version information in multiple places:
 - `version` and `appVersion` in `chart/Chart.yml`
@@ -66,6 +66,6 @@ Signed tag with a GPG key is appreciated, but in case you can't add a GPG key to
 
 The `goreleaser` GitHub Action will automatically create a new draft release with the generated binaries and a changelog attached. When it is created contact PM to validate if release notes are correct and click green publish button.
 
-For patch releases, submit a pull request to merge back the release branch into the `master` branch.
+For patch releases, submit a pull request to merge back the release branch into the `main` branch.
 
 Take a breath. You're done releasing.
