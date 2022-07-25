@@ -12,10 +12,6 @@ namespaceOverride: ""
 
 # TimescaleDB single helm chart configuration
 timescaledb-single:
-  env:
-    - name: "TIMESCALEDB_TELEMETRY"
-      value: "off"
-
   # disable the chart if an existing TimescaleDB instance is used
   enabled: &dbEnabled true
 
@@ -30,7 +26,6 @@ timescaledb-single:
     enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
-  resources: null
   # backup is disabled by default, enable it
   # if you want to backup timescaleDB to s3
   # you can provide the s3 details on tobs install
@@ -49,17 +44,18 @@ timescaledb-single:
       size: 150Gi
     wal:
       size: 20Gi
+  ## TimescaleDB resource requests
+  resources:
+    requests:
+      cpu: 100m
+      memory: 2Gi
 
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.12.1
-  # needs to be enabled for tracing support in Promscale
-  # to expose traces port, add tracing args to Promscale
-  openTelemetry:
-    enabled: &otelEnabled true
+  image: timescale/promscale:0.13.0
   # to pass extra args
   extraArgs:
     - "--metrics.high-availability=true"
@@ -70,18 +66,12 @@ promscale:
     - name: "TOBS_TELEMETRY_VERSION"
       value: "{{ .Chart.Version }}"
     - name: "TOBS_TELEMETRY_TRACING_ENABLED"
-      value: *otelEnabled
+      value: "true"
     - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
       value: *dbEnabled
 
   serviceMonitor:
     enabled: true
-
-  prometheus:
-    # turn off annotation-based scraping of promscale itself, user the serviceMonitor instead.
-    annotations:
-      # TODO(paulfantom): this can be removed when https://github.com/timescale/promscale/issues/1344 is fixed
-      prometheus.io/scrape: "false"
 
   ## Note:
 
@@ -119,7 +109,12 @@ promscale:
     sslMode: require
 
   # Promscale deployment resource requests
-  resources: null
+  resources:
+    requests:
+      # By default this should be enough for a cluster
+      # with only a few pods
+      memory: 500Mi
+      cpu: 30m
 
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
@@ -127,8 +122,52 @@ promscale:
 kube-prometheus-stack:
   enabled: true
   fullnameOverride: "tobs-kube-prometheus"
+  alertmanager:
+    alertmanagerSpec:
+      image:
+        repository: quay.io/prometheus/alertmanager
+        tag: v0.24.0
+      replicas: 3
+      ## AlertManager resource requests
+      resources:
+        limits:
+          memory: 100Mi
+          cpu: 100m
+        requests:
+          memory: 50Mi
+          cpu: 4m
+  prometheusOperator:
+    image:
+      repository: quay.io/prometheus-operator/prometheus-operator
+      tag: v0.58.0
+      pullPolicy: IfNotPresent
+    ## Prometheus config reloader configuration
+    prometheusConfigReloader:
+      # image to use for config and rule reloading
+      image:
+        repository: quay.io/prometheus-operator/prometheus-config-reloader
+        tag: v0.58.0
+      # resource config for prometheusConfigReloader
+      resources:
+        requests:
+          cpu: 100m
+          memory: 50Mi
+        limits:
+          cpu: 200m
+          memory: 50Mi
+    ## Prometheus Operator resource requests
+    resources:
+      limits:
+        memory: 200Mi
+        cpu: 100m
+      requests:
+        memory: 100Mi
+        cpu: 10m
   prometheus:
     prometheusSpec:
+      image:
+        repository: quay.io/prometheus/prometheus
+        tag: v2.37.0
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -136,7 +175,12 @@ kube-prometheus-stack:
       retention: 1d
       # Number of replicas of each shard to deploy for a Prometheus deployment.
       replicas: 2
-      resources: null
+      ## Prometheus container retention
+      resources:
+        requests:
+          memory: 400Mi
+          cpu: 40m
+
       replicaExternalLabelName: "__replica__"
       # Promscale requires a cluster label to be present for high availability mode.
       prometheusExternalLabelName: "cluster"
@@ -369,9 +413,20 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 8.5.5
+      tag: 9.0.4
       pullPolicy: IfNotPresent
-    resources: null
+    resources:
+      limits:
+        cpu: 200m
+        memory: 400Mi
+      requests:
+        cpu: 50m
+        memory: 250Mi
+    envValueFrom:
+      GRAFANA_PASSWORD:
+        secretKeyRef:
+          name: custom-secret-scripts
+          key: GRAFANA_PASSWORD
     sidecar:
       datasources:
         enabled: true
@@ -412,57 +467,54 @@ kube-prometheus-stack:
         # set to the prometheus-server.
         url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
     timescale:
-      database:
-        enabled: false
-        host: *dbHost
-        port: 5432
-        user: grafanadb
-        pass: grafanadb
-        dbName: *metricDB
-        schema: grafanadb
-        sslMode: require
       datasource:
         enabled: true
         user: grafana
-        pass: grafana
+        # leaving password empty will cause helm to generate a random password
+        pass: ""
         dbName: *metricDB
         sslMode: require
         # By default the url/host is set to the db instance deployed
         # with this chart
         host: *dbHost
         port: 5432
-      adminUser: postgres
-      adminPassSecret: "{{ .Release.Name }}-promscale"
     jaeger:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
       promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
 
-  # By default kube-state-metrics are scraped using
-  # serviceMonitor disable annotation based scraping
   kube-state-metrics:
+    image:
+      repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+      tag: v2.5.0
+      pullPolicy: IfNotPresent
+    # By default kube-state-metrics are scraped using
+    # serviceMonitor disable annotation based scraping
     prometheusScrape: false
-    resources: null
+    resources:
+      limits:
+        cpu: 100m
+        memory: 200Mi
+      requests:
+        cpu: 10m
+        memory: 30Mi
 
-  # By default node-exporter are scraped using
-  # serviceMonitor disable annotation based scraping
   prometheus-node-exporter:
+    image:
+      repository: quay.io/prometheus/node-exporter
+      tag: v1.3.1
+      pullPolicy: IfNotPresent
+    # By default node-exporter are scraped using
+    # serviceMonitor disable annotation based scraping
     service:
       annotations:
         prometheus.io/scrape: "false"
-    resources: null
-
-  prometheusOperator:
-    resources: null
-    prometheusConfigReloader:
-      resources: null
-
-  alertmanager:
-    alertmanagerSpec:
-      resources: null
-
-# GrafanaDB job config this job pre-configures Grafana with datasources and dashbaords
-grafanaDBJob:
-  resources: null
+    resources:
+      limits:
+        cpu: 250m
+        memory: 180Mi
+      requests:
+        cpu: 30m
+        memory: 50Mi
 
 # Enable PromLens  https://promlens.com/
 # PromLens is a PromQL query builder, analyzer, and visualizer
@@ -478,10 +530,29 @@ promlens:
 
 # Enable OpenTelemetry Operator
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
-opentelemetryOperator:
-  enabled: *otelEnabled
+opentelemetry-operator:
+  enabled: true
+  manager:
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+      tag: v0.55.0
+    resources:
+      limits:
+        cpu: 50m
+        memory: 260Mi
+      requests:
+        cpu: 5m
+        memory: 130Mi
+    serviceMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
+  instrumentation:
+    pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.15.0
+    nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.27.0
   collector:
-    # The default otel collector that will be deployed by CLI once
+    # The default otel collector that will be deployed by helm once
     # the otel operator is in running state
     config: |
       receivers:
