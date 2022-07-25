@@ -13,8 +13,8 @@ namespaceOverride: ""
 # TimescaleDB single helm chart configuration
 timescaledb-single:
   env:
-  - name: "TIMESCALEDB_TELEMETRY"
-    value: "off"
+    - name: "TIMESCALEDB_TELEMETRY"
+      value: "off"
 
   # disable the chart if an existing TimescaleDB instance is used
   enabled: &dbEnabled true
@@ -450,7 +450,7 @@ kube-prometheus-stack:
       annotations:
         prometheus.io/scrape: "false"
     resources: null
-  
+
   prometheusOperator:
     resources: null
     prometheusConfigReloader:
@@ -472,7 +472,7 @@ promlens:
   # This default URL assumes access via port-forwarding to the connector. If using
   # a load balancer for the connector, change as appropriate
   # NOTE: the internal cluster address does not work here as requests are made by the browser.
-  defaultPrometheusUrl:  "http://localhost:9201"
+  defaultPrometheusUrl: "http://localhost:9201"
   loadBalancer:
     enabled: false
 

@@ -15,3 +15,4 @@ helm-extra-args: --timeout 800s --debug
 # We do not want to bump the Chart version for every single commit,
 # but only once we release
 check-version-increment: false
+validate-maintainers: false
