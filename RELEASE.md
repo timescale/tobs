@@ -35,6 +35,8 @@ For a new major or minor release, work from the `main` branch. For a patch relea
 Update version information in multiple places:
 - `version` and `appVersion` in `chart/Chart.yml`
 
+Next, run `cp chart/values.yaml chart/ci/e2e-values.yaml` to sync testing data and remember to re-apply code part responsible for disabling telemetry, and removing resource requirements (as seen in [this commit](https://github.com/timescale/tobs/commit/2274e7ca494f4a5ea46fb41ab2792702cf1806f6)).
+
 After those steps, create a release commit with: `git commit -a -m "Prepare for the X.Y.Z release"` and create a PR for the changes to be reviewed.
 
 ## Publish the new release
