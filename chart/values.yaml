@@ -18,7 +18,7 @@ timescaledb-single:
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
-    tag: pg14.3-ts2.7.0-p0
+    tag: pg14.4-ts2.7.2-p0
     pullPolicy: IfNotPresent
 
   # create only a ClusterIP service
