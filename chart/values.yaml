@@ -50,7 +50,6 @@ timescaledb-single:
       cpu: 100m
       memory: 2Gi
 
-
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
@@ -525,7 +524,7 @@ promlens:
   # This default URL assumes access via port-forwarding to the connector. If using
   # a load balancer for the connector, change as appropriate
   # NOTE: the internal cluster address does not work here as requests are made by the browser.
-  defaultPrometheusUrl:  "http://localhost:9201"
+  defaultPrometheusUrl: "http://localhost:9201"
   loadBalancer:
     enabled: false
 

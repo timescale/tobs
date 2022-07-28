@@ -1,0 +1,58 @@
+name: "Test Helm Charts"
+on:
+  - push
+  - pull_request
+
+env:
+  helm-version: v3.9.0
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.2.1
+
+      - name: Run chart-testing (lint)
+        run: ct lint --config ct.yaml
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        kube-version:
+          - "1.23"
+          - "1.24"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.2.1
+
+      - name: Start kuberenetes cluster with cert-manager
+        env:
+          KUBE_VERSION: ${{ matrix.kube-version }}
+        run: |
+          make cert-manager
+
+      - name: Wait for cluster to finish bootstraping
+        run: kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
+
+      - name: Create namespace for installing the chart
+        run: kubectl create namespace tobs-test
+
+      - name: Run chart-testing (install)
+        run: ct install --config ct.yaml --namespace tobs-test
+
+      # TODO(onprem): Figure out a workaround to test datasources as ct just removes
+      # the chart release after a successful install.
+      # - name: Check datasources
+      #   run: make check-datasources

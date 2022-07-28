@@ -12,17 +12,13 @@ namespaceOverride: ""
 
 # TimescaleDB single helm chart configuration
 timescaledb-single:
-  env:
-  - name: "TIMESCALEDB_TELEMETRY"
-    value: "off"
-
   # disable the chart if an existing TimescaleDB instance is used
   enabled: &dbEnabled true
 
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
-    tag: pg14.3-ts2.7.0-p0
+    tag: pg14.4-ts2.7.2-p0
     pullPolicy: IfNotPresent
 
   # create only a ClusterIP service
@@ -48,17 +44,15 @@ timescaledb-single:
       size: 150Gi
     wal:
       size: 20Gi
+  ## TimescaleDB resource requests
+  resources: null
 
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.11.0
-  # needs to be enabled for tracing support in Promscale
-  # to expose traces port, add tracing args to Promscale
-  openTelemetry:
-    enabled: &otelEnabled true
+  image: timescale/promscale:0.13.0
   # to pass extra args
   extraArgs:
     - "--metrics.high-availability=true"
@@ -69,18 +63,12 @@ promscale:
     - name: "TOBS_TELEMETRY_VERSION"
       value: "{{ .Chart.Version }}"
     - name: "TOBS_TELEMETRY_TRACING_ENABLED"
-      value: *otelEnabled
+      value: "true"
     - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
       value: *dbEnabled
 
   serviceMonitor:
     enabled: true
-
-  prometheus:
-    # turn off annotation-based scraping of promscale itself, user the serviceMonitor instead.
-    annotations:
-      # TODO(paulfantom): this can be removed when https://github.com/timescale/promscale/issues/1344 is fixed
-      prometheus.io/scrape: "false"
 
   ## Note:
 
@@ -118,12 +106,7 @@ promscale:
     sslMode: require
 
   # Promscale deployment resource requests
-  resources:
-    requests:
-      # By default this should be enough for a cluster
-      # with only a few pods
-      memory: 2Gi
-      cpu: 10m
+  resources: null
 
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
@@ -131,8 +114,34 @@ promscale:
 kube-prometheus-stack:
   enabled: true
   fullnameOverride: "tobs-kube-prometheus"
+  alertmanager:
+    alertmanagerSpec:
+      image:
+        repository: quay.io/prometheus/alertmanager
+        tag: v0.24.0
+      replicas: 3
+      ## AlertManager resource requests
+      resources: null
+  prometheusOperator:
+    image:
+      repository: quay.io/prometheus-operator/prometheus-operator
+      tag: v0.58.0
+      pullPolicy: IfNotPresent
+    ## Prometheus config reloader configuration
+    prometheusConfigReloader:
+      # image to use for config and rule reloading
+      image:
+        repository: quay.io/prometheus-operator/prometheus-config-reloader
+        tag: v0.58.0
+      # resource config for prometheusConfigReloader
+      resources: null
+    ## Prometheus Operator resource requests
+    resources: null
   prometheus:
     prometheusSpec:
+      image:
+        repository: quay.io/prometheus/prometheus
+        tag: v2.37.0
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -140,6 +149,9 @@ kube-prometheus-stack:
       retention: 1d
       # Number of replicas of each shard to deploy for a Prometheus deployment.
       replicas: 2
+      ## Prometheus container retention
+      resources: null
+
       replicaExternalLabelName: "__replica__"
       # Promscale requires a cluster label to be present for high availability mode.
       prometheusExternalLabelName: "cluster"
@@ -372,8 +384,14 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 8.5.5
+      tag: 9.0.4
       pullPolicy: IfNotPresent
+    resources: null
+    envValueFrom:
+      GRAFANA_PASSWORD:
+        secretKeyRef:
+          name: custom-secret-scripts
+          key: GRAFANA_PASSWORD
     sidecar:
       datasources:
         enabled: true
@@ -414,65 +432,74 @@ kube-prometheus-stack:
         # set to the prometheus-server.
         url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
     timescale:
-      database:
-        enabled: false
-        host: *dbHost
-        port: 5432
-        user: grafanadb
-        pass: grafanadb
-        dbName: *metricDB
-        schema: grafanadb
-        sslMode: require
       datasource:
         enabled: true
         user: grafana
-        pass: grafana
+        # leaving password empty will cause helm to generate a random password
+        pass: ""
         dbName: *metricDB
         sslMode: require
         # By default the url/host is set to the db instance deployed
         # with this chart
         host: *dbHost
         port: 5432
-      adminUser: postgres
-      adminPassSecret: "{{ .Release.Name }}-promscale"
     jaeger:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
       promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
 
-  # By default kube-state-metrics are scraped using
-  # serviceMonitor disable annotation based scraping
   kube-state-metrics:
+    image:
+      repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+      tag: v2.5.0
+      pullPolicy: IfNotPresent
+    # By default kube-state-metrics are scraped using
+    # serviceMonitor disable annotation based scraping
     prometheusScrape: false
+    resources: null
 
-  # By default node-exporter are scraped using
-  # serviceMonitor disable annotation based scraping
   prometheus-node-exporter:
+    image:
+      repository: quay.io/prometheus/node-exporter
+      tag: v1.3.1
+      pullPolicy: IfNotPresent
+    # By default node-exporter are scraped using
+    # serviceMonitor disable annotation based scraping
     service:
       annotations:
         prometheus.io/scrape: "false"
-
-# GrafanaDB job config this job pre-configures Grafana with datasources and dashbaords
-grafanaDBJob:
-  resources: {}
+    resources: null
 
 # Enable PromLens  https://promlens.com/
 # PromLens is a PromQL query builder, analyzer, and visualizer
 promlens:
-  enabled: true
+  enabled: false
   image: "promlabs/promlens:latest"
   # This default URL assumes access via port-forwarding to the connector. If using
   # a load balancer for the connector, change as appropriate
   # NOTE: the internal cluster address does not work here as requests are made by the browser.
-  defaultPrometheusUrl:  "http://localhost:9201"
+  defaultPrometheusUrl: "http://localhost:9201"
   loadBalancer:
     enabled: false
 
 # Enable OpenTelemetry Operator
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
-opentelemetryOperator:
-  enabled: *otelEnabled
+opentelemetry-operator:
+  enabled: true
+  manager:
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+      tag: v0.55.0
+    resources: null
+    serviceMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
+  instrumentation:
+    pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.15.0
+    nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.27.0
   collector:
-    # The default otel collector that will be deployed by CLI once
+    # The default otel collector that will be deployed by helm once
     # the otel operator is in running state
     config: |
       receivers:

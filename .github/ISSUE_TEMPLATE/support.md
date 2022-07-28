@@ -12,11 +12,6 @@ about: If you have questions about tobs
 
 **Environment**
 
-* tobs installation method:
-
-- [ ] cli
-- [ ] helm chart
-
 * tobs version:
 
   `tobs version`

@@ -14,11 +14,6 @@ about: Report a bug related to tobs
 
 **Environment**
 
-* tobs installation method:
-
-- [ ] cli
-- [ ] helm chart
-
 * tobs version:
 
   `tobs version`

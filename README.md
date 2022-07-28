@@ -1,8 +1,5 @@
 # tobs - The Observability Stack for Kubernetes
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/timescale/tobs)](https://goreportcard.com/report/github.com/timescale/tobs)
-[![GoDoc](https://godoc.org/github.com/timescale/tobs/cli?status.svg)](https://pkg.go.dev/github.com/timescale/tobs/cli)
-
 Tobs is a tool that aims to make it as easy as possible to install a full observability
 stack into a Kubernetes cluster. Currently this stack includes:
 
@@ -54,14 +51,6 @@ All configuration for all components happens through the helm values.yaml file.
 You can view the self-documenting [default values.yaml](chart/values.yaml) in the repo.
 We also have additional documentation about individual configuration settings in our
 [Helm chart docs](chart/README.md#configuring-helm-chart).
-
-# Alternative deployment methods
-
-## Using the `tobs` CLI tool
-
-We also provide a CLI tool to deploy tobs on a Kubernetes cluster. The CLI tool ([usage guide](https://github.com/timescale/tobs/tree/master/cli#usage-guide)) provides detailed instructions on how to use the CLI for managing tobs.
-
-*NOTE*: At this point, the CLI tool is just a thin wrapper around the helm chart, and hence it's set to be removed in future releases.
 
 # Compatibility matrix
 
