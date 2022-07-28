@@ -185,195 +185,14 @@ kube-prometheus-stack:
       # We encourage people to use ServiceMonitors and PodMonitors for new components.
       # See discussion in: https://github.com/prometheus-operator/prometheus-operator/issues/1547
       # and more info: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
-      additionalScrapeConfigs:
-        - job_name: kubernetes-service-endpoints
-          kubernetes_sd_configs:
-            - role: endpoints
-          relabel_configs:
-            - action: keep
-              regex: true
-              source_labels:
-                - __meta_kubernetes_service_annotation_prometheus_io_scrape
-            - action: replace
-              regex: (https?)
-              source_labels:
-                - __meta_kubernetes_service_annotation_prometheus_io_scheme
-              target_label: __scheme__
-            - action: replace
-              regex: (.+)
-              source_labels:
-                - __meta_kubernetes_service_annotation_prometheus_io_path
-              target_label: __metrics_path__
-            - action: replace
-              regex: ([^:]+)(?::\d+)?;(\d+)
-              replacement: $1:$2
-              source_labels:
-                - __address__
-                - __meta_kubernetes_service_annotation_prometheus_io_port
-              target_label: __address__
-            - action: labelmap
-              regex: __meta_kubernetes_service_label_(.+)
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_namespace
-              target_label: kubernetes_namespace
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_service_name
-              target_label: kubernetes_name
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_pod_node_name
-              target_label: kubernetes_node
-        - job_name: kubernetes-service-endpoints-slow
-          kubernetes_sd_configs:
-            - role: endpoints
-          relabel_configs:
-            - action: keep
-              regex: true
-              source_labels:
-                - __meta_kubernetes_service_annotation_prometheus_io_scrape_slow
-            - action: replace
-              regex: (https?)
-              source_labels:
-                - __meta_kubernetes_service_annotation_prometheus_io_scheme
-              target_label: __scheme__
-            - action: replace
-              regex: (.+)
-              source_labels:
-                - __meta_kubernetes_service_annotation_prometheus_io_path
-              target_label: __metrics_path__
-            - action: replace
-              regex: ([^:]+)(?::\d+)?;(\d+)
-              replacement: $1:$2
-              source_labels:
-                - __address__
-                - __meta_kubernetes_service_annotation_prometheus_io_port
-              target_label: __address__
-            - action: labelmap
-              regex: __meta_kubernetes_service_label_(.+)
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_namespace
-              target_label: kubernetes_namespace
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_service_name
-              target_label: kubernetes_name
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_pod_node_name
-              target_label: kubernetes_node
-          scrape_interval: 5m
-          scrape_timeout: 30s
-        - job_name: kubernetes-services
-          kubernetes_sd_configs:
-            - role: service
-          metrics_path: /probe
-          params:
-            module:
-              - http_2xx
-          relabel_configs:
-            - action: keep
-              regex: true
-              source_labels:
-                - __meta_kubernetes_service_annotation_prometheus_io_probe
-            - source_labels:
-                - __address__
-              target_label: __param_target
-            - replacement: blackbox
-              target_label: __address__
-            - source_labels:
-                - __param_target
-              target_label: instance
-            - action: labelmap
-              regex: __meta_kubernetes_service_label_(.+)
-            - source_labels:
-                - __meta_kubernetes_namespace
-              target_label: kubernetes_namespace
-            - source_labels:
-                - __meta_kubernetes_service_name
-              target_label: kubernetes_name
-        - job_name: kubernetes-pods
-          kubernetes_sd_configs:
-            - role: pod
-          relabel_configs:
-            - action: keep
-              regex: true
-              source_labels:
-                - __meta_kubernetes_pod_annotation_prometheus_io_scrape
-            - action: replace
-              regex: (https?)
-              source_labels:
-                - __meta_kubernetes_pod_annotation_prometheus_io_scheme
-              target_label: __scheme__
-            - action: replace
-              regex: (.+)
-              source_labels:
-                - __meta_kubernetes_pod_annotation_prometheus_io_path
-              target_label: __metrics_path__
-            - action: replace
-              regex: ([^:]+)(?::\d+)?;(\d+)
-              replacement: $1:$2
-              source_labels:
-                - __address__
-                - __meta_kubernetes_pod_annotation_prometheus_io_port
-              target_label: __address__
-            - action: labelmap
-              regex: __meta_kubernetes_pod_label_(.+)
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_namespace
-              target_label: kubernetes_namespace
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_pod_name
-              target_label: kubernetes_pod_name
-            - action: drop
-              regex: Pending|Succeeded|Failed
-              source_labels:
-                - __meta_kubernetes_pod_phase
-        - job_name: kubernetes-pods-slow
-          kubernetes_sd_configs:
-            - role: pod
-          relabel_configs:
-            - action: keep
-              regex: true
-              source_labels:
-                - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow
-            - action: replace
-              regex: (https?)
-              source_labels:
-                - __meta_kubernetes_pod_annotation_prometheus_io_scheme
-              target_label: __scheme__
-            - action: replace
-              regex: (.+)
-              source_labels:
-                - __meta_kubernetes_pod_annotation_prometheus_io_path
-              target_label: __metrics_path__
-            - action: replace
-              regex: ([^:]+)(?::\d+)?;(\d+)
-              replacement: $1:$2
-              source_labels:
-                - __address__
-                - __meta_kubernetes_pod_annotation_prometheus_io_port
-              target_label: __address__
-            - action: labelmap
-              regex: __meta_kubernetes_pod_label_(.+)
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_namespace
-              target_label: kubernetes_namespace
-            - action: replace
-              source_labels:
-                - __meta_kubernetes_pod_name
-              target_label: kubernetes_pod_name
-            - action: drop
-              regex: Pending|Succeeded|Failed
-              source_labels:
-                - __meta_kubernetes_pod_phase
-          scrape_interval: 5m
-          scrape_timeout: 30s
+
+      # If additional scrape configurations are already deployed in a single secret file you can use this section.
+      # Expected values are the secret name and key
+      # Cannot be used with additionalScrapeConfigs
+      additionalScrapeConfigsSecret:
+        enabled: true
+        name: tobs-scrape-config
+        key: additional-scrape-config.yaml
 
   # Values for configuring the deployment of Grafana
   # The Grafana Community chart is used and the guide for it
@@ -384,7 +203,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.0.4
+      tag: 9.0.5
       pullPolicy: IfNotPresent
     resources: null
     envValueFrom:
@@ -488,7 +307,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.55.0
+      tag: v0.56.0
     resources: null
     serviceMonitor:
       enabled: true
@@ -496,7 +315,7 @@ opentelemetry-operator:
       enabled: true
   instrumentation:
     pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
-    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.15.0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.16.0
     nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.27.0
   collector:
     # The default otel collector that will be deployed by helm once
