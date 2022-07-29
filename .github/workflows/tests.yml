@@ -4,7 +4,7 @@ on:
   - pull_request
 
 env:
-  helm-version: v3.9.0
+  helm-version: v3.9.2
 
 jobs:
   lint:
