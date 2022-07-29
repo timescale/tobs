@@ -10,7 +10,7 @@ on:
 
 env:
   kube-version: "v1.23.0"
-  helm-version: v3.9.0
+  helm-version: v3.9.2
 
 jobs:
   template-test:
