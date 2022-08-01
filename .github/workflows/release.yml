@@ -33,6 +33,7 @@ jobs:
              helm plugin install https://github.com/hypnoglow/helm-s3.git          
              helm repo add tscharts s3://charts.timescale.com
              helm s3 push chart_release/* tscharts --acl public-read --relative --dry-run
+
        - name: push package
          env:
            AWS_REGION: 'us-east-1'
