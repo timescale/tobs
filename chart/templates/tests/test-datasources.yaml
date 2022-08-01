@@ -44,7 +44,7 @@ data:
     NAMESPACE="{{ template "tobs.namespace" . }}"
 
     # Get grafana credentials
-    GRAFANA_USER="{{ .Values.kube-prometheus-stack.grafana.adminUser }}"
+    GRAFANA_USER="{{ index .Values "kube-prometheus-stack" "grafana" "adminUser" }}"
     GRAFANA_PASS="$(kubectl get secret -n "${NAMESPACE}" "${RELEASE}-grafana" -o json | jq -r '.data["admin-password"]' | base64 -d)"
 
     SQL_QUERY="SELECT * FROM pg_extension WHERE extname = 'timescaledb_toolkit';"
