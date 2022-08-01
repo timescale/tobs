@@ -13,9 +13,6 @@
 {{- if index .Values "promscale" "enabled" }}
 🤝 Promscale
 {{- end }}
-{{- if .Values.promlens.enabled }}
-🧐 PromLens
-{{- end }}
 {{- if index .Values "kube-prometheus-stack" "grafana" "enabled" }}
 📈 Grafana
 {{- end }}
