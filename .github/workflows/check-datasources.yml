@@ -1,0 +1,39 @@
+name: "Check Datasources"
+on:
+  - push
+  - pull_request
+
+env:
+  helm-version: v3.9.2
+  kube-version: "1.24"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Check Datasources
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+         uses: azure/setup-helm@v3.3
+         with:
+           version: ${{ env.helm-version }}
+
+      - name: Start kuberenetes cluster with cert-manager
+        env:
+          KUBE_VERSION: ${{ env.kube-version }}
+        run: |
+          make cert-manager
+
+      - name: Wait for cluster to finish bootstraping
+        run: kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
+
+      - name: Create namespace for installing the chart
+        run: kubectl create namespace tobs-test
+
+      - name: Install the helm chart with e2e-values
+        run: helm install --namespace tobs-test -f ./chart/ci/e2e-values.yaml --wait --timeout 600s test ./chart
+
+      - name: Check datasources
+        run: make check-datasources
