@@ -284,7 +284,7 @@ kube-prometheus-stack:
         # By default url of data source is set to ts-prom connector instance
         # deployed with this chart. If a connector isn't used this should be
         # set to the prometheus-server.
-        url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
+        url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201"
     timescale:
       datasource:
         enabled: true
@@ -299,7 +299,7 @@ kube-prometheus-stack:
         port: 5432
     jaeger:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
-      promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
+      promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201"
 
   kube-state-metrics:
     image:
