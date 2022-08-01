@@ -56,3 +56,17 @@ jobs:
       # the chart release after a successful install.
       # - name: Check datasources
       #   run: make check-datasources
+
+  test-result:
+    name: End-to-End Test Results
+    if: always()
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the job as a success
+        if: needs.test.result == 'success'
+        run: exit 0
+      - name: Mark the job as a failure
+        if: needs.test.result != 'success'
+        run: exit 1
