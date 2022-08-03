@@ -46,8 +46,14 @@ helm-install: cert-manager load-images  ## This is a phony target that is used t
 	helm dep up chart/
 	helm upgrade --install --wait --timeout 15m test chart/
 
-.PHONY: check-datasources
-	./scripts/check-datasources.sh
+.PHONY: lint
+lint:  ## Lint helm chart using ct (chart-testing).
+	ct lint --config ct.yaml
+
+.PHONY: e2e
+e2e:  ## Run e2e installation tests using ct (chart-testing).
+	kubectl create ns tobs-test
+	ct install --config ct.yaml --namespace tobs-test
 
 manifests.yaml:
 	helm template --namespace test test chart/ > $@
