@@ -1,6 +1,6 @@
 .vscode/
 .idea/
 chart/Chart.lock
-chart/charts/*
+chart/charts
 tmp/
 manifests.yaml
