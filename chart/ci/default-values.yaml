@@ -4,6 +4,9 @@
 # to pod scheduling due to insufficient host resources.
 
 timescaledb-single:
+  env:
+  - name: "TIMESCALEDB_TELEMETRY"
+    value: "off"
   resources: null
 
 promscale:
