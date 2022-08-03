@@ -1,3 +1,10 @@
+[![Security Audit](https://github.com/timescale/tobs/actions/workflows/sec-audit.yml/badge.svg)](https://github.com/timescale/tobs/actions/workflows/sec-audit.yml)
+[![Test Helm Charts](https://github.com/timescale/tobs/actions/workflows/tests.yml/badge.svg)](https://github.com/timescale/tobs/actions/workflows/tests.yml)
+[![Version](https://img.shields.io/github/v/release/timescale/tobs)](https://github.com/timescale/tobs/releases)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/timescale/tobs)](https://github.com/timescale/tobs/pulse/monthly)
+[![License](https://img.shields.io/github/license/timescale/tobs)](https://github.com/timescale/tobs/blob/main/LICENSE)
+[![Slack](https://img.shields.io/badge/chat-join%20slack-brightgreen.svg)](https://timescaledb.slack.com/)
+
 # tobs - The Observability Stack for Kubernetes
 
 Tobs is a tool that aims to make it as easy as possible to install a full observability
