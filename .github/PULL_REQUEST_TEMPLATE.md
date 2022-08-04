@@ -1,20 +1,38 @@
-<!-- 
-Changelog entry
+<!--
+Thank you for contributing to timescale/tobs.
+Before you submit this pull request we'd like to make sure you are aware of our technical requirements and best practices:
 
-We are using GitHub to generate changelog in each release note. This method takes PR title and uses it as a changelog line. For this reason we ask you to use meaningful PR titles.
+* https://github.com/prometheus-community/helm-charts/blob/main/CONTRIBUTING.md#technical-requirements
+* https://helm.sh/docs/chart_best_practices/
+
+Following our best practices right from the start will accelerate the review process and help get your pull request merged quicker.
+
+Please make sure you test your changes before you push them.
+Once the pull request is opened, GitHub Actions will run across your changes and do some initial checks and linting.
+These checks run very quickly.
+Please check the results.
+If you are contributing to this repository for the first time, a maintainer will need to approve those checks to run.
+They are automatically requested as reviewers and will approve the workflows or ask you for changes once they get to it.
+
+We would like these checks to pass before we even continue reviewing your changes.
 -->
 
-## Description
+<!-- markdownlint-disable-next-line first-line-heading -->
+#### What this PR does / why we need it
 
-<!-- Describe the big picture of your changes here to communicate to the maintainers why we should accept this pull request.
--->
 
-## Type of change
 
-*What type of changes does your code introduce to tobs? Put an `x` in the box that apply.*
+#### Which issue this PR fixes
 
-- [ ] `CHANGE` (fix or feature that would cause existing functionality to not work as expected)
-- [ ] `FEATURE` (non-breaking change which adds functionality)
-- [ ] `BUGFIX` (non-breaking change which fixes an issue)
-- [ ] `ENHANCEMENT` (non-breaking change which improves existing functionality)
-- [ ] `NONE` (if none of the other choices apply. Example, tooling, build system, CI, docs, etc.)
+*(optional, in `fixes #<issue number>(, fixes #<issue_number>, ...)` format, will close that issue when PR gets merged)*
+
+- fixes #
+
+#### Special notes for your reviewer
+
+
+#### Checklist
+
+<!-- [Place an '[x]' (no spaces) in all applicable fields. Please remove unrelated fields.] -->
+- [ ] Chart Version bumped
+- [ ] [CLA signed](https://cla-assistant.io/timescale/tobs)
