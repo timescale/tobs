@@ -4,9 +4,6 @@
 # Check out the various configuration options (administration guide) at:
 #    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
 
-# Indicates if tobs helm chart is installed using the tobs CLI
-cli: false
-
 # Override the deployment namespace
 namespaceOverride: ""
 
@@ -188,13 +185,13 @@ kube-prometheus-stack:
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
         # - {protocol}://{host}:{port}/{endpoint}
-        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/read"
+        - url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/read"
           readRecent: true
 
       # The remote_write spec configuration for Prometheus.
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
-        - url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
+        - url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/write"
 
       # Prometheus pod storage spec
       storageSpec:
@@ -284,7 +281,7 @@ kube-prometheus-stack:
         # By default url of data source is set to ts-prom connector instance
         # deployed with this chart. If a connector isn't used this should be
         # set to the prometheus-server.
-        url: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
+        url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201"
     timescale:
       datasource:
         enabled: true
@@ -299,7 +296,7 @@ kube-prometheus-stack:
         port: 5432
     jaeger:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
-      promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201"
+      promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201"
 
   kube-state-metrics:
     image:

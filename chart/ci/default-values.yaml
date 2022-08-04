@@ -1,0 +1,35 @@
+# This is the default values for the chart to run in CI system and it can be used as
+# a base template for other *-values.yaml files. Only resource requests are nullified
+# to allow starting the stack on github action runner and prevent issues related
+# to pod scheduling due to insufficient host resources.
+
+timescaledb-single:
+  env:
+  - name: "TIMESCALEDB_TELEMETRY"
+    value: "off"
+  resources: null
+
+promscale:
+  resources: null
+
+kube-prometheus-stack:
+  alertmanager:
+    alertmanagerSpec:
+      resources: null
+  prometheusOperator:
+    prometheusConfigReloader:
+      resources: null
+    resources: null
+  prometheus:
+    prometheusSpec:
+      resources: null
+  grafana:
+    resources: null
+  kube-state-metrics:
+    resources: null
+  prometheus-node-exporter:
+    resources: null
+
+opentelemetry-operator:
+  manager:
+    resources: null
