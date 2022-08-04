@@ -15,7 +15,7 @@ metadata:
     "helm.sh/hook-weight": "0"
     "helm.sh/resource-policy": keep
 {{- if .Release.IsUpgrade }}
-data: {{ (lookup "v1" "Secret" .Release.Namespace "custom-init-scripts").data }}
+data: {{ (lookup "v1" "Secret" .Release.Namespace "custom-secret-scripts").data }}
 {{ else }}
 stringData:
 {{- $pass := ternary (((($kubePrometheus.grafana).timescale).datasource).pass) (randAlphaNum 16) (ne ((($kubePrometheus.grafana).timescale).datasource).pass "") }}
