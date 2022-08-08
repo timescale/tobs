@@ -8,6 +8,9 @@ on:
     paths:
     - chart/dashboards/**
 
+env:
+  golang-version: 1.18.4
+
 jobs:
   dashboard-sync:
     runs-on: ubuntu-latest
@@ -17,6 +20,14 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Set up golang
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ env.golang-version }}
+
     - name: Run Dashboard synchronizer
       run: |
-        ./scripts/sync-dashboards.sh && git diff --exit-code
+        go install github.com/monitoring-mixins/mixtool/cmd/mixtool@latest && \
+        go install github.com/google/go-jsonnet/cmd/jsonnetfmt@latest && \
+        make sync-mixins && \
+        git diff --exit-code

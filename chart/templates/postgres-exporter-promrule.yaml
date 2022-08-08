@@ -1,0 +1,21 @@
+{{ if (index .Values "timescaledb-single" "prometheus" "enabled") -}}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-postgres-exporter
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade,pre-delete
+    "helm.sh/hook-weight": "0"
+  labels:
+    app: {{ template "tobs.fullname" . }}
+    chart: {{ template "tobs.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/component: postgres-exporter
+    app.kubernetes.io/instance: {{ .Release.Namespace }}.{{ .Release.Name }}-postgres-exporter
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/part-of: tobs
+spec:
+{{ .Files.Get "alerts/postgres-exporter-alerts.yaml" | indent 2 }}
+{{ end -}}

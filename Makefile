@@ -64,3 +64,7 @@ kubescape: manifests.yaml  ## Runs a security analysis on generated manifests - 
 
 help: ## Displays help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-z0-9A-Z_-]+:.*?##/ { printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+.PHONY: sync-mixins
+sync-mixins: ## Syncs mixins from Promscale and Postgres-Exporter
+	./scripts/sync-mixins.sh

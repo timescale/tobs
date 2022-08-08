@@ -47,6 +47,18 @@ timescaledb-single:
       cpu: 100m
       memory: 2Gi
 
+  # Enable Prometheus exporter for PostgreSQL server metrics.
+  # https://github.com/prometheus-community/postgres_exporter
+  prometheus:
+    enabled: true
+    image:
+      repository: quay.io/prometheuscommunity/postgres-exporter
+      tag: v0.11.0
+
+  # Specifies whether ServiceMonitor for Prometheus operator should be created
+  serviceMonitor:
+    enabled: true
+
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
@@ -267,6 +279,7 @@ kube-prometheus-stack:
           - dashboards/apm-service-dependencies-upstream.json
           - dashboards/apm-service-overview.json
           - dashboards/promscale.json
+          - dashboards/postgres-overview.json
     adminUser: admin
     # To configure password externally refer to https://github.com/grafana/helm-charts/blob/6578497320d3c4672bab3a3c7fd38dffba1c9aba/charts/grafana/values.yaml#L340-L345
     adminPassword: ""
@@ -373,12 +386,12 @@ opentelemetry-operator:
       exporters:
         logging:
         otlp:
-          endpoint: "{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9202"
+          endpoint: "{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9202"
           compression: none
           tls:
             insecure: true
         prometheusremotewrite:
-          endpoint: "http://{{ .Release.Name }}-promscale-connector.{{ .Release.Namespace }}.svc:9201/write"
+          endpoint: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/write"
           tls:
             insecure: true
 
