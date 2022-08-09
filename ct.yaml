@@ -4,12 +4,12 @@
 remote: origin
 target-branch: main
 chart-dirs:
-  - chart
-charts: chart
+- .
 chart-repos:
   - timescale=https://charts.timescale.com
   - prometheus=https://prometheus-community.github.io/helm-charts
   - open-telemetery=https://open-telemetry.github.io/opentelemetry-helm-charts
 # Some of tests require longer than default timeout
-helm-extra-args: --timeout 800s --debug
-validate-maintainers: false
+helm-extra-args: --timeout 15m --debug
+# FIXME(paulfantom): re-enable upgrade tests
+# upgrade: true

@@ -52,8 +52,7 @@ lint:  ## Lint helm chart using ct (chart-testing).
 
 .PHONY: e2e
 e2e:  ## Run e2e installation tests using ct (chart-testing).
-	kubectl create ns tobs-test
-	ct install --config ct.yaml --namespace tobs-test
+	ct install --config ct.yaml
 
 manifests.yaml:
 	helm template --namespace test test chart/ > $@
