@@ -3,4 +3,5 @@
 chart/Chart.lock
 chart/charts
 tmp/
+chart_release
 manifests.yaml
