@@ -91,6 +91,15 @@ RELEASE=<release_name>
 kubectl delete $(kubectl get pvc -l operator.prometheus.io/name=$RELEASE-kube-prometheus-prometheus -o name)
 ```
 
+### Opentelemetry Collector
+
+Removing the deployment does not remove the `OpentelemetryCollector` CR object
+For a full cleanup run:
+
+```
+kubectl delete $(kubectl get opentelemetrycollectors -l app.kubernetes.io/managed-by=opentelemetry-operator -o name)
+```
+
 # Configuring Helm Chart
 
 To get a fully-documented configuration file for `tobs`, please run:
