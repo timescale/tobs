@@ -21,6 +21,7 @@ stack into a Kubernetes cluster. Currently this stack includes:
   * [Prometheus-Operator](https://github.com/prometheus-operator/prometheus-operator#prometheus-operator) to manage the life-cycle of Prometheus and AlertManager custom resource definitions (CRDs)
 * [Promscale](https://github.com/timescale/promscale) ([design doc](https://tsdb.co/prom-design-doc)) to store metrics for the long-term and allow analysis with both PromQL and SQL.
 * [TimescaleDB](https://github.com/timescale/timescaledb) for long term storage of metrics and provides ability to query metrics data using SQL.
+  * [Postgres-Exporter](https://github.com/prometheus-community/postgres_exporter) to get metrics from PostgreSQL server
 * [Opentelemetry-Operator](https://github.com/open-telemetry/opentelemetry-operator#opentelemetry-operator-for-kubernetes) to manage the lifecycle of OpenTelemetryCollector Custom Resource Definition (CRDs)
 
 We plan to expand this stack over time and welcome contributions.
@@ -62,13 +63,14 @@ We also have additional documentation about individual configuration settings in
 
 ## Tobs vs. Kubernetes
 
-| Tobs   | Kubernetes     |
-|--------|----------------|
-| 0.11.x | v1.23 to v1.24 |
-| 0.10.x | v1.21 to v1.23 |
-| 0.9.x  | v1.21 to v1.23 |
-| 0.8.x  | v1.21 to v1.23 |
-| 0.7.x  | v1.19 to v1.21 |
+| Tobs Version | Kubernetes Version |
+|--------------|--------------------|
+| 12.0.x       | v1.23 to v1.24     |
+| 0.11.x       | v1.23 to v1.24     |
+| 0.10.x       | v1.21 to v1.23     |
+| 0.9.x        | v1.21 to v1.23     |
+| 0.8.x        | v1.21 to v1.23     |
+| 0.7.x        | v1.19 to v1.21     |
 
 # Contributing
 
