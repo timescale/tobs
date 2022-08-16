@@ -8,7 +8,7 @@
   "dependencyDashboardAutoclose": "true",
   "labels": ["dependencies"],
   "ignoreDeps": ["k8s.io/client-go"],
-  "bumpVersion": true,
+  "bumpVersion": "true",
   "regexManagers": [
     {
       "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
