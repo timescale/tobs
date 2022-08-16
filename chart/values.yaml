@@ -87,35 +87,9 @@ promscale:
   # If you are providing your own secret name, do
   # not forget to configure at below connectionSecretName
 
-  # selector used to provision your own Secret containing connection details
-  # Use this option with caution
-
   # if you are adding a conn string here do not forget
   # to add the same for kube-prometheus.grafana.timescale.adminPassSecret
-  connectionSecretName: ""
-
-  ## Note:
-
-  # If you using tobs deploy TimescaleDB do not configure below
-  # any connection details below as tobs will take care of it.
-
-  # connection details to connect to a target db
-  connection:
-    # Database connection settings. If `uri` is not
-    # set then the specific user, pass, host, port and
-    # sslMode properties are used.
-    uri: ""
-    # the db name in which the metrics will be stored
-    dbName: &metricDB postgres
-    # user to connect to TimescaleDB with
-    user: postgres
-    # empty password string will be populated automatically with a database password
-    password: ""
-    # Host name (templated) of the database instance, default
-    # to service created in timescaledb-single
-    host: &dbHost "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
-    port: 5432
-    sslMode: require
+  connectionSecretName: "tobs-promscale-connection"
 
   # Promscale deployment resource requests
   resources:
@@ -301,11 +275,11 @@ kube-prometheus-stack:
         user: grafana
         # leaving password empty will cause helm to generate a random password
         pass: ""
-        dbName: *metricDB
+        dbName: postgres
         sslMode: require
         # By default the url/host is set to the db instance deployed
         # with this chart
-        host: *dbHost
+        host: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
         port: 5432
     jaeger:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
