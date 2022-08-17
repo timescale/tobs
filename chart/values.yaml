@@ -150,7 +150,7 @@ kube-prometheus-stack:
     prometheusSpec:
       image:
         repository: quay.io/prometheus/prometheus
-        tag: v2.37.0
+        tag: v2.38.0
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -215,7 +215,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.0.7
+      tag: 9.1.0
       pullPolicy: IfNotPresent
     resources:
       limits:
