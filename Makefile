@@ -1,4 +1,4 @@
-KUBE_VERSION ?= 1.23
+KUBE_VERSION ?= 1.24
 KIND_CONFIG ?= ./testdata/kind-$(KUBE_VERSION).yaml
 CERT_MANAGER_VERSION ?= v1.9.1
 
@@ -30,7 +30,7 @@ start-kind: delete-kind  ## This is a phony target that is used to create a loca
 	kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
 
 .PHONY: cert-manager
-cert-manager: start-kind
+cert-manager:
 	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/$(CERT_MANAGER_VERSION)/cert-manager.yaml
 	# Give enough time for a cluster to register new Pods
 	sleep 7
@@ -42,9 +42,14 @@ load-images:  ## Load images into the local kubernetes kind cluster.
 	./scripts/load-images.sh
 
 .PHONY: helm-install
-helm-install: cert-manager load-images  ## This is a phony target that is used to install the Tobs Helm chart.
+helm-install: start-kind cert-manager load-images  ## This is a phony target that is used to install the Tobs Helm chart.
 	helm dep up chart/
-	helm upgrade --install --wait --timeout 15m test chart/
+	helm install --wait --timeout 15m test chart/
+
+.PHONY: helm-upgrade
+helm-upgrade: cert-manager
+	helm dep up chart/
+	helm upgrade --wait --timeout 15m test chart/
 
 .PHONY: lint
 lint:  ## Lint helm chart using ct (chart-testing).
