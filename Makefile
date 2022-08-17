@@ -1,4 +1,4 @@
-KUBE_VERSION ?= 1.23
+KUBE_VERSION ?= 1.24
 KIND_CONFIG ?= ./testdata/kind-$(KUBE_VERSION).yaml
 CERT_MANAGER_VERSION ?= v1.9.1
 
@@ -42,9 +42,14 @@ load-images:  ## Load images into the local kubernetes kind cluster.
 	./scripts/load-images.sh
 
 .PHONY: helm-install
-helm-install: cert-manager load-images  ## This is a phony target that is used to install the Tobs Helm chart.
+helm-install: start-kind cert-manager load-images  ## This is a phony target that is used to install the Tobs Helm chart.
 	helm dep up chart/
-	helm upgrade --install --wait --timeout 15m test chart/
+	helm install --wait --timeout 15m test chart/
+
+.PHONY: helm-upgrade
+helm-upgrade: cert-manager
+	helm dep up chart/
+	helm upgrade --wait --timeout 15m test chart/
 
 .PHONY: lint
 lint:  ## Lint helm chart using ct (chart-testing).

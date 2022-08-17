@@ -41,6 +41,7 @@ jobs:
         env:
           KUBE_VERSION: ${{ matrix.kube }}
         run: |
+          make start-kind
           make cert-manager
 
       - name: Wait for cluster to finish bootstraping
