@@ -30,7 +30,7 @@ start-kind: delete-kind  ## This is a phony target that is used to create a loca
 	kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
 
 .PHONY: cert-manager
-cert-manager: start-kind
+cert-manager:
 	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/$(CERT_MANAGER_VERSION)/cert-manager.yaml
 	# Give enough time for a cluster to register new Pods
 	sleep 7
