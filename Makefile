@@ -1,6 +1,6 @@
 KUBE_VERSION ?= 1.23
 KIND_CONFIG ?= ./testdata/kind-$(KUBE_VERSION).yaml
-CERT_MANAGER_VERSION ?= 1.6.1
+CERT_MANAGER_VERSION ?= v1.9.1
 
 KUBESCAPE_THRESHOLD=29
 
@@ -31,7 +31,7 @@ start-kind: delete-kind  ## This is a phony target that is used to create a loca
 
 .PHONY: cert-manager
 cert-manager: start-kind
-	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cert-manager.yaml
+	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/$(CERT_MANAGER_VERSION)/cert-manager.yaml
 	# Give enough time for a cluster to register new Pods
 	sleep 7
 	# Wait for pods to be up and running
