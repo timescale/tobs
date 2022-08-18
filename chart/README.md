@@ -11,12 +11,12 @@ A Helm chart for deploying Prometheus configured to use TimescaleDB as compresse
     * [Additional configuration for TimescaleDB](#additional-configuration-for-timescaledb)
   * **[Promscale](#promscale)**
     * [Additional configuration for Promscale](#additional-configuration-for-promscale)
-    * [Prometheus, Promscale High-Availability](./docs/values-config.md#prometheus-high-availability)
+    * [Prometheus, Promscale High-Availability](../docs/values-config.md#prometheus-high-availability)
   * **[Prometheus](#prometheus)**
     * [Additional configuration for Prometheus](#additional-configuration-for-prometheus)
   * **[Grafana](#grafana)**
     * [Additional configuration for Grafana](#additional-configuration-for-grafana)
-* **[Upgrading Helm Chart](./docs/upgrades.md)**
+* **[Upgrading Helm Chart](../docs/upgrades.md)**
 * **[Uninstall](#uninstall)**
   * [TimescaleDB secrets](#timescaledb-secrets)
   * [Kube-Prometheus secret](#kube-prometheus-secret)
@@ -231,7 +231,7 @@ The chart is configured to provision a TimescaleDB data source. This is controll
 If enabled it will add timescaleDB SQL initialization script that creates a user (as specified with `kube-prometheus-stack.grafana.timescale.datasource.user`) and grant read-only
 access to the promscale schemas.
 
-*Note: For security reasons this feature works only with TimescaleDB provisioned with tobs. For external DB you need to provision that user and password by yourself using instructions from [docs/upgrades.md#SQL-Datasource-credential-handling-improvements](docs/upgrades.md#sql-datasource-credential-handling-improvements)*
+*Note: For security reasons this feature works only with TimescaleDB provisioned with tobs. For external DB you need to provision that user and password by yourself using instructions from [../docs/upgrades.md#SQL-Datasource-credential-handling-improvements](docs/upgrades.md#sql-datasource-credential-handling-improvements)*
 
 #### Additional configuration for Grafana
 
