@@ -7,12 +7,51 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 ```
 helm repo update
 ```
+## Upgrading 12.0.x to 13.0.0
 
-## Upgrading to 0.12.0
+### kube-prometheus-stack name override removed
+
+Starting with tobs `13.0.0` Helm chart the
+`kube-prometheus-stack.fullNameOverride` option is removed in default
+`values.yaml`. If you are upgrading it is suggested that you add it back.
+Not adding it back will result in a Helm upgrade failure.  It will also delete
+and redeploy the entire kube-prometheus-stack Helm chart.  This may delete any
+non-ephemeral data that is stored in Prometheus, Alertmanager or Grafana.
+
+The error upon upgrade is somewhat trivial and is due to the removal and
+reinstallation of prometheus-operator.  Running it a second time, will result
+in a successful upgrade.
+
+```
+helm upgrade --wait --timeout 15m <helm-release-name> timescale/tobs --version
+13.0.0"
+
+Error: UPGRADE FAILED: failed to create resource: Internal error occurred:
+failed calling webhook "prometheusrulemutate.monitoring.coreos.com": failed to
+call webhook: Post "https://tobs-kube-prometheus-operator.default.svc:443/admission-prometheusrules/validate?timeout=10s":
+x509: certificate is valid for <helm-release-name>-kube-prom-operator,
+<helm-release-name>-kube-prom-operator.default.svc, not tobs-kube-prometheus-operator.default.svc
+```
+
+If you wish to keep all current settings when running the upgrade please be
+sure to add back the `kube-prometheus-stack.fullNameOverride` option in your
+`values.yaml` or add it to your upgrade command
+
+```
+helm upgrade --wait --timeout 15m <helm-release-name> timescale/tobs --version
+13.0.0 --set kube-prometheus-stack.fullNameOverride="tobs-kube-prometheus"
+```
+
+## Upgrading to 12.0.0
+
+### tobs CLI deprecated
+
+Starting with 12.0.0 the tobs CLI is now deprecated.  Going forward you must
+install and upgrade using the Helm chart.
 
 ### SQL Datasource credential handling improvements
 
-Starting with tobs `0.12.0` we are deprecating old way of setting up SQL datasource in grafana with kubernetes `Job` object and we are moving this to database initialization script. This in turn has a few consequences:
+Starting with tobs `12.0.0` we are deprecating old way of setting up SQL datasource in grafana with kubernetes `Job` object and we are moving this to database initialization script. This in turn has a few consequences:
 1) there is no longer a need to set timescaledb admin credentials in helm (options `kube-prometheus-stack.grafana.timescale.adminPassSecret` and `kube-prometheus-stack.grafana.timescale.adminUser`)
 2) For new installations password will be created automatically, so there is no need to store it in helm values
 3) If you are using external DB, you now need to create a user that will be used by grafana to access data from promscale and set proper values in:
@@ -48,7 +87,7 @@ GRANT prom_reader TO <<USERNAME>>;
 
 ### Open-telemetry configuration change in values.yaml
 
-Starting with tobs `0.12.0` the configuration of Open-telemetry has changed
+Starting with tobs `12.0.0` the configuration of Open-telemetry has changed
 from `opentelemetryOperator` to `opentelemetry-operator`. If you are using the
 default values in `values.yaml` nothing should be needed. If you are
 customizing values please make sure you have updated name.

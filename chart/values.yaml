@@ -104,7 +104,6 @@ promscale:
 # are part of Kube-Prometheus already
 kube-prometheus-stack:
   enabled: true
-  fullnameOverride: "tobs-kube-prometheus"
   alertmanager:
     alertmanagerSpec:
       image:
