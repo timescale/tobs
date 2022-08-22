@@ -53,7 +53,7 @@ timescaledb-single:
     enabled: true
     image:
       repository: quay.io/prometheuscommunity/postgres-exporter
-      tag: v0.11.0
+      tag: v0.11.1
 
   # Specifies whether ServiceMonitor for Prometheus operator should be created
   serviceMonitor:
@@ -339,7 +339,7 @@ opentelemetry-operator:
       enabled: true
   instrumentation:
     pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
-    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.16.0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.17.0
     nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.31.0
   collector:
     # The default otel collector that will be deployed by helm once
