@@ -37,7 +37,7 @@ jobs:
             mkdir -p chart_release
             helm dep up chart
             helm package chart -d chart_release/
-            helm plugin install https://github.com/hypnoglow/helm-s3.git
+            helm plugin install https://github.com/hypnoglow/helm-s3.git --version 0.13.0
             helm repo add tscharts s3://charts.timescale.com
             helm s3 push chart_release/* tscharts --acl public-read --relative --dry-run
 
