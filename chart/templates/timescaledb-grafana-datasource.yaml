@@ -1,6 +1,6 @@
 {{- $kubePrometheus := index .Values "kube-prometheus-stack" -}}
 {{- $tsdb := index .Values "timescaledb-single" -}}
-{{ if and $tsdb.enabled $kubePrometheus.grafana.enabled ((($kubePrometheus.grafana).timescale).datasource).enabled -}}
+{{- if and $tsdb.enabled $kubePrometheus.grafana.enabled ((($kubePrometheus.grafana).timescale).datasource).enabled -}}
 apiVersion: v1
 kind: Secret
 metadata:
