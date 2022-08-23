@@ -55,6 +55,22 @@ helm-upgrade: cert-manager
 lint:  ## Lint helm chart using ct (chart-testing).
 	ct lint --config ct.yaml
 
+.PHONY: timescaledb-single
+timescaledb-single:
+
+.PHONY: timescaledb-single
+timescaledb-single: ## This is a phony target that is used to install the timescaledb-single chart.
+	kubectl create ns timescaledb
+	helm repo add timescaledb 'https://raw.githubusercontent.com/timescale/helm-charts/main/charts/repo/'
+	helm install test --wait --timeout 15m \
+		timescaledb/timescaledb-single \
+		--namespace=timescaledb \
+		--set replicaCount=1 \
+		--set image.tag=pg14.4-ts2.7.2-p0 \
+		--set loadBalancer.enabled=false \
+		--set secrets.credentials.PATRONI_SUPERUSER_PASSWORD=test123 \
+		--set secrets.credentials.PATRONI_admin_PASSWORD=test123
+
 .PHONY: e2e
 e2e:  ## Run e2e installation tests using ct (chart-testing).
 	ct install --config ct.yaml

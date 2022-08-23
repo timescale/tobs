@@ -121,13 +121,17 @@ The chart has the following properties in the `values.yaml` file:
 
 ## TimescaleDB
 
-| Parameter                                 | Description                                       | Default             |
-|-------------------------------------------|---------------------------------------------------|---------------------|
-| `timescaledb-single.enabled`              | If false TimescaleDB will not be created          | `true`              |
-| `timescaledb-single.image.tag`            | Docker image tag to use for TimescaleDB           | `pg12-ts2.1-latest` |
-| `timescaledb-single.loadBalancer.enabled` | Create a LB for the DB instead of a ClusterIP     | `false`             |
-| `timescaledb-single.replicaCount`         | Number of pods for DB, set to 3 for HA            | `1`                 |
-| `timescaledb-single.backup.enabled`       | TimescaleDB backup option by default set to false | `false`             |
+| Parameter                                      | Description                                       | Default             |
+|------------------------------------------------|---------------------------------------------------|---------------------|
+| `timescaledb-single.enabled`                     | If false TimescaleDB will not be created          | `true`                |
+| `timescaledb-single.image.tag`                   | Docker image tag to use for TimescaleDB           | `pg14.4-ts2.7.2-p0`   |
+| `timescaledb-single.loadBalancer.enabled`        | Create a LB for the DB instead of a ClusterIP     | `false`               |
+| `timescaledb-single.replicaCount`                | Number of pods for DB, set to 3 for HA            | `1`                   |
+| `timescaledb-single.backup.enabled`              | TimescaleDB backup option by default set to false | `false`               |
+| `timescaledb-single.persistentVolumes.data.size` | Size of the volume for the database               | `150Gi`               |
+| `timescaledb-single.persistentVolumes.wal.size`  | Size of the volume for the WAL disk               | `20Gi`                |
+| `resources.requests.cpu`                         | Resource request for cpu                          | `100m`                |
+| `resources.requests.memory`                      | Resource request for memory                       | `2Gi`                 |
 
 ### Additional configuration for TimescaleDB
 
@@ -169,6 +173,7 @@ The Promscale is configured to connect to the TimescaleDB instance deployed with
 But it can be configured to connect to [any TimescaleDB host](#configuring-an-external-timescaledb), and expose whichever port you like.
 For more details about how to configure the Promscale please see the
 [Helm chart directory](https://github.com/timescale/promscale/tree/master/deploy/helm-chart) of the [Promscale](https://github.com/timescale/promscale) repo.
+
 
 ## Kube-Prometheus
 

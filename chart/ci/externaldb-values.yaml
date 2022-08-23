@@ -1,0 +1,38 @@
+# This file is based on the ci/default-values.yml. The values has been modified to
+# connect to an externally provisioned TimescaleDB instance. Only resource requests
+# are nullified to allow starting the stack on github action runner and prevent
+# issues related to pod scheduling due to insufficient host resources.
+
+timescaledb-single:
+  enabled: false
+
+promscale:
+  connectionSecretName: ""
+  connection:
+    uri: "postgres://postgres:test123@test.timescaledb.svc:5432/postgres"
+  resources: null
+
+kube-prometheus-stack:
+  alertmanager:
+    alertmanagerSpec:
+      replicas: 1
+      resources: null
+  prometheusOperator:
+    prometheusConfigReloader:
+      resources: null
+    resources: null
+  prometheus:
+    prometheusSpec:
+      replicas: 1
+      resources: null
+  grafana:
+    envValueFrom: null
+    resources: null
+  kube-state-metrics:
+    resources: null
+  prometheus-node-exporter:
+    resources: null
+
+opentelemetry-operator:
+  manager:
+    resources: null

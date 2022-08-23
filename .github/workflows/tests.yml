@@ -44,6 +44,10 @@ jobs:
           make start-kind
           make cert-manager
 
+      - name: Start timescaledb-single helm chart install
+        run: |
+          make timescaledb-single
+
       - name: Wait for cluster to finish bootstraping
         run: kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
 
