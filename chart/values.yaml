@@ -64,7 +64,10 @@ timescaledb-single:
 #   https://github.com/timescale/promscale/tree/master/helm-chart
 promscale:
   enabled: true
-  image: timescale/promscale:0.13.0
+  image:
+    repository: timescale/promscale
+    tag: 0.13.0
+    pullPolicy: IfNotPresent
   # to pass extra args
   extraArgs:
     - "--metrics.high-availability=true"
