@@ -7,6 +7,26 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 ```
 helm repo update
 ```
+
+## Upgrading 13.x to 14.x
+
+### promscale image configuration change
+
+Starting with tobs `14.0.0` the configuration of the Promscale image has changed.
+If you are not overriding the Promscale version you can ignore this.  If you
+are explicitly overriding the version you will need to follow the new image/tag
+format
+
+```
+promscale:
+  enabled: true
+  image:
+    repository: timescale/promscale
+    tag: 0.13.0
+    pullPolicy: IfNotPresent
+```
+
+
 ## Upgrading 12.0.x to 13.0.0
 
 ### kube-prometheus-stack name override removed
