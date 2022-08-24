@@ -8,7 +8,7 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 helm repo update
 ```
 
-## Upgrading 13.x to 14.x
+## Upgrading from 13.x to 14.x
 
 ### promscale image configuration change
 
@@ -27,7 +27,7 @@ promscale:
 ```
 
 
-## Upgrading 12.0.x to 13.0.0
+## Upgrading from 12.0.x to 13.0.0
 
 ### kube-prometheus-stack name override removed
 
@@ -62,7 +62,16 @@ helm upgrade --wait --timeout 15m <helm-release-name> timescale/tobs --version
 13.0.0 --set kube-prometheus-stack.fullNameOverride="tobs-kube-prometheus"
 ```
 
-## Upgrading to 12.0.0
+## Upgrading from 0.11.x to 12.x
+
+### Promscale labels immutable
+
+Due to a change in deployment labels in Promscale you will need to delete the Promscale deployment and reinstall when updating tobs.
+
+```
+Helm upgrade failed: cannot patch "tobs-promscale" with kind Deployment: Deployment.apps "tobs-promscale" is invalid: spec.selector: Invalid value: v1.LabelSelector{MatchLabels:map[st │
+│ ing[]string{"app":"tobs-promscale", "release":"tobs"}, MatchExpressions:[]v1.LabelSelectorRequirement(nil)}: field is immutable
+```
 
 ### tobs CLI deprecated
 
