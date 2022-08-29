@@ -20,7 +20,7 @@
       "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
       "matchStrings": ["kubescape-version:\\s(?<currentValue>.*?)\\n"],
       "datasourceTemplate": "github-tags",
-      "depNameTemplate": "armo/kubescape"
+      "depNameTemplate": "kubescape/kubescape"
     },
     {
       "fileMatch": ["^Makefile$"],
