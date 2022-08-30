@@ -3,19 +3,19 @@ name: tobs
 description: A Helm chart for tobs, The Observability Stack for Kubernetes
 home: https://github.com/timescale/tobs
 sources:
-- https://github.com/timescale/tobs
+  - https://github.com/timescale/tobs
 
 maintainers:
-- name: timescale
-  url: https://www.timescale.com/
+  - name: timescale
+    url: https://www.timescale.com/
 
 keywords:
-- observability
-- monitoring
-- tracing
-- opentelemetry
+  - observability
+  - monitoring
+  - tracing
+  - opentelemetry
 
-version: 14.0.0
+version: 14.1.0
 
 # TODO(paulfantom): Enable after kubernetes 1.22 reaches EOL (2022-10-28)
 # kubeVersion: ">= 1.23.0"

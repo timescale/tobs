@@ -5,14 +5,28 @@
 
 timescaledb-single:
   env:
-  - name: "TIMESCALEDB_TELEMETRY"
-    value: "off"
+    - name: "TIMESCALEDB_TELEMETRY"
+      value: "off"
   resources: null
 
 promscale:
   resources: null
 
 kube-prometheus-stack:
+  defaultRules:
+    rules:
+      etcd: false
+      kubeControllerManager: false
+      kubeProxy: false
+      kubeScheduler: false
+  kubeControllerManager:
+    enabled: false
+  kubeProxy:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeEtcd:
+    enabled: false
   alertmanager:
     alertmanagerSpec:
       resources: null

@@ -13,6 +13,20 @@ promscale:
   resources: null
 
 kube-prometheus-stack:
+  defaultRules:
+    rules:
+      etcd: false
+      kubeControllerManager: false
+      kubeProxy: false
+      kubeScheduler: false
+  kubeControllerManager:
+    enabled: false
+  kubeProxy:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeEtcd:
+    enabled: false
   alertmanager:
     alertmanagerSpec:
       replicas: 1
