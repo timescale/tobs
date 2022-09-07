@@ -70,7 +70,7 @@ promscale:
   enabled: true
   image:
     repository: timescale/promscale
-    tag: 0.14.0
+    tag: 0.13.0
     pullPolicy: IfNotPresent
   # to pass extra args
   extraArgs:
