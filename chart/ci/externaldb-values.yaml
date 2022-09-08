@@ -30,10 +30,18 @@ kube-prometheus-stack:
   alertmanager:
     alertmanagerSpec:
       replicas: 1
-      resources: null
+      resources:
+        limits: null
+        requests:
+          cpu: "0"
+          memory: "0"
   prometheusOperator:
     prometheusConfigReloader:
-      resources: null
+      resources:
+        limits: null
+        requests:
+          cpu: "0"
+          memory: "0"
     resources: null
   prometheus:
     prometheusSpec:
@@ -49,4 +57,8 @@ kube-prometheus-stack:
 
 opentelemetry-operator:
   manager:
-    resources: null
+    resources:
+      limits: null
+      requests:
+        cpu: "0"
+        memory: "0"
