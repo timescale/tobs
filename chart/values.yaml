@@ -59,8 +59,8 @@ timescaledb-single:
       repository: quay.io/prometheuscommunity/postgres-exporter
       tag: v0.11.1
 
-  # Specifies whether ServiceMonitor for Prometheus operator should be created
-  serviceMonitor:
+  # Specifies whether PodMonitor for Prometheus operator should be created
+  podMonitor:
     enabled: true
 
 # Values for configuring the deployment of the Promscale
@@ -70,7 +70,7 @@ promscale:
   enabled: true
   image:
     repository: timescale/promscale
-    tag: 0.13.0
+    tag: 0.14.0
     pullPolicy: IfNotPresent
   # to pass extra args
   extraArgs:

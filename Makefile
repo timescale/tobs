@@ -61,12 +61,12 @@ timescaledb-single:
 .PHONY: timescaledb-single
 timescaledb-single: ## This is a phony target that is used to install the timescaledb-single chart.
 	kubectl create ns timescaledb
-	helm repo add timescaledb 'https://raw.githubusercontent.com/timescale/helm-charts/main/charts/repo/'
+	-helm repo add timescaledb 'https://charts.timescale.com'
+	helm repo update timescaledb
 	helm install test --wait --timeout 15m \
 		timescaledb/timescaledb-single \
 		--namespace=timescaledb \
 		--set replicaCount=1 \
-		--set image.tag=pg14.4-ts2.7.2-p0 \
 		--set loadBalancer.enabled=false \
 		--set secrets.credentials.PATRONI_SUPERUSER_PASSWORD=test123 \
 		--set secrets.credentials.PATRONI_admin_PASSWORD=test123
