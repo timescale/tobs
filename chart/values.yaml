@@ -19,8 +19,8 @@ timescaledb-single:
     pullPolicy: IfNotPresent
 
   env:
-  - name: TSTUNE_PROFILE
-    value: promscale
+    - name: TSTUNE_PROFILE
+      value: promscale
 
   # create only a ClusterIP service
   loadBalancer:
@@ -184,6 +184,15 @@ kube-prometheus-stack:
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
         - url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/write"
+          remoteTimeout: 100s
+          queueConfig:
+            capacity: 100000
+            maxSamplesPerSend: 10000
+            batchSendDeadline: 30s
+            minShards: 20
+            maxShards: 20
+            minBackoff: 100ms
+            maxBackoff: 10s
 
       # Prometheus pod storage spec
       storageSpec:

@@ -9,7 +9,7 @@ timescaledb-single:
 promscale:
   connectionSecretName: ""
   connection:
-    uri: "postgres://postgres:test123@test.timescaledb.svc:5432/postgres"
+    uri: "postgres://postgres:temporarypassword@test.timescaledb.svc:5432/postgres"
   resources: null
 
 kube-prometheus-stack:

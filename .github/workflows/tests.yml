@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.0
+        uses: nhudson/chart-testing-action@main
 
       - name: Run chart-testing (lint)
         run: make lint
@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.0
+        uses: nhudson/chart-testing-action@main
 
       - name: Start kuberenetes cluster with cert-manager
         env:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Start timescaledb-single helm chart install
         run: |
-          make timescaledb-single
+          make timescaledb
 
       - name: Wait for cluster to finish bootstraping
         run: kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
