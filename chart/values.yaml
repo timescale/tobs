@@ -1,8 +1,8 @@
 # Values for configuring the deployment of TimescaleDB
 # The charts README is at:
-#    https://github.com/timescale/timescaledb-kubernetes/tree/master/charts/timescaledb-single
+#    https://github.com/timescale/helm-charts/tree/main/charts/timescaledb-single
 # Check out the various configuration options (administration guide) at:
-#    https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/admin-guide.md
+#    https://github.com/timescale/helm-charts/blob/main/charts/timescaledb-single/docs/admin-guide.md
 
 # Override the deployment namespace
 namespaceOverride: ""
@@ -65,7 +65,7 @@ timescaledb-single:
 
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
-#   https://github.com/timescale/promscale/tree/master/helm-chart
+#   https://github.com/timescale/helm-charts/tree/main/charts/promscale
 promscale:
   enabled: true
   image:

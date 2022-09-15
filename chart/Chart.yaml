@@ -15,7 +15,7 @@ keywords:
   - tracing
   - opentelemetry
 
-version: 14.7.0
+version: 14.8.0
 
 # TODO(paulfantom): Enable after kubernetes 1.22 reaches EOL (2022-10-28)
 # kubeVersion: ">= 1.23.0"
@@ -26,7 +26,7 @@ dependencies:
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
-    version: 13.0.0
+    version: 14.1.2
     repository: https://charts.timescale.com
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
