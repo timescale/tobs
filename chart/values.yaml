@@ -341,7 +341,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.59.0
+      tag: v0.60.0
     resources:
       limits:
         cpu: 50m
