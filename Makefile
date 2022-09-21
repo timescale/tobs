@@ -61,6 +61,16 @@ helm-upgrade: cert-manager
 lint:  ## Lint helm chart using ct (chart-testing).
 	ct lint --config ct.yaml
 
+.PHONY: shellcheck
+shellcheck: ## Lint shell scripts using locally installed shellcheck.
+	for f in $$(find chart/scripts/ -name "*.sh" -type f); do \
+		shellcheck $$f  ;\
+	done
+	for f in $$(find scripts/ -name "*.sh" -type f) $$(find chart/scripts/ -name "*.sh" -type f); do \
+		shellcheck --severity=error $$f  ;\
+	done
+
+
 .PHONY: timescaledb
 timescaledb: ## This is a phony target that is used to install the timescaledb-single chart.
 	kubectl create ns timescaledb

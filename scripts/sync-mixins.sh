@@ -74,7 +74,7 @@ build_psql_exporter() {
 	# This seems like the most straightforward way to replace the datasource in the
 	# generated dashboard for now. We can revisit this if we find a better way to
 	# replace the generated datasource.
-	for file in `ls ${psql_mixin}/dashboards_out/*.json`
+	for file in ${psql_mixin}/dashboards_out/*.json
 	do
 		cp -r $file chart/dashboards/$(basename $file)
 		sed -i.orig 's/\"datasource\": .*$/\"datasource\": {\n    \"type\": \"prometheus\",\n    \"uid\": \"dc08d25c8f267b054f12002f334e6d3d32a853e4\"\n }, /g' chart/dashboards/$(basename $file)
@@ -119,4 +119,3 @@ copy_promscale_mixin
 echo ""
 echo "Copy of alerts and dashboards is complete."
 echo "If you added any new dashboards please make sure you add them in the values.yaml file as well."
-

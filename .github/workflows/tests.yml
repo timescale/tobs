@@ -21,6 +21,17 @@ jobs:
       - name: Run chart-testing (lint)
         run: make lint
 
+      - name: Run ShellCheck on scripts shipped with helm chart
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './chart/scripts'
+
+      - name: Run ShellCheck on development scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+          severity: error
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -58,6 +69,12 @@ jobs:
 
       - name: Run e2e chart-testing
         run: make e2e
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
   test-result:
     name: End-to-End Test Results
