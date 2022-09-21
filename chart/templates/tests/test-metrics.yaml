@@ -1,0 +1,74 @@
+{{- $tsdb := index .Values "timescaledb-single" -}}
+{{- $kubePrometheus := index .Values "kube-prometheus-stack" -}}
+{{- if or .Values.promscale.enabled $kubePrometheus.enabled -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: false
+metadata:
+  name: "{{ .Release.Name }}-test-metrics"
+  namespace: "{{ template "tobs.namespace" . }}"
+  labels:
+    {{- include "tobs.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-test-metrics"
+  namespace: "{{ template "tobs.namespace" . }}"
+  labels:
+    {{- include "tobs.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+data:
+  test-metrics.sh: |-
+    {{ $.Files.Get "scripts/test-metrics.sh" | nindent 4 }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-test-metrics"
+  labels:
+    {{- include "tobs.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: checker
+      # TODO(paulfantom): move image build to tobs repo
+      # Current multi-arch image is built from https://github.com/paulfantom/dockerfiles/blob/master/curl-jq/Dockerfile
+      image: quay.io/paulfantom/curl-jq
+      command:
+        - /bin/bash
+        - -c
+        - /usr/local/bin/test-metrics.sh
+      env:
+        - name: NAMESPACE
+          value: {{ template "tobs.namespace" . }}
+        - name: PROMQL_QUERY_URL
+        {{- if .Values.promscale.enabled }}
+          value: "http://{{ .Release.Name }}-promscale.{{ template "tobs.namespace" . }}.svc:9201/api/v1/query"
+        {{- else }}
+          value: "http://{{ .Release.Name }}-kube-prometheus-stack-prometheus.{{ template "tobs.namespace" . }}.svc:9090/api/v1/query"
+        {{- end }}
+        - name: FEATURE_KUBE_PROMETHEUS
+          value: {{ $kubePrometheus.enabled | int | quote }}
+        - name: FEATURE_TIMESCALEDB
+          value: {{ and $tsdb.enabled $tsdb.prometheus.enabled | int | quote }}
+        - name: FEATURE_PROMSCALE
+          value: {{ .Values.promscale.enabled | int | quote }}
+      volumeMounts:
+      - mountPath: /usr/local/bin/test-metrics.sh
+        name: test-metrics-bin
+        readOnly: true
+        subPath: test-metrics.sh
+  serviceAccountName: "{{ .Release.Name }}-test-metrics"
+  restartPolicy: Never
+  volumes:
+  - name: test-metrics-bin
+    configMap:
+      name: "{{ .Release.Name }}-test-metrics"
+      defaultMode: 0755
+{{- end -}}
