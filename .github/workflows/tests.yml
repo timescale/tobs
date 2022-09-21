@@ -34,6 +34,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Increase fs watchers
+        run: |
+          sudo sysctl fs.inotify.max_user_watches=524288
+          sudo sysctl fs.inotify.max_user_instances=524288
+
       - name: Set up chart-testing
         uses: nhudson/chart-testing-action@main
 
