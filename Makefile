@@ -2,13 +2,18 @@ KUBE_VERSION ?= 1.24
 KIND_CONFIG ?= ./testdata/kind-$(KUBE_VERSION).yaml
 CERT_MANAGER_VERSION ?= v1.9.1
 
-KUBESCAPE_THRESHOLD=29
+KUBESCAPE_THRESHOLD=30
 
 MDOX_BIN=mdox
 MDOX_VALIDATE_CONFIG?=.mdox.validate.yaml
 MD_FILES_TO_FORMAT=$(shell find -type f -name '*.md')
 
 all: docs helm-install
+
+.PHONY: clean
+clean:  ## Remove artifacts from previous installations
+	rm -rf chart/charts
+	rm chart/Chart.lock
 
 .PHONY: docs
 docs:  ## This is a phony target that is used to force the docs to be generated.
@@ -27,7 +32,8 @@ delete-kind:  ## This is a phony target that is used to delete the local kuberne
 .PHONY: start-kind
 start-kind: delete-kind  ## This is a phony target that is used to create a local kubernetes kind cluster.
 	kind create cluster --config $(KIND_CONFIG)
-	kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
+	sleep 10  # Wait for additional objects to be present
+	kubectl wait pods --for=condition=Ready --timeout=300s --all --all-namespaces
 
 .PHONY: cert-manager
 cert-manager:
@@ -44,7 +50,7 @@ load-images:  ## Load images into the local kubernetes kind cluster.
 .PHONY: helm-install
 helm-install: start-kind cert-manager load-images  ## This is a phony target that is used to install the Tobs Helm chart.
 	helm dep up chart/
-	helm install --wait --timeout 15m test chart/
+	helm install --wait --timeout 15m test chart/ --values chart/values.yaml --values chart/ci/default-values.yaml
 
 .PHONY: helm-upgrade
 helm-upgrade: cert-manager
@@ -58,7 +64,7 @@ lint:  ## Lint helm chart using ct (chart-testing).
 .PHONY: timescaledb
 timescaledb: ## This is a phony target that is used to install the timescaledb-single chart.
 	kubectl create ns timescaledb
-	helm repo add timescaledb 'https://charts.timescale.com'
+	-helm repo add timescaledb 'https://charts.timescale.com'
 	helm repo update timescaledb
 	helm install test --wait --timeout 15m \
 		timescaledb/timescaledb-single \
@@ -85,5 +91,5 @@ help: ## Displays help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-z0-9A-Z_-]+:.*?##/ { printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 .PHONY: sync-mixins
-sync-mixins: ## Syncs mixins from Promscale and Postgres-Exporter
+sync-mixins:  ## Syncs mixins from Promscale and Postgres-Exporter
 	./scripts/sync-mixins.sh
