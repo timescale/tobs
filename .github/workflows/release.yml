@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  helm-version: v3.9.4
+  helm-version: v3.10.0
 
 jobs:
   release:

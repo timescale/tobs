@@ -9,8 +9,8 @@ on:
 
 env:
   golang-version: 1.18.4
-  helm-version: v3.9.4
-  kubescape-version: v2.0.170
+  helm-version: v3.10.0
+  kubescape-version: v2.0.171
 
 jobs:      
   security-audit:
