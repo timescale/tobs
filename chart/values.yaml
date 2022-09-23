@@ -128,14 +128,14 @@ kube-prometheus-stack:
   prometheusOperator:
     image:
       repository: quay.io/prometheus-operator/prometheus-operator
-      tag: v0.59.1
+      tag: v0.59.2
       pullPolicy: IfNotPresent
     ## Prometheus config reloader configuration
     prometheusConfigReloader:
       # image to use for config and rule reloading
       image:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
-        tag: v0.59.1
+        tag: v0.59.2
       # resource config for prometheusConfigReloader
       resources:
         requests:
@@ -230,7 +230,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.1.5
+      tag: 9.1.6
       pullPolicy: IfNotPresent
     resources:
       limits:
