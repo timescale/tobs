@@ -24,7 +24,7 @@ jobs:
   stale-issues-handler:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v5
+      - uses: actions/stale@v6
         with:
           any-of-labels: 'needs-more-info,question'
           stale-pr-label: 'stale'
