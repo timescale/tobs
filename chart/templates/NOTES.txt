@@ -22,13 +22,14 @@
 
 {{- $prometheus := index .Values "kube-prometheus-stack" "prometheus" }}
 {{- $kubePrometheus := index .Values "kube-prometheus-stack" }}
+{{- $releaseName := include "tobs.prometheus.fullname" . }}
 {{ if $prometheus.enabled }}
 #######################################################################################################################
 🔥 PROMETHEUS NOTES:
 #######################################################################################################################
 
 Prometheus can be accessed via port {{ $prometheus.service.port }} on the following DNS name from within your cluster:
-    {{ $kubePrometheus.fullnameOverride }}-prometheus.{{ .Release.Namespace }}.svc
+    {{ $releaseName }}-prometheus.{{ .Release.Namespace }}.svc
 {{-   if $prometheus.ingress.enabled }}
 
 Server URL(s) from outside the cluster:
@@ -40,7 +41,7 @@ Server URL(s) from outside the cluster:
 Get the Prometheus server URL by running these commands in the same shell:
 {{-     if contains "NodePort" $prometheus.service.type }}
     export NODE_PORT=$(\
-      kubectl get svc --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" {{ $kubePrometheus.fullnameOverride }}-prometheus \
+      kubectl get svc --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" {{ $releaseName }}-prometheus \
     )
     export NODE_IP=$(\
       kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}" \
@@ -49,14 +50,14 @@ Get the Prometheus server URL by running these commands in the same shell:
 {{-     else if contains "LoadBalancer" $prometheus.service.type }}
 NOTE: It may take a few minutes for the LoadBalancer IP to be available.
       You can watch the status by running:
-        kubectl get svc --namespace {{ .Release.Namespace }} -w {{ $kubePrometheus.fullnameOverride }}-prometheus'
+        kubectl get svc --namespace {{ .Release.Namespace }} -w {{ default .Release.Name $releaseName }}-prometheus'
 
     export SERVICE_IP=$(\
-      kubectl get svc --namespace {{ .Release.Namespace }} {{ $kubePrometheus.fullnameOverride }}-prometheus -o jsonpath='{.status.loadBalancer.ingress[0].ip}' \
+      kubectl get svc --namespace {{ .Release.Namespace }} {{ $releaseName }}-prometheus -o jsonpath='{.status.loadBalancer.ingress[0].ip}' \
       )
     echo http://$SERVICE_IP:{{ $prometheus.service.port }}
 {{-     else if contains "ClusterIP"  $prometheus.service.type }}
-    kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ $kubePrometheus.fullnameOverride }}-prometheus 9090:{{ $prometheus.service.port }}
+    kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ $releaseName }}-prometheus 9090:{{ $prometheus.service.port }}
 {{-     end }}
 {{-   end }}
 {{   if not $prometheus.prometheusSpec.storageSpec -}}
@@ -74,7 +75,7 @@ WARNING! Persistence is disabled on Prometheus server. You will lose your data
 
 The Alertmanager can be accessed via port {{ $kubePrometheus.alertmanager.service.port }} on the following DNS name
 from within your cluster:
-    {{ $kubePrometheus.fullnameOverride }}-alertmanager.{{ .Release.Namespace }}.svc
+    {{ $releaseName }}-alertmanager.{{ .Release.Namespace }}.svc
 {{-   if $alertmanager.ingress.enabled }}
 
 Server URL(s) from outside the cluster:
@@ -86,7 +87,7 @@ Server URL(s) from outside the cluster:
 Get the Alertmanager URL by running these commands in the same shell:
 {{-     if contains "NodePort" $alertmanager.service.type }}
     export NODE_PORT=$(\
-      kubectl get svc --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" {{ $kubePrometheus.fullnameOverride }}-alertmanager \
+      kubectl get svc --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" {{ $releaseName }}-alertmanager \
     )
     export NODE_IP=$(\
       kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}" \
@@ -95,14 +96,14 @@ Get the Alertmanager URL by running these commands in the same shell:
 {{-    else if contains "LoadBalancer" $alertmanager.service.type }}
 NOTE: It may take a few minutes for the LoadBalancer IP to be available.
       You can watch the status by running:
-        kubectl get svc --namespace {{ .Release.Namespace }} -w {{ $kubePrometheus.fullnameOverride }}-alertmanager'
+        kubectl get svc --namespace {{ .Release.Namespace }} -w {{ $releaseName }}-alertmanager'
 
     export SERVICE_IP=$(\
-      kubectl get svc --namespace {{ .Release.Namespace }} {{ $kubePrometheus.fullnameOverride }}-alertmanager -o jsonpath='{.status.loadBalancer.ingress[0].ip}'\
+      kubectl get svc --namespace {{ .Release.Namespace }} {{ $releaseName }}-alertmanager -o jsonpath='{.status.loadBalancer.ingress[0].ip}'\
     )
     echo http://$SERVICE_IP:{{ $alertmanager.service.port }}
 {{-    else if contains "ClusterIP" $alertmanager.service.type }}
-    kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ $kubePrometheus.fullnameOverride }}-alertmanager 9093:{{ $alertmanager.service.port }}
+    kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ $releaseName }}-alertmanager 9093:{{ $alertmanager.service.port }}
 {{-     end }}
 {{-   end }}
 {{  if not $alertmanager.storage }}
@@ -192,7 +193,7 @@ for '{{ $grafana.adminUser }}', it can not be retrieved again, you need to reset
 
 To reset the admin user password you can use grafana-cli from inside the pod by executing:
     GRAFANA_POD="$(kubectl get pod -o name --namespace {{ .Release.Namespace }} -l app.kubernetes.io/name=grafana)"
-    kubectl exec -it ${GRAFANA_POD} -c grafana -- grafana-cli admin reset-admin-password <password-you-want-to-set>
+    kubectl exec -it ${GRAFANA_POD} -c grafana --namespace {{ .Release.Namespace }} -- grafana-cli admin reset-admin-password <password-you-want-to-set>
 {{- end }}
 
 🚀 Happy observing!
