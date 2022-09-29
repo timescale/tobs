@@ -171,3 +171,20 @@ Set Grafana Datasource Connection Password
     {{- printf "${GRAFANA_PASSWORD}" -}}
   {{- end -}}
 {{- end -}}
+
+{{/*
+Define a name for the kube-prometheus-stack prometheus installation
+*/}}
+{{- define "tobs.prometheus.fullname" -}}
+{{- $kubePrometheus := index .Values "kube-prometheus-stack" -}}
+{{- if $kubePrometheus.fullnameOverride -}}
+{{- $kubePrometheus.fullnameOverride | trunc 26 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "kube-prometheus-stack" $kubePrometheus.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 26 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 26 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
