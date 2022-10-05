@@ -12,13 +12,13 @@ keywords:
   - monitoring
   - tracing
   - opentelemetry
-version: 14.13.1
+version: 15.0.0
 # TODO(paulfantom): Enable after kubernetes 1.22 reaches EOL (2022-10-28)
 # kubeVersion: ">= 1.23.0"
 dependencies:
   - name: timescaledb-single
     condition: timescaledb-single.enabled
-    version: 0.16.3
+    version: 0.17.0
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
@@ -27,9 +27,9 @@ dependencies:
   - name: kube-prometheus-stack
     condition: kube-prometheus-stack.enabled
     # With each major bump make sure prometheus-operator CRD version matches version specified in cli/pkg/upgrade/upgrade.go#KubePrometheusCRDVersion
-    version: 40.1.0
+    version: 40.3.1
     repository: https://prometheus-community.github.io/helm-charts
   - name: opentelemetry-operator
     condition: opentelemetry-operator.enabled
-    version: 0.12.2
+    version: 0.13.0
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts

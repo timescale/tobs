@@ -6,22 +6,18 @@
 
 # Override the deployment namespace
 namespaceOverride: ""
-
 # TimescaleDB single helm chart configuration
 timescaledb-single:
   # disable the chart if an existing TimescaleDB instance is used
   enabled: &dbEnabled true
-
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
     tag: pg14.5-ts2.8.0-p1
     pullPolicy: IfNotPresent
-
   env:
     - name: TSTUNE_PROFILE
       value: promscale
-
   # create only a ClusterIP service
   loadBalancer:
     enabled: false
@@ -50,7 +46,6 @@ timescaledb-single:
     requests:
       cpu: 100m
       memory: 2Gi
-
   # Enable Prometheus exporter for PostgreSQL server metrics.
   # https://github.com/prometheus-community/postgres_exporter
   prometheus:
@@ -58,11 +53,9 @@ timescaledb-single:
     image:
       repository: quay.io/prometheuscommunity/postgres-exporter
       tag: v0.11.1
-
   # Specifies whether PodMonitor for Prometheus operator should be created
   podMonitor:
     enabled: true
-
 # Values for configuring the deployment of the Promscale
 # The charts README is at:
 #   https://github.com/timescale/helm-charts/tree/main/charts/promscale
@@ -75,7 +68,6 @@ promscale:
   # to pass extra args
   extraArgs:
     - "--metrics.high-availability=true"
-
   extraEnv:
     - name: "TOBS_TELEMETRY_INSTALLED_BY"
       value: "helm"
@@ -85,10 +77,8 @@ promscale:
       value: "true"
     - name: "TOBS_TELEMETRY_TIMESCALEDB_ENABLED"
       value: *dbEnabled
-
   serviceMonitor:
     enabled: true
-
   ## Note:
 
   # If you are providing your own secret name, do
@@ -97,7 +87,6 @@ promscale:
   # if you are adding a conn string here do not forget
   # to add the same for kube-prometheus.grafana.timescale.adminPassSecret
   connectionSecretName: "tobs-promscale-connection"
-
   # Promscale deployment resource requests
   resources:
     requests:
@@ -105,7 +94,6 @@ promscale:
       # with only a few pods
       memory: 500Mi
       cpu: 30m
-
 # Enabling Kube-Prometheus will install
 # Grafana & Prometheus into tobs as they
 # are part of Kube-Prometheus already
@@ -169,7 +157,6 @@ kube-prometheus-stack:
         requests:
           memory: 400Mi
           cpu: 40m
-
       replicaExternalLabelName: "__replica__"
       # Promscale requires a cluster label to be present for high availability mode.
       prometheusExternalLabelName: "cluster"
@@ -179,7 +166,6 @@ kube-prometheus-stack:
         # - {protocol}://{host}:{port}/{endpoint}
         - url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/read"
           readRecent: false
-
       # The remote_write spec configuration for Prometheus.
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:
@@ -193,7 +179,6 @@ kube-prometheus-stack:
             maxShards: 20
             minBackoff: 100ms
             maxBackoff: 10s
-
       # Prometheus pod storage spec
       storageSpec:
         # Using PersistentVolumeClaim
@@ -206,7 +191,6 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 8Gi
-
       # We've enabled annotation-based scraping by default for backward-compatibility
       # and to support the largest number of use-cases out-of-the-box.
       # We encourage people to use ServiceMonitors and PodMonitors for new components.
@@ -220,7 +204,6 @@ kube-prometheus-stack:
         enabled: true
         name: tobs-scrape-config
         key: additional-scrape-config.yaml
-
   # Values for configuring the deployment of Grafana
   # The Grafana Community chart is used and the guide for it
   # can be found at:
@@ -230,7 +213,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.1.6
+      tag: 9.1.7
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -299,7 +282,6 @@ kube-prometheus-stack:
     jaeger:
       # Endpoint for integrating jaeger datasource in grafana. This should point to HTTP endpoint, not gRPC.
       promscaleTracesQueryEndPoint: "{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201"
-
   kube-state-metrics:
     image:
       repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
@@ -315,11 +297,10 @@ kube-prometheus-stack:
       requests:
         cpu: 10m
         memory: 30Mi
-
   prometheus-node-exporter:
     image:
       repository: quay.io/prometheus/node-exporter
-      tag: v1.3.1
+      tag: v1.4.0
       pullPolicy: IfNotPresent
     # By default node-exporter are scraped using
     # serviceMonitor disable annotation based scraping
@@ -333,7 +314,6 @@ kube-prometheus-stack:
       requests:
         cpu: 30m
         memory: 50Mi
-
 # Enable OpenTelemetry Operator
 # If using tobs CLI you can enable otel with --enable-opentelemetry flag
 opentelemetry-operator:
