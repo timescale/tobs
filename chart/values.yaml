@@ -83,9 +83,6 @@ promscale:
 
   # If you are providing your own secret name, do
   # not forget to configure at below connectionSecretName
-
-  # if you are adding a conn string here do not forget
-  # to add the same for kube-prometheus.grafana.timescale.adminPassSecret
   connectionSecretName: "tobs-promscale-connection"
   # Promscale deployment resource requests
   resources:
