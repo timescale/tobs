@@ -8,6 +8,38 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 helm repo update
 ```
 
+## Upgrading from 15.x to 16.x
+
+With `16.0.0` we removed `grafana-db-sec.yaml` generated Secret as it's no
+longer needed to use with Grafana. If you wish to retain it, please make a
+backup.
+
+If you wish to keep using the `GF_DATABASE_*` env variables you will need to
+create a new Secret and reference it in your Grafana configuration.  Here is
+a simple example.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-db-secret
+  namespace: default
+type: Opaque
+data:
+  GF_DATABASE_HOST: host.svc.local:5432
+  GF_DATABASE_NAME: postgres
+  GF_DATABASE_USER: user
+  GF_DATABASE_PASSWORD: pass
+  GF_DATABASE_SSL_MODE:
+  GF_DATABASE_TYPE: postgres
+```
+
+```yaml
+kube-prometheus-stack:
+  grafana:
+    envFromSecret: "grafana-db-secret"
+```
+
 ## Upgrading from 14.x to 15.x
 
 Be aware that the upgrade of prometheus-node-exporter to `4.x.x` inside
