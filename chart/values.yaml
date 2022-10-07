@@ -144,7 +144,7 @@ kube-prometheus-stack:
     prometheusSpec:
       image:
         repository: quay.io/prometheus/prometheus
-        tag: v2.38.0
+        tag: v2.39.0
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
