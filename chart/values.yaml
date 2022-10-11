@@ -113,14 +113,14 @@ kube-prometheus-stack:
   prometheusOperator:
     image:
       repository: quay.io/prometheus-operator/prometheus-operator
-      tag: v0.59.2
+      tag: v0.60.1
       pullPolicy: IfNotPresent
     ## Prometheus config reloader configuration
     prometheusConfigReloader:
       # image to use for config and rule reloading
       image:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
-        tag: v0.59.2
+        tag: v0.60.1
       # resource config for prometheusConfigReloader
       resources:
         requests:
@@ -141,7 +141,7 @@ kube-prometheus-stack:
     prometheusSpec:
       image:
         repository: quay.io/prometheus/prometheus
-        tag: v2.39.0
+        tag: v2.39.1
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
