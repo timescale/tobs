@@ -3,7 +3,7 @@ on:
   - push
   - pull_request
 env:
-  helm-version: v3.10.0
+  helm-version: v3.10.1
 jobs:
   lint:
     runs-on: ubuntu-latest
