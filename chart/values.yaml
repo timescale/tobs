@@ -13,7 +13,7 @@ timescaledb-single:
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
-    tag: pg14.5-ts2.8.0-p1
+    tag: pg14.5-ts2.8.1-p1
     pullPolicy: IfNotPresent
   env:
     - name: TSTUNE_PROFILE

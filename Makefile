@@ -83,7 +83,6 @@ timescaledb: ## This is a phony target that is used to install the timescaledb-s
 		--set loadBalancer.enabled=false \
 		--set secrets.credentials.PATRONI_SUPERUSER_PASSWORD="temporarypassword" \
 		--set secrets.credentials.PATRONI_admin_PASSWORD="temporarypassword" \
-		--set image.tag=pg14.5-ts2.8.0-p0 \
 		--set patroni.log.level=INFO
 
 .PHONY: e2e
