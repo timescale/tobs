@@ -1,7 +1,8 @@
 name: "Test Helm Charts"
 on:
-  - push
-  - pull_request
+  push:
+    branches-ignore: ['renovate/**']
+  pull_request:
 env:
   helm-version: v3.10.1
 jobs:
