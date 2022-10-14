@@ -13,7 +13,7 @@ timescaledb-single:
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
-    tag: pg14.5-ts2.8.0-p1
+    tag: pg14.5-ts2.8.1-p1
     pullPolicy: IfNotPresent
   env:
     - name: TSTUNE_PROFILE
@@ -63,7 +63,7 @@ promscale:
   enabled: true
   image:
     repository: timescale/promscale
-    tag: 0.14.0
+    tag: 0.15.0
     pullPolicy: IfNotPresent
   # to pass extra args
   extraArgs:
@@ -210,7 +210,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.1.7
+      tag: 9.2.0
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -332,7 +332,7 @@ opentelemetry-operator:
       enabled: true
   instrumentation:
     pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
-    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.18.0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.19.0
     nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.31.0
   collector:
     # The default otel collector that will be deployed by helm once
