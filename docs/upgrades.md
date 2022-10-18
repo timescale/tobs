@@ -10,9 +10,9 @@ helm repo update
 
 ## Upgrading from 16.x to 17.x
 
-With `17.0.0` we decided to diverge from gathering metrics data only from 
-namespace in which tobs is deployed and extend it to all namespaces. To 
-accomplish this we changed default kube-prometheus-stack selectors to gather 
+With `17.0.0` we decided to diverge from gathering metrics data only from
+namespace in which tobs is deployed and extend it to all namespaces. To
+accomplish this we changed default kube-prometheus-stack selectors to gather
 all prometheus-operator resources that are not labeled with `tobs/excluded`
 (label value doesn't matter). If you have any other prometheus-operator
 resources in your cluster that you don't want to be scraped by tobs, you need
@@ -29,6 +29,8 @@ kube-prometheus-stack:
       additionalScrapeConfigsSecret:
         enabled: true
 ```
+
+In `17.0.0` we are also updating timescaledb-single chart to version `0.20.0`, which by default uses `ClusterIP` instead of `LoadBalancer` service. This change removes opttion removes field of `timescaledb-single.service.loadBalancerIP`.
 
 ## Upgrading from 15.x to 16.x
 

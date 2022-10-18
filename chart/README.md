@@ -186,7 +186,6 @@ The chart has the following properties in the `values.yaml` file:
 | ------------------------------------------------ | ------------------------------------------------- | ------------------- |
 | `timescaledb-single.enabled`                     | If false TimescaleDB will not be created          | `true`              |
 | `timescaledb-single.image.tag`                   | Docker image tag to use for TimescaleDB           | `pg14.4-ts2.7.2-p0` |
-| `timescaledb-single.loadBalancer.enabled`        | Create a LB for the DB instead of a ClusterIP     | `false`             |
 | `timescaledb-single.replicaCount`                | Number of pods for DB, set to 3 for HA            | `1`                 |
 | `timescaledb-single.backup.enabled`              | TimescaleDB backup option by default set to false | `false`             |
 | `timescaledb-single.persistentVolumes.data.size` | Size of the volume for the database               | `150Gi`             |
