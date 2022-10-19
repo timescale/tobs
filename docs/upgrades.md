@@ -8,6 +8,30 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 helm repo update
 ```
 
+## Upgrading from 16.x to 17.x
+
+With `17.0.0` we decided to diverge from gathering metrics data only from
+namespace in which tobs is deployed and extend it to all namespaces. To
+accomplish this we changed default kube-prometheus-stack selectors to gather
+all prometheus-operator resources that are not labeled with `tobs/excluded`
+(label value doesn't matter). If you have any other prometheus-operator
+resources in your cluster that you don't want to be scraped by tobs, you need
+to label them with `tobs/excluded` label.
+
+Additionally, to prevent data duplication, we are disabling by default
+ability to scrape endpoints using prometheus label annotations. If you wish
+to continue using this option, you need to explicitly set the following
+option:
+```yaml
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      additionalScrapeConfigsSecret:
+        enabled: true
+```
+
+In `17.0.0` we are also updating timescaledb-single chart to version `0.20.0`, which by default uses `ClusterIP` instead of `LoadBalancer` service. This change removes opttion removes field of `timescaledb-single.service.loadBalancerIP`.
+
 ## Upgrading from 15.x to 16.x
 
 With `16.0.0` we removed `grafana-db-sec.yaml` generated Secret as it's no

@@ -80,7 +80,6 @@ timescaledb: ## This is a phony target that is used to install the timescaledb-s
 		timescaledb/timescaledb-single \
 		--namespace=timescaledb \
 		--set replicaCount=1 \
-		--set loadBalancer.enabled=false \
 		--set secrets.credentials.PATRONI_SUPERUSER_PASSWORD="temporarypassword" \
 		--set secrets.credentials.PATRONI_admin_PASSWORD="temporarypassword" \
 		--set patroni.log.level=INFO

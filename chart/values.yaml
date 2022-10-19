@@ -18,9 +18,6 @@ timescaledb-single:
   env:
     - name: TSTUNE_PROFILE
       value: promscale
-  # create only a ClusterIP service
-  loadBalancer:
-    enabled: false
   # number or TimescaleDB pods to spawn (default is 3, 1 for no HA)
   replicaCount: 1
   # backup is disabled by default, enable it
@@ -157,6 +154,45 @@ kube-prometheus-stack:
       replicaExternalLabelName: "__replica__"
       # Promscale requires a cluster label to be present for high availability mode.
       prometheusExternalLabelName: "cluster"
+
+      # By default collect all PrometheusRules and scrape configuration from the cluster
+      # Exclude all resources labeled with `tobs/excluded`
+      ruleSelectorNilUsesHelmValues: false
+      ruleNamespaceSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
+      ruleSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
+      serviceMonitorNamespaceSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
+      podMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
+      podMonitorNamespaceSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
+      probeSelectorNilUsesHelmValues: false
+      probeSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
+      probeNamespaceSelector:
+        matchExpressions:
+        - key: tobs/excluded
+          operator: DoesNotExist
       # The remote_read spec configuration for Prometheus.
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       remoteRead:
@@ -198,7 +234,7 @@ kube-prometheus-stack:
       # Expected values are the secret name and key
       # Cannot be used with additionalScrapeConfigs
       additionalScrapeConfigsSecret:
-        enabled: true
+        enabled: false
         name: tobs-scrape-config
         key: additional-scrape-config.yaml
   # Values for configuring the deployment of Grafana
