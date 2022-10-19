@@ -246,7 +246,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.2.0
+      tag: 9.2.1
       pullPolicy: IfNotPresent
     resources:
       limits:
