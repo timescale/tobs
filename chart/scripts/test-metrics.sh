@@ -40,7 +40,7 @@ EOF
 )
 genericTests=$(cat <<-EOF
 {
-  "expression": "up{namespace=\"$NAMESPACE\"}==0",
+  "expression": "up{namespace=\"$NAMESPACE\",pod!~".*-grafana-test"}==0",
   "expected": false
 }
 EOF
