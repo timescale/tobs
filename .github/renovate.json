@@ -5,7 +5,7 @@
     "schedule:daily"
   ],
   "dependencyDashboardLabels": ["dependencies"],
-  "dependencyDashboardAutoclose": "true",
+  "dependencyDashboardAutoclose": "false",
   "labels": ["dependencies"],
   "ignoreDeps": ["k8s.io/client-go"],
   "bumpVersion": "minor",
