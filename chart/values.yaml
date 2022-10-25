@@ -30,6 +30,15 @@ timescaledb-single:
   # PGBACKREST_REPO1_S3_REGION
   # PGBACKREST_REPO1_S3_KEY
   # PGBACKREST_REPO1_S3_KEY_SECRET
+  patroni:
+    bootstrap:
+      dcs:
+        postgresql:
+          parameters:
+            checkpoint_timeout: 15min
+            bgwriter_delay: 10ms
+            bgwriter_lru_maxpages: 100000
+            synchronous_commit: 'off'
   backup:
     enabled: false
   # TimescaleDB PVC sizes
