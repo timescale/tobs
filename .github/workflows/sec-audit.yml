@@ -10,7 +10,7 @@ on:
 env:
   golang-version: 1.18.4
   helm-version: v3.10.1
-  kubescape-version: v2.0.173
+  kubescape-version: v2.0.174
 
 jobs:      
   security-audit:
@@ -26,7 +26,7 @@ jobs:
         go-version: ${{ env.golang-version }}
 
     - name: Set up Helm
-      uses: azure/setup-helm@v3.3
+      uses: azure/setup-helm@v3.4
       with:
         version: ${{ env.helm-version }}
     
