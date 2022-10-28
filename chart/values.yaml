@@ -32,6 +32,17 @@ timescaledb-single:
   # PGBACKREST_REPO1_S3_KEY_SECRET
   backup:
     enabled: false
+  # Applying tuning to TimescaleDB as per
+  # https://docs.timescale.com/promscale/latest/recommendations/config-recomm/#database-configuration
+  patroni:
+    bootstrap:
+      dcs:
+        postgresql:
+          parameters:
+            checkpoint_timeout: 15min
+            bgwriter_delay: 10ms
+            bgwriter_lru_maxpages: 100000
+            # synchronous_commit: "off"
   # TimescaleDB PVC sizes
   persistentVolumes:
     data:
