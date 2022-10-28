@@ -72,7 +72,7 @@
   "liveNow": false,
   "panels": [
     {
-      "collapsed": true,
+      "collapsed": false,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -472,7 +472,7 @@
               "refId": "A"
             }
           ],
-          "title": "Requests to Ingestor",
+          "title": "Requests (HTTP)",
           "type": "timeseries"
         },
         {
@@ -1283,7 +1283,7 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
