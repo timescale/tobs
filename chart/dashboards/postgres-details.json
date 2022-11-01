@@ -1309,6 +1309,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "{{ datname }}",
                     "measurement": "postgresql",
@@ -1353,6 +1354,7 @@
                     "editorMode": "code",
                     "expr": "sum(rate(pg_stat_database_xact_rollback{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "sum",
                     "range": true,
                     "refId": "B"
@@ -1369,332 +1371,9 @@
                 "x": 0,
                 "y": 27
             },
-            "id": 27,
+            "id": 34,
             "panels": [],
-            "title": "Checkpoints",
-            "type": "row"
-        },
-        {
-            "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisCenteredZero": false,
-                        "axisColorMode": "text",
-                        "axisLabel": "",
-                        "axisPlacement": "auto",
-                        "barAlignment": 0,
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "hideFrom": {
-                            "legend": false,
-                            "tooltip": false,
-                            "viz": false
-                        },
-                        "lineInterpolation": "linear",
-                        "lineStyle": {
-                            "fill": "solid"
-                        },
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "scaleDistribution": {
-                            "type": "linear"
-                        },
-                        "showPoints": "never",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "max": 1,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 80
-                            }
-                        ]
-                    },
-                    "unit": "percentunit"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 28
-            },
-            "id": 28,
-            "links": [],
-            "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "pluginVersion": "9.2.2",
-            "targets": [
-                {
-                    "alias": "fetched",
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${datasource}"
-                    },
-                    "dsType": "prometheus",
-                    "editorMode": "code",
-                    "expr": "sum by (instance) (rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval])\n/\n(\n    rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval])\n    +\n    rate(pg_stat_bgwriter_checkpoints_timed_total{instance=~\"$instance\"}[$__rate_interval])\n))",
-                    "format": "time_series",
-                    "groupBy": [
-                        {
-                            "params": [
-                                "$interval"
-                            ],
-                            "type": "time"
-                        },
-                        {
-                            "params": [
-                                "null"
-                            ],
-                            "type": "fill"
-                        }
-                    ],
-                    "interval": "5m",
-                    "intervalFactor": 2,
-                    "legendFormat": "{{ instance }}",
-                    "measurement": "postgresql",
-                    "policy": "default",
-                    "range": true,
-                    "refId": "A",
-                    "resultFormat": "time_series",
-                    "select": [
-                        [
-                            {
-                                "params": [
-                                    "tup_fetched"
-                                ],
-                                "type": "field"
-                            },
-                            {
-                                "params": [],
-                                "type": "mean"
-                            },
-                            {
-                                "params": [
-                                    "10s"
-                                ],
-                                "type": "non_negative_derivative"
-                            }
-                        ]
-                    ],
-                    "step": 120,
-                    "tags": [
-                        {
-                            "key": "instance",
-                            "operator": "=~",
-                            "value": "/^$instance$/"
-                        }
-                    ]
-                }
-            ],
-            "title": "% requested",
-            "type": "timeseries"
-        },
-        {
-            "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisCenteredZero": false,
-                        "axisColorMode": "text",
-                        "axisLabel": "",
-                        "axisPlacement": "auto",
-                        "barAlignment": 0,
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "hideFrom": {
-                            "legend": false,
-                            "tooltip": false,
-                            "viz": false
-                        },
-                        "lineInterpolation": "linear",
-                        "lineStyle": {
-                            "fill": "solid"
-                        },
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "scaleDistribution": {
-                            "type": "linear"
-                        },
-                        "showPoints": "never",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 80
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 28
-            },
-            "id": 29,
-            "links": [],
-            "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "pluginVersion": "9.2.2",
-            "targets": [
-                {
-                    "alias": "fetched",
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${datasource}"
-                    },
-                    "dsType": "prometheus",
-                    "editorMode": "code",
-                    "expr": "sum by (instance) (delta(pg_stat_bgwriter_checkpoints_timed_total{instance=~\"$instance\"}[$__rate_interval]))",
-                    "format": "time_series",
-                    "groupBy": [
-                        {
-                            "params": [
-                                "$interval"
-                            ],
-                            "type": "time"
-                        },
-                        {
-                            "params": [
-                                "null"
-                            ],
-                            "type": "fill"
-                        }
-                    ],
-                    "interval": "5m",
-                    "intervalFactor": 2,
-                    "legendFormat": "Timed - {{ instance }}",
-                    "measurement": "postgresql",
-                    "policy": "default",
-                    "range": true,
-                    "refId": "A",
-                    "resultFormat": "time_series",
-                    "select": [
-                        [
-                            {
-                                "params": [
-                                    "tup_fetched"
-                                ],
-                                "type": "field"
-                            },
-                            {
-                                "params": [],
-                                "type": "mean"
-                            },
-                            {
-                                "params": [
-                                    "10s"
-                                ],
-                                "type": "non_negative_derivative"
-                            }
-                        ]
-                    ],
-                    "step": 120,
-                    "tags": [
-                        {
-                            "key": "instance",
-                            "operator": "=~",
-                            "value": "/^$instance$/"
-                        }
-                    ]
-                },
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "${datasource}"
-                    },
-                    "editorMode": "code",
-                    "expr": "sum by (instance) (delta(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval]))",
-                    "hide": false,
-                    "interval": "5m",
-                    "legendFormat": "Requested - {{ instance }}",
-                    "range": true,
-                    "refId": "B"
-                }
-            ],
-            "title": "Write",
-            "type": "timeseries"
-        },
-        {
-            "collapsed": false,
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 36
-            },
-            "id": 31,
-            "panels": [],
-            "title": "Buffers",
+            "title": "BGWriter",
             "type": "row"
         },
         {
@@ -1759,10 +1438,10 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 10,
-                "w": 24,
+                "h": 11,
+                "w": 12,
                 "x": 0,
-                "y": 37
+                "y": 28
             },
             "id": 32,
             "links": [],
@@ -1773,7 +1452,7 @@
                         "mean"
                     ],
                     "displayMode": "table",
-                    "placement": "right",
+                    "placement": "bottom",
                     "showLegend": true
                 },
                 "tooltip": {
@@ -1872,6 +1551,204 @@
                 }
             ],
             "title": "Buffers",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineInterpolation": "linear",
+                        "lineStyle": {
+                            "fill": "solid"
+                        },
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "none"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byFrameRefID",
+                            "options": "C"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.axisPlacement",
+                                "value": "right"
+                            },
+                            {
+                                "id": "max",
+                                "value": 1
+                            },
+                            {
+                                "id": "unit",
+                                "value": "percentunit"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 12,
+                "x": 12,
+                "y": 28
+            },
+            "id": 29,
+            "links": [],
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "last",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "pluginVersion": "9.2.2",
+            "targets": [
+                {
+                    "alias": "fetched",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${datasource}"
+                    },
+                    "dsType": "prometheus",
+                    "editorMode": "code",
+                    "expr": "sum by (instance) (delta(pg_stat_bgwriter_checkpoints_timed_total{instance=~\"$instance\"}[$__rate_interval]))",
+                    "format": "time_series",
+                    "groupBy": [
+                        {
+                            "params": [
+                                "$interval"
+                            ],
+                            "type": "time"
+                        },
+                        {
+                            "params": [
+                                "null"
+                            ],
+                            "type": "fill"
+                        }
+                    ],
+                    "interval": "5m",
+                    "intervalFactor": 2,
+                    "legendFormat": "Scheduled - {{ instance }}",
+                    "measurement": "postgresql",
+                    "policy": "default",
+                    "range": true,
+                    "refId": "A",
+                    "resultFormat": "time_series",
+                    "select": [
+                        [
+                            {
+                                "params": [
+                                    "tup_fetched"
+                                ],
+                                "type": "field"
+                            },
+                            {
+                                "params": [],
+                                "type": "mean"
+                            },
+                            {
+                                "params": [
+                                    "10s"
+                                ],
+                                "type": "non_negative_derivative"
+                            }
+                        ]
+                    ],
+                    "step": 120,
+                    "tags": [
+                        {
+                            "key": "instance",
+                            "operator": "=~",
+                            "value": "/^$instance$/"
+                        }
+                    ]
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${datasource}"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by (instance) (delta(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval]))",
+                    "hide": false,
+                    "interval": "5m",
+                    "legendFormat": "Requested - {{ instance }}",
+                    "range": true,
+                    "refId": "B"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "${datasource}"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by (instance) (rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval])\n/\n(\n    rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval])\n    +\n    rate(pg_stat_bgwriter_checkpoints_timed_total{instance=~\"$instance\"}[$__rate_interval])\n))",
+                    "hide": false,
+                    "interval": "5m",
+                    "legendFormat": "% of requested - {{ instance }}",
+                    "range": true,
+                    "refId": "C"
+                }
+            ],
+            "title": "Checkpoints",
             "type": "timeseries"
         }
     ],
@@ -2027,6 +1904,6 @@
     "timezone": "browser",
     "title": "Postgres Details",
     "uid": "6_Bdz_H4k",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
 }
