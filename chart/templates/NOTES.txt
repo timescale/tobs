@@ -160,7 +160,7 @@ To connect to your database, chose one of these options:
     MASTER_POD=$(\
       kubectl get pod -o name --namespace {{ .Release.Namespace }} -l release={{ .Release.Name }},role=master \
     )
-    kubectl exec -it --namespace {{ .Release.Namespace }} ${MASTERPOD} -- psql -U postgres
+    kubectl exec -it --namespace {{ .Release.Namespace }} ${MASTER_POD} -- psql -U postgres
 {{-   end }}
 {{- end }}
 {{ if index .Values "opentelemetry-operator" "enabled"}}
