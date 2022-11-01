@@ -20,7 +20,7 @@
     "fiscalYearStartMonth": 0,
     "gnetId": 455,
     "graphTooltip": 2,
-    "id": 18,
+    "id": 34,
     "links": [],
     "liveNow": true,
     "panels": [
@@ -169,6 +169,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "{{ datname }}",
                     "measurement": "postgresql",
@@ -213,6 +214,7 @@
                     "editorMode": "code",
                     "expr": "sum(rate(pg_stat_database_blk_read_time{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "sum",
                     "range": true,
                     "refId": "B"
@@ -353,6 +355,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "{{ datname }}",
                     "measurement": "postgresql",
@@ -397,6 +400,7 @@
                     "editorMode": "code",
                     "expr": "sum(rate(pg_stat_database_blk_write_time{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "sum",
                     "range": true,
                     "refId": "B"
@@ -550,6 +554,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "{{ datname }}",
                     "measurement": "postgresql",
@@ -594,6 +599,7 @@
                     "editorMode": "code",
                     "expr": "sum(rate(pg_stat_database_tup_inserted{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "sum",
                     "range": true,
                     "refId": "B"
@@ -734,6 +740,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "{{ datname }}",
                     "measurement": "postgresql",
@@ -778,6 +785,7 @@
                     "editorMode": "code",
                     "expr": "sum(rate(pg_stat_database_tup_fetched{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "sum",
                     "range": true,
                     "refId": "B"
@@ -918,6 +926,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "{{ datname }}",
                     "measurement": "postgresql",
@@ -962,6 +971,7 @@
                     "editorMode": "code",
                     "expr": "sum(rate(pg_stat_database_tup_returned{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "sum",
                     "range": true,
                     "refId": "B"
@@ -1283,7 +1293,7 @@
                     },
                     "dsType": "prometheus",
                     "editorMode": "code",
-                    "expr": "rate(pg_stat_database_xact_rollback{datname=~\"$db\",datname!=\"\",instance=~\"$instance\"}[5m])",
+                    "expr": "rate(pg_stat_database_xact_rollback{datname=~\"$db\",datname!=\"\",instance=~\"$instance\"}[$__rate_interval])",
                     "format": "time_series",
                     "groupBy": [
                         {
@@ -1341,7 +1351,7 @@
                         "uid": "${datasource}"
                     },
                     "editorMode": "code",
-                    "expr": "sum(rate(pg_stat_database_xact_rollback{instance=~\"$instance\"}[5m]))",
+                    "expr": "sum(rate(pg_stat_database_xact_rollback{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
                     "legendFormat": "sum",
                     "range": true,
@@ -1456,7 +1466,7 @@
                     },
                     "dsType": "prometheus",
                     "editorMode": "code",
-                    "expr": "sum by (instance) (rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[5m])\n/\n(\n    rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[5m])\n    +\n    rate(pg_stat_bgwriter_checkpoints_timed_total{instance=~\"$instance\"}[5m])\n))",
+                    "expr": "sum by (instance) (rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval])\n/\n(\n    rate(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval])\n    +\n    rate(pg_stat_bgwriter_checkpoints_timed_total{instance=~\"$instance\"}[$__rate_interval])\n))",
                     "format": "time_series",
                     "groupBy": [
                         {
@@ -1472,6 +1482,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "{{ instance }}",
                     "measurement": "postgresql",
@@ -1619,6 +1630,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "Timed - {{ instance }}",
                     "measurement": "postgresql",
@@ -1663,6 +1675,7 @@
                     "editorMode": "code",
                     "expr": "sum by (instance) (delta(pg_stat_bgwriter_checkpoints_req_total{instance=~\"$instance\"}[$__rate_interval]))",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "Requested - {{ instance }}",
                     "range": true,
                     "refId": "B"
@@ -1778,6 +1791,7 @@
                     "editorMode": "code",
                     "expr": "rate(pg_stat_bgwriter_buffers_checkpoint_total{instance=~\"$instance\"}[$__rate_interval])",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "Checkpoint - {{ instance }}",
                     "range": true,
                     "refId": "A"
@@ -1790,6 +1804,7 @@
                     "editorMode": "code",
                     "expr": "rate(pg_stat_bgwriter_buffers_backend_total{instance=~\"$instance\"}[$__rate_interval])",
                     "hide": false,
+                    "interval": "5m",
                     "legendFormat": "Backend - {{ instance }}",
                     "range": true,
                     "refId": "B"
@@ -1818,6 +1833,7 @@
                             "type": "fill"
                         }
                     ],
+                    "interval": "5m",
                     "intervalFactor": 2,
                     "legendFormat": "Clean - {{ instance }}",
                     "measurement": "postgresql",
@@ -1859,7 +1875,7 @@
             "type": "timeseries"
         }
     ],
-    "refresh": "1m",
+    "refresh": "5m",
     "schemaVersion": 37,
     "style": "dark",
     "tags": [
@@ -1878,15 +1894,15 @@
                     "type": "prometheus",
                     "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
                 },
-                "definition": "",
+                "definition": "label_values(postgres_exporter_build_info,instance)",
                 "hide": 0,
                 "includeAll": true,
                 "multi": false,
                 "name": "instance",
                 "options": [],
                 "query": {
-                    "query": "label_values(up{job=~\"postgres.*\"},instance)",
-                    "refId": "Promscale-PromQL-instance-Variable-Query"
+                    "query": "label_values(postgres_exporter_build_info,instance)",
+                    "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,
                 "regex": "",
@@ -1950,14 +1966,14 @@
             {
                 "current": {
                     "selected": false,
-                    "text": "default/test-timescaledb",
-                    "value": "default/test-timescaledb"
+                    "text": "All",
+                    "value": "$__all"
                 },
                 "datasource": {
                     "type": "prometheus",
                     "uid": "dc08d25c8f267b054f12002f334e6d3d32a853e4"
                 },
-                "definition": "label_values(pg_up, job)",
+                "definition": "label_values(postgres_exporter_build_info, job)",
                 "hide": 0,
                 "includeAll": false,
                 "label": "job",
@@ -1965,8 +1981,8 @@
                 "name": "job",
                 "options": [],
                 "query": {
-                    "query": "label_values(pg_up, job)",
-                    "refId": "Promscale-PromQL-job-Variable-Query"
+                    "query": "label_values(postgres_exporter_build_info, job)",
+                    "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,
                 "regex": "",
@@ -1980,7 +1996,7 @@
         ]
     },
     "time": {
-        "from": "now-1h",
+        "from": "now-3h",
         "to": "now"
     },
     "timepicker": {
