@@ -43,6 +43,7 @@ timescaledb-single:
             bgwriter_delay: 10ms
             bgwriter_lru_maxpages: 100000
             # synchronous_commit: "off"
+            shared_preload_libraries: timescaledb,pg_stat_statements,pg_stat_monitor,pg_stat_kcache
   # TimescaleDB PVC sizes
   persistentVolumes:
     data:

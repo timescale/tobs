@@ -13,6 +13,12 @@ metadata:
    chart: {{ template "tobs.chart" . }}
    release: {{ .Release.Name }}
 data:
-  toolkit.sql: |
-    create extension if not exists timescaledb_toolkit
+  extensions.sql: |
+    create extension if not exists timescaledb_toolkit;
+    create extension if not exists pg_stat_statements;
+    create extension if not exists pg_stat_monitor;
+    create extension if not exists pg_stat_kcache;
+    create extension if not exists pageinspect;
+    create extension if not exists pg_buffercache;
+    create extension if not exists pg_freespacemap;
 {{- end -}}
