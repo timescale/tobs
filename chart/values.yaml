@@ -249,6 +249,8 @@ kube-prometheus-stack:
         enabled: false
         name: tobs-scrape-config
         key: additional-scrape-config.yaml
+      # Enable Prometheus Remote Write dashboard.
+      remoteWriteDashboards: true
   # Values for configuring the deployment of Grafana
   # The Grafana Community chart is used and the guide for it
   # can be found at:
