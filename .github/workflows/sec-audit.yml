@@ -9,7 +9,7 @@ on:
 
 env:
   golang-version: 1.18.4
-  helm-version: v3.10.1
+  helm-version: v3.10.2
   kubescape-version: v2.0.175
 
 jobs:      
