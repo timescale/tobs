@@ -44,6 +44,8 @@ timescaledb-single:
             bgwriter_lru_maxpages: 100000
             # synchronous_commit: "off"
             shared_preload_libraries: timescaledb,pg_stat_statements,pg_stat_monitor,pg_stat_kcache
+            # TODO: stats_temp_directory was deprectated on PG15, we should remove it when the DB upgrades.
+            stats_temp_directory: /tmp/pg_stat_temp
   # TimescaleDB PVC sizes
   persistentVolumes:
     data:
