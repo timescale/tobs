@@ -57,6 +57,8 @@ timescaledb-single:
     requests:
       cpu: 100m
       memory: 2Gi
+  sharedMemory:
+    useMount: true
   # Enable Prometheus exporter for PostgreSQL server metrics.
   # https://github.com/prometheus-community/postgres_exporter
   prometheus:
