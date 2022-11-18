@@ -12,13 +12,13 @@ keywords:
   - monitoring
   - tracing
   - opentelemetry
-version: 17.20.0
+version: 17.21.0
 # TODO(paulfantom): Enable after kubernetes 1.22 reaches EOL (2022-10-28)
 # kubeVersion: ">= 1.23.0"
 dependencies:
   - name: timescaledb-single
     condition: timescaledb-single.enabled
-    version: 0.22.0
+    version: 0.23.0
     repository: https://charts.timescale.com
   - name: promscale
     condition: promscale.enabled
