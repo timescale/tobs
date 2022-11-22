@@ -126,14 +126,14 @@ kube-prometheus-stack:
   prometheusOperator:
     image:
       repository: quay.io/prometheus-operator/prometheus-operator
-      tag: v0.60.1
+      tag: v0.61.0
       pullPolicy: IfNotPresent
     ## Prometheus config reloader configuration
     prometheusConfigReloader:
       # image to use for config and rule reloading
       image:
         repository: quay.io/prometheus-operator/prometheus-config-reloader
-        tag: v0.60.1
+        tag: v0.61.0
       # resource config for prometheusConfigReloader
       resources:
         requests:
@@ -264,7 +264,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.2.5
+      tag: 9.2.6
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -373,7 +373,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.63.1
+      tag: v0.64.1
     resources:
       limits:
         cpu: 50m
@@ -387,7 +387,7 @@ opentelemetry-operator:
       enabled: true
   instrumentation:
     pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
-    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.20.1
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.20.2
     nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.31.0
   collector:
     # The default otel collector that will be deployed by helm once
