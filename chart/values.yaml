@@ -66,6 +66,10 @@ timescaledb-single:
     image:
       repository: quay.io/prometheuscommunity/postgres-exporter
       tag: v0.11.1
+    args:
+    # Disabling collecting database size statistics as this can be expensive
+    # and some of this data is also provided via node_exporter.
+    - "--no-collector.database"
   # Specifies whether PodMonitor for Prometheus operator should be created
   podMonitor:
     enabled: true
