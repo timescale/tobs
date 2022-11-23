@@ -363,6 +363,9 @@ kube-prometheus-stack:
     service:
       annotations:
         prometheus.io/scrape: "false"
+    prometheus:
+      monitor:
+        interval: 15s
     resources:
       limits:
         cpu: 250m
