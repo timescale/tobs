@@ -12,7 +12,7 @@ keywords:
   - monitoring
   - tracing
   - opentelemetry
-version: 17.23.2
+version: 17.24.0
 # TODO(paulfantom): Enable after kubernetes 1.22 reaches EOL (2022-10-28)
 # kubeVersion: ">= 1.23.0"
 dependencies:
