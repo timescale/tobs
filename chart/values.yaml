@@ -215,10 +215,9 @@ kube-prometheus-stack:
           operator: DoesNotExist
       # The remote_read spec configuration for Prometheus.
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
-      remoteRead:
-        # - {protocol}://{host}:{port}/{endpoint}
-        - url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/read"
-          readRecent: false
+      # remoteRead:
+      #  - url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/read"
+      #    readRecent: false
       # The remote_write spec configuration for Prometheus.
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
       remoteWrite:

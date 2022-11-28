@@ -8,6 +8,19 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 helm repo update
 ```
 
+## Upgrading from 17.x to 18.x
+
+To get the best performance out of promscale we recommend to query it directly. Since tobs is already shipping grafana datasource configured this way, there is no need to configure `remote_read` option in prometheus. This is a breaking change for people using `remote_read` option. If you need to use `remote_read` option, you can still add it back by putting the following code snippet into your `values.yaml` file.
+
+```yaml
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      remoteRead:
+        - url: "http://{{ .Release.Name }}-promscale.{{ .Release.Namespace }}.svc:9201/read"
+          readRecent: false
+```
+
 ## Upgrading from 16.x to 17.x
 
 With `17.0.0` we decided to diverge from gathering metrics data only from
