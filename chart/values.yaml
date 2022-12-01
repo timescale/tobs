@@ -158,7 +158,7 @@ kube-prometheus-stack:
     prometheusSpec:
       image:
         repository: quay.io/prometheus/prometheus
-        tag: v2.40.3
+        tag: v2.40.4
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -267,7 +267,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.2.6
+      tag: 9.3.0
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -355,7 +355,7 @@ kube-prometheus-stack:
   prometheus-node-exporter:
     image:
       repository: quay.io/prometheus/node-exporter
-      tag: v1.4.0
+      tag: v1.5.0
       pullPolicy: IfNotPresent
     # By default node-exporter are scraped using
     # serviceMonitor disable annotation based scraping
@@ -379,7 +379,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.64.1
+      tag: v0.66.0
     resources:
       limits:
         cpu: 50m
