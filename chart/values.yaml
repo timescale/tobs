@@ -116,7 +116,8 @@ kube-prometheus-stack:
   alertmanager:
     alertmanagerSpec:
       image:
-        repository: quay.io/prometheus/alertmanager
+        registry: quay.io
+        repository: prometheus/alertmanager
         tag: v0.24.0
       replicas: 3
       ## AlertManager resource requests
@@ -129,14 +130,16 @@ kube-prometheus-stack:
           cpu: 4m
   prometheusOperator:
     image:
-      repository: quay.io/prometheus-operator/prometheus-operator
+      registry: quay.io
+      repository: prometheus-operator/prometheus-operator
       tag: v0.61.1
       pullPolicy: IfNotPresent
     ## Prometheus config reloader configuration
     prometheusConfigReloader:
       # image to use for config and rule reloading
       image:
-        repository: quay.io/prometheus-operator/prometheus-config-reloader
+        registry: quay.io
+        repository: prometheus-operator/prometheus-config-reloader
         tag: v0.61.1
       # resource config for prometheusConfigReloader
       resources:
@@ -157,8 +160,9 @@ kube-prometheus-stack:
   prometheus:
     prometheusSpec:
       image:
-        repository: quay.io/prometheus/prometheus
-        tag: v2.40.4
+        registry: quay.io
+        repository: prometheus/prometheus
+        tag: v2.40.5
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -267,7 +271,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.3.0
+      tag: 9.3.1
       pullPolicy: IfNotPresent
     resources:
       limits:

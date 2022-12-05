@@ -8,6 +8,19 @@ Firstly upgrade the helm repo to pull the latest available tobs helm chart. We a
 helm repo update
 ```
 
+## Upgrading from 18.x to 19.x
+
+There is a breaking change in [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#from-41x-to-42x).
+This will add a new configuration option `global.imageRegistry` along with adding
+a `registry` configuration to all `image` objects.
+
+```yaml
+    image:
+      registry: quay.io
+      repository: prometheus/alertmanager
+      tag: v0.24.0
+```
+
 ## Upgrading from 17.x to 18.x
 
 To get the best performance out of promscale we recommend to query it directly. Since tobs is already shipping grafana datasource configured this way, there is no need to configure `remote_read` option in prometheus. This is a breaking change for people using `remote_read` option. If you need to use `remote_read` option, you can still add it back by putting the following code snippet into your `values.yaml` file.
@@ -35,6 +48,7 @@ Additionally, to prevent data duplication, we are disabling by default
 ability to scrape endpoints using prometheus label annotations. If you wish
 to continue using this option, you need to explicitly set the following
 option:
+
 ```yaml
 kube-prometheus-stack:
   prometheus:
