@@ -50,7 +50,7 @@ jobs:
           helm s3 push chart_release/* tscharts --acl public-read --relative
 
       - name: Create release
-        uses: ncipollo/release-action@v1.11.2
+        uses: ncipollo/release-action@v1.12.0
         with:
           tag: ${{ env.CHART_VERSION }}
           allowUpdates: true
