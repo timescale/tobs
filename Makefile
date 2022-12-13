@@ -79,6 +79,7 @@ timescaledb: ## This is a phony target that is used to install the timescaledb-s
 	helm install test --wait --timeout 15m \
 		timescaledb/timescaledb-single \
 		--namespace=timescaledb \
+		--version 0.24.1 \
 		--set replicaCount=1 \
 		--set secrets.credentials.PATRONI_SUPERUSER_PASSWORD="temporarypassword" \
 		--set secrets.credentials.PATRONI_admin_PASSWORD="temporarypassword" \
