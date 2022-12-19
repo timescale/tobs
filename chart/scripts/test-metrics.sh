@@ -47,13 +47,13 @@ EOF
 )
 
 testset="$genericTests"
-if [ $FEATURE_KUBE_PROMETHEUS -eq 1 ]; then
+if [ "$FEATURE_KUBE_PROMETHEUS" -eq 1 ]; then
   testset="$kubePrometheusTests,$testset"
 fi
-if [ $FEATURE_PROMSCALE -eq 1 ]; then
+if [ "$FEATURE_PROMSCALE" -eq 1 ]; then
   testset="$promscaleTests,$testset"
 fi
-if [ $FEATURE_TIMESCALEDB -eq 1 ]; then
+if [ "$FEATURE_TIMESCALEDB" -eq 1 ]; then
   testset="$timescaleTests,$testset"
 fi
 
