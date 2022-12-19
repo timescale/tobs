@@ -1,11 +1,25 @@
-# Upgrading tobs using helm (without tobs CLI)
-
-The following steps are necessary if using helm without the tobs CLI. The tobs CLI will handle these upgrade tasks automatically for you.
+# Upgrading tobs
 
 Firstly upgrade the helm repo to pull the latest available tobs helm chart. We always recommend upgrading to the [latest](https://github.com/timescale/tobs/releases/latest) tobs stack available.
 
 ```shell
 helm repo update
+```
+
+## Upgrading from 19.x to 20.x
+
+Version 20 of tobs is specifying `clusterName` for timescaledb resources. This is required to make seamless connection
+string propagation work out of the box with version 0.27+ of timescaledb helm chart. Since tobs is now specifying
+`clusterName` in values file, we took this opportunity to also change the default `clusterName` to `{{ .Release.Name }}-tsdb`.
+This allows easier operations on the installed cluster as the objects are clearly associated with particular component.
+
+Sadly this is a breaking change for users who are using tobs with version 0.26 or lower of timescaledb helm chart.
+If you are using tobs with version 0.26 or lower of timescaledb helm chart and you don't want to manually migrate
+your timescaledb resources, you can specify the following option in your `values.yaml` file.
+
+```yaml
+timescaledb-single:
+  clusterName: "{{ .Release.Name }}"
 ```
 
 ## Upgrading from 18.x to 19.x
