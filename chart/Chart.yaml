@@ -12,7 +12,7 @@ keywords:
   - monitoring
   - tracing
   - opentelemetry
-version: 20.1.0
+version: 20.2.0
 # TODO(paulfantom): Enable after kubernetes 1.22 reaches EOL (2022-10-28)
 # kubeVersion: ">= 1.23.0"
 dependencies:
@@ -30,5 +30,5 @@ dependencies:
     repository: https://prometheus-community.github.io/helm-charts
   - name: opentelemetry-operator
     condition: opentelemetry-operator.enabled
-    version: 0.19.2
+    version: 0.20.4
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
