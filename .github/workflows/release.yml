@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  helm-version: v3.10.2
+  helm-version: v3.10.3
 
 jobs:
   release:
@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Helm
-        uses: azure/setup-helm@v3.4
+        uses: azure/setup-helm@v3.5
         with:
           version: ${{ env.helm-version }}
 
