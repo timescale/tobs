@@ -120,7 +120,7 @@ kube-prometheus-stack:
       image:
         registry: quay.io
         repository: prometheus/alertmanager
-        tag: v0.24.0
+        tag: v0.25.0
       replicas: 3
       ## AlertManager resource requests
       resources:
