@@ -134,7 +134,7 @@ kube-prometheus-stack:
     image:
       registry: quay.io
       repository: prometheus-operator/prometheus-operator
-      tag: v0.61.1
+      tag: v0.62.0
       pullPolicy: IfNotPresent
     ## Prometheus config reloader configuration
     prometheusConfigReloader:
@@ -142,7 +142,7 @@ kube-prometheus-stack:
       image:
         registry: quay.io
         repository: prometheus-operator/prometheus-config-reloader
-        tag: v0.61.1
+        tag: v0.62.0
       # resource config for prometheusConfigReloader
       resources:
         requests:
@@ -385,7 +385,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.66.0
+      tag: v0.67.0
     resources:
       limits:
         cpu: 50m
