@@ -5,6 +5,13 @@
 [![License](https://img.shields.io/github/license/timescale/tobs)](https://github.com/timescale/tobs/blob/main/LICENSE)
 [![Slack](https://img.shields.io/badge/chat-join%20slack-brightgreen.svg)](https://timescaledb.slack.com/)
 
+# :warning: Deprecation Notice
+
+This project has been deprecated and archived. New issues won't be answered and PRs won't be merged. If you were using
+this project we are recommending to switch directly to [kube-prometheus (jsonnet version)](https://github.com/prometheus-operator/kube-prometheus#kube-prometheus)
+or [kube-prometheus-stack (helm chart version)](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
+and to use [opentelemetry helm charts](https://github.com/open-telemetry/opentelemetry-helm-charts) directly.
+
 # tobs - The Observability Stack for Kubernetes
 
 Tobs is a tool that aims to make it as easy as possible to install a full observability
