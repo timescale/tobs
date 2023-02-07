@@ -1,3 +1,11 @@
+> **Warning**
+>
+> Tobs has been discontinued and is deprecated.
+>
+> The code in this repository is no longer maintained.
+>
+> [Learn more](https://github.com/timescale/promscale/issues/1836).
+
 [![Security Audit](https://github.com/timescale/tobs/actions/workflows/sec-audit.yml/badge.svg)](https://github.com/timescale/tobs/actions/workflows/sec-audit.yml)
 [![Test Helm Charts](https://github.com/timescale/tobs/actions/workflows/tests.yml/badge.svg)](https://github.com/timescale/tobs/actions/workflows/tests.yml)
 [![Version](https://img.shields.io/github/v/release/timescale/tobs)](https://github.com/timescale/tobs/releases)
