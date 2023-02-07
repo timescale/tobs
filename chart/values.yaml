@@ -13,7 +13,7 @@ timescaledb-single:
   # override default helm chart image to use one with newer promscale_extension
   image:
     repository: timescale/timescaledb-ha
-    tag: pg14.5-ts2.8.1-p2
+    tag: pg14.6-ts2.9.2-p0
     pullPolicy: IfNotPresent
 
   clusterName: "{{ .Release.Name }}-tsdb"
@@ -69,9 +69,9 @@ timescaledb-single:
       repository: quay.io/prometheuscommunity/postgres-exporter
       tag: v0.11.1
     args:
-    # Disabling collecting database size statistics as this can be expensive
-    # and some of this data is also provided via node_exporter.
-    - "--no-collector.database"
+      # Disabling collecting database size statistics as this can be expensive
+      # and some of this data is also provided via node_exporter.
+      - "--no-collector.database"
   # Specifies whether PodMonitor for Prometheus operator should be created
   podMonitor:
     enabled: true
@@ -82,7 +82,7 @@ promscale:
   enabled: true
   image:
     repository: timescale/promscale
-    tag: 0.16.0
+    tag: 0.17.0
     pullPolicy: IfNotPresent
   # to pass extra args
   extraArgs:
@@ -186,39 +186,39 @@ kube-prometheus-stack:
       ruleSelectorNilUsesHelmValues: false
       ruleNamespaceSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       ruleSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       serviceMonitorSelectorNilUsesHelmValues: false
       serviceMonitorSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       serviceMonitorNamespaceSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       podMonitorSelectorNilUsesHelmValues: false
       podMonitorSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       podMonitorNamespaceSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       probeSelectorNilUsesHelmValues: false
       probeSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       probeNamespaceSelector:
         matchExpressions:
-        - key: tobs/excluded
-          operator: DoesNotExist
+          - key: tobs/excluded
+            operator: DoesNotExist
       # The remote_read spec configuration for Prometheus.
       # ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
       # remoteRead:
@@ -385,7 +385,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.67.0
+      tag: v0.68.0
     resources:
       limits:
         cpu: 50m
@@ -399,7 +399,7 @@ opentelemetry-operator:
       enabled: true
   instrumentation:
     pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
-    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.21.0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.22.1
     nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.34.0
   collector:
     # The default otel collector that will be deployed by helm once
