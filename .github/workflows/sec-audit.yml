@@ -10,18 +10,18 @@ on:
 env:
   golang-version: 1.18.4
   helm-version: v3.11.0
-  kubescape-version: v2.0.183
+  kubescape-version: v3.0.18
 
 jobs:      
   security-audit:
     runs-on: ubuntu-latest
     name: Analyse kubernetes manifests
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         persist-credentials: false  
       
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v5
       with:
         go-version: ${{ env.golang-version }}
 
