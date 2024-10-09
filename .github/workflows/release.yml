@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  helm-version: v3.11.0
+  helm-version: v3.16.2
 
 jobs:
   release:
@@ -50,7 +50,7 @@ jobs:
           helm s3 push chart_release/* tscharts --acl public-read --relative
 
       - name: Create release
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1.14.0
         with:
           tag: ${{ env.CHART_VERSION }}
           allowUpdates: true
