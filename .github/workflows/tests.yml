@@ -4,7 +4,7 @@ on:
     branches-ignore: ['renovate/**']
   pull_request:
 env:
-  helm-version: v3.11.0
+  helm-version: v3.16.2
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.1
+        uses: helm/chart-testing-action@v2.6.1
       - name: Run chart-testing (lint)
         run: make lint
       - name: Run ShellCheck on scripts shipped with helm chart
@@ -43,7 +43,7 @@ jobs:
           sudo sysctl fs.inotify.max_user_watches=524288
           sudo sysctl fs.inotify.max_user_instances=524288
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.1
+        uses: helm/chart-testing-action@v2.6.1
       - name: Start kuberenetes cluster with cert-manager
         env:
           KUBE_VERSION: ${{ matrix.kube }}
