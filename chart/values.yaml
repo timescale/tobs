@@ -67,7 +67,7 @@ timescaledb-single:
     enabled: true
     image:
       repository: quay.io/prometheuscommunity/postgres-exporter
-      tag: v0.11.1
+      tag: v0.15.0
     args:
     # Disabling collecting database size statistics as this can be expensive
     # and some of this data is also provided via node_exporter.
@@ -82,7 +82,7 @@ promscale:
   enabled: true
   image:
     repository: timescale/promscale
-    tag: 0.16.0
+    tag: 0.17.0
     pullPolicy: IfNotPresent
   # to pass extra args
   extraArgs:
@@ -120,7 +120,7 @@ kube-prometheus-stack:
       image:
         registry: quay.io
         repository: prometheus/alertmanager
-        tag: v0.25.0
+        tag: v0.27.0
       replicas: 3
       ## AlertManager resource requests
       resources:
@@ -134,7 +134,7 @@ kube-prometheus-stack:
     image:
       registry: quay.io
       repository: prometheus-operator/prometheus-operator
-      tag: v0.62.0
+      tag: v0.77.2
       pullPolicy: IfNotPresent
     ## Prometheus config reloader configuration
     prometheusConfigReloader:
@@ -142,7 +142,7 @@ kube-prometheus-stack:
       image:
         registry: quay.io
         repository: prometheus-operator/prometheus-config-reloader
-        tag: v0.62.0
+        tag: v0.77.2
       # resource config for prometheusConfigReloader
       resources:
         requests:
@@ -164,7 +164,7 @@ kube-prometheus-stack:
       image:
         registry: quay.io
         repository: prometheus/prometheus
-        tag: v2.41.0
+        tag: v2.55.0
       scrapeInterval: "1m"
       scrapeTimeout: "10s"
       evaluationInterval: "1m"
@@ -273,7 +273,7 @@ kube-prometheus-stack:
     # TODO(paulfantom): remove with kube-prometheus bump
     image:
       repository: grafana/grafana
-      tag: 9.3.2
+      tag: 9.5.21
       pullPolicy: IfNotPresent
     resources:
       limits:
@@ -346,7 +346,7 @@ kube-prometheus-stack:
   kube-state-metrics:
     image:
       repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
-      tag: v2.7.0
+      tag: v2.13.0
       pullPolicy: IfNotPresent
     # By default kube-state-metrics are scraped using
     # serviceMonitor disable annotation based scraping
@@ -361,7 +361,7 @@ kube-prometheus-stack:
   prometheus-node-exporter:
     image:
       repository: quay.io/prometheus/node-exporter
-      tag: v1.5.0
+      tag: v1.8.2
       pullPolicy: IfNotPresent
     # By default node-exporter are scraped using
     # serviceMonitor disable annotation based scraping
@@ -385,7 +385,7 @@ opentelemetry-operator:
   manager:
     image:
       repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
-      tag: v0.67.0
+      tag: v0.111.0
     resources:
       limits:
         cpu: 50m
@@ -399,8 +399,8 @@ opentelemetry-operator:
       enabled: true
   instrumentation:
     pythonImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.32b0
-    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.21.0
-    nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.34.0
+    javaImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.33.5
+    nodejsImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.53.0
   collector:
     # The default otel collector that will be deployed by helm once
     # the otel operator is in running state
