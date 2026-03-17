@@ -4,13 +4,13 @@ on:
     branches-ignore: ['renovate/**']
   pull_request:
 env:
-  helm-version: v3.11.0
+  helm-version: v4.1.3
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Set up chart-testing
@@ -35,7 +35,7 @@ jobs:
           - "1.24"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Increase fs watchers
